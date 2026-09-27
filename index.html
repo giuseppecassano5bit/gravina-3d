@@ -5443,7 +5443,7 @@ async function main() {
     debugEl = Object.assign(document.createElement('div'), { className: 'debug' });
     document.body.append(debugEl);
     window.gravina = {
-      THREE, CONFIG, scene, camera, renderer, network, driver, rig, Terrain, Ravine, Details, DATA, GEO, Plane, problems, landmarks,
+      THREE, CONFIG, scene, camera, renderer, network, driver, rig, Terrain, Ravine, Buildings, Details, Scenery, DATA, GEO, Plane, problems, landmarks,
       get phase() { return phase; },
       /** Fa avanzare la simulazione di `seconds` senza disegnare (test e screenshot). */
       advance(seconds, dt = 1 / 30) { for (let t = 0; t < seconds; t += dt) step(dt); },

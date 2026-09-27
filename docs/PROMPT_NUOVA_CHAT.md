@@ -2,7 +2,7 @@
 
 Copia il testo qui sotto (tutto il blocco) come primo messaggio della nuova chat di
 Claude Code, aperta sullo stesso repository `giuseppecassano5bit/gravina-3d`.
-Questa è la versione aggiornata dopo la fase 2c: sostituisce i prompt generati prima.
+Questa è la versione aggiornata dopo la fase 3: sostituisce i prompt generati prima.
 
 ---
 
@@ -33,33 +33,45 @@ PRIMA DI TUTTO LEGGI
 5. tools/test/: prove automatiche con Playwright (simulazione di guida, interazioni,
    screenshot).
 
-STATO ATTUALE (fasi 1, 2, 2b e 2c completate)
+STATO ATTUALE (fasi 1, 2, 2b, 2c e 3 completate; la 3 è in revisione)
 - Rete stradale reale: 157 tratti su 111 incroci reali (circa 9 km), senza vicoli ciechi.
   Le vie cieche importanti hanno un'inversione "a goccia" nello slargo reale in fondo alla via.
 - Il Ponte Acquedotto (su Via giudice Montea, pedonale nella realtà) è percorribile con il mezzo
   per scelta di progetto. È collegato a Via Fontana la Stella e, sul lato ovest, all'anello
   reale di Via Madonna della Stella.
 - 532 edifici reali estrusi a blocchi, con finestre e persiane istanziate, terrazze,
-  tetti in coppi e chiese con campanile a vela.
-- Cattedrale dedicata: navata rialzata, facciata ovest con rosone (ghiera e raggi) e croce,
-  abside a est, campanile sul fianco sud, lesene sui fianchi, portale sud con due colonne.
+  tetti in coppi e chiese con campanile a vela. Altezze: solo numero di piani e altezze di
+  OSM (le stime Microsoft ML si scartano); le altre sono stimate per zona.
+- Cattedrale verificata sulle fonti (README): facciata ovest tripartita da due lesene con tre
+  portali, rosone a 24 raggi e oculi; fianco sud con portale dorico, rilievo, statue e secondo
+  rosone accanto al campanile; campanile a quattro ordini con cupola a cipolla, a filo del
+  fianco sud; cappellone a due piani a nord; niente abside esterna (la sagoma finisce piatta).
+- Purgatorio: portale su Piazza Notar Domenico con pilastri a torri sovrapposte sugli orsi,
+  timpano spezzato con i due scheletri, stemma Orsini ed epigrafe.
+- Chiese rupestri: San Michele delle Grotte è uno sperone di tufo scavato con ingresso,
+  grotte e corridoio panoramico; Madonna della Stella è imbiancata, con campanile a vela in
+  mattoni, corpo basso a una falda e la roccia alle spalle.
 - Ponte con archi su due ordini, circa 25 archi, lesene sui piloni e due cornici.
 - Canyon costruito sul corso reale del Torrente La Gravina, con falesie, gradoni dei rioni
-  Piaggio (nord) e Fondovico (sud), grotte, alberi e mura reali.
+  Piaggio (nord) e Fondovico (sud), grotte, alberi e mura reali. I due rioni scendono
+  dolcemente verso il ciglio (costante RIONI) con le case a gradoni, le 7 scalinate reali
+  di OSM (decorative) e 20 abitazioni rupestri con la fronte in muratura.
 - Le vie sono libere dagli edifici: lo script ricentra e restringe le vie tra le facciate,
   ritaglia le sagome lungo la carreggiata e trasforma in archi i corpi sopraelevati reali
   (level = 1) che scavalcano una via. I tetti a capanna sono ritagliati sulla sagoma reale.
 - Mezzi a scelta: Fiat Panda 4x4 del 1999, Audi RS6 Avant, Lamborghini Huracán e trattore
   John Deere, low-poly e senza loghi (array VEHICLES e VehicleFactory).
-- All'apertura il mezzo aspetta accanto alla testata est del Ponte Acquedotto (camera
-  "vetrina"); con "Parti" attraversa subito il ponte.
+- All'apertura il mezzo aspetta a 12 m dalla testata est del Ponte Acquedotto, accanto alla
+  Fontana della Stella. La vetrina alterna il primo piano del mezzo e un campo lungo dal
+  canyon con le arcate (CONFIG.camera.showroom); con "Parti" il mezzo attraversa subito il ponte.
 - Pausa (P, Spazio, pulsante o minimappa): il mezzo frena e compare il menu con Riprendi,
   cambio mezzo e mappa con i luoghi. In pausa si tocca un luogo (mappa, etichetta 3D o
   elenco) per teletrasportarsi e ripartire da lì.
 - Guida automatica. Agli incroci si sceglie con le frecce ← → ↑ oppure toccando i cartelli
   turistici marroni, che mostrano il nome reale della via e il monumento verso cui porta.
 - Interfaccia: minimappa centrata sul mezzo, targa stradale in marmo, schede didattiche con
-  fatti verificati, attribuzione OpenStreetMap visibile. Layout per telefono in verticale e
+  fatti verificati (dalla fase 3 anche San Francesco, Santa Sofia, Santa Cecilia, Santa Teresa
+  e Gesù), attribuzione OpenStreetMap visibile. Layout per telefono in verticale e
   in orizzontale, risoluzione adattiva agli fps.
 - Camera: vetrina all'apertura, inseguimento dall'alto che sale sopra i tetti quando le case
   coprirebbero il mezzo, panoramiche su ciglio e ponte, vista dall'alto in pausa.
@@ -76,7 +88,8 @@ VINCOLI NON NEGOZIABILI
   Non inventare vie. Uniche eccezioni ammesse: il ponte pedonale e le inversioni a goccia
   negli slarghi reali.
 - I mezzi sono i quattro scelti dal committente (Panda 4x4 1999, RS6, Huracán, John Deere).
-- Nessuna casa sulla carreggiata: la prova "npm run simula" lo verifica (casesullastrada = 0).
+- Nessuna casa sulla carreggiata: la prova "npm run simula" lo verifica (casesullastrada = 0),
+  e nessun dettaglio 3D sulla carreggiata (dettaglisullastrada vuoto).
 - Nessun riferimento a Nunzia Food nella mappa per ora: resta solo il credito nella
   schermata iniziale.
 - Fedeltà alla realtà: nelle schede storiche solo fatti verificati, con la fonte nel README.
@@ -109,28 +122,10 @@ COME SI LAVORA
 PROSSIMI PASSI
 Fermati per il mio feedback alla fine di ogni fase.
 
-Fase 3 · Architettura e fedeltà
-(Già fatto nella fase 2c, sezione 6d "Dettagli" di index.html: portali delle chiese con
-oculo, portale del Purgatorio con timpano spezzato, scheletri e orsi, cornicione e portale
-in bugnato del Palazzo Ducale e del Museo Santomasi, lesene, rosone e portale sud della
-Cattedrale. Parti da lì, non rifarli.)
-1. Cattedrale: verifica con fonti la posizione del campanile e dei rosoni (una fonte parla
-   di un secondo rosone "attiguo al campanile" sul fianco sud) e la facciata a due piani;
-   correggi il modello di conseguenza.
-2. Chiesa del Purgatorio: confronta il portale stilizzato con foto e fonti e affinalo.
-3. San Michele delle Grotte (in fondo a Calata Grotte San Michele, rione Fondovico) e
-   Madonna della Stella (versante di Botromagno): oggi hanno solo l'edificio dei dati con il
-   portale; aggiungi gli ambienti scavati nella parete del canyon.
-4. Rioni Piaggio e Fondovico: case a gradoni, scalinate decorative (per esempio i gradini
-   di Via giudice Montea), abitazioni rupestri.
-5. Altezze: in OSM mancano quasi sempre. Se trovi dati affidabili (numero di piani),
-   usali; altrimenti migliora le stime per zona.
-6. Valuta con me se allargare il diorama o includere percorsi pedonali e scalinate come
-   tratti da percorrere a piedi.
-7. Aggiungi schede verificate per altre chiese (San Francesco, Santa Teresa, Santa Sofia,
-   Santa Cecilia, Gesù, Addolorata) solo se trovi fonti affidabili.
-8. Schermata iniziale: oggi la camera vetrina guarda il mezzo da dietro e il ponte si vede
-   poco; studia un'inquadratura che mostri anche le arcate.
+Da decidere prima della fase 4 (proposte in docs/DESIGN.md, "Da decidere insieme"):
+- percorsi pedonali e scalinate: decorativi, percorribili col mezzo, o un tratto a piedi;
+- allargare il diorama (Museo Civico, San Domenico, Pineta; più lontano la Madonna delle Grazie);
+- usare il modello di elevazione Copernicus GLO-30 per tarare ciglio, gradoni e rioni.
 
 Fase 4 · Rifinitura
 1. Golden hour: calibra luci, nebbia e ombre nette (l'aggancio delle ombre ai texel c'è
@@ -148,10 +143,14 @@ Fase 4 · Rifinitura
 
 LIMITI NOTI
 - Il ciglio del canyon è tracciato a mano (EAST_RIM e WEST_RIM nello script); le quote del
-  terreno sono stilizzate, perché non c'è un modello di elevazione.
+  terreno sono stilizzate, perché non c'è un modello di elevazione. Anche la discesa dei rioni
+  (RIONI) è stilizzata; per questo le scalinate reali hanno pochi gradini.
 - Le gallerie sono escluse; sensi unici e ZTL reali non sono considerati.
-- La facciata ovest con rosone e l'abside a est della Cattedrale seguono la pianta
-  orientata est-ovest. I dettagli vanno verificati con fonti.
+- Non verificati e quindi non modellati: il campanile di San Francesco (manca la posizione) e
+  il punto esatto del campanile della Cattedrale lungo il fianco sud. Per l'Addolorata non ci
+  sono fonti affidabili: ha solo l'etichetta.
+- In questo ambiente la lettura diretta dei siti (Wikipedia, GravinaOggi…) è bloccata dalla
+  rete: le fonti si verificano con la ricerca web, incrociando più risultati.
 - Fiat, Panda, Audi, RS6, Lamborghini, Huracán e John Deere sono marchi dei rispettivi
   proprietari: i mezzi sono stilizzati e senza loghi. Prima di un uso commerciale vanno
   verificati i diritti.
