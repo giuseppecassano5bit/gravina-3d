@@ -18,9 +18,9 @@ di commit.
 
 SKILL
 Per l'interfaccia e il design usa le skill "frontend-design" e "ui-ux-pro-max".
-Non sono sul branch main: stanno nella pull request #1 (branch claude/wizardly-gauss-vkair0)
-e nel branch claude/sharp-shannon-6qc51q, cartella .claude/skills/. Se non sono installate
-in questa sessione, dimmelo subito prima di procedere.
+Sono nel repository, in .claude/skills/ (con altre skill di design: design, design-system,
+brand, ui-styling). Se non risultano caricate in questa sessione, dimmelo subito prima di
+procedere.
 
 PRIMA DI TUTTO LEGGI
 1. README.md: panoramica, comandi, dati, licenze.
