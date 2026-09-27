@@ -33,7 +33,17 @@ dispositivo, gratis:
 3. in **Build and deployment** scegli **Deploy from a branch**, branch `main`, cartella `/ (root)`, e salva.
 
 Dopo un paio di minuti il diorama è su `https://giuseppecassano5bit.github.io/gravina-3d/`.
-Non serve nessun passaggio di compilazione: `index.html` è già il sito.
+Non serve nessun passaggio di compilazione: `index.html` è già il sito (il file `.nojekyll`
+dice a GitHub di pubblicarlo così com'è). Da lì in poi ogni push su `main` aggiorna il sito.
+
+### Lavorare in locale con Claude Code
+
+Tutto per continuare sul proprio computer è nel repository:
+
+* [`CLAUDE.md`](CLAUDE.md): regole e vincoli del progetto, letti da Claude Code all'avvio;
+* [`docs/LAVORARE_IN_LOCALE.md`](docs/LAVORARE_IN_LOCALE.md): cosa installare, prove, server locale, pubblicazione;
+* [`docs/PROMPT_NUOVA_CHAT.md`](docs/PROMPT_NUOVA_CHAT.md): il prompt da incollare nella nuova chat;
+* [`docs/DA_FARE.md`](docs/DA_FARE.md): cosa resta da fare e le decisioni aperte.
 
 ## Comandi
 
@@ -81,7 +91,8 @@ Il file `index.html` è diviso in sezioni numerate e commentate:
 | 10–11 | Interfaccia | minimappa, mappa della pausa, scelta del mezzo, targa, cartelli, schede, teletrasporto |
 | 12–13 | Scena e avvio | cielo al tramonto, luci, ombre agganciate ai texel, qualità adattiva, ciclo principale |
 
-Il documento di progetto completo è in [`docs/DESIGN.md`](docs/DESIGN.md).
+Il documento di progetto completo è in [`docs/DESIGN.md`](docs/DESIGN.md); cosa resta da fare
+è in [`docs/DA_FARE.md`](docs/DA_FARE.md).
 
 ## Dati geografici
 
