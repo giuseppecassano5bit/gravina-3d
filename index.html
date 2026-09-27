@@ -1563,7 +1563,7 @@ const LANDMARKS = [
   },
   {
     id: 'purgatorio', name: 'Chiesa del Purgatorio', ref: 'Santa Maria del Suffragio', kicker: 'Piazza Notar Domenico · dal 1649', radius: 34,
-    text: 'Voluta dai duchi Ferdinando III Orsini e Giovanna Frangipane della Tolfa, genitori di papa Benedetto XIII. Sul portale due scheletri distesi ricordano la caducità della vita; ai lati, gli orsi degli Orsini.',
+    text: 'Voluta dai duchi Ferdinando III Orsini e Giovanna Frangipane della Tolfa, genitori di papa Benedetto XIII. Sul timpano spezzato del portale giacciono due scheletri; i pilastri, fatti di torri sovrapposte (lo stemma dei Frangipane), poggiano sugli orsi degli Orsini.',
   },
   {
     id: 'orsini', name: 'Palazzo Ducale Orsini', ref: 'Palazzo Ducale Orsini', kicker: 'Piazza della Repubblica', radius: 38,
@@ -2864,7 +2864,26 @@ const Buildings = {
       mesh.setColorAt(i, w.door ? shutters[3] : shutters[Math.floor(w.c * shutters.length)]);
     }
     mesh.name = 'finestre';
+    this.windowList = list.slice(0, max);
+    this.windowMesh = mesh;
     return mesh;
+  },
+
+  /**
+   * Toglie le finestre davanti ai portali e ai rilievi (zone: { M, n, half, top }
+   * sul filo del muro, larghe 2·half e alte fino alla quota `top`).
+   */
+  clearWindows(zones) {
+    const mesh = this.windowMesh, zero = new THREE.Matrix4().makeScale(0, 0, 0);
+    if (!mesh || !zones.length) return;
+    this.windowList.forEach((w, i) => {
+      const hit = zones.some(({ M, n, half, top }) => {
+        const de = w.e - M[0], dn = w.n - M[1];
+        return Math.abs(de * n[0] + dn * n[1]) < 1.5 && Math.abs(-de * n[1] + dn * n[0]) < half && w.y < top;
+      });
+      if (hit) mesh.setMatrixAt(i, zero);
+    });
+    mesh.instanceMatrix.needsUpdate = true;
   },
 
   /** Torrini, cisterne e comignoli sui tetti piani. */
@@ -3054,6 +3073,7 @@ const Details = {
       door: C('#4a2e1c'), bone: C('#f3ecdb'), bear: C('#5a3d27'), water: C('#7fb2ad'), iron: C('#2b2723'),
     };
     this.lanterns = [];
+    this.keepOut = [];                   // zone senza finestre: davanti a portali e rilievi
 
     // Chiese: portale con timpano, gradino e oculo sul lato che guarda la via.
     for (const [kind, nameIdx, , rings] of GEO.buildings) {
@@ -3061,13 +3081,15 @@ const Details = {
       const rupestre = name === 'Chiesa Rupestre Madonna della Stella';
       if (kind !== 1 && !rupestre) continue;
       const outer = DATA.pairs(rings[0]);
-      const front = this.frontEdge(outer, 5);
+      const purgatorio = name === 'Santa Maria del Suffragio';
+      // Il Purgatorio si apre sul lato corto a sud, su Piazza Notar Domenico, dove i dati segnano la chiesa.
+      const front = this.frontEdge(outer, 5, purgatorio ? DATA.locate('Chiesa del Purgatorio') : null);
       if (!front) continue;
       const f = this.frame(front);
       const big = Math.abs(Plane.signedArea(outer)) > 250;
-      const purgatorio = name === 'Santa Maria del Suffragio';
-      this.churchPortal(f, big || purgatorio, !rupestre, !purgatorio);
-      if (purgatorio) this.purgatorio(f, front.len);
+      if (purgatorio) this.purgatorio(f);
+      else this.churchPortal(f, big, !rupestre);
+      this.keepOut.push({ M: f.M, n: f.n, half: purgatorio ? 3.4 : big ? 2.6 : 2.2, top: f.ground + (purgatorio ? 9.6 : big ? 10.5 : 8.5) });
       if (rupestre) this.bellCote(outer, (tops.get(name)?.top ?? f.ground + 6));
     }
 
@@ -3082,6 +3104,7 @@ const Details = {
     if (lm('fontana')) this.fountain(lm('fontana').at);
     for (const [e, n] of GEO.views) this.railing(e, n);
     this.placeLanterns(landmarks.filter((l) => l.card !== false));
+    Buildings.clearWindows(this.keepOut);
 
     const mesh = new THREE.Mesh(this.tb.build(), vertexColorMaterial({ roughness: 0.85 }));
     mesh.castShadow = mesh.receiveShadow = true;
@@ -3092,10 +3115,11 @@ const Details = {
   },
 
   /**
-   * Il lato della sagoma che guarda la via più vicina (lunghezza ≥ minLen):
-   * { M: punto medio, n: normale esterna, len, clear: spazio libero davanti }.
+   * Il lato della sagoma che guarda la via più vicina (lunghezza ≥ minLen),
+   * oppure, se c'è, il lato più vicino al punto `near` (per esempio l'ingresso
+   * segnato nei dati): { M: punto medio, n: normale esterna, len, clear: spazio libero davanti }.
    */
-  frontEdge(outer, minLen) {
+  frontEdge(outer, minLen, near = null) {
     const ccw = Plane.signedArea(outer) > 0;
     let best = null;
     for (let i = 0; i < outer.length; i++) {
@@ -3105,9 +3129,9 @@ const Details = {
       let nx = (Q[1] - P[1]) / len, nn = -(Q[0] - P[0]) / len;
       if (!ccw) { nx = -nx; nn = -nn; }
       const M = [(P[0] + Q[0]) / 2, (P[1] + Q[1]) / 2];
-      const near = this.net.closestSample(M[0] + nx * 1.5, M[1] + nn * 1.5);
-      const clear = Math.hypot(near.edge.samples[near.i * 3] - M[0], -near.edge.samples[near.i * 3 + 2] - M[1]) - near.edge.width / 2;
-      const score = near.d - Math.min(len, 14) * 0.25;
+      const road = this.net.closestSample(M[0] + nx * 1.5, M[1] + nn * 1.5);
+      const clear = Math.hypot(road.edge.samples[road.i * 3] - M[0], -road.edge.samples[road.i * 3 + 2] - M[1]) - road.edge.width / 2;
+      const score = near ? Math.hypot(M[0] - near[0], M[1] - near[1]) : road.d - Math.min(len, 14) * 0.25;
       if (!best || score < best.score) best = { score, M, n: [nx, nn], len, clear };
     }
     return best;
@@ -3123,7 +3147,7 @@ const Details = {
   },
 
   /** Portale di chiesa: stipiti, architrave, timpano, porta, gradino e oculo. */
-  churchPortal(f, big, oculus, pediment = true) {
+  churchPortal(f, big, oculus) {
     const s = big ? 1.25 : 1, { light, stone, door, hole } = this.col, y = f.ground;
     f.box(0.42 * s, 3.7 * s, 0.3, light, -1.3 * s, y, 0.1);
     f.box(0.42 * s, 3.7 * s, 0.3, light, 1.3 * s, y, 0.1);
@@ -3131,7 +3155,7 @@ const Details = {
     f.box(2.15 * s, 3.55 * s, 0.1, door, 0, y, 0.04);
     const gable = new THREE.Shape();
     gable.moveTo(-1.75 * s, 0); gable.lineTo(1.75 * s, 0); gable.lineTo(0, 1.15 * s); gable.closePath();
-    if (pediment) f.add(new THREE.ExtrudeGeometry(gable, { depth: 0.28, bevelEnabled: false }), light, 0, y + 4.15 * s, 0);
+    f.add(new THREE.ExtrudeGeometry(gable, { depth: 0.28, bevelEnabled: false }), light, 0, y + 4.15 * s, 0);
     f.box(3.4 * s, 0.16, 0.3, stone, 0, y - 0.06, 0.12);                  // gradino
     if (oculus) {
       f.add(new THREE.TorusGeometry(0.8 * s, 0.16 * s, 5, 14), light, 0, y + 7.3 * s, 0.12);
@@ -3140,13 +3164,43 @@ const Details = {
   },
 
   /**
-   * CHIESA DEL PURGATORIO: sul portale due scheletri distesi (la caducità
-   * della vita) su un timpano spezzato; ai lati gli orsi degli Orsini.
+   * CHIESA DEL PURGATORIO (1649), portale secondo FAI e Wikipedia: ai lati della
+   * porta due pilastri fatti di tre torri sovrapposte, che si restringono salendo
+   * e sono un po' rigonfie al centro (lo stemma dei Frangipane della Tolfa); i
+   * pilastri poggiano sugli orsi degli Orsini. Sulla trabeazione un timpano
+   * spezzato con due scheletri distesi; al centro lo stemma Orsini e, sotto, un
+   * drappo di pietra con l'epigrafe della fondazione.
    */
-  purgatorio(f, facade) {
-    const { light, bone, bear, dark } = this.col, y = f.ground, s = 1.25;
+  purgatorio(f) {
+    const { light, stone, dark, door, hole, bone } = this.col, y = f.ground;
+    const carved = new THREE.Color('#b39364');                              // orsi scolpiti nel tufo
+    const H = 1;                                                           // altezza degli orsi (base dei pilastri)
+    f.box(2.3, 4.5, 0.1, door, 0, y, 0.04);                                // porta
+    f.box(5.4, 0.18, 1.3, stone, 0, y - 0.08, 0.6);                        // gradino
+    f.box(2.9, 0.4, 0.3, light, 0, y + 4.5, 0.12);                         // architrave della porta
+    for (const side of [-1, 1]) {
+      const x = side * 1.9;
+      // orso accovacciato che regge il pilastro, con il muso verso la piazza
+      f.box(1.25, 0.95, 1.15, carved, x, y, 0.55);                         // corpo
+      f.box(0.66, 0.58, 0.55, carved, x, y + 0.55, 1.3);                   // testa
+      f.box(0.3, 0.24, 0.24, carved, x, y + 0.66, 1.66);                   // muso
+      f.box(0.12, 0.1, 0.06, dark, x, y + 0.78, 1.79);                     // naso
+      for (const ex of [-0.22, 0.22]) f.box(0.16, 0.16, 0.12, carved, x + ex, y + 1.13, 1.2);   // orecchie
+      for (const px of [-0.38, 0.38]) f.box(0.3, 0.4, 0.34, carved, x + px, y, 1.25);           // zampe anteriori
+      // tre torri sovrapposte, sempre più strette, rigonfie al centro e con la merlatura
+      let yy = y + H;
+      for (const [r, h] of [[0.5, 1.3], [0.43, 1.2], [0.36, 1.1]]) {
+        const pts = [[0, 0], [r, 0], [r * 1.12, h * 0.5], [r * 0.94, h - 0.2], [r * 1.08, h - 0.2], [r * 1.08, h], [0, h]];
+        f.add(new THREE.LatheGeometry(pts.map(([a, b]) => new THREE.Vector2(a, b)), 8), light, x, yy, 0.55);
+        yy += h;
+      }
+    }
+    const top = y + H + 3.6;                                               // cima dei pilastri
+    // trabeazione sui pilastri
+    f.box(5.6, 0.3, 1.0, light, 0, top, 0.4);
+    f.box(6, 0.35, 1.15, light, 0, top + 0.3, 0.45);
     // timpano spezzato: due falde inclinate con il vuoto al centro
-    for (const side of [-1, 1]) f.box(1.5, 0.3, 0.3, light, side * 1.25, y + 4.35 * s, 0.1, -side * 0.38);
+    for (const side of [-1, 1]) f.box(1.9, 0.32, 0.8, light, side * 1.9, top + 0.85, 0.4, -side * 0.36);
     // due scheletri distesi sulle falde, con la testa verso il centro
     for (const side of [-1, 1]) {
       const parts = [
@@ -3158,19 +3212,19 @@ const Details = {
       ];
       for (const [g, x, yy] of parts) {
         g.translate(-x * side, yy, 0);                                     // testa verso il centro
-        g.rotateZ(-side * 0.38);
-        f.add(g, bone, side * 1.2, y + 4.62 * s, 0.14);
+        g.rotateZ(-side * 0.36);
+        f.add(g, bone, side * 1.85, top + 1.12, 0.5);
       }
     }
-    // gli orsi degli Orsini, seduti su piedistalli ai lati del portale (a rilievo)
-    for (const side of [-1, 1]) {
-      const x = side * Math.min(2.35 * s, facade / 2 - 0.5);
-      f.box(0.9, 1.3, 0.3, dark, x, y, 0.12);                              // piedistallo
-      f.box(0.62, 0.8, 0.26, bear, x, y + 1.3, 0.14);                      // corpo
-      f.box(0.44, 0.4, 0.26, bear, x, y + 2.05, 0.15);                     // testa
-      f.box(0.18, 0.14, 0.14, bear, x + side * 0.06, y + 2.1, 0.28);       // muso
-      for (const ex of [-0.15, 0.15]) f.box(0.1, 0.1, 0.12, bear, x + ex, y + 2.45, 0.15);   // orecchie
-    }
+    // drappo di pietra con l'epigrafe, appeso sotto lo stemma
+    f.box(1.35, 1.0, 0.16, light, 0, top + 0.7, 1.05);
+    for (let k = 0; k < 3; k++) f.box(0.95, 0.05, 0.05, dark, 0, top + 0.95 + k * 0.22, 1.15);
+    // stemma degli Orsini al centro, in alto, con le bande oblique
+    const shield = new THREE.Shape();
+    shield.moveTo(-0.5, 0.35); shield.lineTo(-0.5, 1.3); shield.lineTo(0.5, 1.3); shield.lineTo(0.5, 0.35); shield.quadraticCurveTo(0.5, 0, 0, -0.05); shield.quadraticCurveTo(-0.5, 0, -0.5, 0.35);
+    f.add(new THREE.ExtrudeGeometry(shield, { depth: 0.2, bevelEnabled: false, curveSegments: 3 }), light, 0, top + 1.75, 0.75);
+    for (const k of [-1, 1]) f.box(0.16, 1.1, 0.04, dark, k * 0.2, top + 2.0, 0.97, 0.6);
+    f.box(0.7, 0.22, 0.24, light, 0, top + 3.05, 0.85);                    // corona
   },
 
   /** Piccolo campanile a vela sul colmo (chiesa rupestre della Madonna della Stella). */
@@ -3203,6 +3257,7 @@ const Details = {
     const front = this.frontEdge(outer, 6);
     if (!front) return;
     const f = this.frame(front), { light, door } = this.col, y = f.ground;
+    this.keepOut.push({ M: f.M, n: f.n, half: 2.3, top: y + 4.6 });
     for (let k = 0; k < 7; k++) {                                          // bugnato attorno al portale
       for (const side of [-1, 1]) f.box(0.55, 0.5, 0.26, k % 2 ? light : this.col.stone, side * (1.5 + (k % 2) * 0.1), y + k * 0.55, 0.06);
     }

@@ -77,7 +77,7 @@ if (mode !== 'mobile' && mode !== 'orizzontale') {
         g.camera.lookAt(-24, -12, -297);
       } else if (id === 'purgatorio') {
         const b = g.DATA.building('Santa Maria del Suffragio');
-        const fe = g.Details.frontEdge(g.DATA.pairs(b[3][0]), 5);
+        const fe = g.Details.frontEdge(g.DATA.pairs(b[3][0]), 5, g.DATA.locate('Chiesa del Purgatorio'));
         const y = g.Terrain.heightAt(fe.M[0] + fe.n[0] * 2, fe.M[1] + fe.n[1] * 2);
         g.camera.position.set(fe.M[0] + fe.n[0] * 11 + fe.n[1] * 3, y + 5, -(fe.M[1] + fe.n[1] * 11 - fe.n[0] * 3));
         g.camera.lookAt(fe.M[0], y + 4, -fe.M[1]);
