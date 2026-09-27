@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 27 settembre 2026, dopo la fase 3 (in revisione). Aggiornare questo file a ogni fase.
+Stato al 28 settembre 2026: fase 3 approvata e online. Aggiornare questo file a ogni fase.
 
 ## Fatto finora
 
@@ -9,16 +9,15 @@ Stato al 27 settembre 2026, dopo la fase 3 (in revisione). Aggiornare questo fil
 | 1–2 | Documento di progetto, rete stradale, mezzo, incroci, camera, interfaccia | ✅ |
 | 2b | Dati reali: vie, incroci, edifici, torrente, ponte ad archi | ✅ |
 | 2c | Vie libere dalle case, archi reali, quattro mezzi, pausa, teletrasporto, versione mobile | ✅ |
-| 3 | Cattedrale e Purgatorio sulle fonti, chiese rupestri, rioni a gradoni con scalinate e abitazioni rupestri, altezze, cinque schede nuove, vetrina sulle arcate | ✅ in revisione |
+| 3 | Cattedrale e Purgatorio sulle fonti, chiese rupestri, rioni a gradoni con scalinate e abitazioni rupestri, altezze, cinque schede nuove, vetrina sulle arcate | ✅ approvata il 28/09/2026 |
 
 ## 1. Subito
 
-- [ ] **Attivare GitHub Pages** (una volta sola): Settings → Pages → Deploy from a branch →
-      `main` / `(root)` → Save. Oggi il repository non ha Pages attivo, quindi
-      https://giuseppecassano5bit.github.io/gravina-3d/ non risponde ancora.
+- [x] **GitHub Pages attivo** da `main` / `(root)`:
+      https://giuseppecassano5bit.github.io/gravina-3d/ risponde.
 - [ ] **Provare su un telefono vero** (fps, leggibilità delle schede, tocchi sui cartelli) e
       annotare cosa non va.
-- [ ] **Approvare la fase 3** (o chiedere correzioni).
+- [x] **Fase 3 approvata** (28 settembre 2026).
 
 ## 2. Decisioni aperte (fase 3, punto 6): dettagli in `docs/DESIGN.md`, "Da decidere insieme"
 
