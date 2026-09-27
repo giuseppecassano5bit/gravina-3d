@@ -22,6 +22,9 @@ Due strumenti per lo sviluppo:
 node vista.mjs duomo -26 -4 t+3 -12 -3.5 t+11
 # valuta un'espressione nella pagina, con g = window.gravina
 node valuta.mjs "g.Terrain.heightAt(0, 0)"
+# vetrina: primo piano e campo lungo sul ponte in desktop, telefono verticale e orizzontale;
+# i numeri facoltativi provano altre pose del campo lungo (CONFIG.camera.showroom)
+node vetrina.mjs "[26,56,3,8]" "[18,82,8,6]"
 ```
 
 Se Playwright non trova Chromium, installalo con `npx playwright install chromium`
