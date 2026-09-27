@@ -1550,6 +1550,7 @@ const DATA = {
  *  - ref:  nome dell'edificio o del luogo nei dati (la posizione viene da lì)
  *  - at:   in alternativa, posizione [est, nord]
  *  - card: false = solo etichetta, senza scheda
+ *  - rock: chiesa scavata nella roccia: la sagoma dei dati diventa lo sperone di tufo
  * I testi riportano solo fatti verificati su fonti pubbliche (vedi README).
  */
 const LANDMARKS = [
@@ -1596,7 +1597,7 @@ const LANDMARKS = [
     text: 'La parrocchia di San Giovanni Battista in Sant’Agostino, accanto al chiostro di Sant’Agostino.',
   },
   {
-    id: 'sanmichele', name: 'San Michele delle Grotte', at: [-68, -101], kicker: 'Rione Fondovico · X secolo', radius: 36,
+    id: 'sanmichele', name: 'San Michele delle Grotte', at: [-68, -101], rock: true, kicker: 'Rione Fondovico · X secolo', radius: 36,
     text: 'Chiesa rupestre scavata nel tufo in fondo a Calata Grotte San Michele: cinque navate sorrette da quattordici pilastri. È considerata la prima cattedrale di Gravina.',
   },
   {
@@ -1609,7 +1610,7 @@ const LANDMARKS = [
   },
   {
     id: 'stella', name: 'Madonna della Stella', ref: 'Chiesa Rupestre Madonna della Stella', kicker: 'Chiesa rupestre', radius: 34,
-    text: 'Sul versante opposto della gravina, raggiungibile dal ponte: prende il nome da un affresco della Madonna con una stella sulla fronte.',
+    text: 'Sul versante opposto della gravina, oltre il ponte: fuori è una chiesetta imbiancata con il campanile a vela, dentro è scavata nella roccia. Secondo la tradizione prende il nome da un’immagine della Madonna col Bambino con una stella sulla fronte, trovata da alcuni contadini.',
   },
   {
     id: 'botromagno', name: 'Botromagno', at: [-232, 80], kicker: 'Parco archeologico', radius: 45,
@@ -2478,7 +2479,7 @@ const Buildings = {
    * Costruisce tutti gli edifici in un'unica mesh (più finestre e dettagli
    * istanziati). Restituisce anche le quote dei monumenti per le etichette.
    */
-  build(scene) {
+  build(scene, rockSpots = []) {
     const tb = new TriBuilder();
     const rnd = rng(1092);
     const col = (hex) => new THREE.Color(hex);
@@ -2488,6 +2489,8 @@ const Buildings = {
     const windows = [], details = [], tops = new Map();
     /** Sagome e quote dei tetti: servono alla camera per non finire dietro le case. */
     this.roofs = [];
+    /** Indici (in GEO.buildings) delle chiese scavate nella roccia, costruite da caveChurch. */
+    this.rockChurches = new Set();
     const tmpA = new THREE.Vector3();
 
     GEO.buildings.forEach(([kind, nameIdx, h, rings], index) => {
@@ -2504,6 +2507,17 @@ const Buildings = {
       const height = this.height(kind, h, area, ce, cn, seed, name);
       const top = gMax + height;
       tops.set(name ?? `#${index}`, { top, at: [ce, cn] });
+
+      // Chiese rupestri: niente blocco estruso, ma il fronte scavato nella roccia.
+      if (kind === 1 && rockSpots.some(([e, n]) => outer.some(([x, y]) => Math.hypot(x - e, y - n) < 8))) {
+        this.rockChurches.add(index);
+        this.caveChurch(tb, outer, stone, stoneDark);
+        return;
+      }
+      if (name === 'Chiesa Rupestre Madonna della Stella') {
+        this.stellaChurch(tb, outer, base, roofTiles[1]);
+        return;
+      }
 
       if (kind === 2) {
         this.roofs.push({ pts: outer, top: gMax + 24 });
@@ -2847,6 +2861,179 @@ const Buildings = {
     }
   },
 
+  /** Lato della sagoma rivolto verso il torrente (il fronte delle chiese rupestri). */
+  ravineEdge(outer, minLen = 3) {
+    const ccw = Plane.signedArea(outer) > 0;
+    let best = null;
+    for (let i = 0; i < outer.length; i++) {
+      const P = outer[i], Q = outer[(i + 1) % outer.length], len = Math.hypot(Q[0] - P[0], Q[1] - P[1]);
+      if (len < minLen) continue;
+      let nx = (Q[1] - P[1]) / len, nn = -(Q[0] - P[0]) / len;
+      if (!ccw) { nx = -nx; nn = -nn; }
+      const M = [(P[0] + Q[0]) / 2, (P[1] + Q[1]) / 2], q = Ravine.side(...M);
+      const l = Math.hypot(q.e - M[0], q.n - M[1]) || 1;
+      const score = (nx * (q.e - M[0]) + nn * (q.n - M[1])) / l + Math.min(len, 12) * 0.03;
+      if (!best || score > best.score) best = { score, M, n: [nx, nn], len, P, Q };
+    }
+    return best;
+  },
+
+  /** Colore della roccia per quota: gli stessi strati di tufo delle pareti del canyon. */
+  strata(y, c = new THREE.Color()) {
+    const band = Math.floor((y - CONFIG.terrain.floorY) / 3.2);
+    return c.set(PALETTE.strata[((band % 4) + 4) % 4]);
+  },
+
+  /**
+   * Massa di tufo sulla sagoma `outer`, da `base` a `top`: pareti a strati di
+   * 1,6 m sfalsati di qualche decimetro (come le pareti del canyon) e macchia
+   * sopra. Il lato `flat` (un lato della sagoma, { P, Q }) resta a piombo: lì si
+   * aprono porte e grotte scavate.
+   */
+  rockMass(tb, outer, base, top, flat = null) {
+    const ring = Plane.signedArea(outer) > 0 ? outer : [...outer].reverse();   // antiorario visto dall'alto
+    const N = ring.length, K = Math.max(1, Math.round((top - base) / 1.6));
+    const onFlat = (p) => flat && [flat.P, flat.Q].some((q) => Math.hypot(q[0] - p[0], q[1] - p[1]) < 0.01);
+    // normale esterna in ogni vertice (media dei due lati)
+    const nrm = ring.map((p, i) => {
+      const a = ring[(i + N - 1) % N], b = ring[(i + 1) % N];
+      const n1 = [p[1] - a[1], a[0] - p[0]], n2 = [b[1] - p[1], p[0] - b[0]];
+      const l1 = Math.hypot(...n1) || 1, l2 = Math.hypot(...n2) || 1;
+      const n = [n1[0] / l1 + n2[0] / l2, n1[1] / l1 + n2[1] / l2], l = Math.hypot(...n) || 1;
+      return [n[0] / l, n[1] / l];
+    });
+    const V = (i, k) => {
+      const p = ring[i], y = lerp(base, top, k / K);
+      const j = onFlat(p) ? 0 : (hash2(Math.round(p[0] * 3) + k * 17, Math.round(p[1] * 3)) - 0.5) * 0.7 - (k === K ? 0.35 : 0);
+      return [p[0] + nrm[i][0] * j, y, -(p[1] + nrm[i][1] * j)];
+    };
+    const c = new THREE.Color();
+    /** Triangolo con la faccia rivolta verso `out` (vettore mondo). */
+    const tri = (a, b, d, out, color) => {
+      const ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2], wx = d[0] - a[0], wy = d[1] - a[1], wz = d[2] - a[2];
+      const dot = (uy * wz - uz * wy) * out[0] + (uz * wx - ux * wz) * out[1] + (ux * wy - uy * wx) * out[2];
+      if (dot >= 0) tb.tri(a, b, d, color); else tb.tri(a, d, b, color);
+    };
+    for (let i = 0; i < N; i++) {
+      const i2 = (i + 1) % N, P = ring[i], Q = ring[i2];
+      const out = [Q[1] - P[1], 0, -(P[0] - Q[0])];                        // normale esterna del lato, in coordinate mondo
+      for (let k = 0; k < K; k++) {
+        this.strata(lerp(base, top, (k + 0.5) / K), c).multiplyScalar(0.93 + hash2(i, k) * 0.1);
+        const a = V(i, k), b = V(i2, k), d = V(i2, k + 1), e = V(i, k + 1);
+        tri(a, b, d, out, c); tri(a, d, e, out, c);
+      }
+    }
+    const topRing = ring.map((_, i) => V(i, K));
+    c.set(PALETTE.ledge).lerp(new THREE.Color(PALETTE.scrub), 0.3);
+    for (const [a, b, d] of THREE.ShapeUtils.triangulateShape(topRing.map((p) => new THREE.Vector2(p[0], -p[2])), [])) tri(topRing[a], topRing[b], topRing[d], [0, 1, 0], c);
+  },
+
+  /**
+   * SAN MICHELE DELLE GROTTE, chiesa scavata nel tufo del Fondovico (fonti nel README):
+   * fuori terra non c'è un edificio. La sagoma dei dati diventa lo sperone di roccia
+   * in cui è scavata la chiesa; sul fronte verso la gravina si aprono l'ingresso
+   * laterale, alto e stretto, e le bocche delle grotte; davanti corre il
+   * corridoio panoramico, con il parapetto sul vuoto.
+   */
+  caveChurch(tb, outer, stone, stoneDark) {
+    const hs = outer.map(([e, n]) => Terrain.heightAt(e, n)).sort((a, b) => a - b);
+    const front = this.ravineEdge(outer, 5);
+    if (!front) return;
+    const yT = Terrain.heightAt(front.M[0] + front.n[0] * 1.5, front.M[1] + front.n[1] * 1.5);
+    const base = hs[0] - 1.2, top = Math.max(hs[Math.floor(hs.length / 2)] + 1.2, yT + 4.6);
+    this.rockMass(tb, outer, base, top, front);
+    this.roofs.push({ pts: outer, top: top + 0.5 });
+    // Fronte scavato verso la gravina
+    const f = wallFrame(tb, front.M, front.n), hole = new THREE.Color(PALETTE.cave), iron = new THREE.Color('#2b2723');
+    const half = front.len / 2, y0 = yT + 0.3;
+    const arch = (w, h) => {
+      const sh = new THREE.Shape();
+      sh.moveTo(-w / 2, 0); sh.lineTo(w / 2, 0); sh.lineTo(w / 2, h - w / 2); sh.absarc(0, h - w / 2, w / 2, 0, Math.PI, false); sh.closePath();
+      return new THREE.ExtrudeGeometry(sh, { depth: 0.12, bevelEnabled: false, curveSegments: 6 });
+    };
+    // l'ingresso laterale, alto e stretto, con la ghiera scolpita
+    const xd = -half + 2;
+    f.add(arch(1.2, 3.2), hole, xd, y0, -0.06);
+    f.box(0.3, 3.3, 0.3, stone, xd - 0.75, y0, 0.08);
+    f.box(0.3, 3.3, 0.3, stone, xd + 0.75, y0, 0.08);
+    f.box(1.8, 0.35, 0.34, stone, xd, y0 + 3.3, 0.1);
+    // bocche delle grotte e finestrelle scavate
+    for (let x = xd + 3.2, k = 0; x < half - 1.2; x += 3.1, k++) f.add(arch(k % 2 ? 0.9 : 1.6, k % 2 ? 1.4 : 2.2), hole, x, y0 + (k % 2 ? 1.3 : 0.2), -0.06);
+    // corridoio panoramico: terrazzino di pietra lungo il fronte, con il parapetto in ferro
+    f.box(front.len + 1.2, 2.5, 2.4, stoneDark, 0, y0 - 2.5, 1.2);
+    for (let x = -half - 0.4; x <= half + 0.41; x += 1) f.box(0.07, 1, 0.07, iron, x, y0, 2.3);
+    f.box(front.len + 0.9, 0.07, 0.09, iron, 0, y0 + 0.95, 2.3);
+    f.box(front.len + 0.9, 0.05, 0.06, iron, 0, y0 + 0.5, 2.3);
+  },
+
+  /**
+   * MADONNA DELLA STELLA, santuario rupestre sul versante di Botromagno (fonti nel
+   * README): fuori è molto semplice e imbiancato, con la facciata asimmetrica. La
+   * chiesa ha il tetto a capanna e un piccolo campanile a vela in mattoni sul
+   * vertice; accanto c'è un corpo più basso con il tetto a una falda e una
+   * finestra. La chiesa vera è scavata nella grotta: dietro c'è la roccia.
+   */
+  stellaChurch(tb, outer, base, tiles) {
+    const front = this.ravineEdge(outer, 3);
+    if (!front) return;
+    const white = new THREE.Color(PALETTE.facadesOld[4]), brick = new THREE.Color('#a4553a');
+    const hole = new THREE.Color(PALETTE.cave), door = new THREE.Color('#4a2e1c');
+    const n = front.n, t = [-n[1], n[0]];
+    const T = ([e, m]) => (e - front.M[0]) * t[0] + (m - front.M[1]) * t[1];
+    const D = ([e, m]) => -((e - front.M[0]) * n[0] + (m - front.M[1]) * n[1]);   // profondità dietro la facciata
+    const tMin = Math.min(...outer.map(T)), tMax = Math.max(...outer.map(T)), dMax = Math.max(...outer.map(D));
+    const G = Terrain.heightAt(front.M[0] + n[0] * 1.5, front.M[1] + n[1] * 1.5);
+    const split = lerp(tMin, tMax, 0.62);
+    const main = Plane.clipHalfPlane(outer, (p) => split - T(p)), side = Plane.clipHalfPlane(outer, (p) => T(p) - split);
+    const at = (x, d) => [front.M[0] + t[0] * x - n[0] * d, front.M[1] + t[1] * x - n[1] * d];
+    const extrude = (poly, y1) => {
+      const g = new THREE.ExtrudeGeometry(new THREE.Shape(poly.map(([e, m]) => new THREE.Vector2(e, m))), { depth: y1 - base, bevelEnabled: false, curveSegments: 1 });
+      g.rotateX(-Math.PI / 2);
+      g.translate(0, base, 0);
+      tb.addGeometry(g, white);
+    };
+    // la chiesa: tetto a capanna con il colmo perpendicolare alla facciata
+    const wm = (split - tMin) / 2, eave = G + 4.2, rise = 1.4;
+    extrude(main, eave);
+    this.gableOnFootprint(tb, main, { c: at(tMin + wm, dMax / 2), u: [-n[0], -n[1]], v: t, hl: dMax / 2, hw: wm }, eave, rise, tiles, white);
+    // il corpo più basso accanto, con il tetto a una falda
+    if (side.length >= 3) {
+      extrude(side, G + 3);
+      this.gableOnFootprint(tb, side, { c: at(split, dMax / 2), u: [-n[0], -n[1]], v: t, hl: dMax / 2, hw: (tMax - split) * 1.05 }, G + 3, 0.6, tiles, white);
+    }
+    // facciata: porta ad arco, finestrella e campanile a vela in mattoni sul vertice
+    const f = wallFrame(tb, front.M, n), xm = tMin + wm;
+    const sh = new THREE.Shape();
+    sh.moveTo(-0.5, 0); sh.lineTo(0.5, 0); sh.lineTo(0.5, 1.6); sh.absarc(0, 1.6, 0.5, 0, Math.PI, false); sh.closePath();
+    f.add(new THREE.ExtrudeGeometry(sh, { depth: 0.08, bevelEnabled: false, curveSegments: 5 }), door, xm, G, 0);
+    f.box(0.5, 0.6, 0.08, hole, xm, G + 2.9, 0.02);
+    f.box(1.1, 1.3, 0.36, brick, xm, eave + rise - 0.15, -0.2);
+    f.box(0.45, 0.6, 0.44, hole, xm, eave + rise + 0.35, -0.2);
+    f.box(1.3, 0.14, 0.44, brick, xm, eave + rise + 1.15, -0.2);
+    if (side.length >= 3) f.box(0.7, 0.8, 0.08, hole, split + (tMax - split) / 2, G + 1.2, 0.02);
+    this.roofs.push({ pts: outer, top: eave + rise + 1.4 });
+    // la roccia in cui è scavata la chiesa, alle spalle: un masso sfaccettato a strati
+    const w = tMax - tMin + 5, depth = 5.5, h = eave + rise + 2 - base;
+    const rock = new THREE.BoxGeometry(w, h, depth, 3, 3, 2).toNonIndexed();
+    const Pr = rock.attributes.position;
+    for (let i = 0; i < Pr.count; i++) {
+      // sfalsamento che dipende solo dalla posizione: i vertici condivisi restano uniti
+      const x = Pr.getX(i), y = Pr.getY(i), z = Pr.getZ(i), X = Math.round(x * 10), Y = Math.round(y * 10), Z = Math.round(z * 10);
+      const inward = y > -h / 2 + 0.1 ? 0.35 + 0.65 * (1 - (y + h / 2) / h) : 1;          // si stringe verso l'alto
+      Pr.setXYZ(i, x * inward + (hash2(X + Z * 131, Y) - 0.5) * 0.8, y + (hash2(Y + X * 71, Z) - 0.5) * 0.6, z * (0.7 + 0.3 * inward) + (hash2(Z + Y * 37, X) - 0.5) * 0.6);
+    }
+    const [re, rn] = at(xm + (tMax - tMin) * 0.15, dMax + depth / 2 - 0.8);
+    const m = new THREE.Matrix4().makeBasis(new THREE.Vector3(t[0], 0, -t[1]), new THREE.Vector3(0, 1, 0), new THREE.Vector3(n[0], 0, -n[1]));
+    m.setPosition(re, base + h / 2, -rn);
+    rock.applyMatrix4(m);
+    const c = new THREE.Color();
+    for (let i = 0; i < Pr.count; i += 3) {
+      const a = [Pr.getX(i), Pr.getY(i), Pr.getZ(i)], b = [Pr.getX(i + 1), Pr.getY(i + 1), Pr.getZ(i + 1)], d = [Pr.getX(i + 2), Pr.getY(i + 2), Pr.getZ(i + 2)];
+      tb.tri(a, b, d, this.strata((a[1] + b[1] + d[1]) / 3, c).multiplyScalar(0.92 + hash2(i, 5) * 0.1));
+    }
+    this.roofs.push({ pts: [[-w / 2, -0.8], [w / 2, -0.8], [w / 2, depth], [-w / 2, depth]].map(([x, d]) => at(xm + (tMax - tMin) * 0.15 + x, dMax - 0.8 + d)), top: base + h });
+  },
+
   /** Finestre (con persiane) e porte: un'unica InstancedMesh di piccoli pannelli. */
   instanceWindows(list) {
     const max = Math.min(list.length, CONFIG.buildings.maxWindows);
@@ -3056,10 +3243,10 @@ const Scenery = {
 /* ═══════════════════════════════════════════════════════════════════════
  * 6d. DETTAGLI DEI LUOGHI D'INTERESSE
  *     Più cura dove si guarda di più: portali delle chiese con l'oculo, il
- *     portale della Chiesa del Purgatorio con i due scheletri distesi e gli
- *     orsi degli Orsini, cornicioni e portali dei palazzi, l'ingresso scavato
- *     di San Michele delle Grotte, la Fontana della Stella accanto al ponte,
- *     parapetti ai belvederi e lanterne nelle vie attorno ai monumenti.
+ *     portale della Chiesa del Purgatorio con gli orsi, le torri e i due
+ *     scheletri distesi, cornicioni e portali dei palazzi, la Fontana della
+ *     Stella accanto al ponte, parapetti ai belvederi e lanterne nelle vie
+ *     attorno ai monumenti. (Cattedrale e chiese rupestri sono in 6b.)
  *     Forme stilizzate: ricordano il luogo, non ne sono un rilievo.
  *     Nessun elemento sporge sulla carreggiata (al massimo 0,3 m dal muro).
  * ═══════════════════════════════════════════════════════════════════════ */
@@ -3076,22 +3263,20 @@ const Details = {
     this.keepOut = [];                   // zone senza finestre: davanti a portali e rilievi
 
     // Chiese: portale con timpano, gradino e oculo sul lato che guarda la via.
-    for (const [kind, nameIdx, , rings] of GEO.buildings) {
+    GEO.buildings.forEach(([kind, nameIdx, , rings], index) => {
       const name = DATA.name(nameIdx);
-      const rupestre = name === 'Chiesa Rupestre Madonna della Stella';
-      if (kind !== 1 && !rupestre) continue;
+      if (kind !== 1 || Buildings.rockChurches.has(index)) return;   // le chiese rupestri hanno il fronte scavato
       const outer = DATA.pairs(rings[0]);
       const purgatorio = name === 'Santa Maria del Suffragio';
       // Il Purgatorio si apre sul lato corto a sud, su Piazza Notar Domenico, dove i dati segnano la chiesa.
       const front = this.frontEdge(outer, 5, purgatorio ? DATA.locate('Chiesa del Purgatorio') : null);
-      if (!front) continue;
+      if (!front) return;
       const f = this.frame(front);
       const big = Math.abs(Plane.signedArea(outer)) > 250;
       if (purgatorio) this.purgatorio(f);
-      else this.churchPortal(f, big, !rupestre);
+      else this.churchPortal(f, big);
       this.keepOut.push({ M: f.M, n: f.n, half: purgatorio ? 3.4 : big ? 2.6 : 2.2, top: f.ground + (purgatorio ? 9.6 : big ? 10.5 : 8.5) });
-      if (rupestre) this.bellCote(outer, (tops.get(name)?.top ?? f.ground + 6));
-    }
+    });
 
     // Palazzi: cornicione, fascia marcapiano e portale in bugnato.
     for (const name of ['Palazzo Ducale Orsini', 'Museo e Biblioteca Ettore Pomarici Santomasi']) {
@@ -3100,7 +3285,6 @@ const Details = {
     }
 
     const lm = (id) => landmarks.find((l) => l.id === id);
-    if (lm('sanmichele')) this.rockChurch(lm('sanmichele').at);
     if (lm('fontana')) this.fountain(lm('fontana').at);
     for (const [e, n] of GEO.views) this.railing(e, n);
     this.placeLanterns(landmarks.filter((l) => l.card !== false));
@@ -3147,7 +3331,7 @@ const Details = {
   },
 
   /** Portale di chiesa: stipiti, architrave, timpano, porta, gradino e oculo. */
-  churchPortal(f, big, oculus) {
+  churchPortal(f, big) {
     const s = big ? 1.25 : 1, { light, stone, door, hole } = this.col, y = f.ground;
     f.box(0.42 * s, 3.7 * s, 0.3, light, -1.3 * s, y, 0.1);
     f.box(0.42 * s, 3.7 * s, 0.3, light, 1.3 * s, y, 0.1);
@@ -3157,10 +3341,8 @@ const Details = {
     gable.moveTo(-1.75 * s, 0); gable.lineTo(1.75 * s, 0); gable.lineTo(0, 1.15 * s); gable.closePath();
     f.add(new THREE.ExtrudeGeometry(gable, { depth: 0.28, bevelEnabled: false }), light, 0, y + 4.15 * s, 0);
     f.box(3.4 * s, 0.16, 0.3, stone, 0, y - 0.06, 0.12);                  // gradino
-    if (oculus) {
-      f.add(new THREE.TorusGeometry(0.8 * s, 0.16 * s, 5, 14), light, 0, y + 7.3 * s, 0.12);
-      f.add(new THREE.CylinderGeometry(0.78 * s, 0.78 * s, 0.08, 14).rotateX(Math.PI / 2), hole, 0, y + 7.3 * s, 0.04);
-    }
+    f.add(new THREE.TorusGeometry(0.8 * s, 0.16 * s, 5, 14), light, 0, y + 7.3 * s, 0.12);
+    f.add(new THREE.CylinderGeometry(0.78 * s, 0.78 * s, 0.08, 14).rotateX(Math.PI / 2), hole, 0, y + 7.3 * s, 0.04);
   },
 
   /**
@@ -3227,20 +3409,6 @@ const Details = {
     f.box(0.7, 0.22, 0.24, light, 0, top + 3.05, 0.85);                    // corona
   },
 
-  /** Piccolo campanile a vela sul colmo (chiesa rupestre della Madonna della Stella). */
-  bellCote(outer, top) {
-    const rect = Plane.orientedRect(outer);
-    const [e, n] = rect.c;
-    const g = new THREE.BoxGeometry(0.6, 2.2, 1.6);
-    g.rotateY(Math.atan2(rect.u[1], rect.u[0]));
-    g.translate(e, top + 1.1, -n);
-    this.tb.addGeometry(g, this.col.light);
-    const bell = new THREE.BoxGeometry(0.65, 0.7, 0.6);
-    bell.rotateY(Math.atan2(rect.u[1], rect.u[0]));
-    bell.translate(e, top + 1.3, -n);
-    this.tb.addGeometry(bell, this.col.hole);
-  },
-
   /** Palazzo nobiliare: cornicione in alto, fascia marcapiano e portale in bugnato. */
   palazzo(outer, top) {
     const ccw = Plane.signedArea(outer) > 0;
@@ -3263,33 +3431,6 @@ const Details = {
     }
     f.box(3.6, 0.6, 0.28, light, 0, y + 3.85, 0.06);
     f.box(2.5, 3.8, 0.1, door, 0, y, 0.03);
-  },
-
-  /**
-   * SAN MICHELE DELLE GROTTE: fronte di roccia scavato nella parete del
-   * canyon, con tre aperture ad arco e un terrazzino davanti.
-   */
-  rockChurch([e, n]) {
-    // Se nei dati c'è già l'edificio della chiesa, basta quello (con il suo portale).
-    const nearChurch = GEO.buildings.some(([kind, , , rings]) => kind === 1 && DATA.pairs(rings[0]).some(([x, y]) => Math.hypot(x - e, y - n) < 8));
-    if (nearChurch) return;
-    const q = Ravine.side(e, n);
-    const l = Math.hypot(q.e - e, q.n - n) || 1;
-    const nrm = [(q.e - e) / l, (q.n - n) / l];                           // verso il torrente
-    const f = this.frame({ M: [e, n], n: nrm });
-    const y = Math.min(Terrain.heightAt(e, n), Terrain.heightAt(e + nrm[0] * 4, n + nrm[1] * 4));
-    const { stone, dark, hole, light } = this.col;
-    f.box(14, 7.5, 3, dark, 0, y - 1.5, -2.4);                            // fronte di roccia
-    f.box(15, 0.5, 3.4, stone, 0, y - 0.5, 0.8);                          // terrazzino
-    for (const x of [-4, 0, 4]) {
-      const w = x ? 1.1 : 1.35, arch = new THREE.Shape();
-      arch.moveTo(-w, 0); arch.lineTo(w, 0); arch.lineTo(w, 2.2); arch.absarc(0, 2.2, w, 0, Math.PI, false); arch.closePath();
-      f.add(new THREE.ExtrudeGeometry(arch, { depth: 0.1, bevelEnabled: false, curveSegments: 6 }), hole, x, y, -0.88);
-      const ring = new THREE.Shape();
-      ring.moveTo(w + 0.3, 2.2); ring.absarc(0, 2.2, w + 0.3, 0, Math.PI, false);
-      ring.lineTo(-w, 2.2); ring.absarc(0, 2.2, w, Math.PI, 0, true); ring.closePath();
-      f.add(new THREE.ExtrudeGeometry(ring, { depth: 0.2, bevelEnabled: false, curveSegments: 6 }), light, x, y, -0.9);
-    }
   },
 
   /** FONTANA DELLA STELLA: vasca e muro con nicchia ad arco, accanto alla testata del ponte, fuori dalla strada. */
@@ -4800,7 +4941,7 @@ async function main() {
   await nextFrame();
   const { group: terrain, caveSpots } = World.buildTerrain(areas);
   scene.add(terrain, World.buildRoads(network), World.buildRiver(), World.buildBridge(network), World.buildWalls());
-  const { tops } = Buildings.build(scene);
+  const { tops } = Buildings.build(scene, LANDMARKS.filter((lm) => lm.rock && lm.at).map((lm) => lm.at));
   scene.add(Buildings.arches(network));
 
   // Griglia dei tetti (celle da 10 m): dice se un punto è occupato da un edificio
