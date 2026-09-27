@@ -2,6 +2,7 @@
 
 Copia il testo qui sotto (tutto il blocco) come primo messaggio della nuova chat di
 Claude Code, aperta sullo stesso repository `giuseppecassano5bit/gravina-3d`.
+Questa è la versione aggiornata dopo la fase 2c: sostituisce i prompt generati prima.
 
 ---
 
@@ -17,7 +18,9 @@ di commit.
 
 SKILL
 Per l'interfaccia e il design usa le skill "frontend-design" e "ui-ux-pro-max".
-Se non sono installate in questa sessione, dimmelo subito prima di procedere.
+Non sono sul branch main: stanno nella pull request #1 (branch claude/wizardly-gauss-vkair0)
+e nel branch claude/sharp-shannon-6qc51q, cartella .claude/skills/. Se non sono installate
+in questa sessione, dimmelo subito prima di procedere.
 
 PRIMA DI TUTTO LEGGI
 1. README.md: panoramica, comandi, dati, licenze.
@@ -27,19 +30,20 @@ PRIMA DI TUTTO LEGGI
    è GENERATA: non va modificata a mano.
 4. tools/genera_dati.py: pipeline che estrae i dati reali da Overture Maps
    (© OpenStreetMap contributors, ODbL) e li incorpora in index.html.
-5. tools/test/: prove automatiche con Playwright (simulazione di guida e screenshot).
+5. tools/test/: prove automatiche con Playwright (simulazione di guida, interazioni,
+   screenshot).
 
 STATO ATTUALE (fasi 1, 2, 2b e 2c completate)
 - Rete stradale reale: 157 tratti su 111 incroci reali (circa 9 km), senza vicoli ciechi.
   Le vie cieche importanti hanno un'inversione "a goccia" nello slargo reale in fondo alla via.
-- Il Ponte Acquedotto (su Via giudice Montea, pedonale nella realtà) è percorribile in auto
+- Il Ponte Acquedotto (su Via giudice Montea, pedonale nella realtà) è percorribile con il mezzo
   per scelta di progetto. È collegato a Via Fontana la Stella e, sul lato ovest, all'anello
   reale di Via Madonna della Stella.
-- 539 edifici reali estrusi a blocchi, con finestre e persiane istanziate, terrazze,
+- 532 edifici reali estrusi a blocchi, con finestre e persiane istanziate, terrazze,
   tetti in coppi e chiese con campanile a vela.
-- Cattedrale dedicata: navata rialzata, facciata ovest con rosone, abside a est,
-  campanile sul fianco sud.
-- Ponte con archi su due ordini, circa 25 archi.
+- Cattedrale dedicata: navata rialzata, facciata ovest con rosone (ghiera e raggi) e croce,
+  abside a est, campanile sul fianco sud, lesene sui fianchi, portale sud con due colonne.
+- Ponte con archi su due ordini, circa 25 archi, lesene sui piloni e due cornici.
 - Canyon costruito sul corso reale del Torrente La Gravina, con falesie, gradoni dei rioni
   Piaggio (nord) e Fondovico (sud), grotte, alberi e mura reali.
 - Le vie sono libere dagli edifici: lo script ricentra e restringe le vie tra le facciate,
@@ -54,7 +58,6 @@ STATO ATTUALE (fasi 1, 2, 2b e 2c completate)
   elenco) per teletrasportarsi e ripartire da lì.
 - Guida automatica. Agli incroci si sceglie con le frecce ← → ↑ oppure toccando i cartelli
   turistici marroni, che mostrano il nome reale della via e il monumento verso cui porta.
-- Camera: orbita iniziale, inseguimento dall'alto, panoramiche su ciglio e ponte.
 - Interfaccia: minimappa centrata sul mezzo, targa stradale in marmo, schede didattiche con
   fatti verificati, attribuzione OpenStreetMap visibile. Layout per telefono in verticale e
   in orizzontale, risoluzione adattiva agli fps.
@@ -95,41 +98,51 @@ COME SI LAVORA
   Se serve, imposta CHROMIUM_PATH=/opt/pw-browsers/chromium-1194/chrome-linux/chrome.
   Guarda sempre gli screenshot in tools/test/shots/ prima di consegnare.
 - Debug nel browser: index.html?debug espone window.gravina, con simulate(), advance(),
-  placeAt(est, nord, [dirEst, dirNord]) e rig.snap().
-- Commit piccoli con messaggi in italiano, poi push sul branch di lavoro. Niente pull
-  request se non te la chiedo.
+  placeAt(est, nord, [dirEst, dirNord]), rig.snap(), useVehicle(id), pause(), resume()
+  e goTo(idMonumento).
+- Commit piccoli con messaggi in italiano, poi push sul branch di lavoro.
+- Il sito pubblico è GitHub Pages dal branch main
+  (https://giuseppecassano5bit.github.io/gravina-3d/). Quando approvo una fase, apri una
+  pull request verso main e uniscila, così il sito si aggiorna. Prima di unire, le prove
+  simula e interazioni devono essere verdi.
 
 PROSSIMI PASSI
 Fermati per il mio feedback alla fine di ogni fase.
 
 Fase 3 · Architettura e fedeltà
+(Già fatto nella fase 2c, sezione 6d "Dettagli" di index.html: portali delle chiese con
+oculo, portale del Purgatorio con timpano spezzato, scheletri e orsi, cornicione e portale
+in bugnato del Palazzo Ducale e del Museo Santomasi, lesene, rosone e portale sud della
+Cattedrale. Parti da lì, non rifarli.)
 1. Cattedrale: verifica con fonti la posizione del campanile e dei rosoni (una fonte parla
-   di un secondo rosone "attiguo al campanile" sul fianco sud). Aggiungi il portale sud
-   monumentale e la facciata a due piani.
-2. Chiesa del Purgatorio (Santa Maria del Suffragio): facciata con timpano spezzato, i due
-   scheletri distesi stilizzati e gli orsi degli Orsini ai lati.
+   di un secondo rosone "attiguo al campanile" sul fianco sud) e la facciata a due piani;
+   correggi il modello di conseguenza.
+2. Chiesa del Purgatorio: confronta il portale stilizzato con foto e fonti e affinalo.
 3. San Michele delle Grotte (in fondo a Calata Grotte San Michele, rione Fondovico) e
-   Madonna della Stella (versante di Botromagno): ingressi scavati nella parete del canyon.
-4. Palazzo Ducale Orsini su Piazza della Repubblica: volume a palazzo con cornicione.
-5. Rioni Piaggio e Fondovico: case a gradoni, scalinate decorative (per esempio i gradini
+   Madonna della Stella (versante di Botromagno): oggi hanno solo l'edificio dei dati con il
+   portale; aggiungi gli ambienti scavati nella parete del canyon.
+4. Rioni Piaggio e Fondovico: case a gradoni, scalinate decorative (per esempio i gradini
    di Via giudice Montea), abitazioni rupestri.
-6. Altezze: in OSM mancano quasi sempre. Se trovi dati affidabili (numero di piani),
+5. Altezze: in OSM mancano quasi sempre. Se trovi dati affidabili (numero di piani),
    usali; altrimenti migliora le stime per zona.
-7. Valuta con me se allargare il diorama o includere percorsi pedonali e scalinate come
+6. Valuta con me se allargare il diorama o includere percorsi pedonali e scalinate come
    tratti da percorrere a piedi.
-8. Aggiungi schede verificate per altre chiese (San Francesco, Santa Teresa, Santa Sofia,
+7. Aggiungi schede verificate per altre chiese (San Francesco, Santa Teresa, Santa Sofia,
    Santa Cecilia, Gesù, Addolorata) solo se trovi fonti affidabili.
+8. Schermata iniziale: oggi la camera vetrina guarda il mezzo da dietro e il ponte si vede
+   poco; studia un'inquadratura che mostri anche le arcate.
 
 Fase 4 · Rifinitura
-1. Golden hour: calibra luci, nebbia e ombre nette (aggancia il frustum delle ombre ai
-   texel per evitare lo sfarfallio). Un leggero bloom solo se regge i 60 fps.
+1. Golden hour: calibra luci, nebbia e ombre nette (l'aggancio delle ombre ai texel c'è
+   già). Un leggero bloom solo se regge i 60 fps.
 2. Musica procedurale Web Audio, elegante e mediterranea: pad, arpeggi pizzicati,
    riverbero generato. Dissolvenza in entrata, pulsante muto e cursore volume (40% di
    partenza).
 3. Camera: transizioni più cinematografiche e un pulsante per cambiare vista (l'altezza
    adattiva sopra i tetti c'è già).
-4. Prestazioni su mobile: livelli di dettaglio per le finestre, pixel ratio adattivo,
-   ombre più leggere. Misura su un telefono reale.
+4. Prestazioni su mobile: risoluzione adattiva agli fps, ombre più leggere e layout per
+   verticale e orizzontale ci sono già. Mancano i livelli di dettaglio per le finestre e la
+   misura su un telefono reale.
 5. Interfaccia: restyling con le skill di design, accessibilità, inglese opzionale.
 6. Scegli con me la licenza del codice (per esempio MIT) e aggiungi il file LICENSE.
 
