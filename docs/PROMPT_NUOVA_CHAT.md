@@ -22,14 +22,14 @@ Se non sono installate in questa sessione, dimmelo subito prima di procedere.
 PRIMA DI TUTTO LEGGI
 1. README.md: panoramica, comandi, dati, licenze.
 2. docs/DESIGN.md: documento di progetto aggiornato (dati reali, canyon, edifici,
-   Ferrari, incroci, camera, prestazioni).
+   mezzi, incroci, pausa, camera, prestazioni).
 3. index.html: un unico file diviso in sezioni numerate 0–13. La costante GEO (sezione 3)
    è GENERATA: non va modificata a mano.
 4. tools/genera_dati.py: pipeline che estrae i dati reali da Overture Maps
    (© OpenStreetMap contributors, ODbL) e li incorpora in index.html.
 5. tools/test/: prove automatiche con Playwright (simulazione di guida e screenshot).
 
-STATO ATTUALE (fasi 1, 2 e 2b completate)
+STATO ATTUALE (fasi 1, 2, 2b e 2c completate)
 - Rete stradale reale: 157 tratti su 111 incroci reali (circa 9 km), senza vicoli ciechi.
   Le vie cieche importanti hanno un'inversione "a goccia" nello slargo reale in fondo alla via.
 - Il Ponte Acquedotto (su Via giudice Montea, pedonale nella realtà) è percorribile in auto
@@ -42,22 +42,38 @@ STATO ATTUALE (fasi 1, 2 e 2b completate)
 - Ponte con archi su due ordini, circa 25 archi.
 - Canyon costruito sul corso reale del Torrente La Gravina, con falesie, gradoni dei rioni
   Piaggio (nord) e Fondovico (sud), grotte, alberi e mura reali.
-- Veicolo: Ferrari rossa low-poly ispirata a LaFerrari, senza loghi.
+- Le vie sono libere dagli edifici: lo script ricentra e restringe le vie tra le facciate,
+  ritaglia le sagome lungo la carreggiata e trasforma in archi i corpi sopraelevati reali
+  (level = 1) che scavalcano una via. I tetti a capanna sono ritagliati sulla sagoma reale.
+- Mezzi a scelta: Fiat Panda 4x4 del 1999, Audi RS6 Avant, Lamborghini Huracán e trattore
+  John Deere, low-poly e senza loghi (array VEHICLES e VehicleFactory).
+- All'apertura il mezzo aspetta accanto alla testata est del Ponte Acquedotto (camera
+  "vetrina"); con "Parti" attraversa subito il ponte.
+- Pausa (P, Spazio, pulsante o minimappa): il mezzo frena e compare il menu con Riprendi,
+  cambio mezzo e mappa con i luoghi. In pausa si tocca un luogo (mappa, etichetta 3D o
+  elenco) per teletrasportarsi e ripartire da lì.
 - Guida automatica. Agli incroci si sceglie con le frecce ← → ↑ oppure toccando i cartelli
   turistici marroni, che mostrano il nome reale della via e il monumento verso cui porta.
 - Camera: orbita iniziale, inseguimento dall'alto, panoramiche su ciglio e ponte.
-- Interfaccia: minimappa centrata sull'auto, targa stradale in marmo, schede didattiche con
-  fatti verificati, attribuzione OpenStreetMap visibile.
+- Interfaccia: minimappa centrata sul mezzo, targa stradale in marmo, schede didattiche con
+  fatti verificati, attribuzione OpenStreetMap visibile. Layout per telefono in verticale e
+  in orizzontale, risoluzione adattiva agli fps.
+- Camera: vetrina all'apertura, inseguimento dall'alto che sale sopra i tetti quando le case
+  coprirebbero il mezzo, panoramiche su ciglio e ponte, vista dall'alto in pausa.
+- Dettagli: portali delle chiese con oculo, portale del Purgatorio con scheletri e orsi,
+  lesene e rosone della Cattedrale, cornicioni dei palazzi, lesene e cornici del ponte,
+  Fontana della Stella, parapetti ai belvederi, lanterne accese attorno ai monumenti.
 
 VINCOLI NON NEGOZIABILI
 - Output finale: un unico file HTML copiabile, con CSS e JS inclusi (Three.js da CDN).
 - Stile a blocchi, low-poly, materiali con flatShading: true, tutto procedurale.
   Nessun modello, texture o GeoJSON caricato a runtime: i dati reali restano incorporati
   nella costante GEO.
-- In auto si percorrono SOLO vie reali che si incrociano con altre vie reali (dati GEO).
+- Con il mezzo si percorrono SOLO vie reali che si incrociano con altre vie reali (dati GEO).
   Non inventare vie. Uniche eccezioni ammesse: il ponte pedonale e le inversioni a goccia
   negli slarghi reali.
-- La macchina è una Ferrari rossa.
+- I mezzi sono i quattro scelti dal committente (Panda 4x4 1999, RS6, Huracán, John Deere).
+- Nessuna casa sulla carreggiata: la prova "npm run simula" lo verifica (casesullastrada = 0).
 - Nessun riferimento a Nunzia Food nella mappa per ora: resta solo il credito nella
   schermata iniziale.
 - Fedeltà alla realtà: nelle schede storiche solo fatti verificati, con la fonte nel README.
@@ -75,7 +91,7 @@ COME SI LAVORA
   bucket S3 di Overture Maps funziona. Se serve un certificato del proxy, imposta
   REQUESTS_CA_BUNDLE.
 - Provare:
-    cd tools/test && npm install && npm run simula && npm run foto
+    cd tools/test && npm install && npm run simula && npm run interazioni && npm run foto
   Se serve, imposta CHROMIUM_PATH=/opt/pw-browsers/chromium-1194/chrome-linux/chrome.
   Guarda sempre gli screenshot in tools/test/shots/ prima di consegnare.
 - Debug nel browser: index.html?debug espone window.gravina, con simulate(), advance(),
@@ -110,9 +126,8 @@ Fase 4 · Rifinitura
 2. Musica procedurale Web Audio, elegante e mediterranea: pad, arpeggi pizzicati,
    riverbero generato. Dissolvenza in entrata, pulsante muto e cursore volume (40% di
    partenza).
-3. Camera: evita che gli edifici coprano l'auto nei vicoli (altezza adattiva o edifici
-   vicini alla camera resi trasparenti). Transizioni più cinematografiche e un pulsante
-   per cambiare vista.
+3. Camera: transizioni più cinematografiche e un pulsante per cambiare vista (l'altezza
+   adattiva sopra i tetti c'è già).
 4. Prestazioni su mobile: livelli di dettaglio per le finestre, pixel ratio adattivo,
    ombre più leggere. Misura su un telefono reale.
 5. Interfaccia: restyling con le skill di design, accessibilità, inglese opzionale.
@@ -124,6 +139,7 @@ LIMITI NOTI
 - Le gallerie sono escluse; sensi unici e ZTL reali non sono considerati.
 - La facciata ovest con rosone e l'abside a est della Cattedrale seguono la pianta
   orientata est-ovest. I dettagli vanno verificati con fonti.
-- Ferrari e LaFerrari sono marchi di Ferrari S.p.A.: il modello è stilizzato e senza loghi.
-  Prima di un uso commerciale vanno verificati i diritti.
+- Fiat, Panda, Audi, RS6, Lamborghini, Huracán e John Deere sono marchi dei rispettivi
+  proprietari: i mezzi sono stilizzati e senza loghi. Prima di un uso commerciale vanno
+  verificati i diritti.
 ```

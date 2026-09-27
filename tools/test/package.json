@@ -2,9 +2,10 @@
   "name": "gravina-3d-test",
   "private": true,
   "type": "module",
-  "description": "Prove automatiche del diorama: simulazione di guida e screenshot con Playwright",
+  "description": "Prove automatiche del diorama: simulazione di guida, interazioni e screenshot con Playwright",
   "scripts": {
     "simula": "node simula.mjs",
+    "interazioni": "node interazioni.mjs",
     "foto": "node foto.mjs"
   },
   "devDependencies": {

@@ -16,13 +16,14 @@ const THREE_DIR = path.join(HERE, 'node_modules/three');
 export const SHOTS = path.join(HERE, 'shots');
 fs.mkdirSync(SHOTS, { recursive: true });
 
-export async function open({ w = 1280, h = 720, mobile = false } = {}) {
+export async function open({ w = 1280, h = 720, mobile = false, landscape = false } = {}) {
   const browser = await chromium.launch({
     executablePath: process.env.CHROMIUM_PATH || undefined,
     args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
   });
+  const phone = landscape ? { width: 844, height: 390 } : { width: 390, height: 844 };
   const ctx = await browser.newContext(mobile
-    ? { viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true }
+    ? { viewport: phone, deviceScaleFactor: 2, hasTouch: true, isMobile: true }
     : { viewport: { width: w, height: h } });
   const page = await ctx.newPage();
   const logs = [];

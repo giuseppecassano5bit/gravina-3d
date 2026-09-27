@@ -1,37 +1,98 @@
 /**
  * Screenshot delle scene principali in tools/test/shots/:
- * schermata iniziale, partenza, incrocio, ponte, ciglio, centro. Con "mobile" usa un telefono.
+ * vetrina dei quattro mezzi vicino al ponte, partenza sul ponte, incrocio,
+ * menu di pausa, teletrasporto, un arco sulla via e il centro.
+ * Con "mobile" usa un telefono in verticale, con "orizzontale" un telefono in orizzontale.
  */
 import { open, report, SHOTS } from './common.mjs';
 
-const mobile = process.argv[2] === 'mobile';
-const pre = mobile ? 'mobile' : 'desktop';
-const { browser, page, logs } = await open(mobile ? { mobile: true } : {});
-const shot = async (name) => {
-  await page.waitForTimeout(900);
-  await page.screenshot({ path: `${SHOTS}/${pre}-${name}.png` });
-  console.log(name, await page.evaluate(() => window.gravina.driver.edge.name));
-};
+const mode = process.argv[2];
+const device = mode === 'mobile' ? { mobile: true } : mode === 'orizzontale' ? { mobile: true, landscape: true } : {};
+const pre = mode === 'mobile' ? 'mobile' : mode === 'orizzontale' ? 'orizz' : 'desktop';
+const { browser, page, logs } = await open(device);
 const run = (fn, arg) => page.evaluate(fn, arg);
+const shot = async (name, wait = 900) => {
+  await page.waitForTimeout(wait);
+  await page.screenshot({ path: `${SHOTS}/${pre}-${name}.png` });
+  console.log(name, '·', await run(() => `${window.gravina.phase} · ${window.gravina.driver.edge.name}`));
+};
 
-await shot('00-inizio');
+// Vetrina: i quattro mezzi fermi vicino al ponte.
+for (const [i, id] of ['panda', 'rs6', 'huracan', 'deere'].entries()) {
+  await page.click(`#start-picker .vcard[data-id="${id}"]`);
+  await run(() => window.gravina.advance(2.5));
+  await shot(`0${i}-vetrina-${id}`, 700);
+}
+await page.click('#start-picker .vcard[data-id="huracan"]');
+
+// Partenza: si attraversa il ponte.
 await page.click('#btn-start');
-await run(() => { window.gravina.driver.start(); window.gravina.advance(6); });
-await shot('10-partenza');
-await run(() => { const g = window.gravina; for (let i = 0; i < 900 && !(g.driver.decision?.options.length > 1 && g.driver.remaining < 25); i++) g.advance(1 / 30); });
-await shot('11-incrocio');
-await run(() => {
-  const g = window.gravina;
-  g.placeAt(60, 310, [-1, -0.5]); g.driver.running = true; g.driver.speed = 7; g.rig.snap(g.driver);
-  for (let i = 0; i < 1200 && !g.driver.decision?.options.some((o) => o.edge.bridge); i++) g.advance(1 / 30);
-  const d = g.driver.decision; if (d) g.driver.choose(d.options.findIndex((o) => o.edge.bridge));
-  for (let i = 0; i < 1200 && !g.driver.edge.bridge; i++) g.advance(1 / 30);
-  g.advance(6);
-});
-await shot('20-ponte');
-await run(() => { const g = window.gravina; g.rig.vista.cooldown = 0; g.placeAt(100, 333, [-1, -0.3]); g.driver.running = true; g.driver.speed = 8; g.rig.snap(g.driver); g.advance(6); });
-await shot('30-ciglio');
-await run(() => { const g = window.gravina; g.rig.vista.cooldown = 99; g.placeAt(160, -12, [1, 0]); g.driver.running = true; g.driver.speed = 8; g.rig.snap(g.driver); g.advance(3); });
-await shot('40-centro');
+await run(() => { const g = window.gravina; g.driver.start(); g.advance(9); });
+await shot('10-ponte', 1500);
+
+// Pausa con il menu (e la mappa).
+await run(() => { const g = window.gravina; g.advance(6); g.pause(); g.advance(3); });
+await shot('20-pausa');
+await page.click('#pause-picker .vcard[data-id="deere"]');
+await run(() => window.gravina.advance(1));
+await shot('21-pausa-trattore', 300);
+
+// Mappa: si sceglie un luogo e si va.
+const box = await page.locator('#bigmap').boundingBox();
+if (box) {
+  await page.locator('#bigmap').scrollIntoViewIfNeeded();
+  const pos = await run(() => {
+    const g = window.gravina, lm = g.landmarks.find((l) => l.id === 'purgatorio');
+    const [minE, maxE, , maxN] = [-340, 440, -320, 540];
+    const r = document.getElementById('bigmap').getBoundingClientRect();
+    const k = r.width / (maxE - minE);
+    return { x: (lm.at[0] - minE) * k, y: (maxN - lm.at[1]) * k };
+  });
+  await page.locator('#bigmap').click({ position: pos });
+  await shot('22-mappa-scelta', 400);
+  await page.click('#map-go');
+  await run(() => window.gravina.advance(0.1));
+  await page.waitForTimeout(1200);
+  await run(() => window.gravina.advance(4));
+  await shot('30-teletrasporto', 300);
+}
+
+// Un arco sulla via (L'Arc D' Bench) e il centro storico.
+await run(() => { const g = window.gravina; g.rig.vista.cooldown = 99; g.placeAt(313, 112, [0, -1], 0); g.driver.running = true; g.driver.speed = 6; g.rig.snap(g.driver); g.advance(1); });
+await shot('40-arco');
+await run(() => { const g = window.gravina; g.useVehicle('panda'); g.placeAt(160, -12, [1, 0]); g.driver.speed = 8; g.rig.snap(g.driver); g.advance(3); });
+await shot('50-centro');
+
+// Dettagli dei monumenti: camera libera sulla via più vicina, rivolta al monumento.
+if (mode !== 'mobile' && mode !== 'orizzontale') {
+  await page.evaluate(() => { document.getElementById('hud').hidden = true; document.querySelector('.labels').hidden = true; });
+  // [luogo, distanza, altezza della camera]; per il ponte una vista dal canyon.
+  const views = [['purgatorio', 16, 13], ['duomo', 42, 26], ['fontana', 16, 7], ['sanmichele', 38, 18], ['ponte', 0, 0], ['orsini', 26, 20]];
+  for (const [k, [id, dist, height]] of views.entries()) {
+    await run(([id, dist, height]) => {
+      const g = window.gravina, lm = g.landmarks.find((l) => l.id === id);
+      g.rig.mode = 'free';
+      if (id === 'ponte') {
+        g.camera.position.set(-5, -8, -225);
+        g.camera.lookAt(-24, -12, -297);
+      } else if (id === 'purgatorio') {
+        const b = g.DATA.building('Santa Maria del Suffragio');
+        const fe = g.Details.frontEdge(g.DATA.pairs(b[3][0]), 5);
+        const y = g.Terrain.heightAt(fe.M[0] + fe.n[0] * 2, fe.M[1] + fe.n[1] * 2);
+        g.camera.position.set(fe.M[0] + fe.n[0] * 11 + fe.n[1] * 3, y + 5, -(fe.M[1] + fe.n[1] * 11 - fe.n[0] * 3));
+        g.camera.lookAt(fe.M[0], y + 4, -fe.M[1]);
+      } else {
+        const near = g.network.closestSample(lm.at[0], lm.at[1]);
+        const S = near.edge.samples, i = near.i;
+        const de = S[i * 3] - lm.at[0], dn = -S[i * 3 + 2] - lm.at[1], l = Math.hypot(de, dn) || 1;
+        const y = g.Terrain.heightAt(lm.at[0], lm.at[1]);
+        g.camera.position.set(lm.at[0] + (de / l) * dist, y + height, -(lm.at[1] + (dn / l) * dist));
+        g.camera.lookAt(lm.at[0], y + 5, -lm.at[1]);
+      }
+      g.advance(0.1);
+    }, [id, dist, height]);
+    await shot(`6${k}-dettaglio-${id}`, 500);
+  }
+}
 report(logs);
 await browser.close();
