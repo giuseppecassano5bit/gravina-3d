@@ -1,2 +1,170 @@
-# gravina-3d
-Diorama 3D interattivo in stile low-poly del centro storico di Gravina in Puglia. Progetto open source realizzato per Nunzia Food.
+# Gravina 3D
+
+Diorama 3D interattivo in stile low-poly del centro storico di **Gravina in Puglia**,
+costruito sulle **vie, gli edifici e il torrente reali**.
+Progetto open source realizzato per **Nunzia Food, Eccellenze Pugliesi**.
+
+Appena si apre, il mezzo aspetta accanto al **Ponte Acquedotto**. Scegli con che cosa
+girare: **Fiat Panda 4x4 del 1999**, **Audi RS6 Avant**, **Lamborghini Huracán** o
+**trattore John Deere**. Poi il mezzo percorre da solo le vie reali del centro storico, e a
+ogni incrocio reale scegli tu quale via prendere. Puoi fermarti quando vuoi: dal menu di
+pausa cambi mezzo oppure tocchi un luogo sulla mappa e ti teletrasporti lì.
+Tutto sta in **un unico file HTML**: la geometria è procedurale e i dati geografici sono
+incorporati nel file, senza modelli, texture o GeoJSON caricati a runtime.
+
+## Come si apre
+
+Apri `index.html` in un browser moderno (Chrome, Edge, Firefox o Safari recenti), anche su
+telefono o tablet. Serve una connessione a Internet: Three.js e i font vengono caricati da CDN.
+
+In alternativa puoi avviare un piccolo server locale:
+
+```bash
+npx serve .
+```
+
+### Pubblicarlo online (GitHub Pages)
+
+Il repository è pubblico, quindi il diorama può avere un indirizzo raggiungibile da qualsiasi
+dispositivo, gratis:
+
+1. porta il lavoro sul branch `main` (unisci la pull request del branch di lavoro);
+2. su GitHub apri **Settings → Pages**;
+3. in **Build and deployment** scegli **Deploy from a branch**, branch `main`, cartella `/ (root)`, e salva.
+
+Dopo un paio di minuti il diorama è su `https://giuseppecassano5bit.github.io/gravina-3d/`.
+Non serve nessun passaggio di compilazione: `index.html` è già il sito.
+
+## Comandi
+
+| Azione | Desktop | Mobile |
+|---|---|---|
+| Scegliere il mezzo | clic su una scheda | tocca una scheda |
+| Partire | pulsante **Parti** | tocca **Parti** |
+| Scegliere la via all'incrocio | <kbd>←</kbd> <kbd>→</kbd> (oppure <kbd>A</kbd> <kbd>D</kbd>) | tocca un cartello marrone (in verticale anche le frecce ai lati) |
+| Tornare alla via più dritta | <kbd>↑</kbd> (oppure <kbd>W</kbd>) | tocca il cartello con la freccia dritta |
+| Fermarsi (pausa) | <kbd>P</kbd>, <kbd>Spazio</kbd> o il pulsante **Pausa** | tocca **⏸** o la minimappa |
+| Ripartire | <kbd>P</kbd>, <kbd>Spazio</kbd>, <kbd>Esc</kbd> o **Riprendi** | tocca **Riprendi** |
+| Cambiare mezzo | nel menu di pausa | nel menu di pausa |
+| Teletrasportarsi | in pausa: clic su un luogo della mappa e **Vai qui**, su un'etichetta del diorama o su un nome dell'elenco | gli stessi, al tocco |
+
+Il mezzo avanza da solo. Se non scegli, agli incroci prosegue sulla via più dritta.
+Il menu di pausa compare solo a mezzo fermo; se cambi app o scheda il viaggio va in pausa da
+solo. Il browser ricorda l'ultimo mezzo scelto.
+
+### I mezzi
+
+| Mezzo | Carattere nel diorama |
+|---|---|
+| Fiat Panda 4x4 (1999) | rossa, squadrata, con protezioni in plastica e barre sul tetto; passo tranquillo |
+| Audi RS6 Avant | familiare grigia con passaruota bombati e pinze rosse; brillante |
+| Lamborghini Huracán | arancione, a cuneo, con i fari a Y; la più svelta (sempre a passo da centro storico) |
+| Trattore John Deere | verde e giallo, ruote tassellate e sbuffi di fumo; il più lento, e la camera sale un po' |
+
+## Com'è fatto
+
+Il file `index.html` è diviso in sezioni numerate e commentate:
+
+| # | Sezione | Contenuto |
+|---|---|---|
+| 0 | Configurazione | tutti i parametri (velocità, frenata, camera, sole…) |
+| 1 | Utilità | matematica, rumore procedurale, geometria piana |
+| 2 | Geografia | conversione da latitudine/longitudine a metri |
+| 3 | Dati | blocco `GEO` generato (vie, incroci, edifici, torrente…) e monumenti curati |
+| 4 | Gravina e terreno | canyon sul corso reale del torrente, falesie e gradoni dei rioni |
+| 5 | Rete stradale | vie reali come spline, uscite agli incroci, cartelli, controlli |
+| 6 | Mondo | terreno, strade, Ponte Acquedotto ad archi, edifici reali, archi sulle vie, Cattedrale, grotte, alberi |
+| 6d | Dettagli | portali delle chiese, Purgatorio con scheletri e orsi, palazzi, Fontana della Stella, belvederi, lanterne |
+| 7 | Mezzi | Panda 4x4, RS6, Huracán e trattore, costruiti solo da primitive |
+| 8 | Conducente | movimento automatico, incroci, pausa con frenata |
+| 9 | Camera | vetrina, inseguimento che scavalca i tetti nei vicoli, panoramiche, vista dall'alto in pausa |
+| 10–11 | Interfaccia | minimappa, mappa della pausa, scelta del mezzo, targa, cartelli, schede, teletrasporto |
+| 12–13 | Scena e avvio | cielo al tramonto, luci, ombre agganciate ai texel, qualità adattiva, ciclo principale |
+
+Il documento di progetto completo è in [`docs/DESIGN.md`](docs/DESIGN.md).
+
+## Dati geografici
+
+Vie, incroci, sagome degli edifici, corso del torrente, mura e luoghi d'interesse vengono da
+**[Overture Maps](https://overturemaps.org)** (release 2026-09-23.1), che li deriva in gran
+parte da **[OpenStreetMap](https://www.openstreetmap.org/copyright)**.
+
+Per rigenerarli (per esempio dopo aver migliorato la mappa di Gravina su OpenStreetMap):
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -r tools/requirements.txt
+.venv/bin/python tools/genera_dati.py --anteprima tools/anteprima.png
+```
+
+Lo script scarica solo i pochi MB che riguardano Gravina, costruisce la rete stradale senza
+vicoli ciechi e riscrive il blocco `GEO` dentro `index.html`. Le scelte (vie cieche da
+conservare, ciglio del canyon, area del diorama) sono costanti commentate in cima allo script.
+
+Lo script **libera anche le vie dagli edifici**: ricentra ogni via tra le facciate, la
+restringe nei vicoli stretti (mai sotto 3,4 m), ritaglia le sagome lungo la carreggiata e
+trasforma in **archi** i corpi sopraelevati reali che scavalcano una via (in OpenStreetMap
+hanno `level = 1`, come L'Arc D' Bench). Risultato attuale: nessun edificio sulla
+carreggiata (la prova `npm run simula` lo verifica sulla geometria disegnata), 5 archi, lo 0,6%
+della superficie costruita ritagliato.
+
+Non servono strumenti di scraping: i dati arrivano dal bucket pubblico di Overture Maps e le
+notizie storiche da fonti pubbliche citate qui sotto.
+
+## Personalizzare
+
+* **Punto di partenza**: costante `START` in `index.html` (metri prima della testata est del ponte).
+* **Mezzi**: array `VEHICLES` (nome, colore, ritmo `pace`, sagoma per i menu) e le funzioni in `VehicleFactory`.
+* **Velocità e frenata**: `CONFIG.drive`.
+* **Camera**: `CONFIG.camera` (altezza, distanza, quanto può salire sopra i tetti).
+* **Monumenti e schede**: array `LANDMARKS`.
+* **Vie**: si modificano in OpenStreetMap o nello script di generazione, non a mano nel blocco `GEO`.
+
+## Strumenti per sviluppatori
+
+Aggiungi `?debug` all'indirizzo (per esempio `index.html?debug`) per vedere fps, triangoli e
+posizione sulla rete, e per avere in console l'oggetto `window.gravina`. Esempi:
+
+```js
+gravina.driver.simulate(3600)          // un'ora di guida con scelte casuali: verifica che il mezzo non si blocchi mai
+gravina.advance(5)                     // fa avanzare la simulazione di 5 secondi senza disegnare
+gravina.placeAt(60, 310, [-1, -0.5])   // mette il mezzo sulla via più vicina a (est, nord), diretto verso ovest
+gravina.useVehicle('deere')            // cambia mezzo: panda, rs6, huracan, deere
+gravina.pause(); gravina.goTo('duomo') // pausa e teletrasporto verso un monumento (id di LANDMARKS)
+```
+
+Prove automatiche con Playwright: vedi [`tools/test/README.md`](tools/test/README.md).
+
+## Stato del progetto
+
+| Fase | Contenuto | Stato |
+|---|---|---|
+| 1 | Documento di progetto | ✅ |
+| 2 | Base: rete stradale, auto, incroci, camera, interfaccia | ✅ |
+| 2b | Dati reali: vie e incroci reali, edifici, torrente e cigli, ponte ad archi | ✅ |
+| 2c | Vie libere dagli edifici e archi reali; quattro mezzi a scelta; partenza dal ponte; pausa con cambio mezzo, mappa e teletrasporto; camera che scavalca i tetti; dettagli dei monumenti; versione mobile | ✅ in revisione |
+| 3 | Architettura: altre facciate dei monumenti, chiese rupestri scavate nella roccia | ⏳ |
+| 4 | Rifinitura: musica procedurale, transizioni di camera, prove su telefoni reali | ⏳ |
+
+## Licenze e marchi
+
+* **Dati cartografici** (blocco `GEO` in `index.html`): © OpenStreetMap contributors, disponibili
+  sotto [Open Database License (ODbL) 1.0](https://opendatacommons.org/licenses/odbl/). Sono un
+  database derivato e restano sotto ODbL; l'attribuzione è visibile nella pagina.
+* **Codice**: la licenza è ancora da scegliere (per esempio MIT).
+* **Fiat** e **Panda**, **Audi** e **RS6**, **Lamborghini** e **Huracán**, **John Deere** (e i
+  suoi colori verde e giallo) sono marchi dei rispettivi proprietari. I mezzi del diorama sono
+  interpretazioni stilizzate non ufficiali e non riproducono loghi. Prima di un uso commerciale
+  o promozionale, verificate i diritti.
+
+## Fonti
+
+Notizie storiche e posizioni dei monumenti da fonti pubbliche, tra cui:
+
+* Ponte Acquedotto: [Wikipedia (EN)](https://en.wikipedia.org/wiki/Ponte_Madonna_della_Stella), [GravinaLife](https://www.gravinalife.it/rubriche/passeggiando-con-la-storia-1/il-ponte-acquedotto-settecentesco-orsiniano-della-madonna-della-stella/), [Viaggiamo.it](https://www.viaggiamo.it/ponte-acquedotto-di-gravina-di-puglia-la-storia/)
+* Cattedrale: [Wikipedia](https://it.wikipedia.org/wiki/Concattedrale_di_Santa_Maria_Assunta_(Gravina_in_Puglia)), [GCatholic](https://gcatholic.org/churches/italy/1312.htm), [GravinaOggi, struttura architettonica](https://www.gravinaoggi.it/_la_struttura_architettonica.html)
+* Chiesa del Purgatorio: [FAI, portale](https://fondoambiente.it/luoghi/portale-chiesa-purgatorio), [Wikidata](https://www.wikidata.org/wiki/Q55163985)
+* Rioni Piaggio e Fondovico: [Stanze Orsini](https://www.stanzeorsini.it/rioni-piaggio-e-fondovico/), [FAI](https://fondoambiente.it/luoghi/rioni-piaggio-e-fondovico?ldc=)
+* Madonna della Stella: [Il Tacco di Bacco](https://iltaccodibacco.it/puglia/guida/7825/)
+* San Michele delle Grotte: [Showcaves](https://www.showcaves.com/english/it/caves/SanMicheleGravina.html)
+* Geografia generale: [Wikipedia, Gravina in Puglia](https://en.wikipedia.org/wiki/Gravina_in_Puglia)

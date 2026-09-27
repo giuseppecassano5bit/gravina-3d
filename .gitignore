@@ -1,0 +1,7 @@
+.venv/
+tools/.cache/
+tools/anteprima.png
+tools/test/node_modules/
+tools/test/shots/
+tools/test/package-lock.json
+__pycache__/
