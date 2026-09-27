@@ -543,9 +543,195 @@ def build_buildings(raw):
             if p.is_empty or p.area < 8:
                 continue
             out.append({'poly': p, 'kind': building_kind(b.get('class')),
-                        'name': (b.get('names') or {}).get('primary'), 'height': b.get('height')})
+                        'name': (b.get('names') or {}).get('primary'), 'height': b.get('height'),
+                        'level': b.get('level') or 0})
     print(f'  edifici: {len(out)}')
     return out
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 3b. Vie libere dagli edifici
+#     Le mezzerie OSM non stanno sempre al centro dei vicoli e le carreggiate
+#     del diorama hanno una larghezza fissa per classe: così alcune facciate
+#     finivano sulla strada e il mezzo sembrava attraversare le case.
+#     Qui (1) si ricentra la via tra le facciate, (2) la si restringe dove il
+#     vicolo è stretto, (3) si ritagliano le sagome lungo la carreggiata e
+#     (4) i corpi sopraelevati attraversati dalla via diventano archi.
+# ─────────────────────────────────────────────────────────────────────────────
+CLASS_WIDTH = {0: 8.0, 1: 7.0, 2: 4.6, 3: 4.2, 4: 4.5, 5: 3.2}   # = CONFIG.road.widths in index.html
+BRIDGE_WIDTH, TURN_WIDTH = 5.5, 3.6
+MIN_WIDTH = 3.4           # m: il mezzo più largo (il trattore, circa 2,4 m) passa con margine
+FACADE_GAP = 0.35         # m liberi tra il bordo della carreggiata e le facciate
+MAX_SHIFT = 1.6           # m: spostamento massimo della mezzeria verso il centro del vicolo
+RAY = 7.0                 # m: fin dove si cercano le facciate ai lati della via
+ARCH_MAX_DEPTH = 14.0     # m: un corpo sopraelevato più profondo non è un arco, e viene tagliato
+
+
+def centripetal_curve(pts, step=1.0):
+    """
+    La stessa curva che disegna index.html (THREE.CatmullRomCurve3 'centripetal',
+    aperta, con i punti fantasma estrapolati agli estremi), campionata ogni ~step m.
+    Il ritaglio degli edifici va fatto su questa, non sulla polilinea: tra punti
+    radi la curva si allontana dalla spezzata anche di un metro.
+    """
+    P = [tuple(map(float, q)) for q in pts]
+    n = len(P)
+    if n < 3:
+        return P
+    out = []
+    for i in range(n - 1):
+        p1, p2 = P[i], P[i + 1]
+        p0 = P[i - 1] if i > 0 else (2 * p1[0] - p2[0], 2 * p1[1] - p2[1])
+        p3 = P[i + 2] if i + 2 < n else (2 * p2[0] - p1[0], 2 * p2[1] - p1[1])
+        dt1 = math.dist(p1, p2) ** 0.5 or 1.0
+        dt0 = math.dist(p0, p1) ** 0.5 or dt1
+        dt2 = math.dist(p2, p3) ** 0.5 or dt1
+        coef = []
+        for k in (0, 1):
+            x0, x1, x2, x3 = p0[k], p1[k], p2[k], p3[k]
+            t1 = ((x1 - x0) / dt0 - (x2 - x0) / (dt0 + dt1) + (x2 - x1) / dt1) * dt1
+            t2 = ((x2 - x1) / dt1 - (x3 - x1) / (dt1 + dt2) + (x3 - x2) / dt2) * dt1
+            coef.append((x1, t1, -3 * x1 + 3 * x2 - 2 * t1 - t2, 2 * x1 - 2 * x2 + t1 + t2))
+        m = max(1, math.ceil(math.dist(p1, p2) / step))
+        for j in range(m):
+            t = j / m
+            out.append(tuple(c0 + c1 * t + c2 * t * t + c3 * t ** 3 for c0, c1, c2, c3 in coef))
+    out.append(P[-1])
+    return out
+
+
+def _normal(line, s):
+    """Punto e normale sinistra della polilinea alla progressiva s."""
+    a, b = line.interpolate(max(0.0, s - 0.6)), line.interpolate(min(line.length, s + 0.6))
+    tx, ty = b.x - a.x, b.y - a.y
+    tl = math.hypot(tx, ty) or 1
+    return line.interpolate(s), (-ty / tl, tx / tl)
+
+
+def _side_clearance(p, n, tree, polys):
+    """Distanze dalle facciate a sinistra e a destra di p (None se p è dentro un edificio)."""
+    out = []
+    for sgn in (1, -1):
+        ray = LineString([(p.x, p.y), (p.x + sgn * n[0] * RAY, p.y + sgn * n[1] * RAY)])
+        best = RAY
+        for i in tree.query(ray):
+            g = polys[i]
+            if g.contains(p):
+                return None
+            hit = ray.intersection(g)
+            if not hit.is_empty:
+                best = min(best, p.distance(hit))
+        out.append(best)
+    return out
+
+
+def recenter(e, tree, polys):
+    """Sposta la mezzeria verso il centro del vicolo (estremi fermi sugli incroci)."""
+    line = LineString(e['poly'])
+    L = line.length
+    if L < 12:
+        return e['poly']
+    count = max(2, int(L / 1.5))
+    ss = [L * k / count for k in range(count + 1)]
+    shifts, normals, points = [], [], []
+    half = CLASS_WIDTH[CLASS_CODE.get(e['cls'], 2)] / 2
+    for s in ss:
+        p, n = _normal(line, s)
+        points.append(p)
+        normals.append(n)
+        d = _side_clearance(p, n, tree, polys)
+        if d is None or min(d) >= half + FACADE_GAP or min(d) >= RAY:
+            shifts.append(0.0)                       # nessuna facciata troppo vicina
+        else:
+            shifts.append(max(-MAX_SHIFT, min(MAX_SHIFT, (d[0] - d[1]) / 2)))
+    k = 3                                            # media mobile: niente zig-zag
+    smooth = [sum(shifts[max(0, i - k):i + k + 1]) / len(shifts[max(0, i - k):i + k + 1]) for i in range(len(shifts))]
+    out = []
+    for s, p, n, sh in zip(ss, points, normals, smooth):
+        w = min(1.0, s / 8.0, (L - s) / 8.0)         # raccordo di 8 m verso gli incroci
+        w = w * w * (3 - 2 * w)
+        out.append((p.x + n[0] * sh * w, p.y + n[1] * sh * w))
+    out[0], out[-1] = e['poly'][0], e['poly'][-1]
+    return list(LineString(out).simplify(0.25).coords)
+
+
+def fit_width(e, tree, polys):
+    """Larghezza della carreggiata: quella della classe, ristretta nei vicoli stretti."""
+    if e['bridge']:
+        return BRIDGE_WIDTH
+    if e.get('turn'):
+        return TURN_WIDTH
+    full = CLASS_WIDTH[CLASS_CODE.get(e['cls'], 2)]
+    line = LineString(centripetal_curve(e['poly']))
+    gaps = []
+    for s in np.arange(2.5, line.length - 2.5, 1.0):  # lontano dagli spigoli degli incroci
+        p, n = _normal(line, s)
+        d = _side_clearance(p, n, tree, polys)
+        if d is not None and max(d) < RAY:
+            gaps.append(d[0] + d[1])
+    if not gaps:
+        return full
+    return round(max(MIN_WIDTH, min(full, float(np.quantile(gaps, 0.2)) - 2 * FACADE_GAP)), 1)
+
+
+def free_roads(edges, pos, buildings):
+    """Ricentra e dimensiona le vie, ritaglia gli edifici, ricava gli archi."""
+    ground = [b['poly'] for b in buildings if not b['level']]
+    tree = STRtree(ground)
+    for e in edges:
+        if not e['bridge'] and not e.get('turn'):
+            e['poly'] = recenter(e, tree, ground)
+    for e in edges:
+        e['width'] = fit_width(e, tree, ground)
+
+    # Carreggiate + margine, più gli slarghi agli incroci con 3+ vie (come in index.html).
+    curves = {id(e): LineString(centripetal_curve(e['poly'])) for e in edges}
+    parts = [curves[id(e)].buffer(e['width'] / 2 + FACADE_GAP, quad_segs=6) for e in edges]
+    inc = collections.defaultdict(list)
+    for e in edges:
+        inc[e['a']].append(e['width'])
+        inc[e['b']].append(e['width'])
+    for n, ws in inc.items():
+        if len(ws) >= 3:
+            parts.append(Point(pos[n]).buffer(max(ws) / 2 + 0.3 + FACADE_GAP, quad_segs=6))
+    corridor = shapely.union_all(parts)
+    centerlines = [(curves[id(e)], e) for e in edges if not e['bridge'] and not e.get('turn')]
+
+    out, arches, cut_area, whole_area = [], [], 0.0, 0.0
+    for b in buildings:
+        poly = b['poly']
+        whole_area += poly.area
+        if not poly.intersects(corridor):
+            out.append(b)
+            continue
+        # Corpo sopraelevato attraversato dalla mezzeria: è un arco sulla via.
+        if b['level']:
+            for line, e in centerlines:
+                span = line.intersection(poly)
+                if not span.is_empty and span.length > 0.5 and span.length <= ARCH_MAX_DEPTH:
+                    piece = poly.intersection(line.buffer(e['width'] / 2 + FACADE_GAP + 0.6, cap_style='flat'))
+                    piece = max(getattr(piece, 'geoms', [piece]), key=lambda g: g.area)
+                    if piece.geom_type == 'Polygon' and piece.area > 2:
+                        arches.append({'poly': piece.simplify(0.2), 'name': b['name'], 'width': e['width']})
+        rest = poly.difference(corridor)
+        cut_area += poly.area - rest.area
+        pieces = [g for g in getattr(rest, 'geoms', [rest]) if g.geom_type == 'Polygon']
+        # scarta schegge troppo piccole o troppo sottili per essere case; la semplificazione
+        # alleggerisce i bordi tagliati e il secondo taglio li riporta fuori dalla strada
+        pieces = [g for g in pieces if g.area >= 6 and not g.buffer(-0.7).is_empty]
+        pieces = [max(getattr(h, 'geoms', [h]), key=lambda x: x.area)
+                  for h in (g.simplify(0.25, preserve_topology=True).difference(corridor) for g in pieces)]
+        pieces = [g for g in pieces if g.geom_type == 'Polygon' and g.area >= 6]
+        pieces.sort(key=lambda g: -g.area)
+        for i, g in enumerate(pieces):
+            if b['kind'] == KIND['cathedral'] and i:
+                continue                             # la Cattedrale resta un corpo unico
+            main = i == 0
+            out.append({**b, 'poly': g, 'name': b['name'] if main else None,
+                        'kind': b['kind'] if main or b['kind'] not in (KIND['church'], KIND['cathedral']) else KIND['house']})
+    print(f'  vie libere: {len(arches)} archi, {cut_area:.0f} m² di edifici ritagliati '
+          f'({100 * cut_area / whole_area:.1f}% della superficie), {len(out)} edifici')
+    return out, arches
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -605,7 +791,7 @@ def flat(coords):
     return [round(v, 1) for p in coords for v in p]
 
 
-def encode(edges, pos, buildings, feats):
+def encode(edges, pos, buildings, arches, feats):
     names, name_idx = [], {}
 
     def nid(s):
@@ -628,7 +814,7 @@ def encode(edges, pos, buildings, feats):
         flags = (1 if e['bridge'] else 0) | (2 if e['foot'] else 0) | (4 if e.get('turn') else 0)
         poly = list(e['poly'])
         poly[0], poly[-1] = pos[e['a']], pos[e['b']]        # estremi esattamente sui nodi
-        E.append([node_ids[e['a']], node_ids[e['b']], CLASS_CODE.get(e['cls'], 2), nid(e['name']), flags, flat(poly)])
+        E.append([node_ids[e['a']], node_ids[e['b']], CLASS_CODE.get(e['cls'], 2), nid(e['name']), flags, flat(poly), e['width']])
     B = []
     for b in buildings:
         rings = [flat(b['poly'].exterior.coords[:-1])] + [flat(r.coords[:-1]) for r in b['poly'].interiors]
@@ -642,6 +828,7 @@ def encode(edges, pos, buildings, feats):
         'nodes': flat(nodes),
         'edges': E,
         'buildings': B,
+        'arches': [[nid(a['name']), a['width'], flat(a['poly'].exterior.coords[:-1])] for a in arches],
         'river': flat(feats['river'].coords),
         'cliffs': [flat(c.coords) for c in feats['cliffs']],
         'walls': [flat(w.coords) for w in feats['walls'] if w.geom_type == 'LineString'],
@@ -653,7 +840,7 @@ def encode(edges, pos, buildings, feats):
     }
     lines = ['const GEO = {']
     for k, v in geo.items():
-        if k in ('edges', 'buildings', 'places', 'areas', 'cliffs', 'walls', 'views', 'bridges'):
+        if k in ('edges', 'buildings', 'arches', 'places', 'areas', 'cliffs', 'walls', 'views', 'bridges'):
             lines.append(f'  {k}: [')
             lines += [f'    {json.dumps(x, ensure_ascii=False, separators=(",", ":"))},' for x in v]
             lines.append('  ],')
@@ -672,7 +859,7 @@ def write_html(block: str):
     print(f'  index.html aggiornato ({len(block) / 1024:.0f} KB di dati)')
 
 
-def preview(path, edges, buildings, feats):
+def preview(path, edges, buildings, arches, feats):
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
@@ -681,8 +868,14 @@ def preview(path, edges, buildings, feats):
         x, y = b['poly'].exterior.xy
         ax.fill(x, y, color='#b0452a' if b['kind'] in (1, 2) else '#dccaa0', lw=0)
     for e in edges:
+        road = LineString(e['poly']).buffer(e['width'] / 2)
+        x, y = road.exterior.xy
+        ax.fill(x, y, color='#e8a23a' if e['bridge'] else '#8fb8a8' if e['foot'] or e.get('turn') else '#8a93a6', lw=0, alpha=0.8)
         x, y = zip(*e['poly'])
-        ax.plot(x, y, color='#d62' if e['bridge'] else '#2a8' if e.get('turn') else '#1a8' if e['foot'] else '#135', lw=2)
+        ax.plot(x, y, color='#135', lw=0.4)
+    for a in arches:
+        x, y = a['poly'].exterior.xy
+        ax.fill(x, y, color='#7a2ea0', lw=0)
     x, y = feats['river'].xy
     ax.plot(x, y, color='#2a7fd4', lw=2)
     for rim, c in ((EAST_RIM, 'r'), (WEST_RIM, 'm')):
@@ -703,12 +896,13 @@ def main():
     buildings = build_buildings(data['building'])
     print('3. Rete stradale')
     edges, pos = build_network(data, [b['poly'] for b in buildings])
+    buildings, arches = free_roads(edges, pos, buildings)
     print('4. Morfologia')
     feats = build_features(data)
     print('5. Scrittura')
-    write_html(encode(edges, pos, buildings, feats))
+    write_html(encode(edges, pos, buildings, arches, feats))
     if args.anteprima:
-        preview(args.anteprima, edges, buildings, feats)
+        preview(args.anteprima, edges, buildings, arches, feats)
 
 
 if __name__ == '__main__':
