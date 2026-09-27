@@ -1555,7 +1555,7 @@ const DATA = {
 const LANDMARKS = [
   {
     id: 'duomo', name: 'Cattedrale di Santa Maria Assunta', ref: 'Cattedrale', kicker: 'Piazza Benedetto XIII · dal 1092', radius: 50,
-    text: 'Fondata dai Normanni nel 1092 e ampliata nel Quattrocento, domina dal ciglio della gravina i rioni Piaggio e Fondovico. L’ingresso principale è sul fianco sud, verso la piazza. Basilica minore dal 1993.',
+    text: 'Voluta nel 1092 dal normanno Umfrido d’Altavilla, fu ricostruita dopo l’incendio e il terremoto del 1456. Il portale maggiore è a ovest, sotto il rosone a ventiquattro raggi con l’Assunta; un secondo ingresso si apre sul fianco sud, verso la piazza. Il campanile ha la cupola a cipolla del 1698. Basilica minore dal 1993.',
   },
   {
     id: 'belvedere', name: 'La Gravina', at: [-27, 19], kicker: 'Belvedere della Cattedrale', radius: 32,
@@ -2084,6 +2084,39 @@ class TriBuilder {
   }
 }
 
+/**
+ * Sistema locale su un muro, per portali, rosoni e cornici: x lungo il muro,
+ * y quota assoluta, z verso l'esterno (0 = filo del muro nel punto M, con
+ * normale esterna n in [est, nord]). Le geometrie finiscono nel TriBuilder `tb`.
+ */
+function wallFrame(tb, M, n) {
+  const t = [-n[1], n[0]];
+  const m = new THREE.Matrix4().makeBasis(new THREE.Vector3(t[0], 0, -t[1]), new THREE.Vector3(0, 1, 0), new THREE.Vector3(n[0], 0, -n[1]));
+  m.setPosition(M[0], 0, -M[1]);
+  const add = (geo, color, x = 0, y = 0, z = 0) => {
+    const g = geo.index ? geo.toNonIndexed() : geo;
+    g.translate(x, y, z);
+    g.applyMatrix4(m);
+    tb.addGeometry(g, color);
+  };
+  /** Parallelepipedo con la base alla quota y (z = centro della profondità). */
+  const box = (w, h, d, color, x, y, z, rz = 0) => {
+    const g = new THREE.BoxGeometry(w, h, d);
+    if (rz) g.rotateZ(rz);
+    add(g, color, x, y + h / 2, z);
+  };
+  /** Rosone: fondo scuro, ghiera, anello interno, raggi e disco centrale. */
+  const rose = (x, y, r, rays, colors, z = 0) => {
+    const { light, hole } = colors;
+    add(new THREE.CylinderGeometry(r, r, 0.1, 20).rotateX(Math.PI / 2), hole, x, y, z + 0.05);
+    add(new THREE.TorusGeometry(r + 0.12, Math.max(0.16, r * 0.12), 5, 20), light, x, y, z + 0.14);
+    add(new THREE.TorusGeometry(r * 0.52, 0.07, 4, 16), light, x, y, z + 0.12);
+    for (let k = 0; k < rays / 2; k++) add(new THREE.BoxGeometry(0.12, r * 2, 0.12).rotateZ((k * Math.PI * 2) / rays), light, x, y, z + 0.12);
+    add(new THREE.CylinderGeometry(r * 0.24, r * 0.24, 0.24, 10).rotateX(Math.PI / 2), light, x, y, z + 0.14);
+  };
+  return { add, box, rose, m };
+}
+
 const World = {
   bounds() { const [minX, maxX, minN, maxN] = GEO.meta.area; return { minX, maxX, minN, maxN }; },
 
@@ -2597,97 +2630,219 @@ const Buildings = {
   },
 
   /**
-   * CATTEDRALE: navate laterali sulla sagoma reale, navata centrale più alta
-   * con tetto a capanna, facciata a ovest con rosone, abside a est e
-   * campanile sul fianco sud (dove si apre l'ingresso principale).
+   * CATTEDRALE, sulla sagoma reale orientata est-ovest (fonti nel README):
+   *  - navate laterali sulla sagoma, navata centrale più alta con tetto a capanna;
+   *  - facciata ovest tripartita da due lesene, con tre portali (il centrale,
+   *    più grande, è rimasto incompiuto), il rosone a 24 raggi con l'Assunta al
+   *    centro, oculi sopra le porte laterali e cornice di coronamento;
+   *  - fianco sud, verso Piazza Benedetto XIII: portale dorico con due colonne,
+   *    architrave e timpano, il rilievo della Madonna col Bambino tra le statue
+   *    dei santi Pietro e Paolo, e un secondo rosone accanto al campanile;
+   *  - campanile sul fianco sud: pianta quadrata, quattro ordini decrescenti
+   *    separati da cornici, cella con arcate e cupola a cipolla (1698) con croce;
+   *  - a nord, sulla sporgenza della sagoma, il cappellone del Santissimo a due piani.
+   * La sagoma reale finisce piatta a est, contro un altro edificio: niente abside esterna.
+   * Nei dati il campanile non è un edificio a sé: sta dentro la sagoma, a filo del fianco sud.
    */
   cathedral(tb, outer, base, ground, stone, stoneDark, tiles) {
-    const rect = Plane.orientedRect(outer);
-    let { c, u, v, hl, hw } = rect;
+    const G = ground;
+    const light = new THREE.Color('#ecdcb2'), hole = new THREE.Color(PALETTE.cave), door = new THREE.Color('#4a2e1c');
+    const dome = new THREE.Color('#cdb58a'), iron = new THREE.Color('#2b2723');
+    const colors = { light, hole };
+    let { c, u } = Plane.orientedRect(outer);
     if (u[0] < 0) u = [-u[0], -u[1]];                    // u punta a est
-    v = [-u[1], u[0]];                                   // v punta a nord
-    const yaw = Math.atan2(u[1], u[0]);
+    const v = [-u[1], u[0]];                             // v punta a nord
+    const A = ([e, n]) => (e - c[0]) * u[0] + (n - c[1]) * u[1];
+    const B = ([e, n]) => (e - c[0]) * v[0] + (n - c[1]) * v[1];
     const at = (a, b) => [c[0] + u[0] * a + v[0] * b, c[1] + u[1] * a + v[1] * b];
-    const box = (w, h, d, a, b, y, color, extraYaw = 0) => {
+    const yaw = Math.atan2(u[1], u[0]);
+    const south = [-v[0], -v[1]], north = v, westward = [-u[0], -u[1]];
+
+    /** Sezione trasversale del poligono alla distanza `a` lungo l'asse: [b minimo, b massimo]. */
+    const section = (poly, a) => {
+      let lo = Infinity, hi = -Infinity;
+      for (let i = 0; i < poly.length; i++) {
+        const p = poly[i], q = poly[(i + 1) % poly.length], ap = A(p), aq = A(q);
+        if (ap === aq || (ap - a) * (aq - a) > 0) continue;
+        const b = lerp(B(p), B(q), (a - ap) / (aq - ap));
+        lo = Math.min(lo, b); hi = Math.max(hi, b);
+      }
+      return lo < hi ? [lo, hi] : null;
+    };
+    const median = (xs) => [...xs].sort((x, y) => x - y)[Math.floor(xs.length / 2)];
+    const tidy = (poly) => poly.filter((p, i) => { const q = poly[(i + 1) % poly.length]; return Math.hypot(q[0] - p[0], q[1] - p[1]) > 0.05; });
+    const extrude = (poly, y0, y1, color) => {
+      const g = new THREE.ExtrudeGeometry(new THREE.Shape(poly.map(([e, n]) => new THREE.Vector2(e, n))), { depth: y1 - y0, bevelEnabled: false, curveSegments: 1 });
+      g.rotateX(-Math.PI / 2);
+      g.translate(0, y0, 0);
+      tb.addGeometry(g, color);
+    };
+    /** Parallelepipedo allineato alla chiesa: w lungo l'asse, d di traverso, base alla quota y. */
+    const box = (w, h, d, a, b, y, color) => {
       const g = new THREE.BoxGeometry(w, h, d);
-      g.rotateY(yaw + extraYaw);
+      g.rotateY(yaw);
       const [e, n] = at(a, b);
       g.translate(e, y + h / 2, -n);
       tb.addGeometry(g, color);
     };
-    // Navate laterali (sagoma reale)
-    const shape = new THREE.Shape(outer.map(([e, n]) => new THREE.Vector2(e, n)));
-    const walls = new THREE.ExtrudeGeometry(shape, { depth: ground + 11 - base, bevelEnabled: false, curveSegments: 1 });
-    walls.rotateX(-Math.PI / 2);
-    walls.translate(0, base, 0);
-    tb.addGeometry(walls, stone);
-    this.gableOnFootprint(tb, outer, { c, u, v, hl, hw }, ground + 11, 2.2, tiles, stone);
-    // Navata centrale rialzata
-    box(hl * 1.85, 8, hw * 0.8, -hl * 0.05, 0, ground + 11, stone);
-    this.gable(tb, { c: at(-hl * 0.05, 0), u, v, hl: hl * 0.925, hw: hw * 0.42 }, ground + 19, 3.6, tiles, stone);
-    // Facciata ovest a due piani con rosone
-    box(1.2, 22.5, hw * 1.95, -hl - 0.4, 0, base, stone);
-    const rose = new THREE.CylinderGeometry(1.9, 1.9, 0.4, 10);
-    rose.rotateZ(Math.PI / 2);
-    rose.rotateY(yaw);
-    const [re, rn] = at(-hl - 1.05, 0);
-    rose.translate(re, ground + 16, -rn);
-    tb.addGeometry(rose, new THREE.Color(PALETTE.cave));
-    // Abside semicircolare a est
-    const apse = new THREE.CylinderGeometry(hw * 0.55, hw * 0.55, ground + 12 - base, 10, 1, false, 0, Math.PI);
-    apse.rotateY(yaw + Math.PI);
-    const [ae, an] = at(hl, 0);
-    apse.translate(ae, (ground + 12 + base) / 2, -an);
-    tb.addGeometry(apse, stoneDark);
-    // Campanile sul fianco sud, verso est, con cella campanaria e cuspide
-    const [te, tn] = at(hl * 0.55, -hw - 3.4);
-    const tb2 = (w, h, y, color) => { const g = new THREE.BoxGeometry(w, h, w); g.rotateY(yaw); g.translate(te, y + h / 2, -tn); tb.addGeometry(g, color); };
-    const tg = Terrain.heightAt(te, tn) - 1;
-    tb2(6.4, ground + 25 - tg, tg, stone);
-    tb2(6.6, 0.6, ground + 25, stoneDark);
-    tb2(5.8, 5, ground + 25.6, stone);
-    for (const [a, b] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-      const g = new THREE.BoxGeometry(a ? 0.3 : 2.2, 3, b ? 0.3 : 2.2);
-      g.rotateY(yaw);
-      const e = te + (u[0] * a + v[0] * b) * 2.95, n = tn + (u[1] * a + v[1] * b) * 2.95;
-      g.translate(e, ground + 28, -n);
-      tb.addGeometry(g, new THREE.Color(PALETTE.cave));
+
+    // La sporgenza a nord (il cappellone) non deve spostare l'asse della chiesa:
+    // il muro nord è il valore tipico delle sezioni, ciò che va oltre è il cappellone.
+    const aMin = Math.min(...outer.map(A)), aMax = Math.max(...outer.map(A));
+    const secs = [];
+    for (let a = aMin + 1; a < aMax - 1; a += 1) { const s = section(outer, a); if (s) secs.push(s); }
+    const northWall = [...secs.map((s) => s[1])].sort((x, y) => x - y)[Math.floor(secs.length * 0.6)];
+    const cut = northWall + 0.5;
+    const body = tidy(Plane.clipHalfPlane(outer, (p) => cut - B(p)));
+    let chapel = tidy(Plane.clipHalfPlane(outer, (p) => B(p) - cut));
+    if (chapel.length < 3 || Math.abs(Plane.signedArea(chapel)) < 20) chapel = null;
+    const bS = median(secs.map((s) => s[0])), bN = median(secs.map((s) => Math.min(s[1], cut)));
+    const bc = (bS + bN) / 2, hw = (bN - bS) / 2, nw = hw * 0.42;          // asse, semilarghezza, semilarghezza della navata
+    const westPts = body.filter((p) => A(p) < aMin + 2.5).map(A);
+    const aW = westPts.reduce((s, x) => s + x, 0) / westPts.length, aE = aMax;
+
+    // Navate laterali (sagoma reale) con falde che scendono dalla navata centrale
+    extrude(body, base, G + 11, stone);
+    this.gableOnFootprint(tb, body, { c: at(0, bc), u, v, hl: (aE - aW) / 2, hw }, G + 11, 2, tiles, stone);
+    // Navata centrale rialzata, con le finestre alte
+    const nave0 = aW + 0.6, nave1 = aE - 0.3, am = (nave0 + nave1) / 2;
+    box(nave1 - nave0, 8, nw * 2, am, bc, G + 11, stone);
+    this.gable(tb, { c: at(am, bc), u, v, hl: (nave1 - nave0) / 2, hw: nw }, G + 19, 3.4, tiles, stone);
+    for (let a = nave0 + 5; a < nave1 - 3; a += 5.2) {
+      for (const s of [-1, 1]) box(1, 1.7, 0.12, a, bc + s * (nw + 0.02), G + 14.6, hole);
     }
-    const cone = new THREE.ConeGeometry(4.3, 6, 4);
-    cone.rotateY(yaw + Math.PI / 4);
-    cone.translate(te, ground + 33.6, -tn);
-    tb.addGeometry(cone, tiles);
-    // Portale sud verso Piazza Benedetto XIII, con due colonne
-    box(4.2, 6.5, 1.2, 0, -hw - 0.3, ground - 0.5, stoneDark);
-    box(2.4, 4.6, 0.3, 0, -hw - 0.95, ground - 0.5, new THREE.Color(PALETTE.cave));
-    const light = new THREE.Color('#ecdcb2');
-    for (const a of [-1.75, 1.75]) {
-      const col = new THREE.CylinderGeometry(0.28, 0.32, 5.2, 8);
-      const [ce, cn] = at(a, -hw - 1.05);
-      col.translate(ce, ground - 0.5 + 2.6, -cn);
-      tb.addGeometry(col, light);
+
+    // Facciata ovest: lastra con il profilo delle navate (laterali basse, centrale a capanna)
+    const sw = section(body, aW + 0.8) ?? [bS, bN];
+    const fw = wallFrame(tb, at(aW - 0.6, bc), westward);                // x verso sud-nord invertito: x = bc − b
+    const fy = Terrain.heightAt(...at(aW - 3, bc));
+    const xN = bc - sw[1] - 0.3, xS = bc - sw[0] + 0.3, xn = nw + 0.5;  // bordi della facciata e della parte centrale
+    const yS = G + 12, yM = G + 13.2, yN = G + 19.6, yA = G + 23.4;
+    const profile = new THREE.Shape([[xN, base], [xS, base], [xS, yS], [xn, yM], [xn, yN], [0, yA], [-xn, yN], [-xn, yM], [xN, yS]].map(([x, y]) => new THREE.Vector2(x, y)));
+    fw.add(new THREE.ExtrudeGeometry(profile, { depth: 1.2, bevelEnabled: false }), stone, 0, 0, -1.2);
+    // coronamento: cornici sulle falde e sotto il timpano
+    const ledge = (x0, y0, x1, y1) => fw.box(Math.hypot(x1 - x0, y1 - y0) + 0.35, 0.42, 0.7, light, (x0 + x1) / 2, (y0 + y1) / 2 - 0.21, 0.1, Math.atan2(y1 - y0, x1 - x0));
+    ledge(xS, yS, xn, yM); ledge(xN, yS, -xn, yM); ledge(xn, yN, 0, yA); ledge(-xn, yN, 0, yA);
+    fw.box(xn * 2 + 0.4, 0.36, 0.6, light, 0, yN - 0.5, 0.05);
+    // due lesene che dividono la facciata in tre parti
+    for (const s of [-1, 1]) fw.box(1, yN - 0.5 - base, 0.6, light, s * nw, base, 0.05);
+    // portale centrale, più grande (incompiuto: senza timpano)
+    fw.box(3.1, 5.4, 0.12, door, 0, fy, 0.04);
+    for (const s of [-1, 1]) fw.box(0.6, 6, 0.5, light, s * 1.85, fy, 0.1);
+    fw.box(4.4, 0.7, 0.55, light, 0, fy + 6, 0.12);
+    fw.box(4.6, 0.18, 1.2, stoneDark, 0, fy - 0.1, 0.5);
+    // rosone a 24 raggi con l'Assunta al centro, allineato al portale
+    fw.rose(0, G + 15.6, 2.3, 24, colors);
+    // portali laterali: lesene scanalate, lunetta decorata e oculo sopra
+    for (const s of [-1, 1]) {
+      const x = s * (xn + ((s > 0 ? xS : -xN) - xn) / 2);
+      fw.box(1.8, 3.4, 0.12, door, x, fy, 0.04);
+      for (const k of [-1, 1]) fw.box(0.38, 3.8, 0.34, light, x + k * 1.12, fy, 0.08);
+      fw.box(2.7, 0.35, 0.38, light, x, fy + 3.8, 0.1);
+      const lunette = new THREE.Shape();
+      lunette.moveTo(1.2, 0); lunette.absarc(0, 0, 1.2, 0, Math.PI, false); lunette.lineTo(-0.95, 0); lunette.absarc(0, 0, 0.95, Math.PI, 0, true);
+      fw.add(new THREE.ExtrudeGeometry(lunette, { depth: 0.3, bevelEnabled: false, curveSegments: 6 }), light, x, fy + 4.15, 0);
+      fw.add(new THREE.CircleGeometry(0.95, 8, 0, Math.PI), hole, x, fy + 4.15, 0.02);
+      fw.add(new THREE.TorusGeometry(0.75, 0.15, 5, 14), light, x, G + 8.6, 0.14);
+      fw.add(new THREE.CylinderGeometry(0.74, 0.74, 0.08, 14).rotateX(Math.PI / 2), hole, x, G + 8.6, 0.04);
     }
-    // Rosone: ghiera in pietra chiara e raggi, sulla facciata ovest
-    const face = Math.atan2(u[0], -u[1]);               // ruota l'asse z verso est-ovest
-    const [oe, on] = at(-hl - 1.3, 0);
-    const ring = new THREE.TorusGeometry(1.95, 0.24, 5, 16).rotateY(face);
-    ring.translate(oe, ground + 16, -on);
-    tb.addGeometry(ring, light);
-    for (let k = 0; k < 8; k++) {
-      const spoke = new THREE.BoxGeometry(0.13, 3.7, 0.13).rotateZ((k * Math.PI) / 8).rotateY(face);
-      spoke.translate(oe, ground + 16, -on);
-      tb.addGeometry(spoke, light);
+    // croce in cima
+    fw.box(0.25, 1.8, 0.25, light, 0, yA - 0.1, 0);
+    fw.box(1, 0.25, 0.25, light, 0, yA + 1.05, 0);
+
+    // Campanile: dentro la sagoma, a filo del fianco sud, nella metà verso est
+    const T = 6.6, aT = lerp(aW, aE, 0.72);
+    const sT = Math.min(...[-T / 2, 0, T / 2].map((d) => section(body, aT + d)?.[0] ?? bS));
+    const bT = sT - 0.4 + T / 2;
+    const [te, tn] = at(aT, bT);
+    const tg = Terrain.heightAt(te, tn - 4) - 1;
+    const tower = (w, h, y, color) => { const g = new THREE.BoxGeometry(w, h, w); g.rotateY(yaw); g.translate(te, y + h / 2, -tn); tb.addGeometry(g, color); };
+    const orders = [[T, tg, G + 12.5], [T - 0.4, G + 13, G + 19], [T - 0.8, G + 19.5, G + 25], [T - 1.2, G + 25.5, G + 30.5]];
+    orders.forEach(([w, y0, y1], k) => {
+      tower(w, y1 - y0, y0, stone);
+      tower(w + 0.45, 0.5, y1, light);                                     // cornice tra un ordine e l'altro
+      for (const [nx, nn] of [south, north, [u[0], u[1]], westward]) {
+        const f = wallFrame(tb, [te + nx * w / 2, tn + nn * w / 2], [nx, nn]);
+        if (k === 0) f.box(0.5, 2.2, 0.1, hole, 0, G + 6, 0.02);           // feritoia (XII secolo)
+        if (k === 1 || k === 2) {                                          // bifore cieche
+          for (const x of [-0.7, 0.7]) f.box(0.8, 2.4, 0.1, hole, x, y0 + 1.8, 0.02);
+          f.box(2.3, 0.3, 0.2, light, 0, y0 + 4.2, 0.06);
+        }
+        if (k === 3) {                                                     // cella: arcata con balaustra
+          const arch = new THREE.Shape();
+          arch.moveTo(-1.3, 0); arch.lineTo(1.3, 0); arch.lineTo(1.3, 2.4); arch.absarc(0, 2.4, 1.3, 0, Math.PI, false); arch.closePath();
+          f.add(new THREE.ExtrudeGeometry(arch, { depth: 0.1, bevelEnabled: false, curveSegments: 6 }), hole, 0, y0 + 0.9, 0);
+          f.box(3.4, 0.9, 0.5, light, 0, y0, 0.2);
+          for (let x = -1.2; x <= 1.21; x += 0.6) f.box(0.14, 0.7, 0.14, light, x, y0 + 0.9, 0.3);
+        }
+      }
+    });
+    // cupola a cipolla (il "cipollone" del 1698) su un tamburo ottagonale, con la croce di ferro
+    const drum = new THREE.CylinderGeometry(2.2, 2.35, 1, 8);
+    drum.translate(te, G + 31.5, -tn);
+    tb.addGeometry(drum, stone);
+    const onion = new THREE.LatheGeometry([[0, 0], [2.1, 0], [2.6, 0.5], [2.75, 1.2], [2.5, 2], [1.9, 2.8], [1.1, 3.5], [0.45, 4.1], [0.16, 4.6], [0, 4.8]].map(([x, y]) => new THREE.Vector2(x, y)), 8);
+    onion.translate(te, G + 32, -tn);
+    tb.addGeometry(onion, dome);
+    const cross = new THREE.BoxGeometry(0.16, 1.7, 0.16); cross.translate(te, G + 37.5, -tn); tb.addGeometry(cross, iron);
+    const arm = new THREE.BoxGeometry(0.9, 0.14, 0.16); arm.rotateY(yaw + Math.PI / 2); arm.translate(te, G + 37.9, -tn); tb.addGeometry(arm, iron);
+    this.roofs.push({ pts: [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([x, y]) => at(aT + (x * T) / 2, bT + (y * T) / 2)), top: G + 38 });
+
+    // Fianco sud: portale dorico, rilievo e statue; secondo rosone accanto al campanile
+    const southFrame = (a) => { const s = section(body, a); return s && wallFrame(tb, at(a, s[0]), south); };
+    const aP = lerp(aW, aE, 0.47), aR = aT + T / 2 + 2.4;
+    const fp = southFrame(aP), py = Terrain.heightAt(...at(aP, bS - 3));
+    if (fp) {
+      fp.box(2.5, 4.6, 0.12, door, 0, py, 0.04);
+      fp.box(4.4, 0.25, 1.3, stoneDark, 0, py - 0.15, 0.6);                  // gradino
+      for (const s of [-1, 1]) {
+        fp.box(0.9, 0.5, 0.9, light, s * 1.9, py, 0.5);                    // plinto
+        fp.add(new THREE.CylinderGeometry(0.3, 0.34, 4.6, 8), light, s * 1.9, py + 2.8, 0.5);
+        fp.box(0.8, 0.35, 0.8, light, s * 1.9, py + 5.1, 0.5);             // capitello
+      }
+      fp.box(5.2, 0.8, 1.1, light, 0, py + 5.45, 0.4);                      // architrave
+      const ped = new THREE.Shape();
+      ped.moveTo(-2.75, 0); ped.lineTo(2.75, 0); ped.lineTo(0, 1.25); ped.closePath();
+      fp.add(new THREE.ExtrudeGeometry(ped, { depth: 0.9, bevelEnabled: false }), light, 0, py + 6.25, -0.05);
+      fp.box(1.5, 1.9, 0.3, light, 0, py + 7.7, 0.1);                       // rilievo: Madonna col Bambino
+      fp.box(0.55, 1.1, 0.12, stoneDark, 0, py + 8.05, 0.28);
+      for (const s of [-1, 1]) {                                            // statue di San Pietro e San Paolo
+        fp.box(0.7, 0.35, 0.7, light, s * 2.35, py + 6.25, 0.4);
+        fp.box(0.5, 1.2, 0.4, light, s * 2.35, py + 6.6, 0.4);
+        fp.add(new THREE.IcosahedronGeometry(0.2, 0), light, s * 2.35, py + 8, 0.4);
+      }
     }
-    // Croce in cima alla facciata
-    box(0.25, 1.7, 0.25, -hl - 0.4, 0, base + 22.5, light);
-    box(0.25, 0.25, 0.95, -hl - 0.4, 0, base + 23.5, light);
+    const fr = southFrame(aR);
+    if (fr) fr.rose(0, G + 7.6, 1.45, 16, colors);
+
     // Lesene lungo i fianchi, sul filo reale dei muri (sporgono 0,3 m)
-    for (let a = -hl + 4; a < hl - 3; a += 5.5) {
-      for (const side of [-1, 1]) {
-        let b = 0;
-        while (b < hw + 2 && Plane.contains(outer, ...at(a, side * (b + 0.25)))) b += 0.25;
-        if (b < 1) continue;
-        box(0.9, ground + 11.2 - base, 0.5, a, side * (b + 0.05), base, stoneDark);
+    for (let a = aW + 4; a < aE - 3; a += 5.5) {
+      const s = section(body, a);
+      if (!s) continue;
+      if (Math.abs(a - aP) > 3.6 && Math.abs(a - aT) > T / 2 + 1 && Math.abs(a - aR) > 2.2) box(0.9, G + 11.2 - base, 0.5, a, s[0] - 0.05, base, stoneDark);
+      if (s[1] < cut - 0.3) box(0.9, G + 11.2 - base, 0.5, a, s[1] + 0.05, base, stoneDark);
+    }
+
+    // Cappellone del Santissimo (1631): due piani sulla sporgenza a nord, verso la gravina
+    if (chapel) {
+      const top = G + 13.4, cr = Plane.orientedRect(chapel);
+      extrude(chapel, base, top, stone);
+      this.gableOnFootprint(tb, chapel, cr, top, Math.min(2.2, cr.hw * 0.5), tiles, stone);
+      const ccw = Plane.signedArea(chapel) > 0;
+      for (let i = 0; i < chapel.length; i++) {
+        const P = chapel[i], Q = chapel[(i + 1) % chapel.length], len = Math.hypot(Q[0] - P[0], Q[1] - P[1]);
+        if (len < 2 || (Math.abs(B(P) - cut) < 0.05 && Math.abs(B(Q) - cut) < 0.05)) continue;   // lato sul taglio
+        let nx = (Q[1] - P[1]) / len, nn = -(Q[0] - P[0]) / len;
+        if (!ccw) { nx = -nx; nn = -nn; }
+        const f = wallFrame(tb, [(P[0] + Q[0]) / 2, (P[1] + Q[1]) / 2], [nx, nn]);
+        f.box(len + 0.3, 0.26, 0.4, light, 0, G + 5.4, 0.05);                  // marcapiano tra i due piani
+        f.box(len + 0.5, 0.45, 0.5, light, 0, top - 0.45, 0.05);               // cornicione
+        if (len > 4) {
+          const win = new THREE.Shape();
+          win.moveTo(-0.6, 0); win.lineTo(0.6, 0); win.lineTo(0.6, 1.8); win.absarc(0, 1.8, 0.6, 0, Math.PI, false); win.closePath();
+          f.add(new THREE.ExtrudeGeometry(win, { depth: 0.08, bevelEnabled: false, curveSegments: 5 }), hole, 0, G + 8, 0);
+          f.box(0.8, 1.2, 0.08, hole, 0, G + 2.2, 0.02);
+        }
       }
     }
   },
@@ -2963,23 +3118,8 @@ const Details = {
    * z verso l'esterno (0 = filo del muro). `ground` è la quota della strada.
    */
   frame({ M, n, clear = 1 }) {
-    const t = [-n[1], n[0]];
-    const m = new THREE.Matrix4().makeBasis(new THREE.Vector3(t[0], 0, -t[1]), new THREE.Vector3(0, 1, 0), new THREE.Vector3(n[0], 0, -n[1]));
-    m.setPosition(M[0], 0, -M[1]);
     const ground = Terrain.heightAt(M[0] + n[0] * 1.5, M[1] + n[1] * 1.5);
-    const add = (geo, color, x = 0, y = 0, z = 0) => {
-      const g = geo.index ? geo.toNonIndexed() : geo;
-      g.translate(x, y, z);
-      g.applyMatrix4(m);
-      this.tb.addGeometry(g, color);
-    };
-    /** Parallelepipedo con la base alla quota y. */
-    const box = (w, h, d, color, x, y, z, rz = 0) => {
-      const g = new THREE.BoxGeometry(w, h, d);
-      if (rz) g.rotateZ(rz);
-      add(g, color, x, y + h / 2, z);
-    };
-    return { add, box, ground, clear, M, n };
+    return { ...wallFrame(this.tb, M, n), ground, clear, M, n };
   },
 
   /** Portale di chiesa: stipiti, architrave, timpano, porta, gradino e oculo. */
@@ -3138,9 +3278,16 @@ const Details = {
     e += out[0] * shift; n += out[1] * shift;
     const f = this.frame({ M: [e, n], n: out });
     const y = Terrain.heightAt(...f.M), { iron } = this.col;
-    for (let x = -4; x <= 4.01; x += 1) f.box(0.07, 1.05, 0.07, iron, x, y, 0);
-    f.box(8.2, 0.07, 0.09, iron, 0, y + 1.0, 0);
-    f.box(8.2, 0.05, 0.06, iron, 0, y + 0.5, 0);
+    // Paletti ogni metro, ma solo fuori dalla carreggiata (al belvedere della Cattedrale la via gira attorno al ciglio).
+    const free = (x) => this.net.conformerClearance(e - out[1] * x, n + out[0] * x) > 0.4;
+    for (let x = -4; x <= 4.01; x += 1) {
+      if (!free(x)) continue;
+      f.box(0.07, 1.05, 0.07, iron, x, y, 0);
+      if (x < 4 && free(x + 1) && free(x + 0.5)) {
+        f.box(1.05, 0.07, 0.09, iron, x + 0.5, y + 1.0, 0);
+        f.box(1.05, 0.05, 0.06, iron, x + 0.5, y + 0.5, 0);
+      }
+    }
   },
 
   /**
