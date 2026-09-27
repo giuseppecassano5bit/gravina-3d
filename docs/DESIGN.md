@@ -22,7 +22,7 @@ mappa. Lungo il percorso compaiono schede brevi sui monumenti.
 |---|---|
 | Fedeltà ai luoghi | Vie, incroci e sagome degli edifici vengono dai dati reali (OpenStreetMap via Overture Maps). |
 | Stile a blocchi | Ogni edificio reale è un blocco estruso di tufo o intonaco, con finestre, persiane, terrazze o tetti in coppi. |
-| Riconoscibilità | I monumenti hanno forme dedicate: Cattedrale con campanile, lesene e rosone, chiese con portale e campanile a vela, portale del Purgatorio, ponte ad archi su due ordini. |
+| Riconoscibilità | I monumenti hanno forme dedicate, verificate sulle fonti: Cattedrale con facciata tripartita, rosone a 24 raggi e campanile a cipolla, portale del Purgatorio con orsi e torri, chiese rupestri scavate, ponte ad archi su due ordini. |
 | Vie libere | Nessun edificio sulla carreggiata: il mezzo non attraversa mai le case. Dove una casa scavalca davvero la via c'è un arco. |
 | Zero collisioni, 60 fps | Il mezzo segue spline precalcolate sulla rete reale: niente fisica. |
 | Anche su telefono | Interfaccia touch, pannelli che si adattano a verticale e orizzontale, risoluzione adattiva. |
@@ -50,7 +50,10 @@ acque, infrastrutture, uso del suolo, luoghi) derivano in gran parte da **OpenSt
    - Conserva alcune vie cieche importanti (Piazza Benedetto XIII, Via Civita, Calata Grotte San Michele, Larghetto San Francesco, Via Matteotti). In fondo a ciascuna aggiunge un'**inversione a goccia** dentro lo slargo reale, solo se c'è spazio tra gli edifici.
    - Il **Ponte Acquedotto** fa parte di Via giudice Montea, che nella realtà è pedonale: resta percorribile per scelta di progetto, ed è marcato "pedonale" nei dati e sulla targa.
 3. **Edifici.** Sagome reali semplificate a 0,3 m, con cortili (fori), classe, nome e
-   `level` (i corpi sopraelevati hanno `level = 1`).
+   `level` (i corpi sopraelevati hanno `level = 1`). L'altezza si prende solo se è affidabile:
+   numero di piani o altezza di OpenStreetMap. Le altezze stimate dalle immagini aeree
+   (Microsoft ML Buildings, 35 edifici nell'area) si scartano perché nel centro storico sono
+   spesso assurde (1,5-2,5 m per un condominio).
 3b. **Vie libere dagli edifici** (`free_roads`). Le mezzerie OSM non stanno sempre al centro
    dei vicoli e le carreggiate avevano una larghezza fissa per classe: alcune facciate finivano
    sulla strada e il mezzo sembrava attraversare le case. Ora lo script:
@@ -62,7 +65,8 @@ acque, infrastrutture, uso del suolo, luoghi) derivano in gran parte da **OpenSt
      polilinea: tra punti radi la curva se ne allontana anche di un metro;
    - trasforma in **archi** i corpi sopraelevati (`level = 1`) che la via attraversa per al
      massimo 14 m, come L'Arc D' Bench. La larghezza di ogni via viaggia con i dati.
-4. **Morfologia.** Corso del Torrente La Gravina, falesie, mura, belvederi, aree pedonali e verdi, luoghi d'interesse.
+4. **Morfologia.** Corso del Torrente La Gravina, falesie, mura, belvederi, aree pedonali e verdi, luoghi d'interesse,
+   e le 7 **scalinate reali** (`highway=steps`, 165 m in tutto: Via giudice Montea, Gradoni San Giovanni Battista…).
 5. **Ciglio del canyon.** È tracciato a mano, una volta sola, su belvederi, mura del Fondovico,
    falesie e testate del ponte (costanti `EAST_RIM` e `WEST_RIM`).
 6. **Scrittura.** La costante `GEO` viene scritta tra i marcatori `@@DATI-GEO-INIZIO@@` e
@@ -77,6 +81,8 @@ acque, infrastrutture, uso del suolo, luoghi) derivano in gran parte da **OpenSt
 | Inversioni a goccia | 4 |
 | Edifici reali | 532 (dopo il ritaglio), nessuno sulla carreggiata |
 | Archi sulle vie | 5 |
+| Scalinate reali (solo decorative) | 7, 165 m |
+| Edifici con altezza reale | 1 (Museo Santomasi, 3 piani); le altre sono stimate per zona |
 | Area del diorama | 780 × 860 m (est −340…440, nord −320…540) |
 
 ### Sistema di coordinate
@@ -98,6 +104,14 @@ acque, infrastrutture, uso del suolo, luoghi) derivano in gran parte da **OpenSt
 | Botromagno (ovest) | fondo, poi **parete ripida** a tre salti fino a −8 m, poi un ripiano fino a −3 m, poi l'altopiano che sale verso la collina di Botromagno |
 
 * Il fondo è a −38 m: il ponte (a quota 0 sulla testata est) risulta alto circa 37 m, come quello vero.
+* **Discesa dei rioni** (costante `RIONI`). Nei dati le case fitte del Piaggio e del Fondovico stanno
+  oltre il ciglio tracciato a mano, cioè sull'altopiano; nella realtà i rioni scendono verso la
+  gravina (la Calata Grotte San Michele scende dal Fondovico; da Piazza Pellicciari una scalinata
+  attraversa il rione fino a San Michele). Così, lungo il tratto di ciglio di ogni rione, il
+  terreno scende dolcemente verso il ciglio: 8 m nel Piaggio (a partire da 80 m dal ciglio),
+  12 m nel Fondovico (da 170 m, cioè da Piazza Pellicciari). Sotto il ciglio i gradoni partono da
+  quella quota. Cattedrale, Piazza Benedetto XIII e testata del ponte restano fuori; le vie nuove
+  in pendenza arrivano al 14%.
 * Il terreno viene **spianato sotto le strade** (con raccordi di 9 m), tranne sotto il ponte.
 * Le **grotte** sono bocche ad arco sulle pareti lato città. Aggiungono l'effetto "città di pietra scavata".
 
@@ -107,27 +121,38 @@ acque, infrastrutture, uso del suolo, luoghi) derivano in gran parte da **OpenSt
 
 | Elemento | Resa |
 |---|---|
-| Case | Sagoma reale estrusa. Nel centro storico: 2–3 piani (3,3 m per piano), toni di tufo e calce. Nei quartieri moderni: 3–5 piani e intonaci chiari. |
+| Case | Sagoma reale estrusa. Nei rioni Piaggio e Fondovico: 1–2 piani, **a gradoni** (la sagoma è tagliata in strisce di circa 3,5 m parallele al ciglio, ognuna alta quanto serve sopra il suo terreno; i tetti fanno da terrazza e sui salti si aprono porte e finestre). Nel centro storico: 2–3 piani (3,3 m per piano), toni di tufo e calce. Nei quartieri moderni: 3–5 piani e intonaci chiari. |
 | Tetti | Terrazze piane con torrini, cisterne e comignoli; i piccoli corpi rettangolari hanno spesso un **tetto a capanna in coppi**. Le falde sono **ritagliate sulla sagoma reale** (divise lungo il colmo e triangolate): nessun tetto sporge sulla strada. |
 | Archi | Volume di tufo con volta a tutto sesto sopra la carreggiata, ghiera in pietra chiara e finestrella sulle due fronti. |
 | Finestre e porte | Pannelli istanziati lungo ogni facciata, piano per piano: persiane marroni o verdi, portoni al piano terra (fino a 32 000 istanze, una sola draw call). |
 | Chiese | Pietra di tufo, tetto a capanna, **campanile a vela** sul colmo; sul lato che guarda la via un **portale** con stipiti, architrave, timpano, gradino e **oculo**. |
-| Chiesa del Purgatorio | Portale con **timpano spezzato**, i **due scheletri distesi** e, ai lati su piedistalli, gli **orsi degli Orsini** (come nella scheda, fonte FAI). |
-| Cattedrale | Sagoma reale, navata centrale rialzata con tetto a capanna, **facciata ovest con rosone** (ghiera e raggi) e croce, abside a est, **campanile sul fianco sud**, **lesene** lungo i fianchi, **portale sud con due colonne** verso Piazza Benedetto XIII. |
+| Chiesa del Purgatorio | Portale sul lato corto a sud, su Piazza Notar Domenico (dove i dati segnano la chiesa). Ai lati della porta due **pilastri di tre torri sovrapposte**, sempre più strette e rigonfie al centro (lo stemma dei Frangipane della Tolfa), che **poggiano sugli orsi** degli Orsini; sulla trabeazione il **timpano spezzato** con i **due scheletri distesi**; al centro lo **stemma Orsini** e sotto il **drappo di pietra con l'epigrafe** (fonte FAI). |
+| Cattedrale | Sagoma reale orientata est-ovest. La sporgenza a nord della sagoma non sposta più l'asse. Navate laterali sulla sagoma e navata centrale rialzata con le finestre alte. **Facciata ovest tripartita da due lesene**, con **tre portali** (il centrale più grande e incompiuto, i laterali con lunetta e un **oculo** sopra), il **rosone a 24 raggi** con l'Assunta al centro, la cornice di coronamento e la croce. **Fianco sud**: portale dorico con due colonne, architrave e timpano, il rilievo della Madonna col Bambino tra San Pietro e San Paolo, e un **secondo rosone accanto al campanile**. **Campanile** a filo del fianco sud (nei dati non è un edificio a sé): quattro ordini decrescenti separati da cornici, bifore cieche, cella con arcate e balaustra, **cupola a cipolla** del 1698 con la croce di ferro. **Cappellone del Santissimo** a due piani sulla sporgenza nord. Niente abside esterna: la sagoma reale finisce piatta a est, contro un altro edificio. |
+| San Michele delle Grotte | Fuori terra non c'è un edificio: la sagoma dei dati diventa lo **sperone di tufo a strati** in cui è scavata la chiesa, con l'ingresso laterale alto e stretto, le bocche delle grotte e il **corridoio panoramico** con il parapetto verso la gravina. |
+| Madonna della Stella | Chiesetta **imbiancata** con la facciata a capanna rivolta alla gravina, **campanile a vela in mattoni** sul vertice, **corpo basso con tetto a una falda** e finestra, la **roccia** alle spalle in cui è scavata la chiesa vera. |
 | Palazzi | Palazzo Ducale Orsini e Museo Pomarici Santomasi: **cornicione**, fascia marcapiano e **portale in bugnato**. |
 | Ponte Acquedotto | Prospetto estruso con **archi su due ordini**: 4 grandi arcate sul canyon più una fila di archetti sotto l'impalcato, circa 25 archi come l'originale. **Lesene** sui piloni, **due cornici** marcapiano, parapetti, larghezza reale 5,5 m. |
 | Fontana della Stella | Muro con nicchia ad arco, cornice, vasca con l'acqua, accanto alla testata est del ponte e fuori dalla strada (forma stilizzata). |
-| Belvederi | Parapetti in ferro sul ciglio, nei tre belvederi dei dati. |
+| Belvederi | Parapetti in ferro sul ciglio, nei tre belvederi dei dati, solo dove non c'è la strada. |
+| Scalinate | Le 7 scalinate reali: gradini di tufo con alzate da 16 cm che seguono il terreno e parapetti bassi. Si guardano soltanto e si fermano prima delle vie. |
+| Abitazioni rupestri | 20 grotte chiuse da una fronte in muratura (tufo o calce) con porta e finestrella, sui salti dei gradoni lato città, lontano da vie ed edifici. Le fonti ne contano circa ottanta sui pendii. |
 | Lanterne | Lanterne a muro accese, ogni ~16 m nelle vie entro 70 m dai monumenti (circa 100). |
-| Regola | Nessun dettaglio sporge più di 0,3 m dal muro verso la strada. |
+| Regola | Nessun dettaglio sulla carreggiata: la prova `npm run simula` controlla che nessun vertice di portali, campanile, scalinate, lanterne e parapetti stia sopra una via tra 0,3 e 3,2 m d'altezza (`dettaglisullastrada` vuoto). Nei vicoli i dettagli sporgono al massimo 0,3 m. |
 | Mura | I tratti reali di mura urbane diventano muri di tufo. |
 | Alberi | Pini e lecci nei giardini reali (Villa Comunale), ulivi verso Botromagno, macchia nel canyon. |
 
 Monumenti con scheda (solo fatti verificati): Cattedrale, la Gravina (belvedere), Chiesa del
 Purgatorio, Palazzo Ducale Orsini, Museo Pomarici Santomasi, Santa Lucia (Piaggio), Gravina
 Sotterranea, Piazza Pellicciari, Sant'Agostino, San Michele delle Grotte (Fondovico), Ponte
-Acquedotto, Fontana della Stella, Madonna della Stella, Botromagno. Altre chiese e piazze
-hanno solo l'etichetta.
+Acquedotto, Fontana della Stella, Madonna della Stella, Botromagno, e dalla fase 3 San
+Francesco, Santa Sofia, Santa Cecilia, Santa Teresa e Chiesa del Gesù. L'Addolorata e le piazze
+hanno solo l'etichetta (per l'Addolorata non ci sono fonti affidabili).
+
+Non verificato, e quindi non modellato: il campanile di San Francesco (le fonti dicono tre
+ordini e circa 40 m, ma la sua posizione non si ricava dai dati) e la posizione esatta del
+campanile della Cattedrale lungo il fianco sud (è nella metà verso est). Una fonte (Wikivoyage)
+parla di una "facciata a due ordini con oculi ovali": non è chiaro a quale chiesa si riferisca,
+e le fonti principali descrivono la facciata della Cattedrale come tripartita.
 
 ---
 
@@ -153,7 +178,7 @@ riusato: il cambio è istantaneo.
 ## 6. Movimento, incroci e cartelli
 
 * Il mezzo segue la spline della via: crociera 8,5 m/s, 5,5 m/s vicino agli incroci, 6 m/s sul ponte, 4,5 m/s nelle inversioni, tutto moltiplicato per il ritmo del mezzo.
-* **Partenza**: 26 m prima della testata est del Ponte Acquedotto, sulla via che vi arriva (Via Fontana la Stella), rivolti verso il ponte. Il primo tratto attraversa il ponte.
+* **Partenza**: 12 m prima della testata est del Ponte Acquedotto, sulla via che vi arriva (Via Fontana la Stella), accanto alla Fontana della Stella e rivolti verso il ponte. Il primo tratto attraversa il ponte.
 * **Pausa**: il mezzo frena a 7 m/s² fino a fermarsi; il menu (riprendi, cambia mezzo, mappa e luoghi) compare solo in pausa. Il viaggio va in pausa da solo se la pagina viene nascosta.
 * **Teletrasporto** (solo in pausa): dissolvenza, il mezzo va sulla via più vicina al luogo, 12 m prima, e il viaggio riprende da lì con la scheda del monumento. Per il ponte si torna al punto di partenza.
 * A 38 m dall'incrocio si calcolano le uscite (tutte tranne l'inversione) ordinate da sinistra a destra con l'**angolo di svolta reale**. La più dritta è preselezionata.
@@ -161,14 +186,14 @@ riusato: il cambio è istantaneo.
   - in grande il nome reale della via;
   - per i vicoli senza nome, "Vicolo per" seguito dalla via in cui sboccano;
   - sotto, il prossimo monumento lungo quella via ("verso Chiesa del Purgatorio"), oppure il rione.
-* **Targa in marmo**: via corrente più rione (Centro storico, Rione Piaggio, Rione Fondovico, Madonna della Stella · Botromagno), e "percorso pedonale" dove serve.
+* **Targa in marmo**: via corrente più rione (Centro storico, Rione Piaggio, Rione Fondovico anche sulla discesa verso il ciglio, Madonna della Stella · Botromagno), e "percorso pedonale" dove serve.
 * Le quote delle strade sono smussate (media mobile di ±6 m), così i gradoni del terreno non si sentono sotto le ruote.
 
 ---
 
 ## 7. Camera
 
-* **Vetrina** all'apertura: la camera ondeggia piano attorno al tre quarti posteriore del mezzo fermo, dal lato più aperto (verso la gravina), e guarda la strada davanti.
+* **Vetrina** all'apertura, a due tempi (`CONFIG.camera.showroom`): per 9 s la camera ondeggia piano attorno al tre quarti posteriore del mezzo fermo, dal lato più aperto, e guarda la strada davanti; poi un volo a gru di 3,5 s porta a un **campo lungo dal canyon**, a sud del ponte, con le arcate su due ordini e il mezzo sulla testata; dopo 10 s si torna al primo piano. Scegliendo un mezzo si torna subito al primo piano. Pose diverse per schermi orizzontali e verticali, calcolate rispetto all'asse del ponte.
 * **Inseguimento dall'alto** (18 m sopra il mezzo, 12 m dietro; un po' più alto per il trattore): si vede la strada tra i tetti, come in un plastico.
 * **Tetti**: se un tetto si mette tra la camera e il mezzo, o la camera finisce a ridosso di un tetto, la camera sale (fino a 22 m in più) e si avvicina in pianta. Usa una griglia dei tetti (celle da 10 m) con la quota di ogni edificio e arco.
 * **Pausa**: vista dall'alto che gira piano sopra il mezzo.
@@ -182,8 +207,8 @@ riusato: il cambio è istantaneo.
 
 | Voce | Valore |
 |---|---|
-| Triangoli totali | circa 237 000 (terreno 70k, edifici, 25k finestre istanziate, dettagli) |
-| Draw call | circa 37 |
+| Triangoli totali | circa 265 000 (terreno 70k, edifici, 25k finestre istanziate, dettagli, scalinate, abitazioni rupestri) |
+| Draw call | circa 42 |
 | Costruzione della scena | circa 1 s su un PC recente |
 | Aggiornamento per frame | O(1) sulla spline; minimappa copiata da un canvas pre-disegnato; 8 + 16 controlli sulla griglia dei tetti per la camera |
 | Ombre | riquadro di 180 m che segue il mezzo, agganciato ai texel (niente sfarfallio) |
@@ -198,8 +223,30 @@ riusato: il cambio è istantaneo.
 | 1 | Documento di progetto | ✅ |
 | 2 | Base: rete, auto, incroci, camera, interfaccia | ✅ |
 | 2b | **Dati reali**: vie e incroci reali, edifici reali, torrente e cigli reali, ponte ad archi | ✅ |
-| 2c | **Vie libere e mezzi**: nessuna casa sulla strada, archi reali, quattro mezzi, partenza dal ponte, pausa con cambio mezzo e teletrasporto, camera che scavalca i tetti, dettagli dei monumenti, versione mobile | ✅ in revisione |
-| 3 | Architettura: altre facciate dei monumenti, San Michele e Madonna della Stella scavate nella roccia, dettagli dei rioni | ⏳ |
+| 2c | **Vie libere e mezzi**: nessuna casa sulla strada, archi reali, quattro mezzi, partenza dal ponte, pausa con cambio mezzo e teletrasporto, camera che scavalca i tetti, dettagli dei monumenti, versione mobile | ✅ |
+| 3 | **Architettura e fedeltà**: Cattedrale e Purgatorio sulle fonti, San Michele e Madonna della Stella scavate nella roccia, rioni a gradoni in discesa con scalinate reali e abitazioni rupestri, altezze affidabili o stimate per zona, schede di altre cinque chiese, vetrina con il campo lungo sulle arcate | ✅ in revisione |
 | 4 | Rifinitura: musica procedurale (Web Audio, 40%, muto), transizioni di camera, prove su telefoni reali | ⏳ |
+
+### Da decidere insieme (fase 3, punto 6)
+
+**Percorsi pedonali e scalinate.** Nei dati ci sono 20 tratti di marciapiede o passaggio
+pedonale (1,7 km), 7 scalinate (165 m) e 8 sentieri (3,2 km). Aggiungendo marciapiedi e
+scalinate alla rete, sempre senza vicoli ciechi, si passa da 157 a 178 tratti e da 8,96 a
+9,83 km, con circa 1 km pedonale in più (i sentieri non aggiungono anelli). Tre strade possibili:
+1. lasciarli decorativi, come oggi le scalinate;
+2. percorrerli col mezzo, come già il ponte (ma una Huracán giù per una scalinata stona);
+3. un tratto **a piedi**: sui tratti pedonali il mezzo si ferma all'imbocco e prosegue una
+   figurina low-poly, che al tratto carrabile successivo ritrova il mezzo. Più lavoro, ma è
+   fedele e mostra i rioni dal loro punto di vista.
+
+**Allargare il diorama.** Oggi è 780 × 860 m. Appena fuori restano il Museo Civico (30 m a
+est), la Chiesa di San Domenico (90 m a est), la Pineta comunale (a nord) e, più lontano, il
+Santuario della Madonna delle Grazie con la facciata a stemma (circa 360 m a nord-est). Con 100 m
+in più per lato l'area cresce di oltre il 50%: più edifici e triangoli, da misurare sui telefoni.
+
+**Quote reali.** Il modello di elevazione Copernicus GLO-30 (30 m, licenza libera con
+attribuzione) è raggiungibile dal bucket S3 pubblico. Si potrebbe usare nello script per tarare
+ciglio, gradoni e discesa dei rioni, oggi tracciati a mano, e scrivere le quote in `GEO`. A
+30 m il canyon è appena accennato: servirebbe come guida, non come terreno diretto.
 
 Il prompt per continuare il lavoro in una nuova chat è in [`PROMPT_NUOVA_CHAT.md`](PROMPT_NUOVA_CHAT.md).

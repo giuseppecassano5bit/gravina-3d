@@ -29,7 +29,10 @@ Come funziona
        perché richiesto dal progetto: nei dati è marcato come "pedonale".
     3. Edifici: sagome reali semplificate, con cortili (fori) e classe.
     4. Morfologia: corso del Torrente La Gravina, falesie, mura, belvederi,
-       più il ciglio del canyon tracciato a mano su belvederi, mura e falesie.
+       scalinate reali (solo decorative), più il ciglio del canyon tracciato a
+       mano su belvederi, mura e falesie.
+    Altezze degli edifici: solo numero di piani e altezze di OpenStreetMap; le
+    stime automatiche dalle immagini aeree (Microsoft ML Buildings) si scartano.
 """
 from __future__ import annotations
 
@@ -530,6 +533,23 @@ def building_kind(cls):
     return KIND['house']
 
 
+def reliable_height(b):
+    """
+    Altezza affidabile in metri, oppure None.
+    Si usano il numero di piani e l'altezza di OpenStreetMap. Le altezze stimate
+    dalle immagini aeree (Microsoft ML Buildings) nel centro storico sono spesso
+    assurde (1,5-2,5 m per un condominio) e si scartano: le stima il diorama per zona.
+    """
+    if b.get('num_floors'):
+        return b['num_floors'] * 3.3 + 0.6
+    if not b.get('height'):
+        return None
+    srcs = b.get('sources') or []
+    src = next((x for x in srcs if x.get('property') == '/properties/height'), None) \
+        or next((x for x in srcs if not x.get('property')), None)
+    return b['height'] if src and src.get('dataset') == 'OpenStreetMap' else None
+
+
 def build_buildings(raw):
     area = box(AREA[0], AREA[2], AREA[1], AREA[3])
     out = []
@@ -543,7 +563,7 @@ def build_buildings(raw):
             if p.is_empty or p.area < 8:
                 continue
             out.append({'poly': p, 'kind': building_kind(b.get('class')),
-                        'name': (b.get('names') or {}).get('primary'), 'height': b.get('height'),
+                        'name': (b.get('names') or {}).get('primary'), 'height': reliable_height(b),
                         'level': b.get('level') or 0})
     print(f'  edifici: {len(out)}')
     return out
@@ -769,6 +789,15 @@ def build_features(data):
         if g.geom_type == 'Polygon' and inside(g.centroid.coords[0], AREA):
             areas.append((l.get('class'), g.simplify(0.5)))
 
+    # Scalinate reali (OSM highway=steps): nel diorama sono gradini di tufo da guardare, non vie.
+    steps = []
+    for sg in data['segment']:
+        if sg.get('class') != 'steps' or sg['geom']['type'] != 'LineString':
+            continue
+        line = LineString([to_local(*p) for p in sg['geom']['coordinates']]).intersection(box(AREA[0], AREA[2], AREA[1], AREA[3]))
+        if line.geom_type == 'LineString' and line.length > 4:
+            steps.append(((sg.get('names') or {}).get('primary'), line))
+
     places = []
     keep = ('christian_place_of_worship', 'museum', 'historic_site', 'public_plaza', 'library', 'bridge', 'park', 'land_feature')
     for p in data['place']:
@@ -777,7 +806,7 @@ def build_features(data):
         if cat in keep and inside((e, n), AREA) and (p.get('confidence') or 0) >= 0.6:
             places.append((e, n, (p.get('names') or {}).get('primary'), cat))
     return {'river': rl, 'cliffs': cliffs, 'walls': walls, 'views': views,
-            'bridges': bridges, 'areas': areas, 'places': places}
+            'bridges': bridges, 'areas': areas, 'places': places, 'steps': steps}
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -836,11 +865,12 @@ def encode(edges, pos, buildings, arches, feats):
         'bridges': [flat(b.coords) for b in feats['bridges']],
         'areas': [[c, flat(g.exterior.coords[:-1])] for c, g in feats['areas']],
         'places': [[round(e, 1), round(n, 1), nid(nm), c] for e, n, nm, c in feats['places'] if nm],
+        'steps': [[nid(nm), flat(g.coords)] for nm, g in feats['steps']],
         'rims': {'east': flat(EAST_RIM), 'west': flat(WEST_RIM)},
     }
     lines = ['const GEO = {']
     for k, v in geo.items():
-        if k in ('edges', 'buildings', 'arches', 'places', 'areas', 'cliffs', 'walls', 'views', 'bridges'):
+        if k in ('edges', 'buildings', 'arches', 'places', 'areas', 'cliffs', 'walls', 'views', 'bridges', 'steps'):
             lines.append(f'  {k}: [')
             lines += [f'    {json.dumps(x, ensure_ascii=False, separators=(",", ":"))},' for x in v]
             lines.append('  ],')
@@ -876,6 +906,8 @@ def preview(path, edges, buildings, arches, feats):
     for a in arches:
         x, y = a['poly'].exterior.xy
         ax.fill(x, y, color='#7a2ea0', lw=0)
+    for _, g in feats['steps']:
+        ax.plot(*g.xy, color='#6a3a1c', lw=2.5)
     x, y = feats['river'].xy
     ax.plot(x, y, color='#2a7fd4', lw=2)
     for rim, c in ((EAST_RIM, 'r'), (WEST_RIM, 'm')):

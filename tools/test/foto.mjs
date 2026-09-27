@@ -1,6 +1,6 @@
 /**
  * Screenshot delle scene principali in tools/test/shots/:
- * vetrina dei quattro mezzi vicino al ponte, partenza sul ponte, incrocio,
+ * vetrina dei quattro mezzi vicino al ponte e campo lungo sulle arcate, partenza sul ponte, incrocio,
  * menu di pausa, teletrasporto, un arco sulla via e il centro.
  * Con "mobile" usa un telefono in verticale, con "orizzontale" un telefono in orizzontale.
  */
@@ -23,6 +23,9 @@ for (const [i, id] of ['panda', 'rs6', 'huracan', 'deere'].entries()) {
   await run(() => window.gravina.advance(2.5));
   await shot(`0${i}-vetrina-${id}`, 700);
 }
+// Vetrina, secondo tempo: il campo lungo sul Ponte Acquedotto con le arcate.
+await run(() => window.gravina.advance(14));
+await shot('04-vetrina-ponte', 700);
 await page.click('#start-picker .vcard[data-id="huracan"]');
 
 // Partenza: si attraversa il ponte.
@@ -77,7 +80,7 @@ if (mode !== 'mobile' && mode !== 'orizzontale') {
         g.camera.lookAt(-24, -12, -297);
       } else if (id === 'purgatorio') {
         const b = g.DATA.building('Santa Maria del Suffragio');
-        const fe = g.Details.frontEdge(g.DATA.pairs(b[3][0]), 5);
+        const fe = g.Details.frontEdge(g.DATA.pairs(b[3][0]), 5, g.DATA.locate('Chiesa del Purgatorio'));
         const y = g.Terrain.heightAt(fe.M[0] + fe.n[0] * 2, fe.M[1] + fe.n[1] * 2);
         g.camera.position.set(fe.M[0] + fe.n[0] * 11 + fe.n[1] * 3, y + 5, -(fe.M[1] + fe.n[1] * 11 - fe.n[0] * 3));
         g.camera.lookAt(fe.M[0], y + 4, -fe.M[1]);

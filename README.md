@@ -33,7 +33,17 @@ dispositivo, gratis:
 3. in **Build and deployment** scegli **Deploy from a branch**, branch `main`, cartella `/ (root)`, e salva.
 
 Dopo un paio di minuti il diorama è su `https://giuseppecassano5bit.github.io/gravina-3d/`.
-Non serve nessun passaggio di compilazione: `index.html` è già il sito.
+Non serve nessun passaggio di compilazione: `index.html` è già il sito (il file `.nojekyll`
+dice a GitHub di pubblicarlo così com'è). Da lì in poi ogni push su `main` aggiorna il sito.
+
+### Lavorare in locale con Claude Code
+
+Tutto per continuare sul proprio computer è nel repository:
+
+* [`CLAUDE.md`](CLAUDE.md): regole e vincoli del progetto, letti da Claude Code all'avvio;
+* [`docs/LAVORARE_IN_LOCALE.md`](docs/LAVORARE_IN_LOCALE.md): cosa installare, prove, server locale, pubblicazione;
+* [`docs/PROMPT_NUOVA_CHAT.md`](docs/PROMPT_NUOVA_CHAT.md): il prompt da incollare nella nuova chat;
+* [`docs/DA_FARE.md`](docs/DA_FARE.md): cosa resta da fare e le decisioni aperte.
 
 ## Comandi
 
@@ -71,17 +81,18 @@ Il file `index.html` è diviso in sezioni numerate e commentate:
 | 1 | Utilità | matematica, rumore procedurale, geometria piana |
 | 2 | Geografia | conversione da latitudine/longitudine a metri |
 | 3 | Dati | blocco `GEO` generato (vie, incroci, edifici, torrente…) e monumenti curati |
-| 4 | Gravina e terreno | canyon sul corso reale del torrente, falesie e gradoni dei rioni |
+| 4 | Gravina e terreno | canyon sul corso reale del torrente, falesie, gradoni e discesa dei rioni Piaggio e Fondovico (`RIONI`) |
 | 5 | Rete stradale | vie reali come spline, uscite agli incroci, cartelli, controlli |
-| 6 | Mondo | terreno, strade, Ponte Acquedotto ad archi, edifici reali, archi sulle vie, Cattedrale, grotte, alberi |
-| 6d | Dettagli | portali delle chiese, Purgatorio con scheletri e orsi, palazzi, Fontana della Stella, belvederi, lanterne |
+| 6 | Mondo | terreno, strade, Ponte Acquedotto ad archi, edifici reali con le case a gradoni dei rioni, archi sulle vie, Cattedrale, chiese rupestri, grotte, abitazioni rupestri, alberi |
+| 6d | Dettagli | portali delle chiese, portale del Purgatorio, palazzi, Fontana della Stella, scalinate, belvederi, lanterne |
 | 7 | Mezzi | Panda 4x4, RS6, Huracán e trattore, costruiti solo da primitive |
 | 8 | Conducente | movimento automatico, incroci, pausa con frenata |
-| 9 | Camera | vetrina, inseguimento che scavalca i tetti nei vicoli, panoramiche, vista dall'alto in pausa |
+| 9 | Camera | vetrina a due tempi (primo piano e campo lungo sulle arcate), inseguimento che scavalca i tetti nei vicoli, panoramiche, vista dall'alto in pausa |
 | 10–11 | Interfaccia | minimappa, mappa della pausa, scelta del mezzo, targa, cartelli, schede, teletrasporto |
 | 12–13 | Scena e avvio | cielo al tramonto, luci, ombre agganciate ai texel, qualità adattiva, ciclo principale |
 
-Il documento di progetto completo è in [`docs/DESIGN.md`](docs/DESIGN.md).
+Il documento di progetto completo è in [`docs/DESIGN.md`](docs/DESIGN.md); cosa resta da fare
+è in [`docs/DA_FARE.md`](docs/DA_FARE.md).
 
 ## Dati geografici
 
@@ -101,6 +112,17 @@ Lo script scarica solo i pochi MB che riguardano Gravina, costruisce la rete str
 vicoli ciechi e riscrive il blocco `GEO` dentro `index.html`. Le scelte (vie cieche da
 conservare, ciglio del canyon, area del diorama) sono costanti commentate in cima allo script.
 
+Oltre alle vie esporta le **scalinate reali** (in OpenStreetMap `highway=steps`: la scalinata
+di Via giudice Montea, i Gradoni San Giovanni Battista e altre cinque), che nel diorama sono
+gradini di tufo da guardare e non si percorrono.
+
+**Altezze degli edifici.** In OpenStreetMap mancano quasi sempre: nell'area del diorama il
+numero di piani c'è solo per il Museo Santomasi (3 piani). Overture aggiunge le altezze stimate
+dalle immagini aeree (Microsoft ML Buildings) per 35 edifici, ma nel centro storico sono spesso
+assurde (1,5-2,5 m per un condominio): lo script le scarta. Le altezze mancanti le stima il
+diorama per zona: uno o due piani nei rioni Piaggio e Fondovico, due o tre nel centro storico,
+tre-cinque nei quartieri moderni.
+
 Lo script **libera anche le vie dagli edifici**: ricentra ogni via tra le facciate, la
 restringe nei vicoli stretti (mai sotto 3,4 m), ritaglia le sagome lungo la carreggiata e
 trasforma in **archi** i corpi sopraelevati reali che scavalcano una via (in OpenStreetMap
@@ -113,7 +135,9 @@ notizie storiche da fonti pubbliche citate qui sotto.
 
 ## Personalizzare
 
-* **Punto di partenza**: costante `START` in `index.html` (metri prima della testata est del ponte).
+* **Punto di partenza**: costante `START` in `index.html` (metri prima della testata est del ponte, oggi 12).
+* **Vetrina**: `CONFIG.camera.showroom` (durate del primo piano e del campo lungo, pose del campo lungo).
+* **Rioni**: costante `RIONI` (tratto di ciglio, larghezza e profondità della discesa verso la gravina).
 * **Mezzi**: array `VEHICLES` (nome, colore, ritmo `pace`, sagoma per i menu) e le funzioni in `VehicleFactory`.
 * **Velocità e frenata**: `CONFIG.drive`.
 * **Camera**: `CONFIG.camera` (altezza, distanza, quanto può salire sopra i tetti).
@@ -142,8 +166,8 @@ Prove automatiche con Playwright: vedi [`tools/test/README.md`](tools/test/READM
 | 1 | Documento di progetto | ✅ |
 | 2 | Base: rete stradale, auto, incroci, camera, interfaccia | ✅ |
 | 2b | Dati reali: vie e incroci reali, edifici, torrente e cigli, ponte ad archi | ✅ |
-| 2c | Vie libere dagli edifici e archi reali; quattro mezzi a scelta; partenza dal ponte; pausa con cambio mezzo, mappa e teletrasporto; camera che scavalca i tetti; dettagli dei monumenti; versione mobile | ✅ in revisione |
-| 3 | Architettura: altre facciate dei monumenti, chiese rupestri scavate nella roccia | ⏳ |
+| 2c | Vie libere dagli edifici e archi reali; quattro mezzi a scelta; partenza dal ponte; pausa con cambio mezzo, mappa e teletrasporto; camera che scavalca i tetti; dettagli dei monumenti; versione mobile | ✅ |
+| 3 | Architettura e fedeltà: Cattedrale e Purgatorio sulle fonti, chiese rupestri scavate, rioni a gradoni con scalinate e abitazioni rupestri, altezze per zona, schede di altre cinque chiese, vetrina sulle arcate | ✅ in revisione |
 | 4 | Rifinitura: musica procedurale, transizioni di camera, prove su telefoni reali | ⏳ |
 
 ## Licenze e marchi
@@ -162,9 +186,15 @@ Prove automatiche con Playwright: vedi [`tools/test/README.md`](tools/test/READM
 Notizie storiche e posizioni dei monumenti da fonti pubbliche, tra cui:
 
 * Ponte Acquedotto: [Wikipedia (EN)](https://en.wikipedia.org/wiki/Ponte_Madonna_della_Stella), [GravinaLife](https://www.gravinalife.it/rubriche/passeggiando-con-la-storia-1/il-ponte-acquedotto-settecentesco-orsiniano-della-madonna-della-stella/), [Viaggiamo.it](https://www.viaggiamo.it/ponte-acquedotto-di-gravina-di-puglia-la-storia/)
-* Cattedrale: [Wikipedia](https://it.wikipedia.org/wiki/Concattedrale_di_Santa_Maria_Assunta_(Gravina_in_Puglia)), [GCatholic](https://gcatholic.org/churches/italy/1312.htm), [GravinaOggi, struttura architettonica](https://www.gravinaoggi.it/_la_struttura_architettonica.html)
-* Chiesa del Purgatorio: [FAI, portale](https://fondoambiente.it/luoghi/portale-chiesa-purgatorio), [Wikidata](https://www.wikidata.org/wiki/Q55163985)
-* Rioni Piaggio e Fondovico: [Stanze Orsini](https://www.stanzeorsini.it/rioni-piaggio-e-fondovico/), [FAI](https://fondoambiente.it/luoghi/rioni-piaggio-e-fondovico?ldc=)
-* Madonna della Stella: [Il Tacco di Bacco](https://iltaccodibacco.it/puglia/guida/7825/)
-* San Michele delle Grotte: [Showcaves](https://www.showcaves.com/english/it/caves/SanMicheleGravina.html)
+* Cattedrale: [Wikipedia](https://it.wikipedia.org/wiki/Concattedrale_di_Santa_Maria_Assunta_(Gravina_in_Puglia)), [Wikipedia (EN)](https://en.wikipedia.org/wiki/Gravina_Cathedral), [Carta dei Beni Culturali della Regione Puglia](https://www.cartapulia.it/en/esplora-la-carta/-/rcp/ricercaCartapulia_INSTANCE_1yi8w0oVRO9u/dettaglio/5990) (orientamento, facciata tripartita con tre portali e rosone a 24 raggi, campanile sul profilo sud, cappellone), [Museo Capitolare, campanile](https://www.museocapitolaregravina.it/campanile-cattedrale/) (quattro ordini, cipollone del 1698), [Visit Puglia](https://www.visit-puglia.it/at/11/luogosacro/786/it/Cattedrale-di-Santa-Maria-Assunta-Gravina-in-Puglia-(Bari)) (portale sud e secondo rosone attiguo al campanile), [Catalogo generale dei Beni Culturali](https://catalogo.beniculturali.it/detail/ArchitecturalOrLandscapeHeritage/1600180859), [GCatholic](https://gcatholic.org/churches/italy/1312.htm), [GravinaOggi, struttura architettonica](https://www.gravinaoggi.it/_la_struttura_architettonica.html)
+* Chiesa del Purgatorio: [FAI, portale](https://fondoambiente.it/luoghi/portale-chiesa-purgatorio) (pilastri a torri sovrapposte sugli orsi, timpano spezzato con gli scheletri, stemma ed epigrafe), [Wikipedia](https://it.wikipedia.org/wiki/Chiesa_di_Santa_Maria_del_Suffragio_(Gravina_in_Puglia)), [GravinaOggi](https://www.gravinaoggi.it/chiesa-ducale-santa-maria-del-suffragio--o-purgatorio-.html), [Wikidata](https://www.wikidata.org/wiki/Q55163985)
+* Rioni Piaggio e Fondovico: [Stanze Orsini](https://www.stanzeorsini.it/rioni-piaggio-e-fondovico/), [FAI](https://fondoambiente.it/luoghi/rioni-piaggio-e-fondovico?ldc=), [GravinaOggi](https://www.gravinaoggi.it/i-rioni-storici-piaggio-e-fondovito-a-gravina.html) (scalinate di tufo, circa ottanta ambienti scavati)
+* Madonna della Stella: [GravinaLife](https://www.gravinalife.it/rubriche/passeggiando-con-la-storia-1/santuario-rupestre-madonna-della-stella/) (esterno imbiancato, campanile a vela in mattoni, corpo basso a una falda), [Museo Capitolare](https://www.museocapitolaregravina.it/madonna-della-stella/), [Il Tacco di Bacco](https://iltaccodibacco.it/puglia/guida/7825/)
+* San Michele delle Grotte: [Museo Capitolare](https://www.museocapitolaregravina.it/san-michele-delle-grotte/), [Wikipedia](https://it.wikipedia.org/wiki/Chiesa_rupestre_di_San_Michele), [Showcaves](https://www.showcaves.com/english/it/caves/SanMicheleGravina.html)
+* San Francesco: [GravinaLife](https://www.gravinalife.it/rubriche/passeggiando-con-la-storia-1/la-monumentale-chiesa-di-san-francesco-nella-sua-evoluzione-storica/), [GravinaOggi, il campanile](https://www.gravinaoggi.it/il_campanile_di_san_francesco.html)
+* Santa Sofia: [GravinaLife](https://www.gravinalife.it/rubriche/passeggiando-con-la-storia-1/gravina-santa-sofia-tomba-di-angela-castriota-skanderbeg/), [Columbia University, Spanish Italy and the Iberian Americas](https://siia.mcah.columbia.edu/object/tomb-angela-castriota-skanderbeg-s-sofia-gravina)
+* Santa Cecilia: [GravinaLife](https://www.gravinalife.it/rubriche/passeggiando-con-la-storia-1/chiesa-santa-cecilia-nel-centro-storico/), [GravinaOggi](https://www.gravinaoggi.it/chiesa-di-santa-cecilia.html)
+* Santa Teresa: [GravinaOggi, il monastero](https://www.gravinaoggi.it/monastero-di-santa-teresa-a-gravina-in-puglia.html), [GravinaOggi, il SS. Nome di Gesù](https://www.gravinaoggi.it/la_chiesa_del_ss_nome_di_gesu.html) (l'antica parrocchia di San Matteo)
+* Chiesa del Gesù: [GravinaOggi](https://www.gravinaoggi.it/la_chiesa_del_ss_nome_di_gesu.html), [Carta dei Beni Culturali della Regione Puglia](https://cartapulia.it/dettaglio?id=127705)
+* Addolorata: nessuna fonte affidabile trovata (nei dati il punto d'interesse vicino si chiama "Chiesa dell'Annunziata"), quindi solo l'etichetta
 * Geografia generale: [Wikipedia, Gravina in Puglia](https://en.wikipedia.org/wiki/Gravina_in_Puglia)
