@@ -21,7 +21,7 @@ del lavoro su due chat in [`PIANO_FASE_3_4.md`](PIANO_FASE_3_4.md).
       proprietà appena creata, e il file è valido (200, `application/xml`). Se resta così, reinviarla.
 - [x] Descrizione del repository su GitHub aggiornata, con il link al sito nel riquadro About.
 
-### Fase 3.4, blocco C · la città intera (PR #8, in revisione) 🔄
+### Fase 3.4, blocco C · la città intera (PR #8, unita il 28/09/2026) ✅
 
 - [x] Pipeline: zolla di 2,9 × 3,1 km (12 × 13 riquadri da 240 m), 80 km di vie percorribili
       (1 390 tratti, 861 incroci) più 238 vie cieche decorative, 1 828 edifici della città,
@@ -42,10 +42,9 @@ del lavoro su due chat in [`PIANO_FASE_3_4.md`](PIANO_FASE_3_4.md).
 - [ ] **Schermata iniziale in orizzontale sul telefono**: il pannello sfora di circa 50 px e la
       riga delle quote Copernicus si vede solo scorrendo (chat interfaccia).
 - [ ] Provare la città su un telefono vero (fps, tempo di costruzione, calore).
-- [ ] Dopo l'unione: blocco F (strade per il Bosco Difesa Grande e il P.I.P.) e, se c'è margine,
-      blocco G (percorsi a piedi e quote reali del centro storico).
+- [x] Dopo l'unione: blocco F (strade per il Bosco Difesa Grande e il P.I.P.), unito.
 
-### Fase 3.4, blocco F · strade per il Bosco Difesa Grande e il P.I.P. (PR #10, in revisione) 🔄
+### Fase 3.4, blocco F · strade per il Bosco Difesa Grande e il P.I.P. (PR #10, unita il 28/09/2026) ✅
 
 - [x] Regola del **tracciato reale compresso** in `CLAUDE.md` (eccezione come il Ponte Acquedotto).
 - [x] Tre zolle (città, P.I.P., Bosco) in `GEO.meta.zolle`; plinto, riquadri e minimappa per zolla.
@@ -57,7 +56,10 @@ del lavoro su due chat in [`PIANO_FASE_3_4.md`](PIANO_FASE_3_4.md).
       verdi; budget rispettato (telefono 241 000 triangoli e 53 draw call al massimo, PC 334 000 e
       69; 277 KB compressi).
 - [ ] **Rifugio**: se si trovano fonti affidabili, dargli una scheda.
-- [ ] Dopo l'unione, se c'è margine: blocco G (percorsi a piedi e quote reali del centro storico).
+- [ ] Prossimo: blocco G (percorsi a piedi e quote reali del centro storico), se il budget lo
+      permette: dopo il blocco F restano circa 3 KB compressi e 9 000 triangoli sul telefono.
+- [ ] Blocchi B (camera libera), D (revisione del centro storico) ed E (nuovi luoghi): non
+      ancora iniziati.
 
 ## Fatto finora
 

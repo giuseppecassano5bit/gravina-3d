@@ -212,7 +212,7 @@ Ogni blocco ha il suo branch e una PR in bozza aperta subito. Push dopo ogni com
 
 ### A · Crediti e ricerca su Google (`fase-3-4-a-crediti-seo`)
 - Togliere ogni riferimento allo sponsor precedente: schermata iniziale, meta description,
-  commento di testa di `index.html`, README, DESIGN, CLAUDE.md, `docs/PROMPT_NUOVA_CHAT.md` e
+  commento di testa di `index.html`, README, DESIGN, CLAUDE.md, il prompt per la nuova chat e
   ogni altro file (un `grep -ri` sul nome non deve trovare nulla).
 - Unico credito: **Giuseppe Cassano** (github.com/giuseppecassano5bit), nella schermata iniziale
   e come autore nei metadati.
@@ -381,6 +381,9 @@ licenze), `CLAUDE.md` (nuove regole ed eccezioni).
 ---
 
 ## 9. Lavoro in parallelo su due chat
+
+*Concluso il 28/09/2026: le due cartelle parallele sono state chiuse e si lavora di nuovo
+nella cartella principale, un blocco alla volta. La sezione resta come promemoria.*
 
 **Cartelle di lavoro** (git worktree dello stesso repository; la cartella principale
 `progetto gravina 3d` resta su `main` e non ci si lavora):
