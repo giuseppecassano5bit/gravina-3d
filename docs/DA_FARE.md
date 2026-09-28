@@ -2,6 +2,9 @@
 
 Stato al 28 settembre 2026: fase 3 approvata e online. Aggiornare questo file a ogni fase.
 
+**Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
+del lavoro su due chat in [`PIANO_FASE_3_4.md`](PIANO_FASE_3_4.md).
+
 ## Fatto finora
 
 | Fase | Contenuto | Stato |
