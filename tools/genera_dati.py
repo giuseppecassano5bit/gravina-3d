@@ -1402,6 +1402,12 @@ def ring_ints(coords, q):
     return out
 
 
+def dm_ints(flat_coords):
+    """Linea piatta a 0,1 m → interi: numero di punti, primo punto in dm, poi differenze. Senza perdite."""
+    q = [round(v * 10) for v in flat_coords]
+    return [len(q) // 2, *q[:2], *(q[k] - q[k - 2] for k in range(2, len(q)))]
+
+
 def encode(edges, deco, pos, buildings, city, arches, feats, extra):
     names, name_idx = [], {}
 
@@ -1424,16 +1430,23 @@ def encode(edges, deco, pos, buildings, city, arches, feats, extra):
     def flags(e):
         return ((1 if e['bridge'] else 0) | (2 if e['foot'] else 0) | (4 if e.get('turn') else 0)
                 | (8 if e['cls'] == 'track' else 0) | (16 if e.get('urban') else 0))
+    # Vie, vie decorative ed edifici del centro storico in forma compatta (CODEC), a 0,1 m come prima:
+    # index.html li riporta alle righe di sempre in DATA.unpack().
     E = []
     for e in edges:
         poly = list(e['poly'])
         poly[0], poly[-1] = pos[e['a']], pos[e['b']]        # estremi esattamente sui nodi
-        E.append([node_ids[e['a']], node_ids[e['b']], CLASS_CODE.get(e['cls'], 2), nid(e['name']), flags(e), flat(poly), e['width']])
-    D = [[CLASS_CODE.get(e['cls'], 2), nid(e['name']), flags(e), e['width'], flat(e['poly'])] for e in deco]
+        E += [node_ids[e['a']], node_ids[e['b']], CLASS_CODE.get(e['cls'], 2), nid(e['name']), flags(e),
+              round(e['width'] * 10), *dm_ints(flat(poly))]
+    D = []
+    for e in deco:
+        D += [CLASS_CODE.get(e['cls'], 2), nid(e['name']), flags(e), round(e['width'] * 10), *dm_ints(flat(e['poly']))]
     B = []
     for b in buildings:
         rings = [flat(b['poly'].exterior.coords[:-1])] + [flat(r.coords[:-1]) for r in b['poly'].interiors]
-        B.append([b['kind'], nid(b['name']), round(b['height'] or 0, 1), rings])
+        B += [b['kind'], nid(b['name']), round((b['height'] or 0) * 10), len(rings)]
+        for r in rings:
+            B += dm_ints(r)
     # Edifici della città moderna: tipo, nome, altezza in dm, anelli a passo di 0,25 m.
     C = []
     for b in city:
@@ -1461,10 +1474,10 @@ def encode(edges, deco, pos, buildings, city, arches, feats, extra):
             'origine': list(ORIGIN), 'area': list(BOUND), 'zolle': [list(z) for z in ZOLLE], 'z0': list(Z0), 'riquadro': TILE, 'quota0': ALT0,
         },
         'names': names,
-        'nodes': flat(nodes),
-        'edges': E,
-        'deco': D,
-        'buildings': B,
+        'nodes': varint(dm_ints(flat(nodes))),
+        'edges': varint(E),
+        'deco': varint(D),
+        'buildings': varint(B),
         'city': varint(C),
         'dem': {'passo': DEM_STEP, 'nx': g.shape[1], 'ny': g.shape[0], 'q': 0.25, 'dati': varint(dem)},
         'cover': {'passo': COVER_STEP, 'nx': extra['cover'].shape[1], 'ny': extra['cover'].shape[0], 'dati': varint(runs)},
@@ -1484,7 +1497,7 @@ def encode(edges, deco, pos, buildings, city, arches, feats, extra):
     }
     lines = ['const GEO = {']
     for k, v in geo.items():
-        if k in ('edges', 'deco', 'buildings', 'arches', 'places', 'pois', 'areas', 'cliffs', 'walls', 'views', 'bridges', 'steps', 'rails'):
+        if k in ('arches', 'places', 'pois', 'areas', 'cliffs', 'walls', 'views', 'bridges', 'steps', 'rails'):
             lines.append(f'  {k}: [')
             lines += [f'    {json.dumps(x, ensure_ascii=False, separators=(",", ":"))},' for x in v]
             lines.append('  ],')
