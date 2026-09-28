@@ -3444,7 +3444,7 @@ const CODEC = (() => {
 })();
 
 /** Uso del suolo nella griglia `GEO.cover` (tools/genera_dati.py, COVER). */
-const COVER = { CAMPAGNA: 0, CITTA: 1, PARCO: 2, BOSCO: 3, CAMPO: 4, ULIVETO: 5, INDUSTRIA: 6, CIMITERO: 7, SPORT: 8, PIAZZA: 9, MACCHIA: 10, CAVA: 11 };
+const COVER = { CAMPAGNA: 0, CITTA: 1, PARCO: 2, BOSCO: 3, CAMPO: 4, ULIVETO: 5, INDUSTRIA: 6, CIMITERO: 7, SPORT: 8, PIAZZA: 9, MACCHIA: 10, CAVA: 11, QUERCE: 12 };
 
 /** Accesso comodo ai dati generati. */
 const DATA = {
@@ -3582,10 +3582,18 @@ const LANDMARKS = [
 
 /**
  * Luoghi della città moderna (blocco C): per ora solo etichette, senza scheda. Le schede con
- * i fatti verificati arrivano con il blocco E.
+ * i fatti verificati arrivano con il blocco E. Blocco F: il P.I.P. e il Bosco Difesa Grande,
+ * in fondo alla strada compressa (posizioni del diorama, non quelle reali). Il rifugio ha solo
+ * l'etichetta: nessuna fonte pubblica lo descrive.
  */
 const CITY_LANDMARKS = [
   { id: 'castello', name: 'Castello Svevo', ref: 'Castello Svevo', card: false },
+  { id: 'pip', name: 'P.I.P. - Zona Artigianale', at: [2709, 778], card: false },
+  {
+    id: 'bosco', name: 'Bosco Difesa Grande', at: [262, -1732], kicker: 'Zona speciale di conservazione · a 6 km dalla città', radius: 60,
+    text: 'Bosco di querce (roverella, cerro e farnetto) circa 6 km a sud di Gravina: circa 1.900 ettari di bosco dentro un sito Natura 2000 di oltre 5.200 ettari, zona speciale di conservazione dal 2015. Gli incendi del 12 agosto 2017 e del 28 luglio 2021 ne hanno bruciato una parte. Qui la strada è accorciata: il tracciato reale è lungo circa 5,4 km.',
+  },
+  { id: 'rifugio', name: 'Rifugio Bosco Difesa Grande', ref: 'Rifugio Bosco Difesa Grande', card: false },
 ];
 
 /**
@@ -4233,6 +4241,11 @@ function wallFrame(tb, M, n) {
 const World = {
   bounds() { const [minX, maxX, minN, maxN] = GEO.meta.area; return { minX, maxX, minN, maxN }; },
 
+  /** Il punto sta in una delle zolle (la città e le appendici del blocco F)? */
+  inZolle(e, n, pad = 0) {
+    return (GEO.meta.zolle ?? [GEO.meta.area]).some(([a, b, c, d]) => e >= a - pad && e <= b + pad && n >= c - pad && n <= d + pad);
+  },
+
   /** Punti campione delle strade (anche decorative) e dei binari usati per spianare il terreno. */
   conformerFeatures(network) {
     const features = [];
@@ -4271,14 +4284,11 @@ const World = {
     c.multiplyScalar(0.95 + r * 0.1);                           // piccola variazione "pietra viva"
   },
 
-  /** Basamento scuro sotto la zolla, come un plastico da esposizione. */
+  /** Basamento scuro sotto ogni zolla, come un plastico da esposizione. */
   buildPlinth() {
-    const T = CONFIG.terrain, B = this.bounds();
-    const mesh = new THREE.Mesh(
-      new THREE.BoxGeometry(B.maxX - B.minX + 8, 6, B.maxN - B.minN + 8),
-      new THREE.MeshStandardMaterial({ color: PALETTE.plinth, roughness: 0.7, flatShading: true }));
-    mesh.position.set((B.minX + B.maxX) / 2, T.baseY - 3, -(B.minN + B.maxN) / 2);
-    return mesh;
+    const T = CONFIG.terrain, parts = (GEO.meta.zolle ?? [GEO.meta.area]).map(([a, b, c, d]) =>
+      new THREE.BoxGeometry(b - a + 8, 6, d - c + 8).translate((a + b) / 2, T.baseY - 3, -(c + d) / 2));
+    return new THREE.Mesh(mergeGeometries(parts), new THREE.MeshStandardMaterial({ color: PALETTE.plinth, roughness: 0.7, flatShading: true }));
   },
 
   /**
@@ -5582,10 +5592,10 @@ const Tiles = {
   /** Triangoli per strato (per le misure di prestazioni). */
   stats: { terreno: 0, vie: 0, edifici: 0, alberi: 0, binari: 0, fianchi: 0 },
 
-  /** Riquadro che contiene il punto (e, n), o null fuori dalla zolla. */
+  /** Riquadro che contiene il punto (e, n), o null fuori dalle zolle. */
   at(e, n) {
     const i = Math.floor((e - this.e0) / this.size), j = Math.floor((n - this.n0) / this.size);
-    return i >= 0 && j >= 0 && i < this.nx && j < this.ny ? this.list[j * this.nx + i] : null;
+    return i >= 0 && j >= 0 && i < this.nx && j < this.ny ? this.grid[j * this.nx + i] : null;
   },
 
   /** Nel centro storico (zona Z0) vie ed edifici hanno il dettaglio pieno delle fasi 2–3. */
@@ -5602,8 +5612,10 @@ const Tiles = {
     this.material = cityMaterial();
     const [z0a, z0b, z0c, z0d] = GEO.meta.z0, [pa, pb, pc, pd] = CONFIG.terrain.proc;
     const [fine, city, country] = CONFIG.city.cells;
+    this.grid = new Array(this.nx * this.ny).fill(null);   // null: fuori dalle zolle (blocco F: città, P.I.P., bosco)
     for (let j = 0; j < this.ny; j++) {
       for (let i = 0; i < this.nx; i++) {
+        if (!World.inZolle(e0 + (i + 0.5) * S, n0 + (j + 0.5) * S)) continue;
         const t = { i, j, e0: e0 + i * S, n0: n0 + j * S, e1: e0 + (i + 1) * S, n1: n0 + (j + 1) * S, built: false, mesh: null, buildings: [], roads: [], nodes: [], rails: [] };
         const overlaps = (a, b, c, d) => t.e0 < b && t.e1 > a && t.n0 < d && t.n1 > c;
         let urban = 0, river = false;
@@ -5616,6 +5628,7 @@ const Tiles = {
         const castle = DATA.city().some((b) => b.kind === 7 && b.c[0] > t.e0 - 60 && b.c[0] < t.e1 + 60 && b.c[1] > t.n0 - 60 && b.c[1] < t.n1 + 60);
         t.cell = t.fine ? fine : urban >= 2 || river || castle ? city : country;
         this.list.push(t);
+        this.grid[j * this.nx + i] = t;
       }
     }
     this._binRoads(network);
@@ -5724,8 +5737,8 @@ const Tiles = {
   /** Maglia di confine: la più larga tra il riquadro e il vicino da quel lato (0 = bordo della zolla). */
   _edgeCell(t, di, dj) {
     const i = t.i + di, j = t.j + dj;
-    if (i < 0 || j < 0 || i >= this.nx || j >= this.ny) return 0;
-    return Math.max(t.cell, this.list[j * this.nx + i].cell);
+    const u = i < 0 || j < 0 || i >= this.nx || j >= this.ny ? null : this.grid[j * this.nx + i];
+    return u ? Math.max(t.cell, u.cell) : 0;
   },
 
   /**
@@ -5735,7 +5748,7 @@ const Tiles = {
    */
   builderAt(e, n, layer) {
     const i = clamp(Math.floor((e - this.e0) / this.size), 0, this.nx - 1), j = clamp(Math.floor((n - this.n0) / this.size), 0, this.ny - 1);
-    const t = this.list[j * this.nx + i];
+    const t = this.grid[j * this.nx + i];
     if (t.mesh) console.warn('[Riquadri] strato aggiunto a un riquadro già costruito', t.i, t.j, layer);
     t.pre ??= {};
     return (t.pre[layer] ??= new TileBuilder(1024));
@@ -5901,6 +5914,7 @@ const Tiles = {
         case COVER.PARCO: c.copy(pal.park).lerp(pal.fieldOlive, r * 0.3); break;
         case COVER.SPORT: c.set('#7f9e48'); break;
         case COVER.BOSCO: c.copy(pal.scrubDark).lerp(pal.park, r * 0.4); break;
+      case COVER.QUERCE: c.copy(pal.scrubDark).lerp(pal.fieldOchre, 0.25 + r * 0.2); break;   // lettiera di foglie
         case COVER.MACCHIA: c.copy(pal.scrub).lerp(pal.fieldGold, r * 0.3); break;
         case COVER.ULIVETO: c.copy(pal.fieldOlive).lerp(pal.scrub, 0.3); break;
         case COVER.INDUSTRIA: c.set('#cdbfa6'); break;
@@ -6065,7 +6079,7 @@ const Tiles = {
 
   _trees(t, tb) {
     const shapes = this.treeShapes();
-    const density = { [COVER.PARCO]: 0.3, [COVER.BOSCO]: 0.5, [COVER.MACCHIA]: 0.22, [COVER.ULIVETO]: 0.45, [COVER.CIMITERO]: 0.14, [COVER.CAMPAGNA]: 0.018, [COVER.CAMPO]: 0.004, [COVER.CITTA]: 0.01, [COVER.PIAZZA]: 0.06 };
+    const density = { [COVER.PARCO]: 0.3, [COVER.BOSCO]: 0.5, [COVER.QUERCE]: 0.6, [COVER.MACCHIA]: 0.22, [COVER.ULIVETO]: 0.45, [COVER.CIMITERO]: 0.14, [COVER.CAMPAGNA]: 0.018, [COVER.CAMPO]: 0.004, [COVER.CITTA]: 0.01, [COVER.PIAZZA]: 0.06 };
     const bark = new THREE.Color('#6b4a33'), c = new THREE.Color();
     const put = (geo, color, e, y, n, sx, sy, sz, rot) => this.put(tb, geo, color, e, y, n, sx, sy, sz, rot);
     const step = 8, k = this.size / step, dens = CONFIG.city.trees * (this.light ? 0.5 : 1);
@@ -6078,7 +6092,7 @@ const Tiles = {
         const rot = h1 * TAU, s = 0.8 + h2 * 0.6;
         // raggio della chioma sotto i 3,5 m d'altezza: deve restare fuori dalla carreggiata
         const reach = code === COVER.CIMITERO || code === COVER.BOSCO || (code === COVER.PARCO && h1 < 0.5) ? 1
-          : code === COVER.MACCHIA ? 1.4 * s : code === COVER.ULIVETO || code === COVER.CAMPAGNA || code === COVER.CAMPO ? 1.9 * s : 2.4 * s;
+          : code === COVER.QUERCE ? 3.6 * s : code === COVER.MACCHIA ? 1.4 * s : code === COVER.ULIVETO || code === COVER.CAMPAGNA || code === COVER.CAMPO ? 1.9 * s : 2.4 * s;
         if (Terrain.conformer.clearance(e, n) < reach + 0.6 || Buildings.occupied(e, n) || Ravine.bed(e, n).d < 5) continue;
         const g = Terrain.heightAt(e, n);
         if (code === COVER.CIMITERO) {                                            // cipresso
@@ -6087,6 +6101,9 @@ const Tiles = {
         } else if (code === COVER.BOSCO || (code === COVER.PARCO && h1 < 0.5)) { // pino d'Aleppo, chioma a ombrello
           put(shapes.trunk, bark, e, g - 0.2, n, 1.2, 5.5 * s, 1.2, rot);
           put(shapes.round, c.set(h2 < 0.5 ? '#4f6b35' : '#5b7a3a'), e, g + 5.8 * s, n, 3 * s, 1.3 * s, 3 * s, rot);
+        } else if (code === COVER.QUERCE) {                                      // roverella o cerro: chioma larga e bassa
+          put(shapes.trunk, bark, e, g - 0.2, n, 1.6, 4.2 * s, 1.6, rot);
+          put(shapes.round, c.set(h2 < 0.33 ? '#56682f' : h2 < 0.66 ? '#6a7a36' : '#4a5e2c'), e, g + 5.4 * s, n, 3.6 * s, 2.6 * s, 3.2 * s, rot);
         } else if (code === COVER.ULIVETO || code === COVER.CAMPAGNA || code === COVER.CAMPO) {   // ulivo
           put(shapes.trunk, bark, e, g - 0.2, n, 1.4, 1.4, 1.4, rot);
           put(shapes.round, c.set('#8a9a5b'), e, g + 2 * s, n, 1.9 * s, 1.2 * s, 1.9 * s, rot);
@@ -7256,7 +7273,7 @@ class CameraRig {
  * ═══════════════════════════════════════════════════════════════════════ */
 
 /** Colori dell'uso del suolo sulla mappa (COVER), sfumati come una carta turistica. */
-const MAP_COVER = ['#efe6d2', '#e8dcc3', '#cfdba6', '#b8cc92', '#f0e2b6', '#dfe2b2', '#e3dcd4', '#dcd6c8', '#c6d99c', '#f3ead6', '#d9dcae', '#e6dcc6'];
+const MAP_COVER = ['#efe6d2', '#e8dcc3', '#cfdba6', '#b8cc92', '#f0e2b6', '#dfe2b2', '#e3dcd4', '#dcd6c8', '#c6d99c', '#f3ead6', '#d9dcae', '#e6dcc6', '#a9bf84'];
 
 class MapLayers {
   constructor(network) {
@@ -7301,7 +7318,8 @@ class MapLayers {
     for (let j = 0; j < Relief.cny; j++) {
       for (let i = 0; i < Relief.cnx; i++) {
         const c = rgb[Relief.cover[j * Relief.cnx + i]] ?? rgb[0], k = ((Relief.cny - 1 - j) * Relief.cnx + i) * 4;
-        img.data[k] = c[0]; img.data[k + 1] = c[1]; img.data[k + 2] = c[2]; img.data[k + 3] = 255;
+        const on = World.inZolle(Relief.e0 + (i + 0.5) * Relief.cstep, Relief.n0 + (j + 0.5) * Relief.cstep);   // fuori dalle zolle: trasparente
+        img.data[k] = c[0]; img.data[k + 1] = c[1]; img.data[k + 2] = c[2]; img.data[k + 3] = on ? 255 : 0;
       }
     }
     cctx.putImageData(img, 0, 0);
@@ -7457,7 +7475,7 @@ const POI_GROUPS = [
   { name: 'Palazzi e musei', ids: ['orsini', 'santomasi', 'sotterranea'] },
   { name: 'Piazze e giardini', ids: ['pellicciari', 'repubblica', 'villa'] },
   { name: 'La gravina e il paesaggio', ids: ['belvedere', 'ponte', 'fontana', 'botromagno'] },
-  { name: 'Fuori dal centro storico', ids: ['castello'] },
+  { name: 'Fuori dal centro storico', ids: ['castello', 'pip', 'bosco', 'rifugio'] },
 ];
 
 class PauseMap {
