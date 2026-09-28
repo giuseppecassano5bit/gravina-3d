@@ -2,6 +2,22 @@
 
 Stato al 28 settembre 2026: fase 3 approvata e online. Aggiornare questo file a ogni fase.
 
+**Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
+del lavoro su due chat in [`PIANO_FASE_3_4.md`](PIANO_FASE_3_4.md).
+
+### Fase 3.4, blocco A · crediti e ricerca su Google (PR #7, in revisione)
+
+- [x] Unico credito Giuseppe Cassano; nessun riferimento allo sponsor precedente nei file.
+- [x] Metadati (titolo, descrizione, canonical, Open Graph, Twitter card, JSON-LD, icona).
+- [x] Pannello «Il progetto» con testo vero e `<noscript>` più ricco.
+- [x] `og-image.jpg` generata dal diorama (`npm run anteprima`) e `sitemap.xml`.
+- [x] Schermata iniziale compattata: a 1280×720 credito e attribuzione ODbL uscivano dallo schermo.
+- [x] Proprietà creata in Google Search Console (prefisso URL) e `<meta name="google-site-verification">`
+      nel `<head>`: non va tolto, altrimenti la verifica decade.
+- [ ] Dopo l'unione: verifica in Search Console e invio di `sitemap.xml` (istruzioni nel README).
+- [ ] Descrizione del repository su GitHub: cita ancora lo sponsor precedente (si cambia da
+      **About** sulla pagina del repository).
+
 ## Fatto finora
 
 | Fase | Contenuto | Stato |

@@ -2,7 +2,7 @@
 
 Diorama 3D interattivo in stile low-poly del centro storico di **Gravina in Puglia**,
 costruito sulle **vie, gli edifici e il torrente reali**.
-Progetto open source realizzato per **Nunzia Food, Eccellenze Pugliesi**.
+Progetto open source di **Giuseppe Cassano** ([github.com/giuseppecassano5bit](https://github.com/giuseppecassano5bit)).
 
 Appena si apre, il mezzo aspetta accanto al **Ponte Acquedotto**. Scegli con che cosa
 girare: **Fiat Panda 4x4 del 1999**, **Audi RS6 Avant**, **Lamborghini Huracán** o
@@ -35,6 +35,28 @@ dispositivo, gratis:
 Dopo un paio di minuti il diorama è su `https://giuseppecassano5bit.github.io/gravina-3d/`.
 Non serve nessun passaggio di compilazione: `index.html` è già il sito (il file `.nojekyll`
 dice a GitHub di pubblicarlo così com'è). Da lì in poi ogni push su `main` aggiorna il sito.
+
+### Ricerca su Google e anteprime nei social
+
+`index.html` ha già titolo e descrizione per i motori di ricerca, i meta Open Graph e Twitter
+per le anteprime (l'immagine è `og-image.jpg`) e i dati strutturati JSON-LD (sito, opera,
+luogo e autore). Il pannello **Il progetto** della schermata iniziale è testo vero, leggibile
+anche dai motori di ricerca.
+
+Per far conoscere il sito a Google, una volta sola:
+
+1. apri [Google Search Console](https://search.google.com/search-console) e aggiungi una
+   proprietà di tipo **Prefisso URL**: `https://giuseppecassano5bit.github.io/gravina-3d/`;
+2. come metodo di verifica scegli **Tag HTML** e copia il `<meta name="google-site-verification" …>`
+   nel `<head>` di `index.html`, poi porta la modifica su `main`;
+3. quando il sito è aggiornato premi **Verifica**;
+4. in **Sitemap** invia `sitemap.xml`.
+
+Due file stanno fuori da `index.html` perché servono solo a social e motori di ricerca:
+`og-image.jpg` (1200×630, si rigenera con `npm run anteprima` in `tools/test`) e `sitemap.xml`
+(aggiornare `lastmod` quando il sito cambia molto). Non c'è `robots.txt`: su GitHub Pages il
+sito sta in `/gravina-3d/` e i motori di ricerca leggono solo quello alla radice del dominio
+(`giuseppecassano5bit.github.io/robots.txt`); senza, tutto è già indicizzabile.
 
 ### Lavorare in locale con Claude Code
 
@@ -170,12 +192,16 @@ Prove automatiche con Playwright: vedi [`tools/test/README.md`](tools/test/READM
 | 3 | Architettura e fedeltà: Cattedrale e Purgatorio sulle fonti, chiese rupestri scavate, rioni a gradoni con scalinate e abitazioni rupestri, altezze per zona, schede di altre cinque chiese, vetrina sulle arcate | ✅ in revisione |
 | 4 | Rifinitura: musica procedurale, transizioni di camera, prove su telefoni reali | ⏳ |
 
-## Licenze e marchi
+## Crediti, licenze e marchi
+
+* **Autore**: Giuseppe Cassano ([github.com/giuseppecassano5bit](https://github.com/giuseppecassano5bit)).
 
 * **Dati cartografici** (blocco `GEO` in `index.html`): © OpenStreetMap contributors, disponibili
   sotto [Open Database License (ODbL) 1.0](https://opendatacommons.org/licenses/odbl/). Sono un
   database derivato e restano sotto ODbL; l'attribuzione è visibile nella pagina.
 * **Codice**: la licenza è ancora da scegliere (per esempio MIT).
+* **Librerie e caratteri**: [Three.js](https://threejs.org) (MIT) da CDN; Marcellus SC, Barlow e
+  Barlow Semi Condensed (SIL Open Font License) da Google Fonts.
 * **Fiat** e **Panda**, **Audi** e **RS6**, **Lamborghini** e **Huracán**, **John Deere** (e i
   suoi colori verde e giallo) sono marchi dei rispettivi proprietari. I mezzi del diorama sono
   interpretazioni stilizzate non ufficiali e non riproducono loghi. Prima di un uso commerciale
