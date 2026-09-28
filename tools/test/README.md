@@ -10,6 +10,14 @@ node foto.mjs mobile        # le stesse scene su un telefono in verticale
 node foto.mjs orizzontale   # e in orizzontale
 ```
 
+L'immagine di anteprima per i social e i motori di ricerca (`og-image.jpg` nella radice,
+1200×630, al massimo 150 KB) si rigenera con:
+
+```bash
+npm run anteprima                                  # riscrive ../../og-image.jpg (serve la rete per i caratteri)
+node anteprima.mjs prova -30 440 t+42 15 240 t-5   # prova inquadrature in shots/anteprima-<n>.png
+```
+
 `simula` controlla anche che nessun dettaglio 3D (portali, campanile, scalinate, lanterne,
 parapetti…) stia sulla carreggiata all'altezza del mezzo: la voce `dettaglisullastrada` deve
 restare vuota.

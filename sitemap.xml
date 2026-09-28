@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Mappa del sito per i motori di ricerca: una sola pagina, con la sua immagine di anteprima.
+     Si invia da Google Search Console (Sitemap → sitemap.xml). Aggiornare lastmod a ogni rilascio. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://giuseppecassano5bit.github.io/gravina-3d/</loc>
+    <lastmod>2026-09-28</lastmod>
+    <image:image>
+      <image:loc>https://giuseppecassano5bit.github.io/gravina-3d/og-image.jpg</image:loc>
+    </image:image>
+  </url>
+</urlset>
