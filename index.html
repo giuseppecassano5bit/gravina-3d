@@ -444,6 +444,43 @@
   .pause-btn:active { background: var(--sign-brown); }
   .hud.is-paused .pause-btn, .hud.is-paused .junction, .hud.is-paused .touch-arrow, .hud.is-paused .card { display: none; }
 
+  /* Musica e camera libera: pillole come «Pausa», nella stessa colonna a destra */
+  .pill {
+    display: flex; align-items: center; gap: 0.45rem; height: 46px; padding: 0 1.05rem 0 0.85rem;
+    font: 700 0.84rem/1 var(--font-sign); letter-spacing: 0.14em; text-transform: uppercase;
+    color: #fff; background: var(--dusk-glass); border: 2px solid rgba(255, 255, 255, 0.85); border-radius: 99px;
+    cursor: pointer;
+  }
+  .pill svg { width: 15px; height: 15px; flex: none; }
+  .pill:active { background: var(--sign-brown); }
+  .pill:focus-visible, .radio__next:focus-visible, .radio__vol:focus-visible { outline: 3px solid var(--sunset); outline-offset: 2px; }
+  .radio {
+    position: absolute; display: flex; flex-direction: row-reverse; align-items: center; gap: 0.45rem;
+    top: calc(var(--gutter) + 176px + 30px + 56px + var(--safe-top)); right: calc(var(--gutter) + var(--safe-right));
+  }
+  /* accesa: bordo e nota color tramonto, e al posto di «Musica» il titolo del brano */
+  .radio__toggle[aria-pressed="true"] { border-color: var(--sunset); }
+  .radio__toggle[aria-pressed="true"] svg { color: var(--sunset); }
+  .radio__toggle[aria-pressed="true"] .radio__label { font: 400 1rem/1 var(--font-display); letter-spacing: 0.04em; text-transform: none; }
+  .radio__next {
+    display: grid; place-items: center; width: 38px; height: 38px; padding: 0;
+    color: #fff; background: var(--dusk-glass); border: 2px solid rgba(255, 255, 255, 0.6); border-radius: 50%; cursor: pointer;
+  }
+  .radio__next[hidden], .radio__vol[hidden] { display: none; }
+  .radio__next svg { width: 13px; height: 13px; }
+  .radio__vol { width: 88px; accent-color: var(--sunset); }
+  .follow-btn { position: absolute; top: calc(var(--gutter) + 176px + 30px + 112px + var(--safe-top)); right: calc(var(--gutter) + var(--safe-right)); }
+  .follow-btn[hidden] { display: none; }
+  .hud.is-paused .radio, .hud.is-paused .follow-btn { display: none; }
+
+  /* A piedi: pittogramma del pedone nella targa e sui cartelli dei tratti pedonali */
+  .plaque.is-walking .plaque__dest::before, .sign--walk .sign__dest::before {
+    content: ''; display: inline-block; width: 0.8em; height: 1em; margin-right: 0.4em; vertical-align: -0.12em;
+    background: currentColor;
+    -webkit-mask: var(--pedone) no-repeat center / contain; mask: var(--pedone) no-repeat center / contain;
+  }
+  .hud { --pedone: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 20'%3E%3Ccircle cx='9' cy='2.5' r='2.2'/%3E%3Cpath d='M7 6h3.2l2.3 4.2-1.6.8-1.4-2.4-.7 3.4 2.6 3.3V20h-1.8v-4.1l-2.3-2.7-1 3.4L4 20l-1.6-.9 2.5-4.3.9-4.5-1.3.8V14H2.7V9.8z'/%3E%3C/svg%3E"); }
+
   .pause { position: fixed; inset: 0; display: flex; justify-content: flex-end; pointer-events: none; }
   .pause__sheet {
     pointer-events: auto; box-sizing: border-box;
@@ -533,6 +570,11 @@
     .attribution--hud { top: calc(var(--gutter) + 104px + 4px + var(--safe-top)); font-size: 0.6rem; }
     .pause-btn { top: calc(var(--gutter) + 104px + 24px + var(--safe-top)); width: 48px; height: 48px; padding: 0; justify-content: center; }
     .pause-btn span { display: none; }
+    .pill { width: 48px; height: 48px; padding: 0; justify-content: center; }
+    .pill span { display: none; }
+    .radio { top: calc(var(--gutter) + 104px + 24px + 58px + var(--safe-top)); }
+    .radio__vol { display: none !important; }     /* sul telefono bastano i tasti del volume */
+    .follow-btn { top: calc(var(--gutter) + 104px + 24px + 116px + var(--safe-top)); }
     .plaque { max-width: calc(100vw - 2 * var(--gutter) - 116px); padding: 0.45rem 0.8rem 0.5rem; }
     .plaque__street { font-size: 1rem; }
     .card { top: calc(132px + var(--safe-top)); width: calc(100vw - 2 * var(--gutter) - 116px); padding: 0.75rem 0.9rem 0.85rem; }
@@ -583,6 +625,8 @@
     .minimap { width: 92px; height: 92px; }
     .attribution--hud { top: calc(var(--gutter) + 92px + 4px + var(--safe-top)); }
     .pause-btn { top: calc(var(--gutter) + 92px + 24px + var(--safe-top)); }
+    .radio { top: calc(var(--gutter) + 92px + 24px + 58px + var(--safe-top)); }
+    .follow-btn { top: calc(var(--gutter) + 92px + 24px + 116px + var(--safe-top)); }
     .plaque { padding: 0.4rem 0.8rem 0.45rem; }
     .plaque__street { font-size: 1rem; }
     .card { top: calc(var(--gutter) + 58px + var(--safe-top)); width: min(330px, 42vw); padding: 0.6rem 0.8rem 0.7rem; gap: 0.2rem; }
@@ -670,12 +714,18 @@
         <dd>Scegli il mezzo (Fiat Panda 4x4 del 1999, Audi RS6 Avant, Lamborghini Huracán o trattore John Deere) e premi Parti: il mezzo va avanti da solo.</dd>
         <dt>Agli incroci</dt>
         <dd>Scegli la via con <kbd>←</kbd> <kbd>→</kbd> o toccando i cartelli marroni. Se non scegli, prosegue dritto.</dd>
+        <dt>A piedi</dt>
+        <dd>I cartelli col pedone portano su passaggi e scalinate del centro storico: il mezzo si ferma, prosegui a piedi e lo ritrovi al tratto carrabile successivo.</dd>
+        <dt>Camera</dt>
+        <dd>Trascina per girare attorno al mezzo, usa la rotella o due dita per avvicinarti; dopo qualche secondo la camera torna dietro, oppure premi Segui il mezzo.</dd>
+        <dt>Musica</dt>
+        <dd>Il pulsante Musica, o il tasto <kbd>M</kbd>, accende una radio di brani ambient originali, generati dal diorama stesso.</dd>
         <dt>In pausa</dt>
         <dd>Con <kbd>P</kbd>, <kbd>Spazio</kbd> o il pulsante Pausa ti fermi: puoi cambiare mezzo o toccare un luogo sulla mappa per andarci.</dd>
       </dl>
 
       <h3>Dati e fonti</h3>
-      <p>Vie, edifici e torrente vengono da OpenStreetMap, tramite Overture Maps. Il mezzo percorre solo vie reali; l’unica eccezione è il Ponte Acquedotto, che nella realtà è pedonale. Le altezze delle case, che nei dati quasi sempre mancano, sono stimate per zona.</p>
+      <p>Vie, edifici e torrente vengono da OpenStreetMap, tramite Overture Maps. Il mezzo percorre solo vie reali; l’unica eccezione è il Ponte Acquedotto, che nella realtà è pedonale. Marciapiedi, passaggi e scalinate si percorrono a piedi, solo dove si collegano ad altre vie. Le altezze delle case, che nei dati quasi sempre mancano, sono stimate per zona.</p>
       <p>Le schede storiche riportano solo fatti verificati. Le fonti, tra cui Wikipedia, la Carta dei Beni Culturali della Regione Puglia, il FAI, il Museo Capitolare, GravinaLife e GravinaOggi, sono elencate nel <a href="https://github.com/giuseppecassano5bit/gravina-3d#fonti" target="_blank" rel="noopener">README del progetto</a>.</p>
 
       <h3>Crediti e licenze</h3>
@@ -715,6 +765,22 @@
   <button class="pause-btn" id="btn-pause" type="button" aria-label="Metti in pausa">
     <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3.6" height="12" rx="1" fill="currentColor"/><rect x="9.4" y="2" width="3.6" height="12" rx="1" fill="currentColor"/></svg>
     <span>Pausa</span>
+  </button>
+
+  <div class="radio" id="radio">
+    <button class="pill radio__toggle" id="btn-radio" type="button" aria-pressed="false" aria-label="Accendi la musica">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 2.2 14 .8v10.1a2.3 2.3 0 1 1-1.6-2.2V4.2L7.6 5v7.9A2.3 2.3 0 1 1 6 10.7z" fill="currentColor"/></svg>
+      <span class="radio__label" id="radio-label">Musica</span>
+    </button>
+    <button class="radio__next" id="btn-next" type="button" aria-label="Brano successivo" hidden>
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3l7 5-7 5zM9 3l6 5-6 5z" fill="currentColor"/></svg>
+    </button>
+    <input class="radio__vol" id="radio-vol" type="range" min="0" max="1" step="0.05" value="0.6" aria-label="Volume della musica" hidden>
+  </div>
+
+  <button class="pill follow-btn" id="btn-follow" type="button" hidden aria-label="Segui il mezzo">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1v2.2M8 12.8V15M1 8h2.2M12.8 8H15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="8" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/></svg>
+    <span>Segui il mezzo</span>
   </button>
 
   <article class="card" id="card" aria-live="polite">
@@ -857,6 +923,14 @@ const CONFIG = {
     chaseDistance: 12, chaseHeight: 18, lookAhead: 8,   // vista da plastico, abbastanza dall'alto per i vicoli
     maxLift: 22,             // m: quanto può salire la camera per scavalcare i tetti nei vicoli
     walk: { distance: 6.5, height: 4.6, lookAhead: 2.5, maxLift: 15 },   // a piedi: più bassa e più vicina alla figurina
+    /** Camera libera: si gira attorno al mezzo trascinando; dopo `idle` s senza tocchi torna dietro. */
+    orbit: { idle: 4, minDist: 8, maxDist: 70, minElev: 10, maxElev: 80 },
+    /**
+     * Giro automatico: [angolo attorno al mezzo in gradi (0 = dietro, + = verso sinistra), fattore
+     * d'inclinazione, durata in s]. Negli ultimi `junction` metri prima di un incrocio con scelta la
+     * camera torna dietro, per vedere dove si va.
+     */
+    auto: { junction: 22, shots: [[0, 1, 4], [32, 0.85, 7], [0, 1, 3], [160, 0.7, 6], [0, 1, 3], [-30, 0.85, 7], [0, 1, 3], [-70, 0.62, 6], [0, 1, 3], [120, 0.6, 6]] },
     vistaCooldown: 25,       // s di riposo tra due panoramiche sulla gravina
     /**
      * Vetrina: durata (s) del primo piano del mezzo, del volo, del campo lungo sul ponte.
@@ -5048,6 +5122,10 @@ class CameraRig {
     this.aerialAngle = 0;
     this.lift = 0;                   // m in più sopra i tetti quando le case coprono il mezzo
     this.footMix = 0;                // 0 in auto, 1 a piedi (passaggio morbido)
+    // Camera libera (trascinamento, rotella, pizzico): angolo attorno al mezzo, inclinazione, distanza.
+    this.orbit = { on: false, w: 0, yaw: 0, elev: 0.98, dist: 22, idle: 0, quick: false };
+    this.auto = { yaw: 0, k: 1, t: 0, shot: 0 };   // giro automatico nei rettilinei
+    this.aerialZoom = 1;
     this.pending = true;             // prossimo aggiornamento senza transizione
     this.frame = { x: 0, y: 0, tx: 0, ty: 0 };
     this.vista = { weight: 0, cooldown: 12, kind: null, active: false, dir: new THREE.Vector3(), pos: new THREE.Vector3(), target: new THREE.Vector3() };
@@ -5097,8 +5175,36 @@ class CameraRig {
     this.aerialAngle = Math.atan2(this.pos.x - driver.position.x, this.pos.z - driver.position.z);
   }
 
+  /** Vero mentre la camera è libera (per il pulsante «Segui il mezzo»). */
+  get free() { return this.orbit.on && this.mode === 'drive'; }
+
+  /** Trascinamento di (dx, dy) pixel: gira attorno al mezzo (in pausa, attorno alla vista dall'alto). */
+  drag(dx, dy) {
+    if (this.mode === 'aerial') { this.aerialAngle -= dx * 0.006; return; }
+    if (this.mode !== 'drive') return;
+    const O = this.orbit, C = CONFIG.camera.orbit, rad = THREE.MathUtils.degToRad;
+    if (!O.on && O.w < 0.05) Object.assign(O, this._current);       // si parte dalla vista di adesso
+    O.on = true; O.quick = false; O.idle = 0;
+    O.yaw -= dx * 0.006;
+    O.elev = clamp(O.elev + dy * 0.005, rad(C.minElev), rad(C.maxElev));
+  }
+
+  /** Zoom (f > 1 allontana): rotella o pizzico. */
+  zoom(f) {
+    if (this.mode === 'aerial') { this.aerialZoom = clamp(this.aerialZoom * f, 0.45, 2.6); return; }
+    if (this.mode !== 'drive') return;
+    const O = this.orbit, C = CONFIG.camera.orbit;
+    if (!O.on && O.w < 0.05) Object.assign(O, this._current);
+    O.on = true; O.quick = false; O.idle = 0;
+    O.dist = clamp(O.dist * f, C.minDist, C.maxDist);
+  }
+
+  /** «Segui il mezzo»: la camera torna subito dietro. */
+  follow() { Object.assign(this.orbit, { on: false, quick: true }); }
+
   /** Passa all'inseguimento del mezzo (con un volo di raccordo). */
   startDrive(driver) {
+    Object.assign(this.orbit, { on: false, w: 0 });
     this.mode = 'drive';
     this.introT = 0;
     this.chaseYaw = driver.yaw;
@@ -5107,6 +5213,8 @@ class CameraRig {
   /** Porta subito la camera dietro al mezzo (teletrasporto, strumenti di debug). */
   snap(driver) {
     this.mode = 'drive';
+    Object.assign(this.orbit, { on: false, w: 0 });
+    Object.assign(this.auto, { yaw: 0, k: 1, t: 0, shot: 0 });
     this.introT = 10;
     this.chaseYaw = driver.yaw;
     this.vista.weight = 0;
@@ -5149,8 +5257,9 @@ class CameraRig {
 
   #aerialPose(dt, driver) {
     this.aerialAngle += dt * 0.05;
-    const car = driver.position;
-    this._wantPos.set(car.x + Math.sin(this.aerialAngle) * 24, car.y + 24, car.z + Math.cos(this.aerialAngle) * 24);
+    const car = driver.position, R = 24 * this.aerialZoom;
+    this._wantPos.set(car.x + Math.sin(this.aerialAngle) * R, car.y + R, car.z + Math.cos(this.aerialAngle) * R);
+    this._wantPos.y += this.#roofLift(car, this._wantPos);          // mai dentro i tetti delle palazzine
     this._wantTarget.set(car.x, car.y + 1, car.z);
   }
 
@@ -5162,20 +5271,56 @@ class CameraRig {
     this.footMix += ((driver.onFoot ? 1 : 0) - this.footMix) * (dt > 0 ? damp(1.4, dt) : 1);
     const m = smoothstep(0, 1, this.footMix);
     const tall = Math.max(0, this.dims.height - 1.4) * 1.5 * (1 - m);   // un po' più in alto per il trattore
+    // Vista d'inseguimento in coordinate sferiche attorno al mezzo: angolo (0 = dietro),
+    // inclinazione e distanza. Il giro automatico e la camera libera le spostano.
+    const back0 = lerp(C.chaseDistance, C.walk.distance, m), up0 = lerp(C.chaseHeight, C.walk.height, m);
+    const elev0 = Math.atan2(up0, back0), dist0 = Math.hypot(up0, back0);
+    this.#updateAuto(dt, driver, elev0, dist0);
+    const O = this.orbit, A = this.auto;
+    O.idle += dt;
+    if (O.on && O.idle > C.orbit.idle) O.on = false;                // dopo qualche secondo torna dietro
+    O.w += ((O.on ? 1 : 0) - O.w) * (dt > 0 ? damp(O.on ? 10 : O.quick ? 4 : 2, dt) : 1);
+    const w = smoothstep(0, 1, O.w);
+    const yawOff = A.yaw + angleDiff(A.yaw, O.yaw) * w;
+    const elev = lerp(elev0 * A.k, O.elev, w), dist = lerp(dist0, O.dist, w);
+    this._current = { yaw: yawOff, elev, dist };
+    const yaw = this.chaseYaw + yawOff, sy = Math.sin(yaw), cy = Math.cos(yaw);
     // Nei vicoli, se un tetto si mette tra la camera e il mezzo, la camera sale
     // (subito) e si avvicina in pianta, fino a guardare quasi dall'alto; poi scende piano.
-    const back = lerp(C.chaseDistance, C.walk.distance, m) * (1 - 0.5 * this.lift / C.maxLift);
+    const back = Math.cos(elev) * dist * (1 - 0.5 * this.lift / C.maxLift);
     this.maxLift = lerp(C.maxLift, C.walk.maxLift, m);
-    this._chasePos.set(car.x - fx * back, car.y + lerp(C.chaseHeight, C.walk.height, m) + tall, car.z - fz * back);
+    this._chasePos.set(car.x - sy * back, car.y + Math.sin(elev) * dist + tall, car.z - cy * back);
     const need = this.#roofLift(car, this._chasePos);
     this.lift += (need - this.lift) * (dt > 0 ? damp(need > this.lift ? 4 : 0.7, dt) : 1);   // dt = 0: aggancio immediato
     this._chasePos.y += this.lift;
-    const look = lerp(C.lookAhead, C.walk.lookAhead, m);
+    const look = lerp(C.lookAhead, C.walk.lookAhead, m) * Math.max(0, Math.cos(yawOff)) * (1 - w);
     this._chaseTarget.set(car.x + fx * look, car.y + 0.8, car.z + fz * look);
     this.#updateVista(dt, driver);
-    const w = smoothstep(0, 1, this.vista.weight);
-    this._wantPos.lerpVectors(this._chasePos, this.vista.pos, w);
-    this._wantTarget.lerpVectors(this._chaseTarget, this.vista.target, w);
+    const wv = smoothstep(0, 1, this.vista.weight);
+    this._wantPos.lerpVectors(this._chasePos, this.vista.pos, wv);
+    this._wantTarget.lerpVectors(this._chaseTarget, this.vista.target, wv);
+  }
+
+  /**
+   * Giro automatico: nei rettilinei la camera passa piano da un'inquadratura all'altra attorno
+   * al mezzo (tre quarti, fianco, davanti); torna dietro prima degli incroci con scelta, durante
+   * le panoramiche, quando il mezzo è fermo o la camera è libera, e dove case alte o vicoli
+   * stretti costringerebbero la camera a salire sopra i tetti (lì resta dietro).
+   */
+  #updateAuto(dt, driver, elev, dist) {
+    const A = this.auto, S = CONFIG.camera.auto, rad = THREE.MathUtils.degToRad, car = driver.position;
+    const junction = driver.decision?.options.length > 1 && driver.remaining < S.junction;
+    const moving = !this.vista.active && !this.orbit.on && driver.speed > 1.5 && this.introT > 4;
+    if (moving && (A.t += dt) > S.shots[A.shot][2]) { A.t = 0; A.shot = (A.shot + 1) % S.shots.length; }
+    let [deg, k] = moving && !junction ? S.shots[A.shot] : [0, 1];
+    if (deg) {
+      const yaw = this.chaseYaw + rad(deg), e = elev * k, back = Math.cos(e) * dist;
+      this._showPos.set(car.x - Math.sin(yaw) * back, car.y + Math.sin(e) * dist, car.z - Math.cos(yaw) * back);
+      if (this.#roofLift(car, this._showPos) > Math.max(8, this.lift + 3)) [deg, k] = [0, 1];
+    }
+    const rate = dt > 0 ? damp(junction ? 1.8 : 0.7, dt) : 1;
+    A.yaw += angleDiff(A.yaw, rad(deg)) * rate;
+    A.k += (k - A.k) * rate;
   }
 
   /**
@@ -5247,7 +5392,8 @@ class CameraRig {
     V.cooldown -= dt;
     const progress = driver.s / edge.length;
     let want = false;
-    if (edge.vista === 'bridge') want = true;
+    if (this.orbit.on) want = false;                                    // camera libera: niente panoramiche
+    else if (edge.vista === 'bridge') want = true;
     else if (edge.vista === 'rim') want = (V.active && V.kind === 'rim' && progress < 0.85) || (V.cooldown <= 0 && progress > 0.1 && progress < 0.6);
     if (want) V.kind = edge.vista;
     if (!want && V.active) V.cooldown = CONFIG.camera.vistaCooldown;
@@ -5735,6 +5881,7 @@ class UI {
     this.el = {
       start: $('start'), startPanel: $('start-panel'), btnStart: $('btn-start'), status: $('status'),
       startPicker: $('start-picker'), controlsHint: $('controls-hint'),
+      btnFollow: $('btn-follow'), btnRadio: $('btn-radio'), radioLabel: $('radio-label'), btnNext: $('btn-next'), radioVol: $('radio-vol'),
       hud: $('hud'), plate: $('plaque'), street: $('plaque-street'), dest: $('plaque-dest'), minimapBtn: $('minimap-btn'), btnPause: $('btn-pause'),
       card: $('card'), cardKicker: $('card-kicker'), cardTitle: $('card-title'), cardText: $('card-text'),
       junction: $('junction'), junctionHead: $('junction-head'), signs: $('signs'),
@@ -5823,7 +5970,7 @@ class UI {
     this.el.signs.replaceChildren(...d.options.map((o, i) => {
       const b = document.createElement('button');
       b.type = 'button';
-      b.className = 'sign';
+      b.className = o.walk ? 'sign sign--walk' : 'sign';
       b.setAttribute('role', 'radio');
       b.innerHTML = `${this.#arrow(o.angle)}<span class="sign__dest"></span><span class="sign__street"></span>`;
       b.querySelector('.sign__dest').textContent = o.label;
@@ -5979,6 +6126,151 @@ class UI {
     f.classList.remove('is-on');
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * 11b. RADIO: musica ambient generata dal codice (Web Audio), nessun file.
+ *      Pianoforte morbido con note rade, pedale lungo e riverbero, su accordi
+ *      lenti: brani originali «alla Minecraft», rilassati. Ogni brano ha la
+ *      sua tonalità, il suo passo e il suo timbro; le note escono da un
+ *      generatore pseudo-casuale con seme, quindi ogni brano torna uguale.
+ * ═══════════════════════════════════════════════════════════════════════ */
+const Radio = (() => {
+  // Timbri: [multiplo della frequenza, ampiezza, forma d'onda], durata della nota (s), brillantezza (Hz).
+  const PIANO = { osc: [[1, 1, 'sine'], [2, 0.22, 'triangle'], [3, 0.05, 'sine']], len: 4.5, bright: 2600 };
+  const CELESTA = { osc: [[1, 0.8, 'sine'], [4, 0.16, 'sine']], len: 3, bright: 4200 };
+  const FLAUTO = { osc: [[1, 1, 'triangle'], [2, 0.08, 'sine']], len: 3.6, bright: 1800 };
+  // Accordi in semitoni dalla tonica (`root`, nota MIDI); `pad`: tappeto d'archi morbido.
+  const TRACKS = [
+    { title: 'Tufo', root: 60, bpm: 60, voice: PIANO, density: 0.5, pad: true, chords: [[0, 4, 7, 11, 14], [5, 9, 12, 16], [-3, 0, 4, 7], [7, 11, 14, 19]] },
+    { title: 'Chianche', root: 62, bpm: 54, voice: CELESTA, density: 0.42, pad: false, chords: [[0, 3, 7, 10, 14], [-2, 2, 5, 9], [-4, 0, 3, 7], [5, 9, 12, 15]] },
+    { title: 'Botromagno', root: 55, bpm: 50, voice: PIANO, density: 0.34, pad: true, chords: [[0, 4, 7, 11], [-3, 0, 4, 7, 14], [5, 9, 12, 16], [2, 7, 9, 14]] },
+    { title: 'Fondovico', root: 57, bpm: 58, voice: FLAUTO, density: 0.46, pad: true, chords: [[0, 3, 7, 14], [-4, 0, 3, 7], [3, 7, 10, 14], [-5, -2, 2, 7]] },
+    { title: 'Acquedotto', root: 64, bpm: 62, voice: PIANO, density: 0.55, pad: false, chords: [[0, 4, 7, 11, 14], [-3, 0, 4, 7], [5, 9, 12, 16], [7, 11, 14, 16]] },
+    { title: 'Piaggio', root: 53, bpm: 52, voice: CELESTA, density: 0.38, pad: true, chords: [[0, 4, 7, 11], [-3, 0, 3, 7], [-2, 2, 5, 9], [0, 5, 7, 12]] },
+  ];
+  const BARS = 32;                   // battute per brano (2–3 minuti), poi si passa al successivo
+  let ctx = null, master, bus, on = false, vol = 0.6, index = Math.floor(Math.random() * TRACKS.length), beat = 0, next = 0, timer = 0, rnd = Math.random;
+
+  const seeded = (a) => () => { a = (a + 0x6d2b79f5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const hz = (m) => 440 * 2 ** ((m - 69) / 12);
+
+  function setup() {
+    ctx = new AudioContext();
+    master = ctx.createGain();
+    master.gain.value = 0;
+    master.connect(ctx.destination);
+    bus = ctx.createGain();
+    // Riverbero: coda di rumore che si spegne in 3,5 s (niente file di impulso).
+    const n = ctx.sampleRate * 3.5, ir = ctx.createBuffer(2, n, ctx.sampleRate);
+    for (let c = 0; c < 2; c++) { const d = ir.getChannelData(c); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n) ** 3; }
+    const verb = ctx.createConvolver(), wet = ctx.createGain();
+    verb.buffer = ir;
+    wet.gain.value = 0.45;
+    bus.connect(master);
+    bus.connect(verb).connect(wet).connect(master);
+  }
+
+  /** Una nota di pianoforte (o celesta, o flauto): attacco breve e lunga coda. */
+  function note(m, t, vel, V, len = V.len) {
+    const g = ctx.createGain(), lp = ctx.createBiquadFilter(), pan = ctx.createStereoPanner();
+    lp.frequency.setValueAtTime(V.bright, t);
+    lp.frequency.exponentialRampToValueAtTime(500, t + len);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.16 * vel, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+    pan.pan.value = (rnd() - 0.5) * 0.6;
+    lp.connect(g).connect(pan).connect(bus);
+    for (const [k, a, type] of V.osc) {
+      const o = ctx.createOscillator(), og = ctx.createGain();
+      o.type = type; o.frequency.value = hz(m) * k; o.detune.value = (rnd() - 0.5) * 8; og.gain.value = a;
+      o.connect(og).connect(lp);
+      o.start(t); o.stop(t + len + 0.05);
+    }
+  }
+
+  /** Tappeto: tre note basse che entrano e si spengono piano. */
+  function pad(root, chord, t, dur) {
+    for (const k of chord.slice(0, 3)) {
+      const o = ctx.createOscillator(), g = ctx.createGain(), lp = ctx.createBiquadFilter();
+      o.type = 'triangle'; o.frequency.value = hz(root + k - 12);
+      lp.frequency.value = 700;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.028, t + dur * 0.4);
+      g.gain.linearRampToValueAtTime(0, t + dur + 1.5);
+      o.connect(lp).connect(g).connect(bus);
+      o.start(t); o.stop(t + dur + 1.6);
+    }
+  }
+
+  /** Un battito del brano: basso e tappeto a ogni cambio d'accordo, poi note rade della melodia. */
+  function play(T, i, t) {
+    const bar = Math.floor(i / 4), b = i % 4, spb = 60 / T.bpm, chord = T.chords[Math.floor(bar / 2) % T.chords.length];
+    if (bar >= BARS) return false;
+    if (b === 0 && bar % 2 === 0) {
+      note(T.root + chord[0] - 24, t, 0.55, T.voice, 7);
+      if (T.pad) pad(T.root, chord, t, spb * 8);
+    }
+    const quiet = bar % 8 === 7 || bar >= BARS - 2 ? 0.3 : 1;          // respiri, e un finale che sfuma
+    for (const off of [0, 0.5]) {
+      if (rnd() > T.density * quiet * (off ? 0.45 : 1)) continue;
+      const m = T.root + chord[Math.floor(rnd() * chord.length)] + (rnd() < 0.35 ? 12 : 0);
+      note(m, t + off * spb + rnd() * 0.03, 0.35 + rnd() * 0.4, T.voice);
+      if (rnd() < 0.15) note(m - (rnd() < 0.5 ? 5 : 3), t + off * spb + 0.04, 0.25, T.voice);
+    }
+    return true;
+  }
+
+  /** Programma le note del prossimo secondo e mezzo (orologio dell'audio, non dei fotogrammi). */
+  function tick() {
+    const T = TRACKS[index];
+    while (next < ctx.currentTime + 1.5) {
+      if (!play(T, beat, next)) { api.next(4); return; }                   // fine del brano: pausa e poi il prossimo
+      next += 60 / T.bpm;
+      beat++;
+    }
+  }
+
+  function start(delay) {
+    beat = 0; rnd = seeded(index * 7919 + 17);
+    next = ctx.currentTime + delay;
+    api.onChange?.();
+  }
+
+  const api = {
+    onChange: null,
+    get on() { return on; },
+    get title() { return TRACKS[index].title; },
+    toggle() {
+      on = !on;
+      if (on) {
+        if (!ctx) setup();
+        ctx.resume();
+        master.gain.cancelScheduledValues(ctx.currentTime);
+        master.gain.setTargetAtTime(vol * 0.9, ctx.currentTime, 0.4);
+        start(0.2);
+        timer = setInterval(tick, 250);
+      } else {
+        clearInterval(timer);
+        master.gain.setTargetAtTime(0, ctx.currentTime, 0.25);
+        setTimeout(() => { if (!on) ctx.suspend(); }, 1500);
+        api.onChange?.();
+      }
+    },
+    /** Brano successivo (dopo `gap` secondi di silenzio). */
+    next(gap = 0.6) {
+      index = (index + 1) % TRACKS.length;
+      if (on) start(gap);
+      else api.onChange?.();
+    },
+    volume(v) {
+      vol = clamp(v, 0, 1);
+      if (on) master.gain.setTargetAtTime(vol * 0.9, ctx.currentTime, 0.1);
+    },
+  };
+  // A scheda nascosta la musica tace; torna quando si rientra.
+  document.addEventListener('visibilitychange', () => { if (ctx && on) (document.hidden ? ctx.suspend() : ctx.resume()); });
+  return api;
+})();
 
 /* ═══════════════════════════════════════════════════════════════════════
  * 12. SCENA, LUCI E CIELO
@@ -6409,6 +6701,53 @@ async function main() {
   ui.el.touchLeft.addEventListener('click', () => driver.steer(-1));
   ui.el.touchRight.addEventListener('click', () => driver.steer(1));
 
+  // Camera libera: trascinamento (un dito o il mouse) per girare attorno al mezzo, rotella o
+  // pizzico per lo zoom. Sotto i 6 px è un tocco, non un trascinamento.
+  const canvas = renderer.domElement, touches = new Map();
+  let travel = 0, pinch = 0;
+  const spread = () => { const [a, b] = [...touches.values()]; return Math.hypot(a.x - b.x, a.y - b.y); };
+  canvas.addEventListener('pointerdown', (ev) => {
+    if (phase === 'menu') return;
+    canvas.setPointerCapture(ev.pointerId);
+    touches.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+    travel = 0;
+    pinch = touches.size === 2 ? spread() : 0;
+  });
+  canvas.addEventListener('pointermove', (ev) => {
+    const p = touches.get(ev.pointerId);
+    if (!p) return;
+    const dx = ev.clientX - p.x, dy = ev.clientY - p.y;
+    Object.assign(p, { x: ev.clientX, y: ev.clientY });
+    if (touches.size === 2) {
+      const d = spread();
+      if (pinch > 0 && d > 0) rig.zoom(pinch / d);
+      pinch = d;
+    } else if ((travel += Math.abs(dx) + Math.abs(dy)) > 6) rig.drag(dx, dy);
+  });
+  const lift = (ev) => { touches.delete(ev.pointerId); pinch = 0; };
+  canvas.addEventListener('pointerup', lift);
+  canvas.addEventListener('pointercancel', lift);
+  canvas.addEventListener('wheel', (ev) => {
+    if (phase === 'menu') return;
+    ev.preventDefault();
+    rig.zoom(Math.exp(clamp(ev.deltaY, -120, 120) * 0.0015));
+  }, { passive: false });
+  ui.el.btnFollow.addEventListener('click', () => rig.follow());
+
+  // Radio: musica ambient generata dal codice (11b). Si accende solo con un gesto (regola dei browser).
+  const radioUi = () => {
+    const on = Radio.on;
+    ui.el.btnRadio.setAttribute('aria-pressed', String(on));
+    ui.el.btnRadio.setAttribute('aria-label', on ? `Spegni la musica (${Radio.title})` : 'Accendi la musica');
+    ui.el.radioLabel.textContent = on ? Radio.title : 'Musica';
+    ui.el.btnNext.hidden = ui.el.radioVol.hidden = !on;
+  };
+  Radio.onChange = radioUi;
+  const toggleRadio = () => { Radio.toggle(); try { localStorage.setItem('gravina3d.radio', Radio.on ? '1' : '0'); } catch { /* pazienza */ } };
+  ui.el.btnRadio.addEventListener('click', toggleRadio);
+  ui.el.btnNext.addEventListener('click', () => Radio.next());
+  ui.el.radioVol.addEventListener('input', () => Radio.volume(+ui.el.radioVol.value));
+
   // Tastiera: frecce agli incroci, P / Spazio per la pausa, Esc per riprendere.
   addEventListener('keydown', (ev) => {
     if (ev.repeat) return;
@@ -6420,6 +6759,7 @@ async function main() {
       return;
     }
     if (k === 'Escape' && phase === 'pause') { resume(); return; }
+    if ((k === 'm' || k === 'M') && !onControl && phase !== 'menu') { toggleRadio(); return; }
     if (phase !== 'drive') return;
     if (k === 'ArrowLeft' || k === 'a' || k === 'A') { driver.steer(-1); ev.preventDefault(); }
     else if (k === 'ArrowRight' || k === 'd' || k === 'D') { driver.steer(1); ev.preventDefault(); }
@@ -6455,6 +6795,7 @@ async function main() {
   };
   ui.enableStart(() => {
     phase = 'drive';
+    try { if (localStorage.getItem('gravina3d.radio') === '1' && !Radio.on) Radio.toggle(); } catch { /* pazienza */ }
     rig.startDrive(driver);
     reframe();
     setTimeout(() => { if (!driver.running) driver.start(); }, CONFIG.drive.startDelay * 1000);
@@ -6471,6 +6812,7 @@ async function main() {
     if (phase === 'menu') return;
     minimap.draw(driver);
     ui.tickDecision(driver);
+    if (ui.el.btnFollow.hidden === rig.free) ui.el.btnFollow.hidden = !rig.free;
     ui.tickCard(dt);
     proximityTimer -= dt;
     if (proximityTimer <= 0) { proximityTimer = 0.25; checkLandmarks(); }
@@ -6495,7 +6837,7 @@ async function main() {
         driver.place(r.edge, r.dir, Math.max(0, r.s - back));
         return r.edge.name;
       },
-      useVehicle, pause, resume, teleport, pauseMap,
+      useVehicle, pause, resume, teleport, pauseMap, Radio,
       /** Teletrasporto verso il monumento con quell'id (in pausa). */
       goTo(id) { return teleport({ lm: landmarks.find((l) => l.id === id) }); },
     };

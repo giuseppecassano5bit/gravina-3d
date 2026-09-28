@@ -3,7 +3,7 @@
  * pausa e ripresa da tastiera, minimappa, teletrasporto da etichetta 3D e da
  * elenco, cambio mezzo in pausa, pausa automatica a scheda nascosta, mezzo
  * ricordato alla riapertura, percorsi a piedi (sosta all'imbocco, figurina, pausa, ripartenza,
- * teletrasporto). Fallisce alla prima attesa non rispettata.
+ * teletrasporto), camera libera e radio. Fallisce alla prima attesa non rispettata.
  */
 import { open } from './common.mjs';
 
@@ -112,6 +112,48 @@ await advance(1);
 f = await foot();
 check('il teletrasporto da piedi riporta sul mezzo', f.phase === 'drive' && !f.onFoot && !f.figure && f.speed > 0, f.street);
 
+// Camera libera (blocco B) e radio: il trascinamento gira la vista e il mezzo continua ad avanzare,
+// la rotella cambia la distanza, dopo 4,5 s la camera torna dietro, «Segui il mezzo» la riporta
+// subito, con la camera libera il clic sui cartelli sceglie ancora la via; M accende la musica.
+const cam = () => page.evaluate(() => { const g = window.gravina;
+  return { free: g.rig.free, button: !document.getElementById('btn-follow').hidden, dist: g.camera.position.distanceTo(g.driver.position), speed: g.driver.speed, odo: g.driver.odometer }; });
+await page.evaluate(() => { const g = window.gravina; g.placeAt(300, 0, [1, 0]); g.rig.snap(g.driver); });
+await advance(2);
+const before = await cam();
+await page.mouse.move(640, 420); await page.mouse.down(); await page.mouse.move(700, 400, { steps: 4 }); await page.mouse.move(860, 360, { steps: 8 }); await page.mouse.up();
+await advance(0.5);
+let c = await cam();
+check('il trascinamento gira la camera e il mezzo avanza', c.free && c.button && c.speed > 1 && c.odo > before.odo);
+const near = c.dist;
+await page.mouse.wheel(0, 500);
+await advance(0.6);
+c = await cam();
+check('la rotella allontana la camera', c.dist > near + 2, `${near.toFixed(0)} → ${c.dist.toFixed(0)} m`);
+await advance(4.5);
+c = await cam();
+check('dopo 4,5 s la camera torna dietro al mezzo', !c.free && !c.button);
+await page.mouse.move(640, 420); await page.mouse.down(); await page.mouse.move(520, 440, { steps: 10 }); await page.mouse.up();
+await advance(0.2);
+const freeSign = await until(() => page.isVisible('.sign:not([aria-checked="true"])'), 20);
+if (freeSign) {
+  const want = await page.evaluate(() => [...document.querySelectorAll('.sign')].findIndex((b) => b.getAttribute('aria-checked') !== 'true'));
+  await page.click(`.sign >> nth=${want}`);
+  const chosen = await page.evaluate(() => window.gravina.driver.decision?.selected);
+  check('con la camera libera il clic su un cartello sceglie la via', chosen === want && (await cam()).free);
+}
+await page.click('#btn-follow');
+await advance(0.3);
+check('«Segui il mezzo» riporta subito dietro', !(await cam()).free && await page.isHidden('#btn-follow'));
+await page.keyboard.press('m');
+await page.waitForTimeout(300);
+const radio = await page.evaluate(() => ({ on: window.gravina.Radio.on, label: document.getElementById('radio-label').textContent, pressed: document.getElementById('btn-radio').getAttribute('aria-pressed') }));
+check('M accende la radio e il pulsante mostra il brano', radio.on && radio.pressed === 'true' && radio.label !== 'Musica', radio.label);
+await page.click('#btn-next');
+const second = await page.textContent('#radio-label');
+check('«Brano successivo» cambia brano', second !== radio.label, second);
+await page.click('#btn-radio');
+check('il pulsante spegne la musica', !(await page.evaluate(() => window.gravina.Radio.on)));
+
 await page.reload();
 await page.waitForFunction(() => !document.getElementById('btn-start').disabled, null, { timeout: 120000 });
 const kept = await page.evaluate(() => document.querySelector('#start-picker .vcard.is-selected')?.dataset.id);
@@ -120,4 +162,25 @@ check('alla riapertura resta il mezzo scelto', kept === 'deere', kept);
 const errors = logs.filter((l) => /error/i.test(l));
 check('nessun errore in console', errors.length === 0, errors.join(' | '));
 await browser.close();
+
+// Telefono: un dito gira la camera, due dita la avvicinano o allontanano (tocchi veri via CDP).
+{
+  const { browser, page } = await open({ mobile: true });
+  await page.click('#btn-start');
+  await page.evaluate(() => { const g = window.gravina; g.driver.start(); g.placeAt(300, 0, [1, 0]); g.rig.snap(g.driver); g.advance(2); });
+  const cdp = await page.context().newCDPSession(page);
+  const touch = (type, pts) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints: pts.map(([x, y], id) => ({ x, y, id })) });
+  const view = () => page.evaluate(() => { const g = window.gravina; g.advance(0.3); return { free: g.rig.free, dist: g.camera.position.distanceTo(g.driver.position) }; });
+  await touch('touchStart', [[195, 520]]);
+  for (let k = 1; k <= 8; k++) await touch('touchMove', [[195 + k * 12, 520 - k * 4]]);
+  await touch('touchEnd', []);
+  const one = await view();
+  check('telefono: un dito gira la camera', one.free);
+  await touch('touchStart', [[150, 500], [240, 500]]);
+  for (let k = 1; k <= 8; k++) await touch('touchMove', [[150 + k * 5, 500], [240 - k * 5, 500]]);
+  await touch('touchEnd', []);
+  const two = await view();
+  check('telefono: due dita allontanano la camera', two.dist > one.dist + 1, `${one.dist.toFixed(0)} → ${two.dist.toFixed(0)} m`);
+  await browser.close();
+}
 process.exit(failures ? 1 : 0);
