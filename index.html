@@ -1231,6 +1231,7 @@ const GEO = {
     [-1,[193.0,326.7,181.7,329.6,171.6,329.6]],
   ],
   rims: {"east":[-92.7,-523.5,-92.7,-523.5,-92.7,-523.5,-150,-420,-110,-300,-95,-230,-78,-186,-60,-140,-45,-70,-30,20,-20,100,-8,157,14,200,26,250,30,290,58,335,78,400,84,450,62,505,0,535,-80,562,-150,640,-136.9,758.7,-154.7,784.5,-178.6,797.7,-225.3,820.8,-268.4,840.6,-317.4,858.3,-365.6,861.7,-393.6,875.3,-416.1,889.4,-441.0,889.8,-461.4,871.7,-464.5,870.1,-481.2,853.8],"west":[-288.4,-442.5,-288.4,-442.5,-288.4,-442.5,-240,-420,-205,-300,-182,-160,-168,20,-156,113,-132,150,-124,199,-106,249,-84,300,-80,350,-62,400,-90,428,-150,445,-230,530,-260,640,-309.5,682.5,-310.3,683.2,-311.5,684.8,-312.8,686.1,-319.9,686.8,-332.3,694.3,-348.5,696.6,-376.1,693.8,-411.8,689.0,-447.2,679.1,-484.1,669.9,-506.9,663.2,-524.3,658.5]},
+  rioni: {"n0":-240,"passo":15,"d":[18.6,17.9,16.8,16.3,16.1,15.9,15.3,14.1,13.0,11.8,10.7,9.7,9.0,8.8,9.0,9.7,10.7,12.0,13.3,14.5,15.5,16.2,16.8,17.2,17.3,17.4,17.5,16.9,15.9,14.7,14.2,14.1,14.1,14.4,15.1,16.2,16.5],"w":[240,240,240,235,230,225,220,220,215,215,215,215,215,215,215,215,215,210,215,215,215,215,210,205,195,185,170,165,155,150,145,140,140,140,140,140,150]},
 };
 /* @@DATI-GEO-FINE@@ */
 
@@ -1504,11 +1505,12 @@ const ZONE = { BANK: 0, SLOPE: 1, WALL: 2, FLOOR: 3 };
 /**
  * I rioni medievali scendono verso la gravina: il Piaggio a nord della Cattedrale,
  * il Fondovico a sud, da Piazza Pellicciari fino a San Michele delle Grotte.
- * Senza un modello di elevazione la discesa è stilizzata: sull'altopiano, lungo il
- * tratto di ciglio del rione (quota nord da n0 a n1, con dissolvenza `fade`), il
- * terreno scende dolcemente di `depth` metri avvicinandosi al ciglio, a partire da
- * `width` metri di distanza; sotto il ciglio i gradoni partono da quella quota.
- * Cattedrale, Piazza Benedetto XIII e testata del ponte restano fuori.
+ * Sull'altopiano, lungo il tratto di ciglio del rione (quota nord da n0 a n1, con
+ * dissolvenza `fade`, disegnati a mano), il terreno scende dolcemente avvicinandosi al
+ * ciglio; sotto il ciglio i gradoni partono da quella quota. Quanto scende e da quale
+ * distanza lo dicono le quote reali Copernicus (`GEO.rioni`, ogni 15 m lungo il ciglio,
+ * blocco G); `depth` e `width` servono solo se mancano. Cattedrale, Piazza Benedetto XIII
+ * e testata del ponte restano fuori.
  */
 const RIONI = [
   { name: 'Rione Piaggio', n0: 25, n1: 275, fade: 65, width: 80, depth: 8 },
@@ -1518,9 +1520,19 @@ const RIONI = [
 /** Quanto scende il terreno nel punto di quota nord `n`, a `s` metri oltre il ciglio: { drop, name }. */
 function rioneDrop(n, s) {
   let best = { drop: 0, name: null };
+  const P = GEO.rioni;
+  let real = null;
+  if (P) {
+    const x = clamp((n - P.n0) / P.passo, 0, P.d.length - 1.001), i = Math.floor(x), f = x - i;
+    real = { depth: lerp(P.d[i], P.d[i + 1], f), width: lerp(P.w[i], P.w[i + 1], f) };
+  }
   for (const R of RIONI) {
-    const along = smoothstep(R.n0, R.n0 + R.fade, n) * (1 - smoothstep(R.n1 - R.fade, R.n1, n));
-    const drop = R.depth * along * (1 - smoothstep(0, R.width, Math.max(0, s)));
+    const { depth } = real ?? R;
+    // Pendenze da vie vere (al massimo il 14–18% circa): più il rione scende, più la discesa
+    // comincia lontano dal ciglio e più lunga è la dissolvenza verso Cattedrale e ponte.
+    const width = Math.max((real ?? R).width, 11 * depth), fade = Math.max(R.fade, 7.5 * depth);
+    const along = smoothstep(R.n0, R.n0 + fade, n) * (1 - smoothstep(R.n1 - fade, R.n1, n));
+    const drop = depth * along * (1 - smoothstep(0, width, Math.max(0, s)));
     if (drop > best.drop) best = { drop, name: R.name };
   }
   return best;
@@ -1719,12 +1731,14 @@ const Terrain = {
     if (L.side > 0) {
       if (L.t >= 1) return { y: 2.5 * smoothstep(0, 250, L.s) - rioneDrop(n, L.s).drop, zone: ZONE.BANK, rough: 0.3, side: 1 };
       if (L.dR < 7) return { y: F, zone: ZONE.FLOOR, rough: 0.5, side: 1 };
+      // Dove il rione scende molto, la falesia si abbassa: i gradoni restano sotto il ciglio.
+      const rim = -rioneDrop(n, 0).drop, top = Math.min(F + 18, rim - 6);
       if (L.t < 0.32) {                                    // falesia sul torrente
         const u = (L.t - 0.07) / 0.25;
-        return { y: F + 18 * terrace(u, 2), zone: ZONE.WALL, rough: 1.3, side: 1 };
+        return { y: F + (top - F) * terrace(u, 2), zone: ZONE.WALL, rough: 1.3, side: 1 };
       }
-      const u = (L.t - 0.32) / 0.68, rim = -rioneDrop(n, 0).drop;   // gradoni dei rioni, fino alla quota del ciglio
-      return { y: F + 18 + (rim - F - 18) * terrace(u, 5), zone: ZONE.SLOPE, rough: 0.55, side: 1 };
+      const u = (L.t - 0.32) / 0.68;                       // gradoni dei rioni, fino alla quota del ciglio
+      return { y: top + (rim - top) * terrace(u, 5), zone: ZONE.SLOPE, rough: 0.55, side: 1 };
     }
     if (L.t >= 1) {                                        // altopiano verso Botromagno
       const hill = 14 * Math.exp(-((e + 380) ** 2 + (n + 200) ** 2) / 200 ** 2);
@@ -3092,10 +3106,9 @@ const Buildings = {
       const span = (d) => {
         let side = 0, high = y;
         for (let j = 0; j <= edge.count; j++) {
-          const de = S[j * 3] - pe, dn = -S[j * 3 + 2] - pn;
-          if (Math.abs(de * te + dn * tn - am) > d / 2) continue;
-          side = Math.max(side, Math.abs(-de * tn + dn * te));
-          high = Math.max(high, S[j * 3 + 1]);
+          const de = S[j * 3] - pe, dn = -S[j * 3 + 2] - pn, along = Math.abs(de * te + dn * tn - am), across = Math.abs(-de * tn + dn * te);
+          if (along <= d / 2 + 1.8 && across <= half + 1.8) high = Math.max(high, S[j * 3 + 1]);   // anche in curva
+          if (along <= d / 2) side = Math.max(side, across);
         }
         return { side, high };
       };

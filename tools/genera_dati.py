@@ -1378,6 +1378,36 @@ def extend_rims(river, dem_light):
     return east, west
 
 
+RIONI_N = (-240, 300, 15)   # m: tratto del ciglio est in cui si misura la discesa dei rioni, e passo
+RIONI_SCALA = 0.45         # le quote a 30 m esagerano la discesa vicino al ciglio (il canyon sfocato), e il canyon del
+                           # diorama resta quello disegnato a mano: se ne usa meno della metà
+
+
+def rioni_profile(ground_at):
+    """
+    Discesa dei rioni verso la gravina, dalle quote Copernicus (blocco G). Lungo il ciglio est
+    disegnato a mano, ogni 15 m, si confronta l'altopiano (220–300 m dentro l'abitato) con la quota
+    a 45 m dal ciglio, più metà della pendenza che resta fino al ciglio: i 45 m più vicini sono
+    sporcati dal canyon, che a 30 m di maglia e dopo lo smusso "sbava" dentro le case. `da` è la
+    distanza dal ciglio a cui comincia la discesa. Il diorama la usa come guida in rioneDrop.
+    """
+    def rim_e(n):
+        for (e0, n0), (e1, n1) in zip(EAST_RIM, EAST_RIM[1:]):
+            if min(n0, n1) <= n <= max(n0, n1):
+                return e0 + (n - n0) / ((n1 - n0) or 1) * (e1 - e0)
+    S = np.arange(0, 301, 5)
+    depth, width = [], []
+    for n in range(RIONI_N[0], RIONI_N[1] + 1, RIONI_N[2]):
+        e = rim_e(n)
+        H = np.array([float(ground_at(e + s, n)) for s in S])
+        plateau, h45, h80 = H[S >= 220].max(), H[S == 45][0], H[S == 80][0]
+        d = plateau - h45 + (h80 - h45) / 35 * 45 * 0.5
+        depth.append(round(max(0.0, d) * RIONI_SCALA, 1))
+        width.append(int(S[np.argmax(H >= plateau - 0.1 * (plateau - h45))]))
+    print(f'  discesa dei rioni (quote reali × {RIONI_SCALA}): da {min(depth):.0f} a {max(depth):.0f} m, a partire da {min(width)}–{max(width)} m dal ciglio')
+    return {'n0': RIONI_N[0], 'passo': RIONI_N[2], 'd': depth, 'w': width}
+
+
 def smooth_line(pts, k=2):
     """Media mobile su una polilinea (estremi compresi)."""
     return [tuple(np.mean(pts[max(0, i - k):i + k + 1], axis=0)) for i in range(len(pts))] if len(pts) > 2 else pts
@@ -1517,6 +1547,7 @@ def encode(edges, deco, pos, buildings, city, arches, feats, extra):
         'pois': [[e, n, nid(nm), kind, osm, wd or ''] for e, n, nm, kind, osm, wd in extra['pois']],
         'steps': [[nid(nm), flat(g.coords)] for nm, g in feats['steps']],
         'rims': {'east': flat(extra['rims'][0]), 'west': flat(extra['rims'][1])},
+        'rioni': extra['rioni'],
     }
     lines = ['const GEO = {']
     for k, v in geo.items():
@@ -1613,6 +1644,7 @@ def main():
     extra = {
         'ground': ground, 'cover': cover, 'rails': build_rails(data), 'pois': city_pois(osm),
         'riverY': river_bed(feats['river'], lambda e, n: at(e, n)), 'rims': extend_rims(feats['river'], at),
+        'rioni': rioni_profile(at),
     }
     print('5. Scrittura')
     write_html(encode(edges, deco, pos, old, city, arches, feats, extra))
