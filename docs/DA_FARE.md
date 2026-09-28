@@ -5,6 +5,17 @@ Stato al 28 settembre 2026: fase 3 approvata e online. Aggiornare questo file a 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
 del lavoro su due chat in [`PIANO_FASE_3_4.md`](PIANO_FASE_3_4.md).
 
+### Fase 3.4, blocco G · percorsi a piedi, quote reali, camera e radio (in corso)
+
+Richiesto il 28/09/2026. Oltre al blocco G del piano, il committente ha chiesto anche una camera
+che si muove attorno al mezzo (il blocco B) e una radio con una playlist pop.
+
+- [ ] Piano breve e domande al committente (in attesa di risposta).
+- [ ] Percorsi a piedi con la figurina low-poly.
+- [ ] Quote reali Copernicus come guida per ciglio, gradoni e rioni del centro storico.
+- [ ] Camera che gira attorno al mezzo.
+- [ ] Radio.
+
 ### Fase 3.4, blocco A · crediti e ricerca su Google (PR #7, unita il 28/09/2026) ✅
 
 - [x] Unico credito Giuseppe Cassano; nessun riferimento allo sponsor precedente nei file.
