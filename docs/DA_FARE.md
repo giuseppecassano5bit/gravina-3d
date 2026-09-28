@@ -110,7 +110,7 @@ del lavoro su due chat in [`PIANO_FASE_3_4.md`](PIANO_FASE_3_4.md).
 - [ ] Vetrina, campo lungo: sui telefoni il mezzo è piccolo. Le pose si tarano in
       `CONFIG.camera.showroom` con `node vetrina.mjs "[…]" "[…]"`.
 - [ ] Prestazioni con la città intera (blocco C, `node prestazioni.mjs`): 543 000 triangoli in
-      scena, al massimo 334 000 per fotogramma su PC e 242 000 sul telefono, 69 e 53 draw call.
+      scena, al massimo 334 000 per fotogramma su PC e 242 000 sul telefono, 69 e 54 draw call.
       Misurare su un telefono di fascia media.
 
 **Progetto**

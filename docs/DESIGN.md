@@ -314,13 +314,14 @@ partenza, centro, Piazza Scacchi, pausa e panoramica sulla città (il caso peggi
 
 | Voce | Fase 3 (solo centro storico) | Fase 3.4, città intera | Tetto |
 |---|---|---|---|
-| `index.html` | 390 KB (124 KB compressi) | 737 KB (268 KB compressi) | ≤ 900 KB (≤ 280) |
-| Costruzione fino a "Parti" | 282 ms | circa 510 ms | ≤ 1,5 s |
+| `index.html` | 390 KB (124 KB compressi) | 737 KB (269 KB compressi) | ≤ 900 KB (≤ 280) |
+| Costruzione fino a "Parti" | 282 ms | circa 500 ms | ≤ 1,5 s |
+| Memoria JavaScript | 41 MB | circa 100 MB | ≤ 150 MB |
 | Città completa (in sottofondo) | — | circa 900 ms | — |
 | Triangoli nella scena | 267 000 | 543 000 (telefono 483 000) | ≤ 650 000 |
 | Triangoli per fotogramma, PC | 267 000 | 334 000 | ≤ 400 000 |
 | Triangoli per fotogramma, telefono | 267 000 | 242 000 | ≤ 250 000 |
-| Draw call, PC / telefono | 39 / 38 | 69 / 53 | ≤ 90 / ≤ 70 |
+| Draw call, PC / telefono | 39 / 38 | 69 / 54 | ≤ 90 / ≤ 70 |
 
 | Voce | Valore |
 |---|---|
