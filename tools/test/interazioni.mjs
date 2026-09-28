@@ -2,7 +2,8 @@
  * Prova delle interazioni come le fa un visitatore: credito e pannello «Il progetto», scelta del mezzo, partenza,
  * pausa e ripresa da tastiera, minimappa, teletrasporto da etichetta 3D e da
  * elenco, cambio mezzo in pausa, pausa automatica a scheda nascosta, mezzo
- * ricordato alla riapertura. Fallisce alla prima attesa non rispettata.
+ * ricordato alla riapertura, percorsi a piedi (sosta all'imbocco, figurina, pausa, ripartenza,
+ * teletrasporto). Fallisce alla prima attesa non rispettata.
  */
 import { open } from './common.mjs';
 
@@ -69,6 +70,47 @@ check('dall’elenco si va alla Cattedrale', s.phase === 'drive' && s.street ===
 
 await page.evaluate(() => { Object.defineProperty(document, 'hidden', { value: true, configurable: true }); document.dispatchEvent(new Event('visibilitychange')); });
 check('scheda nascosta: pausa automatica', (await state()).phase === 'pause');
+
+// A piedi (blocco G): il mezzo si ferma all'imbocco del tratto pedonale, la figurina lo percorre
+// e al tratto carrabile ritrova il mezzo, che riparte. Pausa e teletrasporto funzionano anche a piedi.
+const foot = () => page.evaluate(() => {
+  const d = window.gravina.driver;
+  return { onFoot: d.onFoot, walk: d.edge.walk, speed: d.speed, remaining: d.remaining, car: d.car && [d.car.pos.x, d.car.pos.z], street: d.edge.name,
+    figure: window.gravina.scene.getObjectByName('figurina')?.visible, plate: document.getElementById('plaque-dest').textContent, phase: window.gravina.phase };
+});
+const until = async (test, seconds, dt = 0.25) => {
+  for (let t = 0; t < seconds; t += dt) { if (await test()) return true; await advance(dt); }
+  return test();
+};
+await page.keyboard.press('Escape');
+await page.evaluate(() => { const g = window.gravina; g.placeAt(60, -40, [-1, 0]); g.rig.snap(g.driver); });
+const sign = await until(() => page.isVisible('.sign:has-text("a piedi")'), 20);
+check('agli incroci c’è il cartello «a piedi»', sign);
+if (sign) await page.click('.sign:has-text("a piedi")');
+await until(async () => (await foot()).onFoot, 20);
+let f = await foot();
+check('il mezzo si ferma all’imbocco e scende la figurina', f.onFoot && f.figure && f.speed === 0 && Math.abs(f.remaining - 3.2) < 0.6, `${f.street}, ${f.remaining.toFixed(1)} m dall’imbocco`);
+const parked = f.car;
+await advance(4);
+f = await foot();
+check('la figurina percorre il tratto pedonale, il mezzo resta fermo', f.onFoot && f.walk && f.speed > 2 && f.car[0] === parked[0] && /percorso pedonale/.test(f.plate), `${f.street} · ${f.plate}`);
+await page.keyboard.press('p');
+await advance(1.5);
+f = await foot();
+check('P mette in pausa anche a piedi', f.phase === 'pause' && f.speed === 0 && f.onFoot);
+await page.keyboard.press('Escape');
+const back = await until(async () => { const x = await foot(); return !x.onFoot && !x.walk; }, 90, 0.5);
+await advance(2);
+f = await foot();
+check('al tratto carrabile si ritrova il mezzo e si riparte', back && !f.onFoot && !f.figure && f.speed > 1, f.street);
+await page.evaluate(() => { const g = window.gravina; g.placeAt(230, -20, [1, 0]); g.rig.snap(g.driver); });
+await until(async () => (await foot()).onFoot, 20);
+await page.keyboard.press('p');
+await page.evaluate(() => window.gravina.goTo('duomo'));
+await page.waitForTimeout(900);
+await advance(1);
+f = await foot();
+check('il teletrasporto da piedi riporta sul mezzo', f.phase === 'drive' && !f.onFoot && !f.figure && f.speed > 0, f.street);
 
 await page.reload();
 await page.waitForFunction(() => !document.getElementById('btn-start').disabled, null, { timeout: 120000 });
