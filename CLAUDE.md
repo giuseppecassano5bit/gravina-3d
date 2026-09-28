@@ -25,7 +25,7 @@ slides). Se non risultano caricate, dillo prima di procedere.
 | File | Contenuto |
 |---|---|
 | `index.html` | tutto il diorama: CSS, HTML e JS in sezioni numerate 0–13 |
-| `index.html`, sezione 3 | la costante `GEO` è **generata**: non modificarla a mano |
+| `index.html`, sezione 3 | la costante `GEO` è **generata**: non modificarla a mano. Il diorama è fatto di tre zolle (città, P.I.P., Bosco) in `GEO.meta.zolle` |
 | `tools/genera_dati.py` | pipeline dei dati reali (Overture Maps, OSM via Overpass, quote Copernicus → `GEO` dentro `index.html`) |
 | `tools/test/` | prove Playwright: `simula`, `interazioni`, `foto`, `prestazioni` (GPU vera: triangoli, draw call, tempi), più `vista`, `valuta`, `vetrina` per lo sviluppo e `anteprima` per `og-image.jpg` |
 | `og-image.jpg`, `sitemap.xml` | anteprima per i social (1200×630) e mappa del sito per Google: file separati, il diorama non li usa |

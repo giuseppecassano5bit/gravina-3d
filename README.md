@@ -127,14 +127,23 @@ parte da **[OpenStreetMap](https://www.openstreetmap.org/copyright)**.
 Dalla fase 3.4 la zolla contiene **la città intera** (2,9 × 3,1 km, dal cimitero alla stazione,
 dallo Sportland al Castello Svevo):
 
-* **80 km di vie percorribili** (1 390 tratti, 861 incroci) e 238 vie cieche reali disegnate ma
+* **86 km di vie percorribili** (1 433 tratti, 890 incroci) e 240 vie cieche reali disegnate ma
   non percorribili; la sterrata del Castello Svevo si percorre;
-* **1 828 edifici della città** con l'altezza stimata per tipo e superficie (le stime Microsoft
+* **due appendici** (blocco F): la zona artigianale **P.I.P.**, a est, con le sue vie a scala
+  reale, e il **Bosco Difesa Grande**, a sud, con un bosco di querce e un rifugio;
+* **2 038 edifici della città** (più i 518 del centro storico) con l'altezza stimata per tipo e superficie (le stime Microsoft
   sono troppo basse e si scartano);
 * **quote reali** dal modello di elevazione **Copernicus DEM GLO-30**, smussate (il DSM comprende
   tetti e alberi); il canyon e i rioni del centro storico restano disegnati a mano;
 * uso del suolo, binari FAL e RFI e luoghi con nome da OpenStreetMap, letti con l'**Overpass
   API** (monumenti, chiese, stazioni, parchi).
+
+**Tracciato reale compresso.** Il Bosco Difesa Grande è a circa 6 km dalla città: la strada che
+ci porta segue il tracciato reale (la provinciale Matera–Gravina, poi la strada verso il bosco,
+5 397 m secondo Overture Maps) **ridotto in scala a circa 760 m**. Gli angoli di svolta restano
+quelli reali, si accorciano solo le lunghezze; in fondo c'è un'inversione a goccia. È
+un'eccezione come il Ponte Acquedotto: nessun'altra via è compressa, e la strada del P.I.P.
+resta a scala reale. La scheda del Bosco lo dice al visitatore.
 
 Per rigenerarli (per esempio dopo aver migliorato la mappa di Gravina su OpenStreetMap):
 
@@ -250,6 +259,9 @@ Notizie storiche e posizioni dei monumenti da fonti pubbliche, tra cui:
 * Santa Teresa: [GravinaOggi, il monastero](https://www.gravinaoggi.it/monastero-di-santa-teresa-a-gravina-in-puglia.html), [GravinaOggi, il SS. Nome di Gesù](https://www.gravinaoggi.it/la_chiesa_del_ss_nome_di_gesu.html) (l'antica parrocchia di San Matteo)
 * Chiesa del Gesù: [GravinaOggi](https://www.gravinaoggi.it/la_chiesa_del_ss_nome_di_gesu.html), [Carta dei Beni Culturali della Regione Puglia](https://cartapulia.it/dettaglio?id=127705)
 * Addolorata: nessuna fonte affidabile trovata (nei dati il punto d'interesse vicino si chiama "Chiesa dell'Annunziata"), quindi solo l'etichetta
+* Bosco Difesa Grande: [Wikipedia](https://it.wikipedia.org/wiki/Bosco_Difesa_Grande) (6 km a sud della città; sito Natura 2000 IT9120008 di 5 268 ettari, zona speciale di conservazione dal 2015 con il D.M. 10/07/2015; 1 890 ettari di bosco; roverella, cerro e farnetto), [SISEF](https://www.sisef.org/2025/07/04/incendio-e-rinascita-del-bosco-difesa-grande-gravina-in-puglia/) (incendi del 12/08/2017, oltre 1 200 ettari, e del 28/07/2021, 936 ettari), [Overture Maps](https://overturemaps.org) (lunghezza del tracciato reale: 5 397 m)
+* Rifugio nel Bosco Difesa Grande: nessuna fonte affidabile trovata, quindi solo l'etichetta
+* Zona artigianale P.I.P.: solo l'etichetta (nessuna scheda)
 * Geografia generale: [Wikipedia, Gravina in Puglia](https://en.wikipedia.org/wiki/Gravina_in_Puglia)
 
 Dati geografici della città intera (fase 3.4):
