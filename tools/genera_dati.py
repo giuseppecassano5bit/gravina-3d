@@ -2,9 +2,11 @@
 """
 Genera i dati geografici REALI di Gravina 3D e li incorpora in index.html.
 
-Fonte: Overture Maps Foundation (release indicata in RELEASE), i cui temi
+Fonti: Overture Maps Foundation (release indicata in RELEASE), i cui temi
 "transportation", "buildings", "base" e "places" derivano in gran parte da
-OpenStreetMap. Licenze: ODbL (© OpenStreetMap contributors) e CDLA-Permissive-2.0.
+OpenStreetMap; OpenStreetMap via Overpass API (luoghi con nome); Copernicus DEM
+GLO-30 (quote). Licenze: ODbL (© OpenStreetMap contributors), CDLA-Permissive-2.0
+e la licenza del Copernicus DEM (attribuzione dell'art. 6(b) in GEO.meta.quote).
 
 Il diorama resta un file unico: i dati NON vengono caricati a runtime, ma
 scritti come costante JavaScript (`GEO`) tra due marcatori dentro index.html.
@@ -33,6 +35,12 @@ Come funziona
        mano su belvederi, mura e falesie.
     Altezze degli edifici: solo numero di piani e altezze di OpenStreetMap; le
     stime automatiche dalle immagini aeree (Microsoft ML Buildings) si scartano.
+    5. Città intera (fase 3.4): zolla AREA a riquadri da TILE m, centro storico
+       Z0 con il dettaglio pieno; vie cieche dei quartieri come vie decorative
+       (GEO.deco, non percorribili); edifici della città in forma compatta con
+       l'altezza stimata per tipo (GEO.city); quote Copernicus smussate (GEO.dem)
+       e letto del torrente (GEO.riverY); uso del suolo (GEO.cover); binari
+       (GEO.rails); luoghi OSM (GEO.pois); Castello Svevo con la sterrata.
 """
 from __future__ import annotations
 
@@ -61,11 +69,22 @@ from shapely.strtree import STRtree
 RELEASE = 'release/2026-09-23.1'
 BASE_URL = 'https://overturemaps-us-west-2.s3.amazonaws.com/'
 CA_BUNDLE = None                      # es. '/percorso/ca.crt' se serve un proxy con CA propria
-BBOX = (16.398, 16.432, 40.806, 40.830)   # lon min, lon max, lat min, lat max
+BBOX = (16.395, 16.455, 40.800, 40.840)   # lon min, lon max, lat min, lat max (la città intera)
 ORIGIN = (40.8174, 16.4134)               # Cattedrale: origine del sistema locale (lat, lon)
 
-AREA = (-340, 440, -320, 540)             # diorama in metri locali: est min/max, nord min/max
-AREA_ROADS = (-330, 430, -310, 530)       # le vie devono stare tutte qui dentro
+# Zolla del diorama in metri locali (est min/max, nord min/max): 12 × 13 riquadri da 240 m.
+# Contiene la città fino alla stazione, al cimitero, allo Sportland e al Castello Svevo.
+TILE = 240
+AREA = (-840, 2040, -1140, 1980)
+AREA_ROADS = (-830, 2030, -1130, 1970)    # le vie devono stare tutte qui dentro
+# Zona Z0, il centro storico: edifici, vie e terreno con il dettaglio pieno (fasi 2–3).
+Z0 = (-340, 450, -320, 540)
+ALT0 = 358                                # quota (m s.l.m.) dello zero del diorama: l'altopiano della Cattedrale
+
+# Il Castello Svevo si raggiunge da una strada di servizio e da una sterrata reali, che con la
+# strada vicinale a nord-est chiudono un anello: qui dentro diventano percorribili.
+CASTLE_BOX = (560, 760, 1480, 1920)
+DEM_FILE = 'dem/Copernicus_DSM_COG_10_N40_00_E016_00_DEM.tif'
 
 THEMES = {                                # nome cache → tema/tipo Overture
     'segment': 'theme=transportation/type=segment',
@@ -276,7 +295,12 @@ def build_edges(segments, connectors):
         on_bridge_route = name == BRIDGE_ROUTE_NAME and cls != 'steps'
         near_bridge_west = cls in ('footway', 'path') and any(
             BRIDGE_WEST_BOX[0] < p[0] < BRIDGE_WEST_BOX[1] and BRIDGE_WEST_BOX[2] < p[1] < BRIDGE_WEST_BOX[3] for p in pts)
-        if cls not in DRIVABLE and not on_bridge_route and not near_bridge_west:
+        to_castle = cls in ('track', 'service') and all(inside(p, CASTLE_BOX) for p in pts)
+        if to_castle:
+            cls = 'track'
+        # vie senza classe (per lo più traverse cieche dei quartieri nuovi): solo da guardare
+        deco = cls == 'unknown'
+        if cls not in DRIVABLE and not on_bridge_route and not near_bridge_west and not to_castle and not deco:
             continue
         flags = s.get('road_flags') or []
         cuts = [(c['at'], c['connector_id']) for c in s.get('connectors', [])]
@@ -300,7 +324,7 @@ def build_edges(segments, connectors):
             edges.append({
                 'a': c0, 'b': c1, 'poly': poly, 'cls': cls, 'name': name,
                 'bridge': any(a <= mid <= b for a, b in spans['is_bridge']),
-                'foot': cls not in DRIVABLE,
+                'foot': cls not in DRIVABLE and not to_castle and not deco, 'deco': deco,
             })
     # posizioni dei nodi: connettori reali o punti di taglio
     pos = dict(conn_pos)
@@ -478,7 +502,8 @@ def merge_chains(edges):
                 continue
             e1, e2 = inc[n]
             if e1 is e2 or e1['name'] != e2['name'] or e1['bridge'] or e2['bridge'] \
-                    or e1['foot'] != e2['foot'] or e1.get('turn') or e2.get('turn'):
+                    or e1['foot'] != e2['foot'] or e1.get('turn') or e2.get('turn') \
+                    or (e1['cls'] == 'track') != (e2['cls'] == 'track'):
                 continue
             p1 = e1['poly'] if e1['b'] == n else e1['poly'][::-1]
             a1 = e1['a'] if e1['b'] == n else e1['b']
@@ -494,23 +519,39 @@ def merge_chains(edges):
     return edges
 
 
+def midpoint(poly):
+    return point_at(poly, 0.5)[1]
+
+
 def build_network(data, buildings):
+    """
+    Rete percorribile (2-core del grafo, più le vie cieche del centro storico con la goccia)
+    e vie decorative: le vie cieche reali della città moderna, visibili ma non percorribili.
+    """
     edges, pos = build_edges(data['segment'], data['connector'])
     edges = [e for e in edges if all(inside(p, AREA_ROADS) for p in e['poly']) and e['a'] != e['b']]
     edges, pos = merge_close_nodes(edges, pos)
-    core = two_core(edges)
-    extra = [e for t in dead_end_trees(edges, core) if any(x['name'] in KEEP_DEAD_ENDS for x in t) for e in t]
+    drivable = [e for e in edges if not e['deco']]
+    core = two_core(drivable)
+    extra = [e for t in dead_end_trees(drivable, core)
+             if any(x['name'] in KEEP_DEAD_ENDS for x in t) and all(inside(midpoint(x['poly']), Z0) for x in t) for e in t]
     tree = STRtree(buildings)
-    edges, loops = add_turnarounds(core, extra, pos, tree, buildings)
-    edges = two_core(edges)
-    edges = largest_component(edges)
-    edges = merge_chains(edges)
-    for e in edges:                                   # geometria più leggera
+    net, loops = add_turnarounds(core, extra, pos, tree, buildings)
+    net = two_core(net)
+    net = largest_component(net)
+    used = {id(e) for e in net}
+    net = merge_chains(net)
+    # Decorative: tutto ciò che resta fuori dalla rete, nella città moderna (il centro storico resta com'era).
+    deco = [e for e in edges if id(e) not in used and not e['foot'] and not e['bridge'] and not inside(midpoint(e['poly']), Z0)]
+    deco = merge_chains(deco)
+    for e in net + deco:                              # geometria più leggera
         if not e.get('turn'):
             e['poly'] = list(LineString(e['poly']).simplify(0.35).coords)
-    print(f'  rete: {len(edges)} vie, {len(degrees(edges))} incroci, '
-          f'{sum(length(e["poly"]) for e in edges) / 1000:.2f} km, {loops} inversioni a goccia')
-    return edges, pos
+    deco = [e for e in deco if length(e['poly']) >= 12]
+    print(f'  rete: {len(net)} vie, {len(degrees(net))} incroci, '
+          f'{sum(length(e["poly"]) for e in net) / 1000:.2f} km, {loops} inversioni a goccia; '
+          f'{len(deco)} vie decorative ({sum(length(e["poly"]) for e in deco) / 1000:.2f} km)')
+    return net, deco, pos
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -559,10 +600,13 @@ def build_buildings(raw):
         g = local_geom(shape(b['geom'])).intersection(area)
         polys = [g] if g.geom_type == 'Polygon' else [p for p in getattr(g, 'geoms', []) if p.geom_type == 'Polygon']
         for p in polys:
-            p = p.simplify(0.3, preserve_topology=True)
+            if p.is_empty:
+                continue
+            # centro storico a 0,3 m (come nelle fasi 2–3), città moderna a 0,5 m
+            p = p.simplify(0.3 if inside(p.centroid.coords[0], Z0) else 0.5, preserve_topology=True)
             if p.is_empty or p.area < 8:
                 continue
-            out.append({'poly': p, 'kind': building_kind(b.get('class')),
+            out.append({'poly': p, 'kind': building_kind(b.get('class')), 'cls': b.get('class'),
                         'name': (b.get('names') or {}).get('primary'), 'height': reliable_height(b),
                         'level': b.get('level') or 0})
     print(f'  edifici: {len(out)}')
@@ -578,7 +622,12 @@ def build_buildings(raw):
 #     vicolo è stretto, (3) si ritagliano le sagome lungo la carreggiata e
 #     (4) i corpi sopraelevati attraversati dalla via diventano archi.
 # ─────────────────────────────────────────────────────────────────────────────
-CLASS_WIDTH = {0: 8.0, 1: 7.0, 2: 4.6, 3: 4.2, 4: 4.5, 5: 3.2}   # = CONFIG.road.widths in index.html
+CLASS_WIDTH = {0: 8.0, 1: 7.0, 2: 4.6, 3: 4.2, 4: 4.5, 5: 3.2, 6: 3.6}   # = CONFIG.road.widths in index.html
+# Città moderna (Z1): nelle vie urbane la larghezza comprende i marciapiedi, che index.html
+# disegna sui bordi del nastro; le vie di campagna hanno solo la carreggiata.
+URBAN_WIDTH = {0: 14.0, 1: 12.0, 2: 10.0, 3: 8.0, 4: 7.0, 5: 3.2, 6: 3.6}
+RURAL_WIDTH = {0: 7.5, 1: 7.0, 2: 6.0, 3: 5.0, 4: 5.0, 5: 3.2, 6: 3.6}
+URBAN_RAY = 11.0          # m: nella città moderna le facciate si cercano più lontano
 BRIDGE_WIDTH, TURN_WIDTH = 5.5, 3.6
 MIN_WIDTH = 3.4           # m: il mezzo più largo (il trattore, circa 2,4 m) passa con margine
 FACADE_GAP = 0.35         # m liberi tra il bordo della carreggiata e le facciate
@@ -628,12 +677,12 @@ def _normal(line, s):
     return line.interpolate(s), (-ty / tl, tx / tl)
 
 
-def _side_clearance(p, n, tree, polys):
+def _side_clearance(p, n, tree, polys, ray_len=RAY):
     """Distanze dalle facciate a sinistra e a destra di p (None se p è dentro un edificio)."""
     out = []
     for sgn in (1, -1):
-        ray = LineString([(p.x, p.y), (p.x + sgn * n[0] * RAY, p.y + sgn * n[1] * RAY)])
-        best = RAY
+        ray = LineString([(p.x, p.y), (p.x + sgn * n[0] * ray_len, p.y + sgn * n[1] * ray_len)])
+        best = ray_len
         for i in tree.query(ray):
             g = polys[i]
             if g.contains(p):
@@ -645,6 +694,30 @@ def _side_clearance(p, n, tree, polys):
     return out
 
 
+def in_z0(e):
+    return inside(midpoint(e['poly']), Z0)
+
+
+def full_width(e):
+    """Larghezza piena della via, prima di restringerla tra le facciate."""
+    code = CLASS_CODE.get(e['cls'], 2)
+    if in_z0(e):
+        return CLASS_WIDTH[code]
+    return (URBAN_WIDTH if e.get('urban') else RURAL_WIDTH)[code]
+
+
+def is_urban(e, tree, polys):
+    """Via di città (facciate vicine su almeno un lato per buona parte del percorso)."""
+    line = LineString(e['poly'])
+    ss = np.arange(2.0, max(2.5, line.length - 2), 6.0)
+    near = 0
+    for s in ss:
+        p, n = _normal(line, s)
+        d = _side_clearance(p, n, tree, polys, URBAN_RAY)
+        near += d is None or min(d) < URBAN_RAY
+    return near >= 0.35 * len(ss)
+
+
 def recenter(e, tree, polys):
     """Sposta la mezzeria verso il centro del vicolo (estremi fermi sugli incroci)."""
     line = LineString(e['poly'])
@@ -654,13 +727,14 @@ def recenter(e, tree, polys):
     count = max(2, int(L / 1.5))
     ss = [L * k / count for k in range(count + 1)]
     shifts, normals, points = [], [], []
-    half = CLASS_WIDTH[CLASS_CODE.get(e['cls'], 2)] / 2
+    half = full_width(e) / 2
+    ray = RAY if in_z0(e) else URBAN_RAY
     for s in ss:
         p, n = _normal(line, s)
         points.append(p)
         normals.append(n)
-        d = _side_clearance(p, n, tree, polys)
-        if d is None or min(d) >= half + FACADE_GAP or min(d) >= RAY:
+        d = _side_clearance(p, n, tree, polys, ray)
+        if d is None or min(d) >= half + FACADE_GAP or min(d) >= ray:
             shifts.append(0.0)                       # nessuna facciata troppo vicina
         else:
             shifts.append(max(-MAX_SHIFT, min(MAX_SHIFT, (d[0] - d[1]) / 2)))
@@ -681,13 +755,14 @@ def fit_width(e, tree, polys):
         return BRIDGE_WIDTH
     if e.get('turn'):
         return TURN_WIDTH
-    full = CLASS_WIDTH[CLASS_CODE.get(e['cls'], 2)]
+    full = full_width(e)
+    ray = RAY if in_z0(e) else URBAN_RAY
     line = LineString(centripetal_curve(e['poly']))
     gaps = []
-    for s in np.arange(2.5, line.length - 2.5, 1.0):  # lontano dagli spigoli degli incroci
+    for s in np.arange(2.5, line.length - 2.5, 1.0 if in_z0(e) else 2.0):  # lontano dagli spigoli degli incroci
         p, n = _normal(line, s)
-        d = _side_clearance(p, n, tree, polys)
-        if d is not None and max(d) < RAY:
+        d = _side_clearance(p, n, tree, polys, ray)
+        if d is not None and max(d) < ray:
             gaps.append(d[0] + d[1])
     if not gaps:
         return full
@@ -695,9 +770,11 @@ def fit_width(e, tree, polys):
 
 
 def free_roads(edges, pos, buildings):
-    """Ricentra e dimensiona le vie, ritaglia gli edifici, ricava gli archi."""
+    """Ricentra e dimensiona le vie (anche le decorative), ritaglia gli edifici, ricava gli archi."""
     ground = [b['poly'] for b in buildings if not b['level']]
     tree = STRtree(ground)
+    for e in edges:
+        e['urban'] = not in_z0(e) and not e['bridge'] and not e.get('turn') and is_urban(e, tree, ground)
     for e in edges:
         if not e['bridge'] and not e.get('turn'):
             e['poly'] = recenter(e, tree, ground)
@@ -724,8 +801,8 @@ def free_roads(edges, pos, buildings):
         if not poly.intersects(corridor):
             out.append(b)
             continue
-        # Corpo sopraelevato attraversato dalla mezzeria: è un arco sulla via.
-        if b['level']:
+        # Corpo sopraelevato attraversato dalla mezzeria: è un arco sulla via (solo nel centro storico).
+        if b['level'] and inside(poly.centroid.coords[0], Z0):
             for line, e in centerlines:
                 span = line.intersection(poly)
                 if not span.is_empty and span.length > 0.5 and span.length <= ARCH_MAX_DEPTH:
@@ -766,12 +843,12 @@ def build_features(data):
 
     cliffs = [LineString([to_local(*p) for p in l['geom']['coordinates']])
               for l in data['land'] if l.get('class') == 'cliff' and l['geom']['type'] == 'LineString']
-    cliffs = [c for c in cliffs if inside(c.centroid.coords[0], AREA)]
+    cliffs = [c for c in cliffs if inside(c.centroid.coords[0], Z0)]
 
     walls, views, bridges = [], [], []
     for i in data['infrastructure']:
         g = local_geom(shape(i['geom']))
-        if not inside(g.centroid.coords[0], AREA):
+        if not inside(g.centroid.coords[0], Z0):
             continue
         name = (i.get('names') or {}).get('primary')
         if i.get('class') == 'city_wall':
@@ -786,7 +863,7 @@ def build_features(data):
         if l.get('class') not in ('pedestrian', 'plaza', 'park', 'grass', 'garden'):
             continue
         g = local_geom(shape(l['geom']))
-        if g.geom_type == 'Polygon' and inside(g.centroid.coords[0], AREA):
+        if g.geom_type == 'Polygon' and inside(g.centroid.coords[0], Z0):
             areas.append((l.get('class'), g.simplify(0.5)))
 
     # Scalinate reali (OSM highway=steps): nel diorama sono gradini di tufo da guardare, non vie.
@@ -794,7 +871,7 @@ def build_features(data):
     for sg in data['segment']:
         if sg.get('class') != 'steps' or sg['geom']['type'] != 'LineString':
             continue
-        line = LineString([to_local(*p) for p in sg['geom']['coordinates']]).intersection(box(AREA[0], AREA[2], AREA[1], AREA[3]))
+        line = LineString([to_local(*p) for p in sg['geom']['coordinates']]).intersection(box(Z0[0], Z0[2], Z0[1], Z0[3]))
         if line.geom_type == 'LineString' and line.length > 4:
             steps.append(((sg.get('names') or {}).get('primary'), line))
 
@@ -803,24 +880,402 @@ def build_features(data):
     for p in data['place']:
         cat = p.get('basic_category')
         e, n = to_local(*p['geom']['coordinates'])
-        if cat in keep and inside((e, n), AREA) and (p.get('confidence') or 0) >= 0.6:
+        if cat in keep and inside((e, n), Z0) and (p.get('confidence') or 0) >= 0.6:
             places.append((e, n, (p.get('names') or {}).get('primary'), cat))
     return {'river': rl, 'cliffs': cliffs, 'walls': walls, 'views': views,
             'bridges': bridges, 'areas': areas, 'places': places, 'steps': steps}
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# 4b. Città moderna: quote reali, uso del suolo, altezze stimate, ferrovie, luoghi
+# ─────────────────────────────────────────────────────────────────────────────
+DEM_STEP = 30             # m: passo della griglia delle quote in GEO
+COVER_STEP = 15           # m: passo della griglia dell'uso del suolo in GEO
+COVER = {'campagna': 0, 'citta': 1, 'parco': 2, 'bosco': 3, 'campo': 4, 'uliveto': 5, 'industria': 6,
+         'cimitero': 7, 'sport': 8, 'piazza': 9, 'macchia': 10, 'cava': 11}
+OVERPASS_URL = 'https://overpass-api.de/api/interpreter'
+OVERPASS_BBOX = '40.79,16.39,40.85,16.46'
+OVERPASS_QUERY = f"""[out:json][timeout:160];
+(nwr["historic"]({OVERPASS_BBOX});
+ nwr["amenity"="place_of_worship"]({OVERPASS_BBOX});
+ nwr["railway"="station"]({OVERPASS_BBOX});
+ nwr["leisure"~"park|stadium|sports_centre"]({OVERPASS_BBOX});
+);out tags center;
+way(76156899);out geom;
+"""
+
+
+def overpass():
+    """Luoghi di OpenStreetMap che Overture non ha (monumenti, stazioni…), più la sagoma del Castello Svevo. In cache."""
+    out = CACHE / 'overpass.json'
+    if out.exists():
+        return json.loads(out.read_text())['elements']
+    r = SESSION.post(OVERPASS_URL, data={'data': OVERPASS_QUERY}, timeout=200,
+                     headers={'User-Agent': 'gravina-3d (github.com/giuseppecassano5bit/gravina-3d)', 'Accept': 'application/json'})
+    r.raise_for_status()
+    out.write_text(r.text)
+    return r.json()['elements']
+
+
+def load_dem():
+    """Tessera Copernicus GLO-30 (DSM, pixel di 1″): restituisce il campionamento bilineare in metri locali."""
+    import tifffile
+    with tifffile.TiffFile(CACHE / DEM_FILE) as tf:
+        page = tf.pages[0]
+        z = page.asarray().astype(np.float64)
+        sx, sy = page.tags['ModelPixelScaleTag'].value[:2]
+        lon0, lat0 = page.tags['ModelTiepointTag'].value[3:5]
+
+    def at(e, n):
+        lat = ORIGIN[0] + np.asarray(n, float) / M_LAT
+        lon = ORIGIN[1] + np.asarray(e, float) / M_LON
+        r, c = (lat0 - lat) / sy - 0.5, (lon - lon0) / sx - 0.5      # centri dei pixel (PixelIsArea)
+        r0, c0 = np.floor(r).astype(int), np.floor(c).astype(int)
+        fr, fc = r - r0, c - c0
+        return (z[r0, c0] * (1 - fr) * (1 - fc) + z[r0, c0 + 1] * (1 - fr) * fc
+                + z[r0 + 1, c0] * fr * (1 - fc) + z[r0 + 1, c0 + 1] * fr * fc)
+    return at
+
+
+def blur(a, sigma):
+    """Sfocatura gaussiana separabile (sigma in celle), bordi replicati."""
+    r = max(1, int(3 * sigma + 0.5))
+    x = np.arange(-r, r + 1)
+    k = np.exp(-x * x / (2 * sigma * sigma))
+    k /= k.sum()
+    b = np.pad(a, ((r, r), (0, 0)), mode='edge')
+    b = sum(k[i] * b[i:i + a.shape[0]] for i in range(2 * r + 1))
+    b = np.pad(b, ((0, 0), (r, r)), mode='edge')
+    return sum(k[i] * b[:, i:i + a.shape[1]] for i in range(2 * r + 1))
+
+
+def low_percentile(a, size, q):
+    """Percentile basso su una finestra quadrata di `size` celle: toglie tetti e alberi dal DSM."""
+    from numpy.lib.stride_tricks import sliding_window_view
+    h = size // 2
+    w = sliding_window_view(np.pad(a, h, mode='edge'), (size, size))
+    return np.percentile(w, q, axis=(2, 3))
+
+
+def building_density(buildings, E, N, sigma):
+    """Frazione di suolo coperta da edifici attorno a ogni punto della griglia (E, N)."""
+    step = E[1] - E[0]
+    acc = np.zeros((len(N), len(E)))
+    for b in buildings:
+        c = b['poly'].centroid
+        i, j = int(round((c.x - E[0]) / step)), int(round((c.y - N[0]) / step))
+        if 0 <= i < len(E) and 0 <= j < len(N):
+            acc[j, i] += b['poly'].area
+    return blur(acc / (step * step), sigma / step)
+
+
+def ground_model(dem_at, buildings):
+    """
+    Quote del terreno dal DSM Copernicus. Il DSM comprende tetti e alberi: in città si
+    prende un percentile basso su 90 m e si smussa molto (35 m), in campagna e nel canyon
+    si smussa poco (15 m), così la valle del torrente resta incisa.
+    Restituisce la funzione di quota fine (10 m) e la griglia di GEO (DEM_STEP m).
+    """
+    f, M = 10, 180
+    E = np.arange(AREA[0] - M, AREA[1] + M + 1, f, dtype=float)
+    N = np.arange(AREA[2] - M, AREA[3] + M + 1, f, dtype=float)
+    EE, NN = np.meshgrid(E, N)
+    Z = dem_at(EE, NN)
+    U = np.clip((building_density(buildings, E, N, 45) - 0.06) / 0.14, 0, 1)
+    A = blur(Z, 1.5)
+    B = blur(low_percentile(Z, 9, 20), 3.5)
+    G = A * (1 - U) + B * U
+    k = DEM_STEP // f
+    grid = G[M // f::k, M // f::k][:(AREA[3] - AREA[2]) // DEM_STEP + 1, :(AREA[1] - AREA[0]) // DEM_STEP + 1]
+
+    def at(e, n):
+        x, y = (np.asarray(e) - E[0]) / f, (np.asarray(n) - N[0]) / f
+        i, j = np.clip(np.floor(x).astype(int), 0, len(E) - 2), np.clip(np.floor(y).astype(int), 0, len(N) - 2)
+        fx, fy = x - i, y - j
+        return (G[j, i] * (1 - fx) * (1 - fy) + G[j, i + 1] * fx * (1 - fy) + G[j + 1, i] * (1 - fx) * fy + G[j + 1, i + 1] * fx * fy)
+    print(f'  quote: griglia {grid.shape[1]} × {grid.shape[0]} ogni {DEM_STEP} m, da {grid.min():.0f} a {grid.max():.0f} m s.l.m.')
+    return at, grid, A, E, N
+
+
+def river_bed(river, dem_light):
+    """Quota del letto del torrente in ogni vertice (m s.l.m.): minimo del DSM di traverso, smussato, sempre in discesa."""
+    pts = list(river.coords)
+    ys = []
+    for i, (e, n) in enumerate(pts):
+        a, b = pts[max(0, i - 1)], pts[min(len(pts) - 1, i + 1)]
+        tx, ty = b[0] - a[0], b[1] - a[1]
+        l = math.hypot(tx, ty) or 1
+        offs = np.arange(-20, 21, 5.0)
+        ys.append(float(np.min(dem_light(e - ty / l * offs, n + tx / l * offs))))
+    s = np.concatenate([[0], np.cumsum([math.dist(p, q) for p, q in zip(pts, pts[1:])])])
+    ys = np.array(ys)
+    sm = np.array([np.sum(ys * np.exp(-((s - x) / 60) ** 2)) / np.sum(np.exp(-((s - x) / 60) ** 2)) for x in s])
+    return np.minimum.accumulate(sm)                  # il torrente scorre da nord verso sud
+
+
+def raster(polys, E, N):
+    """Maschera dei punti della griglia (E, N) dentro i poligoni."""
+    m = np.zeros((len(N), len(E)), bool)
+    for p in polys:
+        x0, y0, x1, y1 = p.bounds
+        i0, i1 = np.searchsorted(E, x0), np.searchsorted(E, x1)
+        j0, j1 = np.searchsorted(N, y0), np.searchsorted(N, y1)
+        if i1 > i0 and j1 > j0:
+            xx, yy = np.meshgrid(E[i0:i1], N[j0:j1])
+            m[j0:j1, i0:i1] |= shapely.contains_xy(p, xx, yy)
+    return m
+
+
+def land_cover(data, buildings):
+    """Uso del suolo su una griglia di COVER_STEP m (centri delle celle): colori del terreno e alberi nella città moderna."""
+    s = COVER_STEP
+    E = np.arange(AREA[0] + s / 2, AREA[1], s, dtype=float)
+    N = np.arange(AREA[2] + s / 2, AREA[3], s, dtype=float)
+    grid = np.zeros((len(N), len(E)), np.uint8)
+    polys = collections.defaultdict(list)
+    lu = {'farmland': 'campo', 'meadow': 'campo', 'orchard': 'uliveto', 'residential': 'citta', 'industrial': 'industria',
+          'commercial': 'industria', 'cemetery': 'cimitero', 'park': 'parco', 'grass': 'parco', 'garden': 'parco',
+          'pitch': 'sport', 'stadium': 'sport', 'pedestrian': 'piazza', 'plaza': 'piazza', 'quarry': 'cava'}
+    for l in data['land_use']:
+        kind = lu.get(l.get('class'))
+        if kind:
+            g = local_geom(shape(l['geom']))
+            polys[kind] += [p for p in getattr(g, 'geoms', [g]) if p.geom_type == 'Polygon']
+    for l in data['land']:
+        kind = {'forest': 'bosco', 'wood': 'bosco', 'heath': 'macchia', 'scrub': 'macchia'}.get(l.get('class'))
+        if kind and l['geom']['type'] in ('Polygon', 'MultiPolygon'):
+            g = local_geom(shape(l['geom']))
+            polys[kind] += [p for p in getattr(g, 'geoms', [g]) if p.geom_type == 'Polygon']
+    dense = building_density(buildings, E, N, 30) > 0.12
+    for kind in ('campo', 'uliveto', 'macchia', 'citta', 'industria', 'cava', 'bosco', 'parco', 'cimitero', 'sport', 'piazza'):
+        m = raster(polys[kind], E, N)
+        if kind == 'citta':
+            m = dense                                    # la città è dove ci sono le case, non tutto il poligono "residenziale"
+        grid[m] = COVER[kind]
+    print('  uso del suolo:', ', '.join(f'{k} {100 * np.mean(grid == v):.0f}%' for k, v in COVER.items() if np.any(grid == v)))
+    return grid
+
+
+HEIGHT_CLASS = {'roof': 3.2, 'shed': 3.0, 'garage': 3.0, 'garages': 3.0, 'carport': 2.8, 'greenhouse': 3.0, 'grandstand': 8.0}
+
+
+def city_height(b, dense, industrial):
+    """
+    Altezza (m) di un edificio della città moderna. OpenStreetMap non ha quasi mai i piani,
+    e le stime di Microsoft sono troppo basse (6-7 m per un condominio): si stima per tipo
+    e superficie. Palazzine da 2 a 6 piani nei quartieri, capannoni da 7 a 9 m, case di
+    campagna da 1 a 2 piani.
+    """
+    if b['height']:
+        return b['height']
+    cls, area = b['cls'], b['poly'].area
+    c = b['poly'].centroid
+    seed = (math.sin(c.x * 12.9898 + c.y * 78.233) * 43758.5453) % 1
+    if cls in HEIGHT_CLASS:
+        return HEIGHT_CLASS[cls]
+    if b['kind'] == KIND['church']:
+        return 11 + seed * 4
+    if cls in ('industrial', 'warehouse') or (industrial and area > 300):
+        return 7 + seed * 2
+    if b['kind'] == KIND['public']:
+        return 3.3 * 3 + 0.6
+    if not dense:
+        floors = 1 if area < 150 or seed < 0.5 else 2
+    elif area < 60:
+        floors = 1
+    elif area < 150:
+        floors = 2 + (seed > 0.5)
+    elif area < 400:
+        floors = 3 + int(seed * 2.99)
+    else:
+        floors = 4 + int(seed * 2.99)
+    return floors * 3.3 + 0.6
+
+
+CITY_KIND = {'house': 0, 'church': 1, 'shed': 3, 'apartments': 4, 'public': 5, 'industry': 6, 'castle': 7}
+
+
+def city_buildings(buildings, cover):
+    """Edifici fuori dal centro storico, con tipo e altezza stimata."""
+    s = COVER_STEP
+    out = []
+    for b in buildings:
+        c = b['poly'].centroid
+        i, j = int((c.x - AREA[0]) / s), int((c.y - AREA[2]) / s)
+        code = cover[min(j, cover.shape[0] - 1), min(i, cover.shape[1] - 1)]
+        dense = code in (COVER['citta'], COVER['industria'], COVER['parco'], COVER['piazza'], COVER['sport'])
+        h = city_height(b, dense, code == COVER['industria'])
+        kind = b['kind']
+        if b['cls'] in ('industrial', 'warehouse') or (code == COVER['industria'] and b['poly'].area > 300):
+            kind = CITY_KIND['industry']
+        out.append({**b, 'height': h, 'kind': kind})
+    return out
+
+
+def castle_outline(elements):
+    """Sagoma del Castello Svevo (OSM w76156899, rovine del 1231) in metri locali."""
+    for el in elements:
+        if el.get('type') == 'way' and el.get('id') == 76156899 and el.get('geometry'):
+            p = Polygon([to_local(g['lon'], g['lat']) for g in el['geometry']])
+            return p.simplify(0.5, preserve_topology=True) if p.is_valid else p.buffer(0)
+    return None
+
+
+POI_KIND = [('castle', 'castello'), ('railway', 'stazione'), ('place_of_worship', 'chiesa'), ('stadium', 'sport'),
+            ('sports_centre', 'sport'), ('park', 'parco'), ('memorial', 'memoria'), ('monument', 'monumento'),
+            ('archaeological_site', 'archeologia'), ('ruins', 'storico'), ('fort', 'storico'), ('building', 'storico')]
+
+
+def city_pois(elements):
+    """Luoghi con nome da OpenStreetMap (via Overpass) nella zolla: solo etichette possibili, niente schede."""
+    out = []
+    for el in elements:
+        t = el.get('tags') or {}
+        c = el.get('center') or ({'lat': el['lat'], 'lon': el['lon']} if 'lat' in el else None)
+        if not t.get('name') or not c:
+            continue
+        e, n = to_local(c['lon'], c['lat'])
+        if not inside((e, n), AREA):
+            continue
+        vals = {t.get('historic'), t.get('amenity'), t.get('leisure'), 'railway' if t.get('railway') == 'station' else None}
+        kind = next((k for key, k in POI_KIND if key in vals), None)
+        if kind:
+            out.append((round(e, 1), round(n, 1), t['name'], kind, f"{el['type'][0]}{el['id']}", t.get('wikidata')))
+    print(f'  luoghi da OpenStreetMap: {len(out)}')
+    return sorted(out, key=lambda x: (x[3], x[2]))
+
+
+def build_rails(data):
+    """Binari reali (FAL a scartamento ridotto, RFI a scartamento ordinario): linee da guardare, senza gallerie."""
+    rails = []
+    clip = box(AREA_ROADS[0], AREA_ROADS[2], AREA_ROADS[1], AREA_ROADS[3])
+    for sg in data['segment']:
+        if sg.get('subtype') != 'rail' or sg.get('class') not in ('narrow_gauge', 'standard_gauge'):
+            continue
+        pts = [to_local(*p) for p in sg['geom']['coordinates']]
+        cuts, spans = [0.0, 1.0], {'is_bridge': [], 'is_tunnel': []}
+        for fl in sg.get('rail_flags') or []:
+            for v in fl.get('values', []):
+                if v in spans:
+                    between = fl.get('between') or [0, 1]
+                    spans[v].append(between)
+                    cuts += between
+        cuts = sorted(set(cuts))
+        for t0, t1 in zip(cuts, cuts[1:]):
+            mid = (t0 + t1) / 2
+            if t1 - t0 < 1e-6 or any(a <= mid <= b for a, b in spans['is_tunnel']):
+                continue
+            i0, p0 = point_at(pts, t0)
+            i1, p1 = point_at(pts, t1)
+            line = LineString([p0] + pts[i0 + 1:i1 + 1] + [p1]).intersection(clip)
+            for g in getattr(line, 'geoms', [line]):
+                if g.geom_type == 'LineString' and g.length > 3:
+                    bridge = any(a <= mid <= b for a, b in spans['is_bridge'])
+                    rails.append({'gauge': 0 if sg['class'] == 'narrow_gauge' else 1, 'bridge': bridge, 'line': g.simplify(0.5)})
+    print(f'  binari: {len(rails)} tratti, {sum(r["line"].length for r in rails) / 1000:.1f} km')
+    return rails
+
+
+def extend_rims(river, dem_light):
+    """
+    Cigli del canyon: quelli tracciati a mano nel centro, prolungati a nord e a sud lungo il
+    torrente finché il DSM mostra una valle incisa (almeno 12 m sotto le sponde). Servono alle
+    panoramiche e alla targa; il terreno fuori dal centro storico viene direttamente dal DSM.
+    """
+    pts = list(river.coords)
+    L = river.length
+
+    def rim_offsets(s):
+        p, a, b = river.interpolate(s), river.interpolate(max(0, s - 15)), river.interpolate(min(L, s + 15))
+        tx, ty = b.x - a.x, b.y - a.y
+        l = math.hypot(tx, ty) or 1
+        nx, ny = -ty / l, tx / l                      # sinistra del verso di percorrenza (nord → sud: est)
+        out = []
+        for sgn in (1, -1):
+            offs = np.arange(0, 260, 5.0)
+            h = dem_light(p.x + sgn * nx * offs, p.y + sgn * ny * offs)
+            floor, bank = h[:5].min(), np.percentile(h[24:], 70)
+            if bank - floor < 12:
+                return None
+            k = int(np.argmax(h >= floor + 0.8 * (bank - floor)))
+            out.append((p.x + sgn * nx * offs[k], p.y + sgn * ny * offs[k]))
+        return out
+
+    east, west = list(EAST_RIM), list(WEST_RIM)
+    # a nord (a monte) si parte dall'ultimo punto dei cigli a mano e si risale; a sud si scende
+    for towards, rim_e, rim_w in (('nord', east, west), ('sud', east, west)):
+        anchor = rim_e[-1] if towards == 'nord' else rim_e[0]
+        s0 = river.project(Point(anchor))
+        step = -30 if towards == 'nord' else 30         # il torrente va da nord a sud
+        added_e, added_w = [], []
+        s = s0 + step * 2
+        while 0 < s < L:
+            r = rim_offsets(s)
+            if not r:
+                break
+            (ea, eb) = r
+            added_e.append(ea)
+            added_w.append(eb)
+            s += step
+        added_e, added_w = smooth_line(added_e), smooth_line(added_w)
+        if towards == 'nord':
+            east += added_e
+            west += added_w
+        else:
+            east[:0] = added_e[::-1]
+            west[:0] = added_w[::-1]
+    print(f'  cigli del canyon: {len(EAST_RIM)} → {len(east)} punti a est, {len(WEST_RIM)} → {len(west)} a ovest')
+    return east, west
+
+
+def smooth_line(pts, k=2):
+    """Media mobile su una polilinea (estremi compresi)."""
+    return [tuple(np.mean(pts[max(0, i - k):i + k + 1], axis=0)) for i in range(len(pts))] if len(pts) > 2 else pts
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # 5. Scrittura del blocco dati in index.html
 # ─────────────────────────────────────────────────────────────────────────────
 CLASS_CODE = {'secondary': 0, 'tertiary': 1, 'residential': 2, 'unclassified': 2, 'living_street': 3,
-              'pedestrian': 4, 'footway': 5, 'path': 5, 'steps': 5}
+              'pedestrian': 4, 'footway': 5, 'path': 5, 'steps': 5, 'track': 6, 'unknown': 2}
 
 
-def flat(coords):
-    return [round(v, 1) for p in coords for v in p]
+COPERNICUS = ('produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 '
+              'provided under COPERNICUS by the European Union and ESA; all rights reserved')
+ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_'
 
 
-def encode(edges, pos, buildings, arches, feats):
+def flat(coords, digits=1):
+    return [round(v, digits) for p in coords for v in p]
+
+
+def varint(values):
+    """
+    Interi con segno → stringa compatta: ogni carattere porta 5 bit del valore (a zigzag)
+    più un bit che dice se il numero continua. Decodificata da CODEC in index.html.
+    """
+    out = []
+    for v in values:
+        z = v * 2 if v >= 0 else -v * 2 - 1
+        while True:
+            c, z = z & 31, z >> 5
+            out.append(ALPHABET[c | (32 if z else 0)])
+            if not z:
+                break
+    return ''.join(out)
+
+
+def ring_ints(coords, q):
+    """Anello a passo q (m), dall'angolo sud-ovest della zolla: primo punto assoluto, poi differenze."""
+    pts = [(round((x - AREA[0]) / q), round((y - AREA[2]) / q)) for x, y in coords]
+    pts = [p for i, p in enumerate(pts) if p != pts[i - 1]] if len(pts) > 1 else pts
+    out = [len(pts), *pts[0]]
+    for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+        out += [x1 - x0, y1 - y0]
+    return out
+
+
+def encode(edges, deco, pos, buildings, city, arches, feats, extra):
     names, name_idx = [], {}
 
     def nid(s):
@@ -838,39 +1293,71 @@ def encode(edges, pos, buildings, arches, feats):
             if n not in node_ids:
                 node_ids[n] = len(nodes)
                 nodes.append(pos[n])
+
+    def flags(e):
+        return ((1 if e['bridge'] else 0) | (2 if e['foot'] else 0) | (4 if e.get('turn') else 0)
+                | (8 if e['cls'] == 'track' else 0) | (16 if e.get('urban') else 0))
     E = []
     for e in edges:
-        flags = (1 if e['bridge'] else 0) | (2 if e['foot'] else 0) | (4 if e.get('turn') else 0)
         poly = list(e['poly'])
         poly[0], poly[-1] = pos[e['a']], pos[e['b']]        # estremi esattamente sui nodi
-        E.append([node_ids[e['a']], node_ids[e['b']], CLASS_CODE.get(e['cls'], 2), nid(e['name']), flags, flat(poly), e['width']])
+        E.append([node_ids[e['a']], node_ids[e['b']], CLASS_CODE.get(e['cls'], 2), nid(e['name']), flags(e), flat(poly), e['width']])
+    D = [[CLASS_CODE.get(e['cls'], 2), nid(e['name']), flags(e), e['width'], flat(e['poly'])] for e in deco]
     B = []
     for b in buildings:
         rings = [flat(b['poly'].exterior.coords[:-1])] + [flat(r.coords[:-1]) for r in b['poly'].interiors]
         B.append([b['kind'], nid(b['name']), round(b['height'] or 0, 1), rings])
+    # Edifici della città moderna: tipo, nome, altezza in dm, anelli a passo di 0,25 m.
+    C = []
+    for b in city:
+        rings = [b['poly'].exterior] + list(b['poly'].interiors)
+        C += [b['kind'], nid(b['name']) + 1, round(b['height'] * 10), len(rings)]
+        for r in rings:
+            C += ring_ints(r.coords[:-1], 0.25)
+    g = extra['ground']
+    q = np.round((g - ALT0) / 0.25).astype(int)               # quote a passo di 0,25 m
+    dem = []
+    for row in q:
+        dem += [int(row[0])] + [int(v) for v in np.diff(row)]
+    cov, runs = extra['cover'].ravel(), []
+    k = 0
+    while k < len(cov):
+        j = k
+        while j < len(cov) and cov[j] == cov[k]:
+            j += 1
+        runs += [int(cov[k]), j - k]
+        k = j
     geo = {
         'meta': {
             'fonte': f'Overture Maps Foundation {RELEASE.split("/")[-1]} · © OpenStreetMap contributors (ODbL)',
-            'origine': list(ORIGIN), 'area': list(AREA),
+            'quote': COPERNICUS,
+            'origine': list(ORIGIN), 'area': list(AREA), 'z0': list(Z0), 'riquadro': TILE, 'quota0': ALT0,
         },
         'names': names,
         'nodes': flat(nodes),
         'edges': E,
+        'deco': D,
         'buildings': B,
+        'city': varint(C),
+        'dem': {'passo': DEM_STEP, 'nx': g.shape[1], 'ny': g.shape[0], 'q': 0.25, 'dati': varint(dem)},
+        'cover': {'passo': COVER_STEP, 'nx': extra['cover'].shape[1], 'ny': extra['cover'].shape[0], 'dati': varint(runs)},
         'arches': [[nid(a['name']), a['width'], flat(a['poly'].exterior.coords[:-1])] for a in arches],
         'river': flat(feats['river'].coords),
+        'riverY': [round(float(y) - ALT0, 1) for y in extra['riverY']],
+        'rails': [[r['gauge'], int(r['bridge']), flat(r['line'].coords, 0)] for r in extra['rails']],
         'cliffs': [flat(c.coords) for c in feats['cliffs']],
         'walls': [flat(w.coords) for w in feats['walls'] if w.geom_type == 'LineString'],
         'views': [[round(g.centroid.x, 1), round(g.centroid.y, 1), nid(n)] for g, n in feats['views']],
         'bridges': [flat(b.coords) for b in feats['bridges']],
         'areas': [[c, flat(g.exterior.coords[:-1])] for c, g in feats['areas']],
         'places': [[round(e, 1), round(n, 1), nid(nm), c] for e, n, nm, c in feats['places'] if nm],
+        'pois': [[e, n, nid(nm), kind, osm, wd or ''] for e, n, nm, kind, osm, wd in extra['pois']],
         'steps': [[nid(nm), flat(g.coords)] for nm, g in feats['steps']],
-        'rims': {'east': flat(EAST_RIM), 'west': flat(WEST_RIM)},
+        'rims': {'east': flat(extra['rims'][0]), 'west': flat(extra['rims'][1])},
     }
     lines = ['const GEO = {']
     for k, v in geo.items():
-        if k in ('edges', 'buildings', 'arches', 'places', 'areas', 'cliffs', 'walls', 'views', 'bridges', 'steps'):
+        if k in ('edges', 'deco', 'buildings', 'arches', 'places', 'pois', 'areas', 'cliffs', 'walls', 'views', 'bridges', 'steps', 'rails'):
             lines.append(f'  {k}: [')
             lines += [f'    {json.dumps(x, ensure_ascii=False, separators=(",", ":"))},' for x in v]
             lines.append('  ],')
@@ -889,29 +1376,40 @@ def write_html(block: str):
     print(f'  index.html aggiornato ({len(block) / 1024:.0f} KB di dati)')
 
 
-def preview(path, edges, buildings, arches, feats):
+def preview(path, edges, deco, buildings, city, arches, feats, extra):
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
-    fig, ax = plt.subplots(figsize=(12, 13), dpi=80)
-    for b in buildings:
+    from matplotlib.colors import ListedColormap
+    W, H = AREA[1] - AREA[0], AREA[3] - AREA[2]
+    fig, ax = plt.subplots(figsize=(W / 150, H / 150), dpi=90)
+    tones = ['#f2ead8', '#e4dccb', '#b8d08a', '#7fa65a', '#eadca0', '#c9cf8f', '#d8d0d8', '#c8c0b0', '#9fd08a', '#efe2c8', '#c8c89a', '#c0b0a0']
+    ax.imshow(extra['cover'], origin='lower', extent=(AREA[0], AREA[1], AREA[2], AREA[3]), cmap=ListedColormap(tones), vmin=0, vmax=11, interpolation='nearest')
+    g = extra['ground']
+    ax.contour(np.linspace(AREA[0], AREA[1], g.shape[1]), np.linspace(AREA[2], AREA[3], g.shape[0]), g, levels=np.arange(250, 460, 5), colors='#8a7a60', linewidths=0.3)
+    for b in buildings + city:
         x, y = b['poly'].exterior.xy
-        ax.fill(x, y, color='#b0452a' if b['kind'] in (1, 2) else '#dccaa0', lw=0)
-    for e in edges:
-        road = LineString(e['poly']).buffer(e['width'] / 2)
-        x, y = road.exterior.xy
-        ax.fill(x, y, color='#e8a23a' if e['bridge'] else '#8fb8a8' if e['foot'] or e.get('turn') else '#8a93a6', lw=0, alpha=0.8)
+        ax.fill(x, y, color='#b0452a' if b['kind'] in (1, 2, 7) else '#dccaa0' if b in buildings else '#c8b48a', lw=0)
+    for e in deco:
         x, y = zip(*e['poly'])
-        ax.plot(x, y, color='#135', lw=0.4)
+        ax.plot(x, y, color='#9a9a9a', lw=e['width'] * 0.25, alpha=0.8)
+    for e in edges:
+        x, y = zip(*e['poly'])
+        c = '#e8a23a' if e['bridge'] else '#6a8a3a' if e['cls'] == 'track' else '#8fb8a8' if e['foot'] or e.get('turn') else '#3a4a6a' if e.get('urban') else '#6a5a8a'
+        ax.plot(x, y, color=c, lw=e['width'] * 0.25)
+    for r in extra['rails']:
+        ax.plot(*r['line'].xy, color='#222', lw=1.2, ls='--' if r['bridge'] else '-')
     for a in arches:
         x, y = a['poly'].exterior.xy
         ax.fill(x, y, color='#7a2ea0', lw=0)
-    for _, g in feats['steps']:
-        ax.plot(*g.xy, color='#6a3a1c', lw=2.5)
     x, y = feats['river'].xy
     ax.plot(x, y, color='#2a7fd4', lw=2)
-    for rim, c in ((EAST_RIM, 'r'), (WEST_RIM, 'm')):
+    for rim, c in ((extra['rims'][0], 'r'), (extra['rims'][1], 'm')):
         ax.plot(*zip(*rim), c + '--', lw=1)
+    ax.plot([Z0[0], Z0[1], Z0[1], Z0[0], Z0[0]], [Z0[2], Z0[2], Z0[3], Z0[3], Z0[2]], 'k:', lw=1)
+    for e, n, nm, kind, *_ in extra['pois']:
+        ax.plot(e, n, 'k.', ms=3)
+        ax.text(e + 6, n + 6, nm, fontsize=4)
     ax.set_xlim(AREA[0], AREA[1]); ax.set_ylim(AREA[2], AREA[3]); ax.set_aspect('equal')
     plt.tight_layout(); plt.savefig(path)
     print(f'  anteprima: {path}')
@@ -922,19 +1420,37 @@ def main():
     ap.add_argument('--forza', action='store_true', help='riscarica i dati ignorando la cache')
     ap.add_argument('--anteprima', metavar='PNG', help='salva una mappa di controllo (richiede matplotlib)')
     args = ap.parse_args()
-    print('1. Download (Overture Maps)')
+    t0 = time.time()
+    print('1. Download (Overture Maps, OpenStreetMap via Overpass, Copernicus GLO-30)')
     data = {name: download(name, tt, args.forza) for name, tt in THEMES.items()}
+    osm = overpass()
+    dem_at = load_dem()
     print('2. Edifici')
     buildings = build_buildings(data['building'])
+    castle = castle_outline(osm)
+    if castle is not None:
+        # la relazione OSM building=castle (r6148325) arriva da Overture come un edificio anonimo con la stessa sagoma
+        buildings = [b for b in buildings if b['poly'].intersection(castle).area < 0.3 * b['poly'].area]
+        buildings.append({'poly': castle, 'kind': CITY_KIND['castle'], 'cls': 'castle', 'name': 'Castello Svevo', 'height': 8.0, 'level': 0})
     print('3. Rete stradale')
-    edges, pos = build_network(data, [b['poly'] for b in buildings])
-    buildings, arches = free_roads(edges, pos, buildings)
-    print('4. Morfologia')
+    edges, deco, pos = build_network(data, [b['poly'] for b in buildings])
+    buildings, arches = free_roads(edges + deco, pos, buildings)
+    print('4. Morfologia, quote reali, uso del suolo')
     feats = build_features(data)
+    at, ground, light, _, _ = ground_model(dem_at, buildings)
+    cover = land_cover(data, buildings)
+    old = [b for b in buildings if inside(b['poly'].centroid.coords[0], Z0)]
+    city = city_buildings([b for b in buildings if not inside(b['poly'].centroid.coords[0], Z0)], cover)
+    print(f'  edifici: {len(old)} nel centro storico, {len(city)} nella città')
+    extra = {
+        'ground': ground, 'cover': cover, 'rails': build_rails(data), 'pois': city_pois(osm),
+        'riverY': river_bed(feats['river'], lambda e, n: at(e, n)), 'rims': extend_rims(feats['river'], at),
+    }
     print('5. Scrittura')
-    write_html(encode(edges, pos, buildings, arches, feats))
+    write_html(encode(edges, deco, pos, old, city, arches, feats, extra))
+    print(f'  fatto in {time.time() - t0:.0f} s')
     if args.anteprima:
-        preview(args.anteprima, edges, buildings, arches, feats)
+        preview(args.anteprima, edges, deco, old, city, arches, feats, extra)
 
 
 if __name__ == '__main__':

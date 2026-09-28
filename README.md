@@ -107,11 +107,12 @@ Il file `index.html` è diviso in sezioni numerate e commentate:
 | 4 | Gravina e terreno | canyon sul corso reale del torrente, falesie, gradoni e discesa dei rioni Piaggio e Fondovico (`RIONI`) |
 | 5 | Rete stradale | vie reali come spline, uscite agli incroci, cartelli, controlli |
 | 6 | Mondo | terreno, strade, Ponte Acquedotto ad archi, edifici reali con le case a gradoni dei rioni, archi sulle vie, Cattedrale, chiese rupestri, grotte, abitazioni rupestri, alberi |
+| 6e | Città a riquadri | la zolla in riquadri da 240 m (una mesh ciascuno): terreno a 5/15/30 m, vie ed edifici della città, binari, alberi, fianco della zolla; finestre e marciapiedi disegnati dallo shader |
 | 6d | Dettagli | portali delle chiese, portale del Purgatorio, palazzi, Fontana della Stella, scalinate, belvederi, lanterne |
 | 7 | Mezzi | Panda 4x4, RS6, Huracán e trattore, costruiti solo da primitive |
 | 8 | Conducente | movimento automatico, incroci, pausa con frenata |
 | 9 | Camera | vetrina a due tempi (primo piano e campo lungo sulle arcate), inseguimento che scavalca i tetti nei vicoli, panoramiche, vista dall'alto in pausa |
-| 10–11 | Interfaccia | minimappa, mappa della pausa, scelta del mezzo, targa, cartelli, schede, teletrasporto |
+| 10–11 | Interfaccia | minimappa vettoriale, mappa della pausa con zoom e trascinamento, luoghi per gruppi, scelta del mezzo, targa, cartelli, schede, teletrasporto |
 | 12–13 | Scena e avvio | cielo al tramonto, luci, ombre agganciate ai texel, qualità adattiva, ciclo principale |
 
 Il documento di progetto completo è in [`docs/DESIGN.md`](docs/DESIGN.md); cosa resta da fare
@@ -123,6 +124,18 @@ Vie, incroci, sagome degli edifici, corso del torrente, mura e luoghi d'interess
 **[Overture Maps](https://overturemaps.org)** (release 2026-09-23.1), che li deriva in gran
 parte da **[OpenStreetMap](https://www.openstreetmap.org/copyright)**.
 
+Dalla fase 3.4 la zolla contiene **la città intera** (2,9 × 3,1 km, dal cimitero alla stazione,
+dallo Sportland al Castello Svevo):
+
+* **80 km di vie percorribili** (1 390 tratti, 861 incroci) e 238 vie cieche reali disegnate ma
+  non percorribili; la sterrata del Castello Svevo si percorre;
+* **1 828 edifici della città** con l'altezza stimata per tipo e superficie (le stime Microsoft
+  sono troppo basse e si scartano);
+* **quote reali** dal modello di elevazione **Copernicus DEM GLO-30**, smussate (il DSM comprende
+  tetti e alberi); il canyon e i rioni del centro storico restano disegnati a mano;
+* uso del suolo, binari FAL e RFI e luoghi con nome da OpenStreetMap, letti con l'**Overpass
+  API** (monumenti, chiese, stazioni, parchi).
+
 Per rigenerarli (per esempio dopo aver migliorato la mappa di Gravina su OpenStreetMap):
 
 ```bash
@@ -131,8 +144,10 @@ python3 -m venv .venv
 .venv/bin/python tools/genera_dati.py --anteprima tools/anteprima.png
 ```
 
-Lo script scarica solo i pochi MB che riguardano Gravina, costruisce la rete stradale senza
-vicoli ciechi e riscrive il blocco `GEO` dentro `index.html`. Le scelte (vie cieche da
+Lo script scarica solo i pochi MB che riguardano Gravina (la prima volta, con la città intera
+e la tessera Copernicus di 39 MB, servono una decina di minuti; poi circa 18 s dalla cache in
+`tools/.cache/`), costruisce la rete stradale senza vicoli ciechi e riscrive il blocco `GEO`
+dentro `index.html`. Le scelte (vie cieche da
 conservare, ciglio del canyon, area del diorama) sono costanti commentate in cima allo script.
 
 Oltre alle vie esporta le **scalinate reali** (in OpenStreetMap `highway=steps`: la scalinata
@@ -180,7 +195,9 @@ gravina.useVehicle('deere')            // cambia mezzo: panda, rs6, huracan, dee
 gravina.pause(); gravina.goTo('duomo') // pausa e teletrasporto verso un monumento (id di LANDMARKS)
 ```
 
-Prove automatiche con Playwright: vedi [`tools/test/README.md`](tools/test/README.md).
+Prove automatiche con Playwright: vedi [`tools/test/README.md`](tools/test/README.md). Le misure di
+prestazioni (triangoli, draw call, tempi di costruzione, memoria) si prendono con
+`node prestazioni.mjs` in `tools/test`, con la GPU vera.
 
 ## Stato del progetto
 
@@ -200,6 +217,15 @@ Prove automatiche con Playwright: vedi [`tools/test/README.md`](tools/test/READM
 * **Dati cartografici** (blocco `GEO` in `index.html`): © OpenStreetMap contributors, disponibili
   sotto [Open Database License (ODbL) 1.0](https://opendatacommons.org/licenses/odbl/). Sono un
   database derivato e restano sotto ODbL; l'attribuzione è visibile nella pagina.
+* **Quote del terreno** della città e della campagna (`GEO.dem`): modello di elevazione
+  Copernicus DEM GLO-30, distribuito gratuitamente con la
+  [licenza del Copernicus DEM](https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM).
+  L'attribuzione richiesta dall'art. 6(b) è sempre visibile nella pagina (schermata iniziale,
+  mappa della pausa e, in breve, sotto la minimappa):
+  "produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space
+  GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved".
+  Come chiede l'art. 6(c): "The organisations in charge of the Copernicus programme by law or
+  by delegation do not incur any liability for any use of the Copernicus WorldDEM-30".
 * **Codice**: la licenza è ancora da scegliere (per esempio MIT).
 * **Librerie e caratteri**: [Three.js](https://threejs.org) (MIT) da CDN; Marcellus SC, Barlow e
   Barlow Semi Condensed (SIL Open Font License) da Google Fonts.
@@ -225,3 +251,9 @@ Notizie storiche e posizioni dei monumenti da fonti pubbliche, tra cui:
 * Chiesa del Gesù: [GravinaOggi](https://www.gravinaoggi.it/la_chiesa_del_ss_nome_di_gesu.html), [Carta dei Beni Culturali della Regione Puglia](https://cartapulia.it/dettaglio?id=127705)
 * Addolorata: nessuna fonte affidabile trovata (nei dati il punto d'interesse vicino si chiama "Chiesa dell'Annunziata"), quindi solo l'etichetta
 * Geografia generale: [Wikipedia, Gravina in Puglia](https://en.wikipedia.org/wiki/Gravina_in_Puglia)
+
+Dati geografici della città intera (fase 3.4):
+
+* Vie, edifici, uso del suolo, acque e binari: [Overture Maps](https://overturemaps.org) 2026-09-23.1, derivato da [OpenStreetMap](https://www.openstreetmap.org/copyright) (ODbL)
+* Luoghi con nome (monumenti, chiese, stazioni, parchi, impianti sportivi): [OpenStreetMap](https://www.openstreetmap.org/copyright) (ODbL), letti con l'[Overpass API](https://overpass-api.de) e messi in cache da `tools/genera_dati.py`
+* Quote del terreno: [Copernicus DEM GLO-30](https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM), tessera N40 E016 dal [registro Open Data di AWS](https://registry.opendata.aws/copernicus-dem/)

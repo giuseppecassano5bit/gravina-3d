@@ -37,6 +37,14 @@ mappa. Lungo il percorso compaiono schede brevi sui monumenti.
 acque, infrastrutture, uso del suolo, luoghi) derivano in gran parte da **OpenStreetMap**
 (© OpenStreetMap contributors, licenza ODbL 1.0). Alcuni luoghi hanno licenza CDLA-Permissive-2.0.
 
+Dalla fase 3.4 servono anche:
+* **OpenStreetMap via Overpass API** (stessa licenza ODbL): monumenti, chiese, stazioni, parchi e
+  la sagoma del Castello Svevo, che Overture non ha tutti. Una query piccola, messa in cache in
+  `tools/.cache/overpass.json`.
+* **Copernicus DEM GLO-30** (tessera N40 E016): le quote del terreno fuori dal centro storico.
+  Licenza libera con l'attribuzione dell'art. 6(b) sempre visibile (schermata iniziale, mappa
+  della pausa, credito breve sotto la minimappa) e la clausola dell'art. 6(c) nel README.
+
 ### Pipeline (`tools/genera_dati.py`)
 
 1. **Download mirato.** I file GeoParquet di Overture pesano centinaia di GB. Lo script legge
@@ -70,26 +78,93 @@ acque, infrastrutture, uso del suolo, luoghi) derivano in gran parte da **OpenSt
 5. **Ciglio del canyon.** È tracciato a mano, una volta sola, su belvederi, mura del Fondovico,
    falesie e testate del ponte (costanti `EAST_RIM` e `WEST_RIM`).
 6. **Scrittura.** La costante `GEO` viene scritta tra i marcatori `@@DATI-GEO-INIZIO@@` e
-   `@@DATI-GEO-FINE@@` di `index.html` (circa 150 KB).
+   `@@DATI-GEO-FINE@@` di `index.html` (circa 420 KB, 170 KB compressi).
+7. **Città intera (fase 3.4).** Tutto gira in circa 18 s con i dati in cache.
+   - Zolla `AREA` di 2,88 × 3,12 km, divisa in 12 × 13 riquadri da 240 m (`TILE`); il centro
+     storico è la zona `Z0` (est −340…450, nord −320…540).
+   - Vie: stesse classi del centro storico; il 2-core toglie le vie cieche dei quartieri, che
+     restano in `GEO.deco` come **vie decorative non percorribili** (disegnate, mai nella rete).
+     Le vie con le facciate vicine sono "urbane" (flag 16, con i marciapiedi).
+   - **Castello Svevo**: dentro `CASTLE_BOX` la strada di servizio, la sterrata e la vicinale
+     reali chiudono un anello e diventano percorribili (la sterrata ha il flag 8).
+   - Edifici della città in `GEO.city`, codificati in modo compatto (interi variabili, 0,25 m):
+     tipo e altezza stimata per tipo e superficie (palazzine da 2 a 6 piani, capannoni 7–9 m,
+     case di campagna 1–2 piani). Le altezze Microsoft si scartano anche qui: sono troppo basse.
+   - Quote: il DSM Copernicus comprende tetti e alberi. In città si prende un percentile basso
+     su 90 m e si smussa molto, in campagna poco; il letto del torrente è il minimo di traverso,
+     sempre in discesa (`GEO.riverY`). Griglia `GEO.dem` ogni 30 m, in quarti di metro; `ALT0`
+     (358 m s.l.m., l'altopiano della Cattedrale) è lo zero del diorama.
+   - I cigli del canyon, tracciati a mano nel centro storico, proseguono a nord e a sud guidati
+     dal DSM.
+   - Uso del suolo `GEO.cover` ogni 15 m (città, piazze, parchi, sport, bosco, macchia, uliveti,
+     industria, cimitero, cave, campi), compresso a sequenze: colora il terreno e sceglie gli alberi.
+   - Binari FAL e RFI (`GEO.rails`, con i ponti) e luoghi con nome (`GEO.pois`, solo etichette).
 
 ### Numeri attuali
 
 | Voce | Valore |
 |---|---|
-| Vie percorribili | 157 tratti, 111 incroci, circa 9 km |
+| Vie percorribili | 1 390 tratti, 861 incroci, circa 80 km (nel centro storico 157 tratti, 9 km) |
+| Vie decorative (cieche, non percorribili) | 238 tratti, 21,6 km |
 | Larghezza delle vie | da 3,4 m (vicoli) a 8 m; 37 tratti ristretti al minimo |
 | Inversioni a goccia | 4 |
-| Edifici reali | 532 (dopo il ritaglio), nessuno sulla carreggiata |
+| Edifici reali | 518 nel centro storico (dopo il ritaglio) e 1 828 in città, nessuno sulla carreggiata |
 | Archi sulle vie | 5 |
 | Scalinate reali (solo decorative) | 7, 165 m |
 | Edifici con altezza reale | 1 (Museo Santomasi, 3 piani); le altre sono stimate per zona |
-| Area del diorama | 780 × 860 m (est −340…440, nord −320…540) |
+| Area del diorama | 2,88 × 3,12 km (est −840…2040, nord −1140…1980), 12 × 13 riquadri da 240 m |
+| Centro storico (zona Z0) | 790 × 860 m (est −340…450, nord −320…540) |
+| Quote e uso del suolo | griglia di 97 × 105 quote ogni 30 m; 192 × 208 celle ogni 15 m |
+| Binari e luoghi OSM | 25 tratti di binario (FAL e RFI); 54 luoghi con nome |
 
 ### Sistema di coordinate
 
 * **Origine**: la Cattedrale (40.8174 N, 16.4134 E); 1 unità = 1 metro.
 * **Assi Three.js**: `x` = Est, `y` = quota, `z` = −Nord.
 * **Conversione**: `est = (lon − 16.4134) · 111 320 · cos(40.8174°)`, `nord = (lat − 40.8174) · 111 132`.
+
+---
+
+## 2b. La città intera (fase 3.4, blocco C)
+
+**Zone di dettaglio**
+
+| Zona | Dove | Edifici | Vie | Terreno |
+|---|---|---|---|---|
+| **Z0** | centro storico, fino a Piazza Scacchi e alla Villa Comunale | come nelle fasi 2–3: finestre vere, coppi, torrini, monumenti su misura | chianche con cordoli, archi, vicoli ristretti | maglia da 5 m, canyon e rioni a mano |
+| **Z1** | città moderna | prismi sulla sagoma reale, tetti a terrazza, finestre e negozi **disegnati dallo shader** | asfalto, marciapiedi e strisce disegnati dallo shader, campionamento adattivo (2–8 m) | maglia da 15 m, quote reali |
+| **Z2** | campagna attorno | case di campagna e capannoni | come Z1, sterrati in terra battuta | maglia da 30 m, ulivi e macchia radi |
+
+**Riquadri** (sezione 6e, `Tiles`). La zolla è divisa in riquadri da 240 m e ogni riquadro è
+**una mesh sola**: terreno, vie, edifici, binari, alberi e fianco della zolla. Così il frustum
+culling scarta quello che non si vede, anche nel passaggio delle ombre, e le draw call restano
+poche. Anche vie, case, finestre, torrini, cisterne e alberi del centro storico entrano nel loro
+riquadro: si preparano prima con `Tiles.builderAt(e, n, strato)` e il riquadro li accoda quando
+si chiude (`_begin` fa il terreno, `_finish` il resto). Tra maglie diverse i vertici di confine
+seguono la maglia più larga: niente fessure. Le finestre coperte dalla casa accanto (muri in
+comune) non si posano.
+
+**Shader della città** (`cityMaterial`): colori per faccia come il resto del diorama, più un
+attributo `aInfo` per vertice che dice il tipo di superficie. Finestre con le persiane per piano
+e campata, negozi al piano terra, lamiera dei capannoni, marciapiedi, strisce, traversine e
+rotaie costano zero triangoli; da lontano si sfumano nel colore medio. Le campate vengono dai
+metri lungo il perimetro (`aInfo.w`), non dalle derivate: di sbieco sarebbero instabili.
+
+**Quote.** Nel centro storico il terreno resta quello disegnato a mano; fuori, le quote
+Copernicus smussate. Le vie seguono le pendenze reali e il terreno si spiana sotto vie e binari.
+
+**Costruzione progressiva.** I riquadri del centro storico si costruiscono subito (il pulsante
+Parti si abilita), gli altri pochi per fotogramma (7 ms), dal più vicino al mezzo; dopo un
+teletrasporto quelli entro 420 m si costruiscono al volo. La nebbia chiude la vista tra 420 e
+1 100 m, la camera finisce a 1 250 m.
+
+**Profilo leggero** (telefoni e tablet): alberi dimezzati, anche nel centro storico; niente
+torrini sulle palazzine; ombre solo dai riquadri del centro storico.
+
+**Mappe** (sezioni 10–10b). La minimappa è vettoriale: disegna in memoria un quadro di 700 m
+attorno al mezzo con una griglia spaziale, e lo ridisegna quando il mezzo si allontana. La mappa
+della pausa si apre sul mezzo (circa 900 m di città), con zoom (rotella, pizzico, + e −),
+trascinamento e il pulsante **Centro storico**. L'elenco dei luoghi è diviso per gruppi.
 
 ---
 
@@ -112,6 +187,9 @@ acque, infrastrutture, uso del suolo, luoghi) derivano in gran parte da **OpenSt
   12 m nel Fondovico (da 170 m, cioè da Piazza Pellicciari). Sotto il ciglio i gradoni partono da
   quella quota. Cattedrale, Piazza Benedetto XIII e testata del ponte restano fuori; le vie nuove
   in pendenza arrivano al 14%.
+* Il canyon e i rioni sono disegnati a mano solo dentro `CONFIG.terrain.proc` (est −360…460,
+  nord −380…600); fuori ci sono le quote reali Copernicus, con il letto del torrente inciso nella
+  valle (`Ravine.bed`). Tra i due, una sfumatura di 110 m (`Terrain.procWeight`).
 * Il terreno viene **spianato sotto le strade** (con raccordi di 9 m), tranne sotto il ponte.
 * Le **grotte** sono bocche ad arco sulle pareti lato città. Aggiungono l'effetto "città di pietra scavata".
 
@@ -230,14 +308,26 @@ riusato: il cambio è istantaneo.
 
 ## 8. Prestazioni
 
+Misure con `tools/test/prestazioni.mjs` (Mac M4, GPU vera, Chromium headless), nelle viste
+partenza, centro, Piazza Scacchi, pausa e panoramica sulla città (il caso peggiore).
+"Per fotogramma" è il massimo tra le viste, senza il passaggio delle ombre.
+
+| Voce | Fase 3 (solo centro storico) | Fase 3.4, città intera | Tetto |
+|---|---|---|---|
+| `index.html` | 390 KB (124 KB compressi) | 737 KB (269 KB compressi) | ≤ 900 KB (≤ 280) |
+| Costruzione fino a "Parti" | 282 ms | circa 500 ms | ≤ 1,5 s |
+| Memoria JavaScript | 41 MB | circa 100 MB | ≤ 150 MB |
+| Città completa (in sottofondo) | — | circa 900 ms | — |
+| Triangoli nella scena | 267 000 | 543 000 (telefono 483 000) | ≤ 650 000 |
+| Triangoli per fotogramma, PC | 267 000 | 334 000 | ≤ 400 000 |
+| Triangoli per fotogramma, telefono | 267 000 | 242 000 | ≤ 250 000 |
+| Draw call, PC / telefono | 39 / 38 | 69 / 54 | ≤ 90 / ≤ 70 |
+
 | Voce | Valore |
 |---|---|
-| Triangoli totali | circa 265 000 (terreno 70k, edifici, 25k finestre istanziate, dettagli, scalinate, abitazioni rupestri) |
-| Draw call | circa 42 |
-| Costruzione della scena | circa 1 s su un PC recente |
-| Aggiornamento per frame | O(1) sulla spline; minimappa copiata da un canvas pre-disegnato; 8 + 16 controlli sulla griglia dei tetti per la camera |
-| Ombre | riquadro di 180 m che segue il mezzo, agganciato ai texel (niente sfarfallio) |
-| Telefoni e tablet | niente MSAA su schermi densi, mappa d'ombra 1024 e ombre non sfumate, risoluzione che segue gli fps (da 0,9 a 2×) |
+| Aggiornamento per frame | O(1) sulla spline; minimappa copiata da un quadro pre-disegnato; 8 + 16 controlli sulla griglia dei tetti per la camera |
+| Ombre | riquadro di 180 m che segue il mezzo, agganciato ai texel (niente sfarfallio); i riquadri lontani non entrano nel passaggio delle ombre |
+| Telefoni e tablet | niente MSAA su schermi densi, mappa d'ombra 1024 e ombre non sfumate, risoluzione che segue gli fps (da 0,9 a 2×), profilo leggero (sezione 2b) |
 
 ---
 
@@ -250,6 +340,7 @@ riusato: il cambio è istantaneo.
 | 2b | **Dati reali**: vie e incroci reali, edifici reali, torrente e cigli reali, ponte ad archi | ✅ |
 | 2c | **Vie libere e mezzi**: nessuna casa sulla strada, archi reali, quattro mezzi, partenza dal ponte, pausa con cambio mezzo e teletrasporto, camera che scavalca i tetti, dettagli dei monumenti, versione mobile | ✅ |
 | 3 | **Architettura e fedeltà**: Cattedrale e Purgatorio sulle fonti, San Michele e Madonna della Stella scavate nella roccia, rioni a gradoni in discesa con scalinate reali e abitazioni rupestri, altezze affidabili o stimate per zona, schede di altre cinque chiese, vetrina con il campo lungo sulle arcate | ✅ in revisione |
+| 3.4 C | **Città intera**: zolla di 2,9 × 3,1 km a riquadri, 80 km di vie, 1 828 edifici della città, quote Copernicus, binari, Castello Svevo, mappe vettoriali con zoom | 🔄 in revisione |
 | 4 | Rifinitura: musica procedurale (Web Audio, 40%, muto), transizioni di camera, prove su telefoni reali | ⏳ |
 
 ### Da decidere insieme (fase 3, punto 6)
@@ -264,12 +355,15 @@ scalinate alla rete, sempre senza vicoli ciechi, si passa da 157 a 178 tratti e 
    figurina low-poly, che al tratto carrabile successivo ritrova il mezzo. Più lavoro, ma è
    fedele e mostra i rioni dal loro punto di vista.
 
-**Allargare il diorama.** Oggi è 780 × 860 m. Appena fuori restano il Museo Civico (30 m a
+**Allargare il diorama.** *Fatto nella fase 3.4 (blocco C): la zolla ora contiene la città
+intera.* Prima era 780 × 860 m. Appena fuori restano il Museo Civico (30 m a
 est), la Chiesa di San Domenico (90 m a est), la Pineta comunale (a nord) e, più lontano, il
 Santuario della Madonna delle Grazie con la facciata a stemma (circa 360 m a nord-est). Con 100 m
 in più per lato l'area cresce di oltre il 50%: più edifici e triangoli, da misurare sui telefoni.
 
-**Quote reali.** Il modello di elevazione Copernicus GLO-30 (30 m, licenza libera con
+**Quote reali.** *Nella fase 3.4 (blocco C) le quote Copernicus disegnano la città e la
+campagna; per ciglio, gradoni e rioni del centro storico resta da fare (blocco G).* Il modello di
+elevazione Copernicus GLO-30 (30 m, licenza libera con
 attribuzione) è raggiungibile dal bucket S3 pubblico. Si potrebbe usare nello script per tarare
 ciglio, gradoni e discesa dei rioni, oggi tracciati a mano, e scrivere le quote in `GEO`. A
 30 m il canyon è appena accennato: servirebbe come guida, non come terreno diretto.

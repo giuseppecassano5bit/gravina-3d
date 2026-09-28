@@ -22,6 +22,18 @@ node anteprima.mjs prova -30 440 t+42 15 240 t-5   # prova inquadrature in shots
 parapetti…) stia sulla carreggiata all'altezza del mezzo: la voce `dettaglisullastrada` deve
 restare vuota.
 
+Misure di prestazioni (piano della fase 3.4, sezione 3), da lanciare prima e dopo ogni modifica
+pesante. Usano la **GPU vera** del computer (il Chromium completo, non la "headless shell"):
+
+```bash
+node prestazioni.mjs dopo   # tabella in console e shots/prestazioni-dopo.json
+```
+
+Per PC (1280×720 a 2×) e telefono (390×844 a 3×, profilo leggero) misura peso del file, tempo
+di costruzione fino a "Parti" e della città completa, memoria, triangoli per strato (anche dentro
+i riquadri) e, in cinque viste (partenza, centro, Piazza Scacchi, pausa, panoramica sulla città),
+fps, tempo di CPU, triangoli e draw call del fotogramma più pesante.
+
 Due strumenti per lo sviluppo:
 
 ```bash

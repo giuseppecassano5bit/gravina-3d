@@ -48,12 +48,11 @@ await shot('21-pausa-trattore', 300);
 const box = await page.locator('#bigmap').boundingBox();
 if (box) {
   await page.locator('#bigmap').scrollIntoViewIfNeeded();
+  // la mappa si apre sul mezzo, con lo zoom: il punto sulla tela lo dà la mappa stessa (pixel del dispositivo)
   const pos = await run(() => {
     const g = window.gravina, lm = g.landmarks.find((l) => l.id === 'purgatorio');
-    const [minE, maxE, , maxN] = [-340, 440, -320, 540];
-    const r = document.getElementById('bigmap').getBoundingClientRect();
-    const k = r.width / (maxE - minE);
-    return { x: (lm.at[0] - minE) * k, y: (maxN - lm.at[1]) * k };
+    const [x, y] = g.pauseMap.xy(...lm.at);
+    return { x: x / g.pauseMap.dpr, y: y / g.pauseMap.dpr };
   });
   await page.locator('#bigmap').click({ position: pos });
   await shot('22-mappa-scelta', 400);

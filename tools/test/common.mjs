@@ -3,6 +3,7 @@
  * - Three.js viene servito da node_modules (niente rete necessaria per il CDN).
  * - I Google Fonts vengono ignorati (restano i font di ripiego).
  * - WebGL gira via SwiftShader: più lento di una GPU vera, ma affidabile.
+ * Con `gpu: true` usa la GPU vera del computer (per misurare gli fps).
  * Percorso di Chromium personalizzabile con la variabile CHROMIUM_PATH.
  */
 import { chromium } from 'playwright';
@@ -16,16 +17,19 @@ const THREE_DIR = path.join(HERE, 'node_modules/three');
 export const SHOTS = path.join(HERE, 'shots');
 fs.mkdirSync(SHOTS, { recursive: true });
 
-export async function open({ w = 1280, h = 720, mobile = false, landscape = false } = {}) {
+export async function open({ w = 1280, h = 720, mobile = false, landscape = false, gpu = false, dpr, init } = {}) {
   const browser = await chromium.launch({
     executablePath: process.env.CHROMIUM_PATH || undefined,
-    args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
+    channel: gpu ? 'chromium' : undefined,   // il Chromium completo: la "headless shell" non usa la GPU
+    args: gpu ? ['--ignore-gpu-blocklist', '--enable-precise-memory-info']
+      : ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
   });
   const phone = landscape ? { width: 844, height: 390 } : { width: 390, height: 844 };
   const ctx = await browser.newContext(mobile
-    ? { viewport: phone, deviceScaleFactor: 2, hasTouch: true, isMobile: true }
-    : { viewport: { width: w, height: h } });
+    ? { viewport: phone, deviceScaleFactor: dpr ?? 2, hasTouch: true, isMobile: true }
+    : { viewport: { width: w, height: h }, deviceScaleFactor: dpr ?? 1 });
   const page = await ctx.newPage();
+  if (init) await page.addInitScript(init);
   const logs = [];
   page.on('console', (m) => logs.push(`[${m.type()}] ${m.text()}`));
   page.on('pageerror', (e) => logs.push(`[pageerror] ${e.message}\n${e.stack}`));
