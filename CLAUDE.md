@@ -7,7 +7,7 @@ del progetto: valgono sempre, anche se il prompt della chat non le ripete.
 
 Diorama 3D interattivo, low-poly e flat-shaded, del centro storico di **Gravina in Puglia**,
 costruito sulle vie e sugli edifici reali (OpenStreetMap via Overture Maps). Progetto open
-source per la promozione turistica, realizzato per **Nunzia Food - Eccellenze Pugliesi**.
+source per la promozione turistica, di **Giuseppe Cassano** (github.com/giuseppecassano5bit).
 Tu sei un game designer esperto e uno sviluppatore three.js.
 
 ## Lingua
@@ -27,7 +27,8 @@ slides). Se non risultano caricate, dillo prima di procedere.
 | `index.html` | tutto il diorama: CSS, HTML e JS in sezioni numerate 0–13 |
 | `index.html`, sezione 3 | la costante `GEO` è **generata**: non modificarla a mano |
 | `tools/genera_dati.py` | pipeline dei dati reali (Overture Maps → `GEO` dentro `index.html`) |
-| `tools/test/` | prove Playwright: `simula`, `interazioni`, `foto`, più `vista`, `valuta`, `vetrina` per lo sviluppo |
+| `tools/test/` | prove Playwright: `simula`, `interazioni`, `foto`, più `vista`, `valuta`, `vetrina` per lo sviluppo e `anteprima` per `og-image.jpg` |
+| `og-image.jpg`, `sitemap.xml` | anteprima per i social (1200×630) e mappa del sito per Google: file separati, il diorama non li usa |
 | `docs/DESIGN.md` | documento di progetto aggiornato, con le decisioni aperte |
 | `docs/DA_FARE.md` | **resoconto di cosa resta da fare**: leggilo a inizio lavoro |
 | `docs/LAVORARE_IN_LOCALE.md` | installazione sul PC e flusso di lavoro |
@@ -36,6 +37,8 @@ slides). Se non risultano caricate, dillo prima di procedere.
 ## Vincoli non negoziabili
 
 - Output finale: **un unico file HTML** copiabile, con CSS e JS inclusi (Three.js da CDN).
+  Eccezione: `og-image.jpg` e `sitemap.xml` servono solo a social e motori di ricerca; il
+  diorama funziona anche senza. Niente `robots.txt`: in `/gravina-3d/` i motori non lo leggono.
 - Stile a blocchi, low-poly, materiali con `flatShading: true`, tutto procedurale. Nessun
   modello, texture o GeoJSON caricato a runtime: i dati reali restano nella costante `GEO`.
 - Con il mezzo si percorrono **solo vie reali** che si incrociano con altre vie reali. Non
@@ -47,7 +50,8 @@ slides). Se non risultano caricate, dillo prima di procedere.
   `dettaglisullastrada` vuoto.
 - Il giro continua all'infinito senza vicoli ciechi: `TrackNetwork.validate()` e
   `npm run simula` devono restare verdi.
-- Nessun riferimento a Nunzia Food nella mappa: solo il credito nella schermata iniziale.
+- Unico credito: **Giuseppe Cassano**, nella schermata iniziale, nel pannello «Il progetto» e
+  nei metadati. Nella mappa nessun credito né sponsor.
 - **Fedeltà**: nelle schede storiche solo fatti verificati, con la fonte nel README. Se
   un'informazione non è verificabile, dillo invece di inventarla.
 - Attribuzione ODbL sempre visibile. I dati derivati da OSM restano sotto ODbL.
