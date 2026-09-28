@@ -37,8 +37,8 @@ slides). Se non risultano caricate, dillo prima di procedere.
 ## Vincoli non negoziabili
 
 - Output finale: **un unico file HTML** copiabile, con CSS e JS inclusi (Three.js da CDN).
-  Eccezione: `og-image.jpg` e `sitemap.xml` servono solo a social e motori di ricerca; il
-  diorama funziona anche senza. Niente `robots.txt`: in `/gravina-3d/` i motori non lo leggono.
+  Eccezione (approvata il 28/09/2026): `og-image.jpg` e `sitemap.xml` servono solo a social e
+  motori di ricerca; il diorama funziona anche senza. Niente `robots.txt`: in `/gravina-3d/` i motori non lo leggono.
 - Stile a blocchi, low-poly, materiali con `flatShading: true`, tutto procedurale. Nessun
   modello, texture o GeoJSON caricato a runtime: i dati reali restano nella costante `GEO`.
 - Con il mezzo si percorrono **solo vie reali** che si incrociano con altre vie reali. Non
