@@ -107,11 +107,12 @@ Il file `index.html` è diviso in sezioni numerate e commentate:
 | 4 | Gravina e terreno | canyon sul corso reale del torrente, falesie, gradoni e discesa dei rioni Piaggio e Fondovico (`RIONI`) |
 | 5 | Rete stradale | vie reali come spline, uscite agli incroci, cartelli, controlli |
 | 6 | Mondo | terreno, strade, Ponte Acquedotto ad archi, edifici reali con le case a gradoni dei rioni, archi sulle vie, Cattedrale, chiese rupestri, grotte, abitazioni rupestri, alberi |
+| 6e | Città a riquadri | la zolla in riquadri da 240 m (una mesh ciascuno): terreno a 5/15/30 m, vie ed edifici della città, binari, alberi, fianco della zolla; finestre e marciapiedi disegnati dallo shader |
 | 6d | Dettagli | portali delle chiese, portale del Purgatorio, palazzi, Fontana della Stella, scalinate, belvederi, lanterne |
 | 7 | Mezzi | Panda 4x4, RS6, Huracán e trattore, costruiti solo da primitive |
 | 8 | Conducente | movimento automatico, incroci, pausa con frenata |
 | 9 | Camera | vetrina a due tempi (primo piano e campo lungo sulle arcate), inseguimento che scavalca i tetti nei vicoli, panoramiche, vista dall'alto in pausa |
-| 10–11 | Interfaccia | minimappa, mappa della pausa, scelta del mezzo, targa, cartelli, schede, teletrasporto |
+| 10–11 | Interfaccia | minimappa vettoriale, mappa della pausa con zoom e trascinamento, luoghi per gruppi, scelta del mezzo, targa, cartelli, schede, teletrasporto |
 | 12–13 | Scena e avvio | cielo al tramonto, luci, ombre agganciate ai texel, qualità adattiva, ciclo principale |
 
 Il documento di progetto completo è in [`docs/DESIGN.md`](docs/DESIGN.md); cosa resta da fare
@@ -123,6 +124,18 @@ Vie, incroci, sagome degli edifici, corso del torrente, mura e luoghi d'interess
 **[Overture Maps](https://overturemaps.org)** (release 2026-09-23.1), che li deriva in gran
 parte da **[OpenStreetMap](https://www.openstreetmap.org/copyright)**.
 
+Dalla fase 3.4 la zolla contiene **la città intera** (2,9 × 3,1 km, dal cimitero alla stazione,
+dallo Sportland al Castello Svevo):
+
+* **80 km di vie percorribili** (1 390 tratti, 861 incroci) e 238 vie cieche reali disegnate ma
+  non percorribili; la sterrata del Castello Svevo si percorre;
+* **1 828 edifici della città** con l'altezza stimata per tipo e superficie (le stime Microsoft
+  sono troppo basse e si scartano);
+* **quote reali** dal modello di elevazione **Copernicus DEM GLO-30**, smussate (il DSM comprende
+  tetti e alberi); il canyon e i rioni del centro storico restano disegnati a mano;
+* uso del suolo, binari FAL e RFI e luoghi con nome da OpenStreetMap, letti con l'**Overpass
+  API** (monumenti, chiese, stazioni, parchi).
+
 Per rigenerarli (per esempio dopo aver migliorato la mappa di Gravina su OpenStreetMap):
 
 ```bash
@@ -131,8 +144,10 @@ python3 -m venv .venv
 .venv/bin/python tools/genera_dati.py --anteprima tools/anteprima.png
 ```
 
-Lo script scarica solo i pochi MB che riguardano Gravina, costruisce la rete stradale senza
-vicoli ciechi e riscrive il blocco `GEO` dentro `index.html`. Le scelte (vie cieche da
+Lo script scarica solo i pochi MB che riguardano Gravina (la prima volta, con la città intera
+e la tessera Copernicus di 39 MB, servono una decina di minuti; poi circa 18 s dalla cache in
+`tools/.cache/`), costruisce la rete stradale senza vicoli ciechi e riscrive il blocco `GEO`
+dentro `index.html`. Le scelte (vie cieche da
 conservare, ciglio del canyon, area del diorama) sono costanti commentate in cima allo script.
 
 Oltre alle vie esporta le **scalinate reali** (in OpenStreetMap `highway=steps`: la scalinata
@@ -180,7 +195,9 @@ gravina.useVehicle('deere')            // cambia mezzo: panda, rs6, huracan, dee
 gravina.pause(); gravina.goTo('duomo') // pausa e teletrasporto verso un monumento (id di LANDMARKS)
 ```
 
-Prove automatiche con Playwright: vedi [`tools/test/README.md`](tools/test/README.md).
+Prove automatiche con Playwright: vedi [`tools/test/README.md`](tools/test/README.md). Le misure di
+prestazioni (triangoli, draw call, tempi di costruzione, memoria) si prendono con
+`node prestazioni.mjs` in `tools/test`, con la GPU vera.
 
 ## Stato del progetto
 

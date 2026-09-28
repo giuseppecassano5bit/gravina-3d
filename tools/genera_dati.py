@@ -2,9 +2,11 @@
 """
 Genera i dati geografici REALI di Gravina 3D e li incorpora in index.html.
 
-Fonte: Overture Maps Foundation (release indicata in RELEASE), i cui temi
+Fonti: Overture Maps Foundation (release indicata in RELEASE), i cui temi
 "transportation", "buildings", "base" e "places" derivano in gran parte da
-OpenStreetMap. Licenze: ODbL (© OpenStreetMap contributors) e CDLA-Permissive-2.0.
+OpenStreetMap; OpenStreetMap via Overpass API (luoghi con nome); Copernicus DEM
+GLO-30 (quote). Licenze: ODbL (© OpenStreetMap contributors), CDLA-Permissive-2.0
+e la licenza del Copernicus DEM (attribuzione dell'art. 6(b) in GEO.meta.quote).
 
 Il diorama resta un file unico: i dati NON vengono caricati a runtime, ma
 scritti come costante JavaScript (`GEO`) tra due marcatori dentro index.html.
@@ -33,6 +35,12 @@ Come funziona
        mano su belvederi, mura e falesie.
     Altezze degli edifici: solo numero di piani e altezze di OpenStreetMap; le
     stime automatiche dalle immagini aeree (Microsoft ML Buildings) si scartano.
+    5. Città intera (fase 3.4): zolla AREA a riquadri da TILE m, centro storico
+       Z0 con il dettaglio pieno; vie cieche dei quartieri come vie decorative
+       (GEO.deco, non percorribili); edifici della città in forma compatta con
+       l'altezza stimata per tipo (GEO.city); quote Copernicus smussate (GEO.dem)
+       e letto del torrente (GEO.riverY); uso del suolo (GEO.cover); binari
+       (GEO.rails); luoghi OSM (GEO.pois); Castello Svevo con la sterrata.
 """
 from __future__ import annotations
 
