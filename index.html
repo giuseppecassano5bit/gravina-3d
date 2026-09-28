@@ -5141,6 +5141,7 @@ class Quality {
 const STORE_KEY = 'gravina3d.mezzo';   // ultimo mezzo scelto (solo in questo browser)
 
 async function main() {
+  performance.mark('gravina:inizio');   // segni di tempo letti da tools/test/prestazioni.mjs
   const ui = new UI();
   await nextFrame();   // lascia comparire il messaggio di caricamento
 
@@ -5413,6 +5414,8 @@ async function main() {
   resize();
 
   // Partenza
+  performance.mark('gravina:pronto');
+  performance.mark('gravina:completo');
   ui.enableStart(() => {
     phase = 'drive';
     rig.startDrive(driver);
