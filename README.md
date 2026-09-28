@@ -7,8 +7,12 @@ Progetto open source di **Giuseppe Cassano** ([github.com/giuseppecassano5bit](h
 Appena si apre, il mezzo aspetta accanto al **Ponte Acquedotto**. Scegli con che cosa
 girare: **Fiat Panda 4x4 del 1999**, **Audi RS6 Avant**, **Lamborghini Huracán** o
 **trattore John Deere**. Poi il mezzo percorre da solo le vie reali del centro storico, e a
-ogni incrocio reale scegli tu quale via prendere. Puoi fermarti quando vuoi: dal menu di
-pausa cambi mezzo oppure tocchi un luogo sulla mappa e ti teletrasporti lì.
+ogni incrocio reale scegli tu quale via prendere. Nel centro storico alcuni cartelli portano
+**a piedi** su passaggi e scalinate reali: il mezzo si ferma, prosegue una figurina, e il mezzo
+la aspetta al tratto carrabile successivo. La camera gira da sola attorno al mezzo, e puoi
+girarla anche tu trascinando; una radio suona brani ambient originali, generati dal diorama.
+Puoi fermarti quando vuoi: dal menu di pausa cambi mezzo oppure tocchi un luogo sulla mappa e
+ti teletrasporti lì.
 Tutto sta in **un unico file HTML**: la geometria è procedurale e i dati geografici sono
 incorporati nel file, senza modelli, texture o GeoJSON caricati a runtime.
 
@@ -79,6 +83,9 @@ Tutto per continuare sul proprio computer è nel repository:
 | Ripartire | <kbd>P</kbd>, <kbd>Spazio</kbd>, <kbd>Esc</kbd> o **Riprendi** | tocca **Riprendi** |
 | Cambiare mezzo | nel menu di pausa | nel menu di pausa |
 | Teletrasportarsi | in pausa: clic su un luogo della mappa e **Vai qui**, su un'etichetta del diorama o su un nome dell'elenco | gli stessi, al tocco |
+| Andare a piedi | scegli un cartello col pedone («a piedi») | tocca un cartello col pedone |
+| Girare la camera | trascina col mouse; rotella per avvicinarsi o allontanarsi; **Segui il mezzo** per tornare dietro | trascina con un dito; due dita per lo zoom |
+| Musica | <kbd>M</kbd> o il pulsante **Musica**; poi brano successivo e volume | tocca **♪** |
 
 Il mezzo avanza da solo. Se non scegli, agli incroci prosegue sulla via più dritta.
 Il menu di pausa compare solo a mezzo fermo; se cambi app o scheda il viaggio va in pausa da
@@ -109,9 +116,11 @@ Il file `index.html` è diviso in sezioni numerate e commentate:
 | 6e | Città a riquadri | la zolla in riquadri da 240 m (una mesh ciascuno): terreno a 5/15/30 m, vie ed edifici della città, binari, alberi, fianco della zolla; finestre e marciapiedi disegnati dallo shader |
 | 6d | Dettagli | portali delle chiese, portale del Purgatorio, palazzi, Fontana della Stella, scalinate, belvederi, lanterne |
 | 7 | Mezzi | Panda 4x4, RS6, Huracán e trattore, costruiti solo da primitive |
-| 8 | Conducente | movimento automatico, incroci, pausa con frenata |
-| 9 | Camera | vetrina a due tempi (primo piano e campo lungo sulle arcate), inseguimento che scavalca i tetti nei vicoli, panoramiche, vista dall'alto in pausa |
+| 7 | Figurina | il visitatore a piedi (`Walker`), circa 200 triangoli in una mesh |
+| 8 | Conducente | movimento automatico, incroci, pausa con frenata, tratti a piedi (sosta all'imbocco, mezzo che aspetta all'uscita) |
+| 9 | Camera | vetrina a due tempi (primo piano e campo lungo sulle arcate), inseguimento che scavalca i tetti nei vicoli, giro automatico attorno al mezzo, camera libera, panoramiche, vista dall'alto in pausa |
 | 10–11 | Interfaccia | minimappa vettoriale, mappa della pausa con zoom e trascinamento, luoghi per gruppi, scelta del mezzo, targa, cartelli, schede, teletrasporto |
+| 11b | Radio | sei brani ambient generati con Web Audio, senza file audio |
 | 12–13 | Scena e avvio | cielo al tramonto, luci, ombre agganciate ai texel, qualità adattiva, ciclo principale |
 
 Il documento di progetto completo è in [`docs/DESIGN.md`](docs/DESIGN.md); cosa resta da fare
@@ -126,16 +135,29 @@ parte da **[OpenStreetMap](https://www.openstreetmap.org/copyright)**.
 Dalla fase 3.4 la zolla contiene **la città intera** (2,9 × 3,1 km, dal cimitero alla stazione,
 dallo Sportland al Castello Svevo):
 
-* **86 km di vie percorribili** (1 433 tratti, 890 incroci) e 240 vie cieche reali disegnate ma
+* **87 km di vie percorribili** (1 461 tratti, 908 incroci) e 240 vie cieche reali disegnate ma
   non percorribili; la sterrata del Castello Svevo si percorre;
+* **percorsi a piedi** nel centro storico (blocco G): 19 tratti reali di marciapiede, passaggio
+  pedonale o scalinata (584 m), solo dove si collegano ad altre vie; le 5 scalinate che nei dati
+  finiscono nel vuoto si guardano soltanto;
 * **due appendici** (blocco F): la zona artigianale **P.I.P.**, a est, con le sue vie a scala
   reale, e il **Bosco Difesa Grande**, a sud, con un bosco di querce e un rifugio;
 * **2 038 edifici della città** (più i 518 del centro storico) con l'altezza stimata per tipo e superficie (le stime Microsoft
   sono troppo basse e si scartano);
 * **quote reali** dal modello di elevazione **Copernicus DEM GLO-30**, smussate (il DSM comprende
-  tetti e alberi); il canyon e i rioni del centro storico restano disegnati a mano;
+  tetti e alberi). Nel centro storico il canyon, i cigli e i gradoni restano disegnati a mano; le
+  quote reali fanno da **guida** per la discesa dei rioni Piaggio e Fondovico verso la gravina
+  (`GEO.rioni`, una misura ogni 15 m lungo il ciglio). A 30 m di maglia il canyon è sfocato e
+  "sbava" dentro le case, quindi se ne usa meno della metà: il Piaggio scende fino a 17 m, il
+  Fondovico circa 12 m;
 * uso del suolo, binari FAL e RFI e luoghi con nome da OpenStreetMap, letti con l'**Overpass
   API** (monumenti, chiese, stazioni, parchi).
+
+**A piedi.** Il mezzo percorre solo vie reali. Marciapiedi, passaggi pedonali e scalinate del
+centro storico si percorrono **a piedi**, con una figurina: il mezzo si ferma all'imbocco e la
+aspetta al tratto carrabile successivo. Nella realtà ci arriverebbe per altre vie: nel diorama
+compare lì, fuori dall'inquadratura. In fondo a Via giudice Montea (verso la scalinata), Via
+Civita e Via Matteotti non c'è spazio per l'inversione a goccia: lì si prosegue per forza a piedi.
 
 **Tracciato reale compresso.** Il Bosco Difesa Grande è a circa 6 km dalla città: la strada che
 ci porta segue il tracciato reale (la provinciale Matera–Gravina, poi la strada verso il bosco,
@@ -216,7 +238,8 @@ prestazioni (triangoli, draw call, tempi di costruzione, memoria) si prendono co
 | 2b | Dati reali: vie e incroci reali, edifici, torrente e cigli, ponte ad archi | ✅ |
 | 2c | Vie libere dagli edifici e archi reali; quattro mezzi a scelta; partenza dal ponte; pausa con cambio mezzo, mappa e teletrasporto; camera che scavalca i tetti; dettagli dei monumenti; versione mobile | ✅ |
 | 3 | Architettura e fedeltà: Cattedrale e Purgatorio sulle fonti, chiese rupestri scavate, rioni a gradoni con scalinate e abitazioni rupestri, altezze per zona, schede di altre cinque chiese, vetrina sulle arcate | ✅ in revisione |
-| 4 | Rifinitura: musica procedurale, transizioni di camera, prove su telefoni reali | ⏳ |
+| 3.4 | Gravina oltre il centro storico: città intera (C), strade per il Bosco e il P.I.P. (F), percorsi a piedi, quote reali del centro storico, camera attorno al mezzo e radio ambient (G, in revisione) | ⏳ |
+| 4 | Rifinitura: luci, prove su telefoni reali, restyling | ⏳ |
 
 ## Crediti, licenze e marchi
 
@@ -225,7 +248,10 @@ prestazioni (triangoli, draw call, tempi di costruzione, memoria) si prendono co
 * **Dati cartografici** (blocco `GEO` in `index.html`): © OpenStreetMap contributors, disponibili
   sotto [Open Database License (ODbL) 1.0](https://opendatacommons.org/licenses/odbl/). Sono un
   database derivato e restano sotto ODbL; l'attribuzione è visibile nella pagina.
-* **Quote del terreno** della città e della campagna (`GEO.dem`): modello di elevazione
+* **Musica**: i sei brani della radio sono composizioni originali generate dal codice (Web Audio),
+  senza campioni né brani di terzi.
+* **Quote del terreno** della città e della campagna (`GEO.dem`), e la discesa dei rioni del centro
+  storico (`GEO.rioni`): modello di elevazione
   Copernicus DEM GLO-30, distribuito gratuitamente con la
   [licenza del Copernicus DEM](https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM).
   L'attribuzione richiesta dall'art. 6(b) è sempre visibile nella pagina (schermata iniziale,

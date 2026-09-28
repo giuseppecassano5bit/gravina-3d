@@ -290,6 +290,7 @@
   .plaque {
     position: absolute;
     top: calc(var(--gutter) + var(--safe-top)); left: calc(var(--gutter) + var(--safe-left));
+    box-sizing: border-box;          /* il limite di larghezza comprende il margine interno: niente targa sotto la minimappa */
     max-width: min(420px, calc(100vw - 2 * var(--gutter) - 200px));
     padding: 0.55rem 1.05rem 0.6rem;
     color: var(--ink); background: var(--marble);
@@ -5953,7 +5954,7 @@ class UI {
     this.el.street.textContent = e.turn ? `${e.name} · slargo` : e.name;
     const mid = e.samples[Math.floor(e.count / 2) * 3], midN = -e.samples[Math.floor(e.count / 2) * 3 + 2];
     const where = districtAt(mid, midN);
-    this.el.dest.textContent = e.walk || e.foot ? `${where} · percorso pedonale` : driver.onFoot ? `${where} · a piedi verso il mezzo` : where;
+    this.el.dest.textContent = e.walk || e.foot ? `${where} · percorso pedonale` : driver.onFoot ? `${where} · a piedi${driver.car?.exit ? ' verso il mezzo' : ''}` : where;
     this.el.plate?.classList.toggle('is-walking', driver.onFoot);
   }
 

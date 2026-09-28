@@ -394,16 +394,19 @@ Misure con `tools/test/prestazioni.mjs` (Mac M4, GPU vera, Chromium headless), n
 partenza, centro, Piazza Scacchi, pausa e panoramica sulla città (il caso peggiore).
 "Per fotogramma" è il massimo tra le viste, senza il passaggio delle ombre.
 
-| Voce | Fase 3 (solo centro storico) | Fase 3.4, città intera | Tetto |
-|---|---|---|---|
-| `index.html` | 390 KB (124 KB compressi) | 737 KB (269 KB compressi) | ≤ 900 KB (≤ 280) |
-| Costruzione fino a "Parti" | 282 ms | circa 500 ms | ≤ 1,5 s |
-| Memoria JavaScript | 41 MB | circa 100 MB | ≤ 150 MB |
-| Città completa (in sottofondo) | — | circa 900 ms | — |
-| Triangoli nella scena | 267 000 | 543 000 (telefono 483 000) | ≤ 650 000 |
-| Triangoli per fotogramma, PC | 267 000 | 334 000 | ≤ 400 000 |
-| Triangoli per fotogramma, telefono | 267 000 | 242 000 | ≤ 250 000 |
-| Draw call, PC / telefono | 39 / 38 | 69 / 54 | ≤ 90 / ≤ 70 |
+| Voce | Fase 3 (solo centro storico) | Fase 3.4, città intera | Dopo il blocco G | Tetto |
+|---|---|---|---|---|
+| `index.html` | 390 KB (124 KB compressi) | 737 KB (269 KB compressi) | 593 KB (251 KB compressi) | ≤ 900 KB (≤ 280) |
+| Costruzione fino a "Parti" | 282 ms | circa 500 ms | circa 520 ms | ≤ 1,5 s |
+| Memoria JavaScript | 41 MB | circa 100 MB | 112 MB (telefono 91) | ≤ 150 MB |
+| Città completa (in sottofondo) | — | circa 900 ms | circa 900 ms | — |
+| Triangoli nella scena | 267 000 | 543 000 (telefono 483 000) | 571 000 (telefono 505 000) | ≤ 650 000 |
+| Triangoli per fotogramma, PC | 267 000 | 334 000 | 335 000 | ≤ 400 000 |
+| Triangoli per fotogramma, telefono | 267 000 | 242 000 | 243 500 | ≤ 250 000 |
+| Draw call, PC / telefono | 39 / 38 | 69 / 54 | 69 / 48 | ≤ 90 / ≤ 70 |
+
+Nel blocco G il peso è sceso nonostante figurina, camera e radio: nodi, vie, vie decorative ed
+edifici del centro storico ora usano il `CODEC` (a 0,1 m, senza perdite), da 90 a 55 KB compressi.
 
 | Voce | Valore |
 |---|---|
