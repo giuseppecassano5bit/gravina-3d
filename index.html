@@ -101,6 +101,7 @@
   ║  Un unico file: CSS + HTML + JavaScript (Three.js da CDN).             ║
   ║  Geometria procedurale su dati reali incorporati (vie, edifici,        ║
   ║  torrente) da © OpenStreetMap contributors (ODbL) via Overture Maps.   ║
+  ║  Quote: Copernicus WorldDEM-30 © DLR e.V., © Airbus DS (Copernicus).   ║
   ║  Nessun modello, texture o GeoJSON caricato a runtime.                 ║
   ║  Documento di progetto: docs/DESIGN.md                                 ║
   ╚══════════════════════════════════════════════════════════════════════╝
@@ -398,12 +399,17 @@
   }
   .labels.is-interactive .pin-label:hover { background: #ffc07a; }
 
-  /* Attribuzione dei dati cartografici (obbligatoria per la licenza ODbL) */
+  /* Attribuzione dei dati cartografici (licenza ODbL) e delle quote (Copernicus WorldDEM-30, art. 6(b)) */
   .attribution { margin: 0; font: 400 0.72rem/1.4 var(--font-ui); color: #BFB29A; }
   .attribution a { color: inherit; }
   .attribution--hud {
     position: absolute; right: calc(var(--gutter) + var(--safe-right)); top: calc(var(--gutter) + 176px + 6px + var(--safe-top));
     font-size: 0.66rem; color: rgba(255, 255, 255, 0.85); text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7); pointer-events: none;
+  }
+  .attribution--map { margin-top: 0.4rem; font-size: 0.66rem; }
+  .attribution--overlay {
+    position: absolute; right: 6px; bottom: 6px; max-width: calc(100% - 150px); padding: 2px 6px;
+    font-size: 0.6rem; line-height: 1.3; text-align: right; color: var(--ink-soft); background: rgba(244, 238, 226, 0.82); border-radius: 2px; pointer-events: none;
   }
 
   /* ── Scelta del mezzo (schermata iniziale e pausa) ──────────────────── */
@@ -639,7 +645,7 @@
         Il progetto
       </button>
     </div>
-    <p class="attribution">Mappa: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors (ODbL), via <a href="https://overturemaps.org" target="_blank" rel="noopener">Overture Maps</a></p>
+    <p class="attribution">Mappa: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors (ODbL), via <a href="https://overturemaps.org" target="_blank" rel="noopener">Overture Maps</a>.<br>Quote del terreno: <span lang="en">produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved</span></p>
   </div>
 </section>
 
@@ -704,7 +710,7 @@
     <canvas id="minimap" width="352" height="352"></canvas>
   </button>
 
-  <p class="attribution attribution--hud">© OpenStreetMap contributors</p>
+  <p class="attribution attribution--hud">© OpenStreetMap contributors · Copernicus WorldDEM-30 © DLR, Airbus</p>
 
   <button class="pause-btn" id="btn-pause" type="button" aria-label="Metti in pausa">
     <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3.6" height="12" rx="1" fill="currentColor"/><rect x="9.4" y="2" width="3.6" height="12" rx="1" fill="currentColor"/></svg>
@@ -760,7 +766,9 @@
           <button class="map-tool" id="map-out" type="button" aria-label="Allontana la mappa">−</button>
         </div>
         <button class="map-home" id="map-home" type="button">Centro storico</button>
+        <p class="attribution attribution--overlay" aria-hidden="true">© OpenStreetMap contributors · Copernicus WorldDEM-30 © DLR, Airbus</p>
       </div>
+      <p class="attribution attribution--map">Mappa: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors (ODbL), via <a href="https://overturemaps.org" target="_blank" rel="noopener">Overture Maps</a>. Quote del terreno: <span lang="en">produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved</span></p>
       <div class="map-pick" id="map-pick">
         <span class="map-pick__name" id="map-pick-name">Nessun luogo selezionato</span>
         <button class="btn-go" id="map-go" type="button" disabled>Vai qui</button>
@@ -8362,7 +8370,7 @@ async function main() {
         driver.place(r.edge, r.dir, Math.max(0, r.s - back));
         return r.edge.name;
       },
-      useVehicle, pause, resume, teleport,
+      useVehicle, pause, resume, teleport, pauseMap,
       /** Teletrasporto verso il monumento con quell'id (in pausa). */
       goTo(id) { return teleport({ lm: landmarks.find((l) => l.id === id) }); },
     };
