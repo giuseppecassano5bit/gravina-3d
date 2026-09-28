@@ -5,3 +5,8 @@ tools/test/node_modules/
 tools/test/shots/
 tools/test/package-lock.json
 __pycache__/
+
+# file locali del Mac e cartella dei prompt e delle foto di riferimento (fuori da git)
+.DS_Store
+.claude/launch.json
+riferimenti/

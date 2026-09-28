@@ -74,9 +74,9 @@ Con la stessa release di Overture (`RELEASE` nello script) i dati escono identic
 
 1. Apri il terminale **nella cartella `gravina-3d`** e avvia `claude` (oppure apri la cartella
    dall'app desktop di Claude o dall'estensione di VS Code).
-2. Incolla il prompt di [`PROMPT_NUOVA_CHAT.md`](PROMPT_NUOVA_CHAT.md).
-3. Claude legge `CLAUDE.md` e `docs/DA_FARE.md`, controlla che le prove siano verdi e aspetta
-   le tue istruzioni.
+2. Incolla il prompt del lavoro da fare. I prompt si preparano di volta in volta e stanno
+   nella cartella locale `riferimenti/`, fuori da git.
+3. Claude legge `CLAUDE.md` e `docs/DA_FARE.md` e parte dal punto indicato nel prompt.
 
 In locale Claude chiede il permesso prima di eseguire comandi o modificare file: puoi
 approvare una volta per tutte i comandi che si ripetono (per esempio `npm run simula`).

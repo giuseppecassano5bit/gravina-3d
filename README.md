@@ -65,7 +65,6 @@ Tutto per continuare sul proprio computer è nel repository:
 
 * [`CLAUDE.md`](CLAUDE.md): regole e vincoli del progetto, letti da Claude Code all'avvio;
 * [`docs/LAVORARE_IN_LOCALE.md`](docs/LAVORARE_IN_LOCALE.md): cosa installare, prove, server locale, pubblicazione;
-* [`docs/PROMPT_NUOVA_CHAT.md`](docs/PROMPT_NUOVA_CHAT.md): il prompt da incollare nella nuova chat;
 * [`docs/DA_FARE.md`](docs/DA_FARE.md): cosa resta da fare e le decisioni aperte.
 
 ## Comandi

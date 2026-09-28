@@ -361,8 +361,10 @@ partenza, centro, Piazza Scacchi, pausa e panoramica sulla città (il caso peggi
 | 2 | Base: rete, auto, incroci, camera, interfaccia | ✅ |
 | 2b | **Dati reali**: vie e incroci reali, edifici reali, torrente e cigli reali, ponte ad archi | ✅ |
 | 2c | **Vie libere e mezzi**: nessuna casa sulla strada, archi reali, quattro mezzi, partenza dal ponte, pausa con cambio mezzo e teletrasporto, camera che scavalca i tetti, dettagli dei monumenti, versione mobile | ✅ |
-| 3 | **Architettura e fedeltà**: Cattedrale e Purgatorio sulle fonti, San Michele e Madonna della Stella scavate nella roccia, rioni a gradoni in discesa con scalinate reali e abitazioni rupestri, altezze affidabili o stimate per zona, schede di altre cinque chiese, vetrina con il campo lungo sulle arcate | ✅ in revisione |
-| 3.4 C | **Città intera**: zolla di 2,9 × 3,1 km a riquadri, 80 km di vie, 1 828 edifici della città, quote Copernicus, binari, Castello Svevo, mappe vettoriali con zoom | 🔄 in revisione |
+| 3 | **Architettura e fedeltà**: Cattedrale e Purgatorio sulle fonti, San Michele e Madonna della Stella scavate nella roccia, rioni a gradoni in discesa con scalinate reali e abitazioni rupestri, altezze affidabili o stimate per zona, schede di altre cinque chiese, vetrina con il campo lungo sulle arcate | ✅ approvata il 28/09/2026 |
+| 3.4 C | **Città intera**: zolla di 2,9 × 3,1 km a riquadri, 80 km di vie, 1 828 edifici della città, quote Copernicus, binari, Castello Svevo, mappe vettoriali con zoom | ✅ (PR #8) |
+| 3.4 F | **Strade per il Bosco Difesa Grande e il P.I.P.**: tre zolle, tracciato reale compresso, bosco di querce | ✅ (PR #10) |
+| 3.4 G | **Percorsi a piedi e quote reali del centro storico** | ⏳ |
 | 4 | Rifinitura: musica procedurale (Web Audio, 40%, muto), transizioni di camera, prove su telefoni reali | ⏳ |
 
 ### Da decidere insieme (fase 3, punto 6)
@@ -389,5 +391,3 @@ elevazione Copernicus GLO-30 (30 m, licenza libera con
 attribuzione) è raggiungibile dal bucket S3 pubblico. Si potrebbe usare nello script per tarare
 ciglio, gradoni e discesa dei rioni, oggi tracciati a mano, e scrivere le quote in `GEO`. A
 30 m il canyon è appena accennato: servirebbe come guida, non come terreno diretto.
-
-Il prompt per continuare il lavoro in una nuova chat è in [`PROMPT_NUOVA_CHAT.md`](PROMPT_NUOVA_CHAT.md).

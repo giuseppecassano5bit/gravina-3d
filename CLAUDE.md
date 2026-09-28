@@ -16,9 +16,13 @@ Sempre in **italiano**: risposte in chat, documenti, commenti nel codice e messa
 
 ## Skill
 
-Per interfaccia e design usa le skill del repository in `.claude/skills/`, soprattutto
-`frontend-design` e `ui-ux-pro-max` (poi design, design-system, brand, ui-styling, banner-design,
-slides). Se non risultano caricate, dillo prima di procedere.
+Per interfaccia e design usa le skill di design, soprattutto `frontend-design` e `ui-ux-pro-max`
+(poi design, design-system, brand, ui-styling, banner-design, slides). Non sono nel repository:
+sono installate sul Mac del committente in `~/.claude/skills/`. Se non risultano caricate (per
+esempio in una sessione nel cloud), dillo prima di procedere.
+
+I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella cartella locale:
+è fuori da git e non va caricata su GitHub.
 
 ## Dove sono le cose
 
