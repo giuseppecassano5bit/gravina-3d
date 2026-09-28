@@ -104,15 +104,15 @@ Dalla fase 3.4 servono anche:
 
 | Voce | Valore |
 |---|---|
-| Vie percorribili | 1 390 tratti, 861 incroci, circa 80 km (nel centro storico 157 tratti, 9 km) |
-| Vie decorative (cieche, non percorribili) | 238 tratti, 21,6 km |
+| Vie percorribili | 1 433 tratti, 890 incroci, circa 86 km (nel centro storico 157 tratti, 9 km) |
+| Vie decorative (cieche, non percorribili) | 240 tratti |
 | Larghezza delle vie | da 3,4 m (vicoli) a 8 m; 37 tratti ristretti al minimo |
-| Inversioni a goccia | 4 |
-| Edifici reali | 518 nel centro storico (dopo il ritaglio) e 1 828 in città, nessuno sulla carreggiata |
+| Inversioni a goccia | 5 (la quinta in fondo alla strada del Bosco) |
+| Edifici reali | 518 nel centro storico (dopo il ritaglio) e 2 038 in città (con il P.I.P. e il rifugio), nessuno sulla carreggiata |
 | Archi sulle vie | 5 |
 | Scalinate reali (solo decorative) | 7, 165 m |
 | Edifici con altezza reale | 1 (Museo Santomasi, 3 piani); le altre sono stimate per zona |
-| Area del diorama | 2,88 × 3,12 km (est −840…2040, nord −1140…1980), 12 × 13 riquadri da 240 m |
+| Area del diorama | tre zolle (`GEO.meta.zolle`): città 2,88 × 3,12 km (est −840…2040, nord −1140…1980), P.I.P. (est 2040…2760, nord 300…1260), Bosco (est 120…600, nord −1860…−1140); riquadro complessivo `GEO.meta.area` est −840…2760, nord −1860…1980 |
 | Centro storico (zona Z0) | 790 × 860 m (est −340…450, nord −320…540) |
 | Quote e uso del suolo | griglia di 97 × 105 quote ogni 30 m; 192 × 208 celle ogni 15 m |
 | Binari e luoghi OSM | 25 tratti di binario (FAL e RFI); 54 luoghi con nome |
@@ -165,6 +165,28 @@ torrini sulle palazzine; ombre solo dai riquadri del centro storico.
 attorno al mezzo con una griglia spaziale, e lo ridisegna quando il mezzo si allontana. La mappa
 della pausa si apre sul mezzo (circa 900 m di città), con zoom (rotella, pizzico, + e −),
 trascinamento e il pulsante **Centro storico**. L'elenco dei luoghi è diviso per gruppi.
+
+## 2c. Le strade per il Bosco e il P.I.P. (fase 3.4, blocco F)
+
+**Zolle.** Il diorama non è più un rettangolo solo: è fatto di tre zolle (`ZOLLE` in
+`tools/genera_dati.py`, `GEO.meta.zolle` nel diorama). La città, il P.I.P. a est e l'appendice
+del Bosco a sud. Quote e uso del suolo coprono il riquadro che le contiene tutte
+(`GEO.meta.area`); i buchi fuori dalle zolle si riempiono (`fill_masked`) ma non si disegnano.
+`Tiles` tiene una griglia che vale `null` fuori dalle zolle, `World.inZolle(e, n, pad)` dice se
+un punto è dentro, e il plinto è un blocco per zolla. La minimappa è trasparente fuori.
+
+**P.I.P. - Zona Artigianale.** Vie reali a scala reale, con i capannoni. Solo l'etichetta.
+
+**Tracciato reale compresso (regola in `CLAUDE.md`).** La strada del Bosco parte dal vero
+tracciato Overture (`BOSCO_ROUTE`, 5 397 m), lo riduce in scala 0,125 (circa 760 m), lo
+semplifica e lo ammorbidisce (`chaikin`). Si attacca alla città nel nodo reale (356, −1060), ha i
+nodi `bosco:svolta` e `bosco:rifugio` e finisce con una goccia. Gli angoli restano quelli reali.
+Il torrente si taglia prima dell'appendice.
+
+**Bosco di querce.** Copertura `querce` (12): un cerchio di 95 m con una radura di 24 m attorno
+al rifugio (8 × 6 m, alto 3,6 m). Nel diorama `COVER.QUERCE` colora il terreno e posa querce
+procedurali (tronco e chioma tonda, densità 0,6) lontane dalla carreggiata. La scheda del Bosco
+si apre entro 60 m dal centro; il rifugio ha solo l'etichetta (nessuna fonte).
 
 ---
 

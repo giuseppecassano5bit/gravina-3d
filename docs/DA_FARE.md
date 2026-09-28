@@ -45,6 +45,20 @@ del lavoro su due chat in [`PIANO_FASE_3_4.md`](PIANO_FASE_3_4.md).
 - [ ] Dopo l'unione: blocco F (strade per il Bosco Difesa Grande e il P.I.P.) e, se c'è margine,
       blocco G (percorsi a piedi e quote reali del centro storico).
 
+### Fase 3.4, blocco F · strade per il Bosco Difesa Grande e il P.I.P. (PR #10, in revisione) 🔄
+
+- [x] Regola del **tracciato reale compresso** in `CLAUDE.md` (eccezione come il Ponte Acquedotto).
+- [x] Tre zolle (città, P.I.P., Bosco) in `GEO.meta.zolle`; plinto, riquadri e minimappa per zolla.
+- [x] Strada del Bosco: tracciato reale Overture di 5 397 m ridotto a circa 760 m, angoli reali,
+      goccia in fondo. Rete: 1 433 tratti, 890 incroci, 86,26 km, 5 gocce.
+- [x] Bosco di querce procedurale con radura e rifugio; P.I.P. a scala reale con i capannoni.
+- [x] Scheda del Bosco sulle fonti (Wikipedia, SISEF, Overture). P.I.P. e rifugio: solo etichetta.
+- [x] Prove: guida fino alla goccia e ritorno con la scheda che si apre; `simula` e `interazioni`
+      verdi; budget rispettato (telefono 241 000 triangoli e 53 draw call al massimo, PC 334 000 e
+      69; 277 KB compressi).
+- [ ] **Rifugio**: se si trovano fonti affidabili, dargli una scheda.
+- [ ] Dopo l'unione, se c'è margine: blocco G (percorsi a piedi e quote reali del centro storico).
+
 ## Fatto finora
 
 | Fase | Contenuto | Stato |

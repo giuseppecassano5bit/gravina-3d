@@ -25,7 +25,7 @@ slides). Se non risultano caricate, dillo prima di procedere.
 | File | Contenuto |
 |---|---|
 | `index.html` | tutto il diorama: CSS, HTML e JS in sezioni numerate 0–13 |
-| `index.html`, sezione 3 | la costante `GEO` è **generata**: non modificarla a mano |
+| `index.html`, sezione 3 | la costante `GEO` è **generata**: non modificarla a mano. Il diorama è fatto di tre zolle (città, P.I.P., Bosco) in `GEO.meta.zolle` |
 | `tools/genera_dati.py` | pipeline dei dati reali (Overture Maps, OSM via Overpass, quote Copernicus → `GEO` dentro `index.html`) |
 | `tools/test/` | prove Playwright: `simula`, `interazioni`, `foto`, `prestazioni` (GPU vera: triangoli, draw call, tempi), più `vista`, `valuta`, `vetrina` per lo sviluppo e `anteprima` per `og-image.jpg` |
 | `og-image.jpg`, `sitemap.xml` | anteprima per i social (1200×630) e mappa del sito per Google: file separati, il diorama non li usa |
@@ -44,6 +44,11 @@ slides). Se non risultano caricate, dillo prima di procedere.
 - Con il mezzo si percorrono **solo vie reali** che si incrociano con altre vie reali. Non
   inventare vie. Eccezioni ammesse: il Ponte Acquedotto (pedonale nella realtà) e le
   inversioni a goccia negli slarghi reali.
+- **Tracciato reale compresso** (eccezione come il Ponte Acquedotto, fase 3.4 blocco F): la
+  strada per il Bosco Difesa Grande segue il tracciato reale (provinciale Matera–Gravina, poi
+  la strada verso il bosco, circa 5,6 km) ridotto in scala a circa 700 m. Gli angoli di svolta
+  restano quelli reali, le lunghezze si accorciano. Nessun'altra via si comprime: la strada del
+  P.I.P. - Zona Artigianale resta a scala reale.
 - Le vie cieche reali della città (`GEO.deco`) si disegnano ma **non si percorrono**. La
   sterrata reale del Castello Svevo è percorribile: con la strada di servizio e la vicinale
   chiude un anello (flag 8, `CASTLE_BOX` in `genera_dati.py`).

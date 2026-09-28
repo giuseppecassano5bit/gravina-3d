@@ -41,6 +41,12 @@ Come funziona
        l'altezza stimata per tipo (GEO.city); quote Copernicus smussate (GEO.dem)
        e letto del torrente (GEO.riverY); uso del suolo (GEO.cover); binari
        (GEO.rails); luoghi OSM (GEO.pois); Castello Svevo con la sterrata.
+    6. Strade fuori città (fase 3.4, blocco F): due appendici a riquadri interi
+       attaccate alla zolla (GEO.meta.zolle). Il P.I.P. - Zona Artigianale a
+       scala reale, con vie e capannoni reali; la strada per il Bosco Difesa
+       Grande come TRACCIATO REALE COMPRESSO (eccezione dichiarata in CLAUDE.md):
+       angoli di svolta reali, lunghezze ridotte a BOSCO_SCALA, e in fondo una
+       piccola zona di querce con la radura, il rifugio e l'inversione a goccia.
 """
 from __future__ import annotations
 
@@ -76,7 +82,13 @@ ORIGIN = (40.8174, 16.4134)               # Cattedrale: origine del sistema loca
 # Contiene la città fino alla stazione, al cimitero, allo Sportland e al Castello Svevo.
 TILE = 240
 AREA = (-840, 2040, -1140, 1980)
-AREA_ROADS = (-830, 2030, -1130, 1970)    # le vie devono stare tutte qui dentro
+AREA_ROADS = (-830, 2030, -1130, 1970)    # binari: devono stare tutti qui dentro
+# Blocco F: appendici a riquadri interi, attaccate alla zolla.
+PIP = (2040, 2760, 300, 1260)             # P.I.P. - Zona Artigianale, a scala reale (3 × 4 riquadri)
+BOSCO = (120, 600, -1860, -1140)          # strada compressa per il Bosco Difesa Grande (2 × 3 riquadri)
+ZOLLE = (AREA, PIP, BOSCO)
+BOUND = (-840, 2760, -1860, 1980)         # rettangolo delle zolle: origine e griglie di GEO
+ROAD_MARGIN = 10                          # le vie restano ad almeno 10 m dal bordo delle zolle
 # Zona Z0, il centro storico: edifici, vie e terreno con il dettaglio pieno (fasi 2–3).
 Z0 = (-340, 450, -320, 540)
 ALT0 = 358                                # quota (m s.l.m.) dello zero del diorama: l'altopiano della Cattedrale
@@ -139,6 +151,27 @@ def local_geom(g):
 
 def inside(p, area) -> bool:
     return area[0] <= p[0] <= area[1] and area[2] <= p[1] <= area[3]
+
+
+def zone_union(zones, margin=0.0):
+    """Unione dei rettangoli `zones` (est min/max, nord min/max), ristretta di `margin` m."""
+    g = shapely.union_all([box(z[0], z[2], z[1], z[3]) for z in zones])
+    return g.buffer(-margin, join_style='mitre') if margin else g
+
+
+def zone_mask(E, N, pad):
+    """Punti della griglia (E, N) dentro una delle zolle, allargate di `pad` m."""
+    EE, NN = np.meshgrid(E, N)
+    m = np.zeros(EE.shape, bool)
+    for z in ZOLLE:
+        m |= (EE >= z[0] - pad) & (EE <= z[1] + pad) & (NN >= z[2] - pad) & (NN <= z[3] + pad)
+    return m
+
+
+# Città e P.I.P. prendono vie ed edifici reali; nell'appendice del bosco c'è solo la strada compressa.
+CITY_ZONE = zone_union((AREA, PIP))
+CITY_ROADS = zone_union((AREA, PIP), ROAD_MARGIN)
+ALL_ROADS = zone_union(ZOLLE, ROAD_MARGIN)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -395,7 +428,7 @@ def add_turnarounds(core, extra, pos, buildings_tree, buildings):
     edges = core + extra
     loops = 0
     tried = set()
-    area = box(AREA_ROADS[0], AREA_ROADS[2], AREA_ROADS[1], AREA_ROADS[3])
+    area = ALL_ROADS
     while True:
         d = degrees(edges)
         leaves = [n for n, k in d.items() if k == 1]
@@ -523,18 +556,81 @@ def midpoint(poly):
     return point_at(poly, 0.5)[1]
 
 
+# Strada per il Bosco Difesa Grande: tracciato reale dal bordo sud della città al rifugio
+# (Overture Maps, fuori dalla zolla: provinciale Matera–Gravina fino alla svolta, poi la strada
+# senza nome verso il bosco e l'ultimo tratto fino al rifugio), circa 5,6 km in metri locali.
+BOSCO_ROUTE = [(413, -1151), (469, -1240), (501, -1291), (667, -1516), (723, -1579), (786, -1700),
+               (790, -1716), (789, -2013), (773, -2066), (491, -2881),
+               (450, -2900), (422, -2926), (400, -2972), (414, -3139), (468, -3340), (499, -3511), (519, -3784),
+               (191, -4130), (167, -4149), (84, -4268), (-106, -4866), (-214, -5287), (-269, -5428),
+               (-441, -5485), (-614, -5592), (-750, -5701), (-785, -5732), (-773, -5662)]
+BOSCO_TURN = 9                            # indice della svolta: fin qui è la provinciale
+BOSCO_START = (356, -1060)                # incrocio della provinciale con Via Fosse Ardeatine (in città)
+BOSCO_SCALA = 0.125                       # 5,6 km → 0,7 km: angoli reali, lunghezze accorciate
+BOSCO_PROVINCIALE = 'Strada provinciale Matera Gravina'
+
+
+def chaikin(pts, rounds=2):
+    """Smussa gli spigoli di una polilinea (estremi fermi): curve morbide, direzioni invariate."""
+    for _ in range(rounds):
+        out = [pts[0]]
+        for a, b in zip(pts, pts[1:]):
+            out += [(0.75 * a[0] + 0.25 * b[0], 0.75 * a[1] + 0.25 * b[1]), (0.25 * a[0] + 0.75 * b[0], 0.25 * a[1] + 0.75 * b[1])]
+        pts = out[:1] + out[2:-1] + [pts[-1]]
+    return pts
+
+
+def bosco_points():
+    """
+    Tracciato compresso: dal bordo della città ogni tratto reale si accorcia di BOSCO_SCALA
+    mantenendo la direzione, quindi gli angoli di svolta restano quelli reali.
+    Restituisce (provinciale, strada del bosco): due polilinee in metri locali.
+    """
+    o = BOSCO_ROUTE[0]
+    sc = lambda q: (o[0] + (q[0] - o[0]) * BOSCO_SCALA, o[1] + (q[1] - o[1]) * BOSCO_SCALA)
+    a = [sc(q) for q in LineString(BOSCO_ROUTE[:BOSCO_TURN + 1]).simplify(30).coords]
+    b = [sc(q) for q in LineString(BOSCO_ROUTE[BOSCO_TURN:]).simplify(30).coords]
+    return chaikin([BOSCO_START] + a), chaikin(b)
+
+
+def bosco_site():
+    """Fondo della strada: (punto finale, direzione, posizione del rifugio a lato della radura)."""
+    pts = bosco_points()[1]
+    (x0, y0), (x1, y1) = pts[-2], pts[-1]
+    l = math.hypot(x1 - x0, y1 - y0) or 1
+    d = ((x1 - x0) / l, (y1 - y0) / l)
+    return (x1, y1), d, (x1 + d[0] * 6 - d[1] * 18, y1 + d[1] * 6 + d[0] * 18)
+
+
+def bosco_road(core, pos):
+    """Archi della strada compressa, attaccati al nodo reale della provinciale in città."""
+    nodes = {n for e in core for n in (e['a'], e['b'])}
+    start = min(nodes, key=lambda n: math.dist(pos[n], BOSCO_START))
+    if math.dist(pos[start], BOSCO_START) > 3:
+        print('  ATTENZIONE: incrocio di partenza della strada del bosco non trovato')
+        return []
+    a, b = bosco_points()
+    a[0] = pos[start]
+    pos['bosco:svolta'], pos['bosco:rifugio'] = a[-1], b[-1]
+    base = {'bridge': False, 'foot': False, 'deco': False}
+    print(f'  strada del bosco: {length(a) + length(b):.0f} m (tracciato reale {length(BOSCO_ROUTE):.0f} m, scala {BOSCO_SCALA})')
+    return [{**base, 'a': start, 'b': 'bosco:svolta', 'poly': a, 'cls': 'secondary', 'name': BOSCO_PROVINCIALE},
+            {**base, 'a': 'bosco:svolta', 'b': 'bosco:rifugio', 'poly': b, 'cls': 'tertiary', 'name': None}]
+
+
 def build_network(data, buildings):
     """
     Rete percorribile (2-core del grafo, più le vie cieche del centro storico con la goccia)
     e vie decorative: le vie cieche reali della città moderna, visibili ma non percorribili.
     """
     edges, pos = build_edges(data['segment'], data['connector'])
-    edges = [e for e in edges if all(inside(p, AREA_ROADS) for p in e['poly']) and e['a'] != e['b']]
+    edges = [e for e in edges if e['a'] != e['b'] and shapely.contains_xy(CITY_ROADS, *np.array(e['poly']).T).all()]
     edges, pos = merge_close_nodes(edges, pos)
     drivable = [e for e in edges if not e['deco']]
     core = two_core(drivable)
     extra = [e for t in dead_end_trees(drivable, core)
              if any(x['name'] in KEEP_DEAD_ENDS for x in t) and all(inside(midpoint(x['poly']), Z0) for x in t) for e in t]
+    extra += bosco_road(core, pos)
     tree = STRtree(buildings)
     net, loops = add_turnarounds(core, extra, pos, tree, buildings)
     net = two_core(net)
@@ -592,7 +688,7 @@ def reliable_height(b):
 
 
 def build_buildings(raw):
-    area = box(AREA[0], AREA[2], AREA[1], AREA[3])
+    area = CITY_ZONE
     out = []
     for b in raw:
         if b.get('is_underground'):
@@ -839,6 +935,8 @@ def build_features(data):
     river = next(w for w in data['water'] if (w.get('names') or {}).get('primary') == 'Torrente La Gravina')
     rl = LineString([to_local(*p) for p in river['geom']['coordinates']])
     rl = rl.intersection(box(big[0], big[2], big[1], big[3]))
+    # l'appendice del bosco è un paesaggio compresso: il torrente reale si ferma 80 m prima
+    rl = rl.difference(box(BOSCO[0] - 80, BOSCO[2] - 80, BOSCO[1] + 80, BOSCO[3]))
     rl = max(getattr(rl, 'geoms', [rl]), key=lambda g: g.length).simplify(1.0)
 
     cliffs = [LineString([to_local(*p) for p in l['geom']['coordinates']])
@@ -892,7 +990,9 @@ def build_features(data):
 DEM_STEP = 30             # m: passo della griglia delle quote in GEO
 COVER_STEP = 15           # m: passo della griglia dell'uso del suolo in GEO
 COVER = {'campagna': 0, 'citta': 1, 'parco': 2, 'bosco': 3, 'campo': 4, 'uliveto': 5, 'industria': 6,
-         'cimitero': 7, 'sport': 8, 'piazza': 9, 'macchia': 10, 'cava': 11}
+         'cimitero': 7, 'sport': 8, 'piazza': 9, 'macchia': 10, 'cava': 11, 'querce': 12}
+BOSCO_QUERCE = 95         # m: raggio del querceto in fondo alla strada del bosco
+BOSCO_RADURA = 24         # m: raggio della radura attorno al rifugio
 OVERPASS_URL = 'https://overpass-api.de/api/interpreter'
 OVERPASS_BBOX = '40.79,16.39,40.85,16.46'
 OVERPASS_QUERY = f"""[out:json][timeout:160];
@@ -977,8 +1077,8 @@ def ground_model(dem_at, buildings):
     Restituisce la funzione di quota fine (10 m) e la griglia di GEO (DEM_STEP m).
     """
     f, M = 10, 180
-    E = np.arange(AREA[0] - M, AREA[1] + M + 1, f, dtype=float)
-    N = np.arange(AREA[2] - M, AREA[3] + M + 1, f, dtype=float)
+    E = np.arange(BOUND[0] - M, BOUND[1] + M + 1, f, dtype=float)
+    N = np.arange(BOUND[2] - M, BOUND[3] + M + 1, f, dtype=float)
     EE, NN = np.meshgrid(E, N)
     Z = dem_at(EE, NN)
     U = np.clip((building_density(buildings, E, N, 45) - 0.06) / 0.14, 0, 1)
@@ -986,7 +1086,11 @@ def ground_model(dem_at, buildings):
     B = blur(low_percentile(Z, 9, 20), 3.5)
     G = A * (1 - U) + B * U
     k = DEM_STEP // f
-    grid = G[M // f::k, M // f::k][:(AREA[3] - AREA[2]) // DEM_STEP + 1, :(AREA[1] - AREA[0]) // DEM_STEP + 1]
+    grid = G[M // f::k, M // f::k][:(BOUND[3] - BOUND[2]) // DEM_STEP + 1, :(BOUND[1] - BOUND[0]) // DEM_STEP + 1].copy()
+    ge = BOUND[0] + DEM_STEP * np.arange(grid.shape[1])
+    gn = BOUND[2] + DEM_STEP * np.arange(grid.shape[0])
+    active = zone_mask(ge, gn, DEM_STEP)
+    fill_masked(grid, active)
 
     def at(e, n):
         x, y = (np.asarray(e) - E[0]) / f, (np.asarray(n) - N[0]) / f
@@ -1013,6 +1117,22 @@ def river_bed(river, dem_light):
     return np.minimum.accumulate(sm)                  # il torrente scorre da nord verso sud
 
 
+def fill_masked(grid, active):
+    """
+    Fuori dalle zolle i valori non servono: ognuno copia il vicino a sinistra (o la riga sopra),
+    così le differenze e le serie di GEO diventano zeri e il blocco compresso quasi non cresce.
+    """
+    for j in range(grid.shape[0]):
+        idx = np.flatnonzero(active[j])
+        if not len(idx):
+            grid[j] = grid[j - 1] if j else grid[j]
+            continue
+        grid[j, :idx[0]] = grid[j, idx[0]]
+        for i in range(idx[0] + 1, grid.shape[1]):
+            if not active[j, i]:
+                grid[j, i] = grid[j, i - 1]
+
+
 def raster(polys, E, N):
     """Maschera dei punti della griglia (E, N) dentro i poligoni."""
     m = np.zeros((len(N), len(E)), bool)
@@ -1029,8 +1149,8 @@ def raster(polys, E, N):
 def land_cover(data, buildings):
     """Uso del suolo su una griglia di COVER_STEP m (centri delle celle): colori del terreno e alberi nella città moderna."""
     s = COVER_STEP
-    E = np.arange(AREA[0] + s / 2, AREA[1], s, dtype=float)
-    N = np.arange(AREA[2] + s / 2, AREA[3], s, dtype=float)
+    E = np.arange(BOUND[0] + s / 2, BOUND[1], s, dtype=float)
+    N = np.arange(BOUND[2] + s / 2, BOUND[3], s, dtype=float)
     grid = np.zeros((len(N), len(E)), np.uint8)
     polys = collections.defaultdict(list)
     lu = {'farmland': 'campo', 'meadow': 'campo', 'orchard': 'uliveto', 'residential': 'citta', 'industrial': 'industria',
@@ -1052,6 +1172,13 @@ def land_cover(data, buildings):
         if kind == 'citta':
             m = dense                                    # la città è dove ci sono le case, non tutto il poligono "residenziale"
         grid[m] = COVER[kind]
+    # fondo della strada del bosco: querce attorno, radura attorno al rifugio
+    end, d, hut = bosco_site()
+    EE, NN = np.meshgrid(E, N)
+    cx, cy = end[0] - d[0] * 40, end[1] - d[1] * 40
+    grid[(EE - cx) ** 2 + (NN - cy) ** 2 < BOSCO_QUERCE ** 2] = COVER['querce']
+    grid[(EE - hut[0]) ** 2 + (NN - hut[1]) ** 2 < BOSCO_RADURA ** 2] = COVER['campo']
+    fill_masked(grid, zone_mask(E, N, s))
     print('  uso del suolo:', ', '.join(f'{k} {100 * np.mean(grid == v):.0f}%' for k, v in COVER.items() if np.any(grid == v)))
     return grid
 
@@ -1101,7 +1228,7 @@ def city_buildings(buildings, cover):
     out = []
     for b in buildings:
         c = b['poly'].centroid
-        i, j = int((c.x - AREA[0]) / s), int((c.y - AREA[2]) / s)
+        i, j = int((c.x - BOUND[0]) / s), int((c.y - BOUND[2]) / s)
         code = cover[min(j, cover.shape[0] - 1), min(i, cover.shape[1] - 1)]
         dense = code in (COVER['citta'], COVER['industria'], COVER['parco'], COVER['piazza'], COVER['sport'])
         h = city_height(b, dense, code == COVER['industria'])
@@ -1135,7 +1262,7 @@ def city_pois(elements):
         if not t.get('name') or not c:
             continue
         e, n = to_local(c['lon'], c['lat'])
-        if not inside((e, n), AREA):
+        if not CITY_ZONE.contains(Point(e, n)):
             continue
         vals = {t.get('historic'), t.get('amenity'), t.get('leisure'), 'railway' if t.get('railway') == 'station' else None}
         kind = next((k for key, k in POI_KIND if key in vals), None)
@@ -1267,7 +1394,7 @@ def varint(values):
 
 def ring_ints(coords, q):
     """Anello a passo q (m), dall'angolo sud-ovest della zolla: primo punto assoluto, poi differenze."""
-    pts = [(round((x - AREA[0]) / q), round((y - AREA[2]) / q)) for x, y in coords]
+    pts = [(round((x - BOUND[0]) / q), round((y - BOUND[2]) / q)) for x, y in coords]
     pts = [p for i, p in enumerate(pts) if p != pts[i - 1]] if len(pts) > 1 else pts
     out = [len(pts), *pts[0]]
     for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
@@ -1331,7 +1458,7 @@ def encode(edges, deco, pos, buildings, city, arches, feats, extra):
         'meta': {
             'fonte': f'Overture Maps Foundation {RELEASE.split("/")[-1]} · © OpenStreetMap contributors (ODbL)',
             'quote': COPERNICUS,
-            'origine': list(ORIGIN), 'area': list(AREA), 'z0': list(Z0), 'riquadro': TILE, 'quota0': ALT0,
+            'origine': list(ORIGIN), 'area': list(BOUND), 'zolle': [list(z) for z in ZOLLE], 'z0': list(Z0), 'riquadro': TILE, 'quota0': ALT0,
         },
         'names': names,
         'nodes': flat(nodes),
@@ -1381,12 +1508,12 @@ def preview(path, edges, deco, buildings, city, arches, feats, extra):
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
     from matplotlib.colors import ListedColormap
-    W, H = AREA[1] - AREA[0], AREA[3] - AREA[2]
+    W, H = BOUND[1] - BOUND[0], BOUND[3] - BOUND[2]
     fig, ax = plt.subplots(figsize=(W / 150, H / 150), dpi=90)
-    tones = ['#f2ead8', '#e4dccb', '#b8d08a', '#7fa65a', '#eadca0', '#c9cf8f', '#d8d0d8', '#c8c0b0', '#9fd08a', '#efe2c8', '#c8c89a', '#c0b0a0']
-    ax.imshow(extra['cover'], origin='lower', extent=(AREA[0], AREA[1], AREA[2], AREA[3]), cmap=ListedColormap(tones), vmin=0, vmax=11, interpolation='nearest')
+    tones = ['#f2ead8', '#e4dccb', '#b8d08a', '#7fa65a', '#eadca0', '#c9cf8f', '#d8d0d8', '#c8c0b0', '#9fd08a', '#efe2c8', '#c8c89a', '#c0b0a0', '#5f7f45']
+    ax.imshow(extra['cover'], origin='lower', extent=(BOUND[0], BOUND[1], BOUND[2], BOUND[3]), cmap=ListedColormap(tones), vmin=0, vmax=12, interpolation='nearest')
     g = extra['ground']
-    ax.contour(np.linspace(AREA[0], AREA[1], g.shape[1]), np.linspace(AREA[2], AREA[3], g.shape[0]), g, levels=np.arange(250, 460, 5), colors='#8a7a60', linewidths=0.3)
+    ax.contour(np.linspace(BOUND[0], BOUND[1], g.shape[1]), np.linspace(BOUND[2], BOUND[3], g.shape[0]), g, levels=np.arange(250, 460, 5), colors='#8a7a60', linewidths=0.3)
     for b in buildings + city:
         x, y = b['poly'].exterior.xy
         ax.fill(x, y, color='#b0452a' if b['kind'] in (1, 2, 7) else '#dccaa0' if b in buildings else '#c8b48a', lw=0)
@@ -1406,11 +1533,12 @@ def preview(path, edges, deco, buildings, city, arches, feats, extra):
     ax.plot(x, y, color='#2a7fd4', lw=2)
     for rim, c in ((extra['rims'][0], 'r'), (extra['rims'][1], 'm')):
         ax.plot(*zip(*rim), c + '--', lw=1)
-    ax.plot([Z0[0], Z0[1], Z0[1], Z0[0], Z0[0]], [Z0[2], Z0[2], Z0[3], Z0[3], Z0[2]], 'k:', lw=1)
+    for z, st in ((Z0, 'k:'), *((z, 'k-') for z in ZOLLE)):
+        ax.plot([z[0], z[1], z[1], z[0], z[0]], [z[2], z[2], z[3], z[3], z[2]], st, lw=1)
     for e, n, nm, kind, *_ in extra['pois']:
         ax.plot(e, n, 'k.', ms=3)
         ax.text(e + 6, n + 6, nm, fontsize=4)
-    ax.set_xlim(AREA[0], AREA[1]); ax.set_ylim(AREA[2], AREA[3]); ax.set_aspect('equal')
+    ax.set_xlim(BOUND[0], BOUND[1]); ax.set_ylim(BOUND[2], BOUND[3]); ax.set_aspect('equal')
     plt.tight_layout(); plt.savefig(path)
     print(f'  anteprima: {path}')
 
@@ -1432,6 +1560,10 @@ def main():
         # la relazione OSM building=castle (r6148325) arriva da Overture come un edificio anonimo con la stessa sagoma
         buildings = [b for b in buildings if b['poly'].intersection(castle).area < 0.3 * b['poly'].area]
         buildings.append({'poly': castle, 'kind': CITY_KIND['castle'], 'cls': 'castle', 'name': 'Castello Svevo', 'height': 8.0, 'level': 0})
+    # rifugio del Bosco Difesa Grande: capanna procedurale a lato della radura (la posizione è compressa)
+    hut = bosco_site()[2]
+    buildings.append({'poly': box(hut[0] - 4, hut[1] - 3, hut[0] + 4, hut[1] + 3), 'kind': CITY_KIND['house'], 'cls': 'hut',
+                      'name': 'Rifugio Bosco Difesa Grande', 'height': 3.6, 'level': 0})
     print('3. Rete stradale')
     edges, deco, pos = build_network(data, [b['poly'] for b in buildings])
     buildings, arches = free_roads(edges + deco, pos, buildings)
