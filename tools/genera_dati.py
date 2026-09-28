@@ -793,8 +793,8 @@ def free_roads(edges, pos, buildings):
         if not poly.intersects(corridor):
             out.append(b)
             continue
-        # Corpo sopraelevato attraversato dalla mezzeria: è un arco sulla via.
-        if b['level']:
+        # Corpo sopraelevato attraversato dalla mezzeria: è un arco sulla via (solo nel centro storico).
+        if b['level'] and inside(poly.centroid.coords[0], Z0):
             for line, e in centerlines:
                 span = line.intersection(poly)
                 if not span.is_empty and span.length > 0.5 and span.length <= ARCH_MAX_DEPTH:
@@ -1421,6 +1421,8 @@ def main():
     buildings = build_buildings(data['building'])
     castle = castle_outline(osm)
     if castle is not None:
+        # la relazione OSM building=castle (r6148325) arriva da Overture come un edificio anonimo con la stessa sagoma
+        buildings = [b for b in buildings if b['poly'].intersection(castle).area < 0.3 * b['poly'].area]
         buildings.append({'poly': castle, 'kind': CITY_KIND['castle'], 'cls': 'castle', 'name': 'Castello Svevo', 'height': 8.0, 'level': 0})
     print('3. Rete stradale')
     edges, deco, pos = build_network(data, [b['poly'] for b in buildings])
