@@ -66,7 +66,7 @@ async function measure(profile) {
       layers[name] = (layers[name] ?? 0) + t;
       total += t;
     }
-    return { total: Math.round(total), meshes, layers: Object.fromEntries(Object.entries(layers).map(([k, v]) => [k, Math.round(v)]).sort((a, b) => b[1] - a[1])) };
+    return { total: Math.round(total), meshes, layers: Object.fromEntries(Object.entries(layers).map(([k, v]) => [k, Math.round(v)]).sort((a, b) => b[1] - a[1])), tiles: { ...g.Tiles.stats } };
   });
 
   const views = {};
@@ -124,6 +124,7 @@ for (const p of out.profiles) {
   console.log(`\n[${p.profile}] ${p.gpu}`);
   console.log(`  pronto (Parti) ${p.build.pronto} ms dall'apertura (${p.build.pronto - p.build.inizio} ms di costruzione) · completo ${p.build.completo} ms · memoria JS ${p.memoryMb} MB · triangoli nella scena ${p.scene.total} (${p.scene.meshes} mesh)`);
   console.log(`  strati: ${Object.entries(p.scene.layers).map(([k, v]) => `${k} ${Math.round(v / 1000)}k`).join(', ')}`);
+  if (p.scene.tiles) console.log(`  nei riquadri: ${Object.entries(p.scene.tiles).map(([k, v]) => `${k} ${Math.round(v / 1000)}k`).join(', ')}`);
   for (const [v, r] of Object.entries(p.views)) console.log(`  ${v.padEnd(11)} ${String(r.fps).padStart(3)} fps (fotogramma peggiore ${r.peggiore} ms, CPU ${r.cpuMs} ms) · ${String(r.triangoli).padStart(7)} triangoli · ${r.draw} draw call`);
   if (p.longTasks.length) console.log(`  blocchi dopo "Parti" (inizio ms, durata ms): ${p.longTasks.map(([s, d]) => `${s}+${d}`).join(' ')}`);
 }

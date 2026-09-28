@@ -60,12 +60,14 @@ const r = await page.evaluate(() => {
     }
     return false;
   };
-  const skip = new Set(['terreno', 'strade', 'ponte-acquedotto', 'alberi', 'panda-4x4', 'audi-rs6', 'lamborghini-huracan', 'trattore-john-deere']);
+  // Terreno, vie e alberi (anche del centro storico) sono nei riquadri: lì valgono gli intervalli t.ranges.
+  const skip = new Set(['ponte-acquedotto', 'panda-4x4', 'audi-rs6', 'lamborghini-huracan', 'trattore-john-deere']);
   const esclusa = (o) => { for (let x = o; x; x = x.parent) if (skip.has(x.name) || x.userData?.vehicle) return true; return false; };
   const dettagli = {};
   const v = new g.THREE.Vector3(), m = new g.THREE.Matrix4();
   g.scene.updateMatrixWorld(true);
-  // Nei riquadri della città si controllano solo edifici e alberi (terreno, vie e binari sono superfici).
+  // Nei riquadri si controllano solo edifici (con finestre, torrini e cisterne) e alberi: terreno, vie
+  // e binari sono superfici.
   const tiles = new Map(g.Tiles.list.map((t) => [t.mesh, t.ranges]));
   const checked = (o, i) => { const r = tiles.get(o); if (!r) return true; const t = Math.floor(i / 3); return (t >= r.edifici[0] && t < r.edifici[1]) || (t >= r.alberi[0] && t < r.alberi[1]); };
   g.scene.traverse((o) => {

@@ -596,7 +596,7 @@ const CONFIG = {
 
   buildings: {
     floorHeight: 3.3,        // altezza di un piano (m)
-    maxWindows: 32000,       // tetto alle finestre istanziate
+    maxWindows: 32000,       // tetto alle finestre del centro storico
   },
 
   camera: {
@@ -3988,9 +3988,12 @@ const World = {
   /**
    * Strade del centro storico: nastri di "chianche" chiare con cordoli, più gli slarghi agli
    * incroci. Fuori dalla zona Z0 le vie sono nei riquadri della città (Tiles), in asfalto.
+   * Anche questi nastri finiscono nei riquadri (strato "vie", per il punto medio di ogni
+   * tratto): il materiale ha una faccia sola, quindi cordoli girati verso l'esterno e
+   * superfici verso l'alto.
    */
   buildRoads(network) {
-    const R = CONFIG.road, tb = new TriBuilder();
+    const R = CONFIG.road;
     const paving = new THREE.Color(PALETTE.paving), curb = new THREE.Color(PALETTE.curb);
     const foot = new THREE.Color('#d9cba8'), tmp = new THREE.Color();
     for (const edge of network.edges) {
@@ -4013,27 +4016,30 @@ const World = {
       const drop = (p) => [p[0], p[1] - R.curbDepth, p[2]];
       for (let k = 0; k < L.length - 1; k++) {
         const i0 = idx[k], i1 = idx[k + 1];
-        if (!Tiles.inZ0((S[i0 * 3] + S[i1 * 3]) / 2, -(S[i0 * 3 + 2] + S[i1 * 3 + 2]) / 2)) continue;   // in città: Tiles
+        const me = (S[i0 * 3] + S[i1 * 3]) / 2, mn = -(S[i0 * 3 + 2] + S[i1 * 3 + 2]) / 2;
+        if (!Tiles.inZ0(me, mn)) continue;                    // in città: Tiles._roads
+        const tb = Tiles.builderAt(me, mn, 'vie');
+        const out = [L[k][0] - Rr[k][0], 0, L[k][2] - Rr[k][2]];   // verso sinistra
         tmp.copy(base).multiplyScalar(k % 2 ? 1 : 0.965);    // lastroni alternati
-        tb.quad(L[k], Rr[k], Rr[k + 1], L[k + 1], tmp);
-        tb.quad(L[k], L[k + 1], drop(L[k + 1]), drop(L[k]), curb);
-        tb.quad(Rr[k], drop(Rr[k]), drop(Rr[k + 1]), Rr[k + 1], curb);
+        tb.quad(L[k], Rr[k], Rr[k + 1], L[k + 1], tmp, null, [0, 1, 0]);
+        tb.quad(L[k], L[k + 1], drop(L[k + 1]), drop(L[k]), curb, null, out);
+        tb.quad(Rr[k], drop(Rr[k]), drop(Rr[k + 1]), Rr[k + 1], curb, null, [-out[0], 0, -out[2]]);
       }
     }
+    // Slarghi agli incroci: dischi di chianche col bordo (senza la faccia di sotto, che non si vede)
     for (const node of network.nodes) {
       if (!node.plaza || !Tiles.inZ0(node.e, node.n)) continue;
+      const tb = Tiles.builderAt(node.e, node.n, 'vie');
       const g = new THREE.CylinderGeometry(node.plaza, node.plaza * 1.03, 0.9, 14).toNonIndexed();
       g.translate(node.pos.x, node.y + R.lift + 0.02 - 0.45, node.pos.z);
       const p = g.attributes.position, nrm = g.attributes.normal;
       for (let i = 0; i < p.count; i += 3) {
-        const col = nrm.getY(i) > 0.9 ? paving : curb;
-        tb.tri([p.getX(i), p.getY(i), p.getZ(i)], [p.getX(i + 1), p.getY(i + 1), p.getZ(i + 1)], [p.getX(i + 2), p.getY(i + 2), p.getZ(i + 2)], col);
+        const ny = nrm.getY(i);
+        if (ny < -0.9) continue;
+        tb.tri([p.getX(i), p.getY(i), p.getZ(i)], [p.getX(i + 1), p.getY(i + 1), p.getZ(i + 1)], [p.getX(i + 2), p.getY(i + 2), p.getZ(i + 2)],
+          ny > 0.9 ? paving : curb, null, [nrm.getX(i), ny, nrm.getZ(i)]);
       }
     }
-    const mesh = new THREE.Mesh(tb.build(), vertexColorMaterial({ roughness: 0.9, side: THREE.DoubleSide }));
-    mesh.receiveShadow = true;
-    mesh.name = 'strade';
-    return mesh;
   },
 
   /**
@@ -4182,7 +4188,8 @@ const World = {
  *    Ogni sagoma reale viene estrusa come un blocco di tufo o intonaco.
  *    Altezze: dato reale se c'è, altrimenti 2–3 piani nel centro storico e
  *    3–5 nei quartieri moderni. Tetti piani a terrazza o a capanna in coppi;
- *    finestre e persiane istanziate lungo le facciate.
+ *    finestre e persiane lungo le facciate. Tutto finisce nei riquadri della
+ *    sezione 6e (strato "edifici"), così il frustum culling lo scarta.
  * ═══════════════════════════════════════════════════════════════════════ */
 const Buildings = {
   /** Centro storico (per altezze e colori). */
@@ -4263,17 +4270,18 @@ const Buildings = {
   },
 
   /**
-   * Costruisce tutti gli edifici in un'unica mesh (più finestre e dettagli
-   * istanziati). Restituisce anche le quote dei monumenti per le etichette.
+   * Costruisce gli edifici del centro storico nei riquadri della città (strato "edifici" del
+   * riquadro che contiene il baricentro), con torrini e cisterne. Le finestre si raccolgono
+   * qui e si posano dopo i dettagli dei monumenti (placeWindows), che ne tolgono alcune.
+   * Restituisce anche le quote dei monumenti per le etichette.
    */
-  build(scene, rockSpots = []) {
-    const tb = new TriBuilder();
+  build(rockSpots = []) {
     const rnd = rng(1092);
     const col = (hex) => new THREE.Color(hex);
     const facadesOld = PALETTE.facadesOld.map(col), facadesNew = PALETTE.facadesNew.map(col);
     const roofFlat = PALETTE.roofFlat.map(col), roofTiles = PALETTE.roofTiles.map(col);
     const stone = col(PALETTE.stone), stoneDark = col(PALETTE.stoneDark);
-    const windows = [], details = [], tops = new Map();
+    const windows = [], tops = new Map();
     /** Sagome e quote dei tetti: servono alla camera per non finire dietro le case. */
     this.roofs = [];
     /** Indici (in GEO.buildings) delle chiese scavate nella roccia, costruite da caveChurch. */
@@ -4288,6 +4296,7 @@ const Buildings = {
       const area = Math.abs(Plane.signedArea(outer));
       const [ce, cn] = Plane.centroid(outer);
       const seed = hash2(index, 1092);
+      const tb = Tiles.builderAt(ce, cn, 'edifici');
       let gMin = Infinity, gMax = -Infinity;
       for (const [e, n] of outer) { const g = Terrain.heightAt(e, n); gMin = Math.min(gMin, g); gMax = Math.max(gMax, g); }
       const base = gMin - 0.8;
@@ -4334,7 +4343,7 @@ const Buildings = {
         catch { continue; }
         geo.rotateX(-Math.PI / 2);
         geo.translate(0, piece.base, 0);
-        this.roofs.push({ pts: piece.poly, top: piece.top + Math.max(rise, 1.5) + (kind === 1 ? 4 : 0) });
+        this.roofs.push({ pts: piece.poly, top: piece.top + Math.max(rise, 1.5) + (kind === 1 ? 4 : 0), wall: piece.top });
         const g = geo.index ? geo.toNonIndexed() : geo, P = g.attributes.position, Nn = g.attributes.normal;
         const c = new THREE.Color();
         for (let i = 0; i < P.count; i += 3) {
@@ -4364,7 +4373,8 @@ const Buildings = {
           const e = rect.c[0] + rect.u[0] * a + rect.v[0] * b, n = rect.c[1] + rect.u[1] * a + rect.v[1] * b;
           if (!Plane.contains(outer, e, n)) continue;
           const big = rnd() > 0.55;
-          details.push({ e, n, y: topAt(e, n), sx: big ? 2.4 : 0.8, sy: big ? 2.3 : 1.4, sz: big ? 2.0 : 0.8, rot: Math.atan2(rect.u[1], rect.u[0]), color: big ? wall : roof });
+          if (big) tb.box(e, n, topAt(e, n), 2.4, 2.3, 2.0, rect.u, wall);   // torrino delle scale
+          else tb.box(e, n, topAt(e, n), 0.8, 1.4, 0.8, rect.u, roof);      // cisterna o comignolo
         }
       }
 
@@ -4394,11 +4404,8 @@ const Buildings = {
       }
     });
 
-    const mesh = new THREE.Mesh(tb.build(), vertexColorMaterial({ roughness: 0.88 }));
-    mesh.castShadow = mesh.receiveShadow = true;
-    mesh.name = 'edifici';
-    scene.add(mesh, this.instanceWindows(windows), this.instanceDetails(details));
-    return { tops, windowCount: windows.length };
+    this.windowList = windows.slice(0, CONFIG.buildings.maxWindows);
+    return { tops, windowCount: this.windowList.length };
   },
 
   /**
@@ -4840,26 +4847,26 @@ const Buildings = {
     this.roofs.push({ pts: [[-w / 2, -0.8], [w / 2, -0.8], [w / 2, depth], [-w / 2, depth]].map(([x, d]) => at(xm + (tMax - tMin) * 0.15 + x, dMax - 0.8 + d)), top: base + h });
   },
 
-  /** Finestre (con persiane) e porte: un'unica InstancedMesh di piccoli pannelli. */
-  instanceWindows(list) {
-    const max = Math.min(list.length, CONFIG.buildings.maxWindows);
-    const geo = new THREE.PlaneGeometry(1, 1);
-    const mat = new THREE.MeshStandardMaterial({ roughness: 0.8, flatShading: true });
-    const mesh = new THREE.InstancedMesh(geo, mat, max);
+  /**
+   * Finestre (con persiane) e porte: piccoli pannelli a 5 cm dal muro, nello strato "edifici"
+   * del riquadro in cui cadono. Si posano dopo i dettagli dei monumenti (Details.build), che
+   * con clearWindows tolgono quelle davanti a portali e rilievi. Nel centro storico molte case
+   * hanno i muri in comune: le finestre che finirebbero dentro la casa accanto (il suo muro è
+   * più alto della finestra) non si posano.
+   */
+  placeWindows() {
     const shutters = PALETTE.shutters.map((h) => new THREE.Color(h));
-    const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
-    for (let i = 0; i < max; i++) {
-      const w = list[i];
-      q.setFromAxisAngle(up, w.yaw);
-      s.set(w.door ? 1.2 : 0.95, w.door ? 2.3 : 1.35, 1);
-      m.compose(p.set(w.e, w.y, -w.n), q, s);
-      mesh.setMatrixAt(i, m);
-      mesh.setColorAt(i, w.door ? shutters[3] : shutters[Math.floor(w.c * shutters.length)]);
+    this.hiddenWindows = 0;
+    for (const w of this.windowList ?? []) {
+      if (w.cleared) continue;
+      const ox = Math.sin(w.yaw), on = -Math.cos(w.yaw);               // normale verso l'esterno [est, nord]
+      const hw = w.door ? 0.6 : 0.475, hh = w.door ? 1.15 : 0.675;
+      if (this.wallAt(w.e + ox * 0.6, w.n + on * 0.6) > w.y + hh + 0.1) { this.hiddenWindows++; continue; }
+      const re = -on * hw, rn = ox * hw;                               // metà larghezza, lungo il muro
+      const P = (s, t) => [w.e + s * re, w.y + t * hh, -(w.n + s * rn)];
+      Tiles.builderAt(w.e, w.n, 'edifici').quad(P(-1, -1), P(1, -1), P(1, 1), P(-1, 1),
+        w.door ? shutters[3] : shutters[Math.floor(w.c * shutters.length)], null, [ox, 0, -on]);
     }
-    mesh.name = 'finestre';
-    this.windowList = list.slice(0, max);
-    this.windowMesh = mesh;
-    return mesh;
   },
 
   /**
@@ -4867,30 +4874,14 @@ const Buildings = {
    * sul filo del muro, larghe 2·half e alte fino alla quota `top`).
    */
   clearWindows(zones) {
-    const mesh = this.windowMesh, zero = new THREE.Matrix4().makeScale(0, 0, 0);
-    if (!mesh || !zones.length) return;
-    this.windowList.forEach((w, i) => {
+    if (!this.windowList || !zones.length) return;
+    for (const w of this.windowList) {
       const hit = zones.some(({ M, n, half, top }) => {
         const de = w.e - M[0], dn = w.n - M[1];
         return Math.abs(de * n[0] + dn * n[1]) < 1.5 && Math.abs(-de * n[1] + dn * n[0]) < half && w.y < top;
       });
-      if (hit) mesh.setMatrixAt(i, zero);
-    });
-    mesh.instanceMatrix.needsUpdate = true;
-  },
-
-  /** Torrini, cisterne e comignoli sui tetti piani. */
-  instanceDetails(list) {
-    const mesh = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({ flatShading: true, roughness: 0.9 }), Math.max(1, list.length));
-    const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
-    list.forEach((d, i) => {
-      m.compose(p.set(d.e, d.y + d.sy / 2, -d.n), q.setFromAxisAngle(up, -d.rot), s.set(d.sx, d.sy, d.sz));
-      mesh.setMatrixAt(i, m);
-      mesh.setColorAt(i, d.color);
-    });
-    mesh.count = list.length;
-    mesh.castShadow = true;
-    return mesh;
+      if (hit) w.cleared = true;
+    }
   },
 
   /**
@@ -5039,13 +5030,13 @@ const Scenery = {
     return mesh;
   },
 
-  /** Alberi low-poly: pini e lecci nei giardini, ulivi verso Botromagno, macchia nel canyon. */
+  /**
+   * Alberi low-poly del centro storico: pini e lecci nei giardini, ulivi verso Botromagno,
+   * macchia nel canyon. Vanno nello strato "alberi" del riquadro in cui cadono (come quelli
+   * della città) e la chioma resta fuori dalla carreggiata: distanza dal bordo della via
+   * maggiore del raggio della chioma più 0,6 m. Sul profilo leggero sono la metà.
+   */
   trees(network, areas) {
-    const canopy = new THREE.IcosahedronGeometry(1, 0);
-    const trunk = new THREE.CylinderGeometry(0.12, 0.18, 1, 5);
-    trunk.translate(0, 0.5, 0);
-    const mTrunk = new THREE.MeshStandardMaterial({ color: '#6b4a33', flatShading: true, roughness: 1 });
-    const mLeaf = new THREE.MeshStandardMaterial({ flatShading: true, roughness: 0.95 });
     const spots = [];
     const r = rng(1743);
     const [minX, maxX, minN, maxN] = CONFIG.terrain.proc, B = { minX, maxX, minN, maxN };   // fuori ci pensano i riquadri
@@ -5055,8 +5046,8 @@ const Scenery = {
     for (const a of areas.filter((x) => x.kind === 'green')) {
       const [e0, e1, n0, n1] = a.bb;
       for (let k = 0; k < (e1 - e0) * (n1 - n0) / 90 && spots.length < 900; k++) {
-        const e = lerp(e0, e1, r()), n = lerp(n0, n1, r());
-        if (Plane.contains(a.pts, e, n) && free(e, n, 1.5)) spots.push({ e, n, s: 2.2 + r() * 1.6, tone: r() < 0.5 ? '#6f8a3e' : '#5b7a3a' });
+        const e = lerp(e0, e1, r()), n = lerp(n0, n1, r()), s = 2.2 + r() * 1.6, tone = r() < 0.5 ? '#6f8a3e' : '#5b7a3a';
+        if (Plane.contains(a.pts, e, n) && free(e, n, Math.max(1.5, s + 0.6))) spots.push({ e, n, s, tone });
       }
     }
     // Ulivi e macchia sull'altopiano di Botromagno e nel canyon
@@ -5064,29 +5055,21 @@ const Scenery = {
       const e = lerp(B.minX + 8, B.maxX - 8, r()), n = lerp(B.minN + 8, B.maxN - 8, r());
       const L = Ravine.locate(e, n);
       if (L.side > 0 && L.t >= 1) continue;
-      if (!free(e, n, 2)) continue;
       const olive = L.side < 0 && L.t >= 1;
       if (olive && fbm(e * 0.02, n * 0.02) < -0.05) continue;
-      spots.push({ e, n, s: olive ? 1.5 + r() * 0.7 : 1.0 + r() * 1.3, tone: olive ? '#8a9a5b' : r() < 0.5 ? '#6d7c3f' : '#7f8a4a' });
+      const s = olive ? 1.5 + r() * 0.7 : 1.0 + r() * 1.3, tone = olive ? '#8a9a5b' : r() < 0.5 ? '#6d7c3f' : '#7f8a4a';
+      if (free(e, n, Math.max(2, s + 0.6))) spots.push({ e, n, s, tone });
     }
-    const leaves = new THREE.InstancedMesh(canopy, mLeaf, Math.max(1, spots.length));
-    const trunks = new THREE.InstancedMesh(trunk, mTrunk, Math.max(1, spots.length));
-    const m = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), p = new THREE.Vector3(), c = new THREE.Color();
+    const shapes = Tiles.treeShapes(), bark = new THREE.Color('#6b4a33'), c = new THREE.Color();
+    let count = 0;
     spots.forEach((t, i) => {
-      const g = Terrain.heightAt(t.e, t.n);
-      q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), hash2(i, 5) * TAU);
-      m.compose(p.set(t.e, g - 0.2, -t.n), q, sc.set(1, t.s * 0.7, 1));
-      trunks.setMatrixAt(i, m);
-      m.compose(p.set(t.e, g + t.s * 0.95, -t.n), q, sc.set(t.s, t.s * 0.8, t.s));
-      leaves.setMatrixAt(i, m);
-      leaves.setColorAt(i, c.set(t.tone).multiplyScalar(0.9 + hash2(i, 9) * 0.2));
+      if (Tiles.light && hash2(i, 31) < 0.5) return;
+      const g = Terrain.heightAt(t.e, t.n), rot = hash2(i, 5) * TAU, tb = Tiles.builderAt(t.e, t.n, 'alberi');
+      Tiles.put(tb, shapes.trunk, bark, t.e, g - 0.2, t.n, 1.15, t.s * 0.7, 1.15, rot);
+      Tiles.put(tb, shapes.round, c.set(t.tone).multiplyScalar(0.9 + hash2(i, 9) * 0.2), t.e, g + t.s * 0.95, t.n, t.s, t.s * 0.8, t.s, rot);
+      count++;
     });
-    leaves.count = trunks.count = spots.length;
-    leaves.castShadow = trunks.castShadow = true;
-    const group = new THREE.Group();
-    group.name = 'alberi';
-    group.add(leaves, trunks);
-    return group;
+    return count;
   },
 };
 
@@ -5099,7 +5082,9 @@ const Scenery = {
  *     e 30 m in campagna; tra maglie diverse i vertici di confine seguono
  *     la maglia più larga (niente fessure). I riquadri del centro storico
  *     si costruiscono subito, gli altri pochi per fotogramma, dal più vicino.
- *     Finestre, marciapiedi e binari li disegna lo shader: zero triangoli.
+ *     In città finestre, marciapiedi e binari li disegna lo shader: zero
+ *     triangoli. Vie, case, finestre, torrini e alberi del centro storico si
+ *     preparano prima (builderAt) ed entrano nella mesh del loro riquadro.
  * ═══════════════════════════════════════════════════════════════════════ */
 
 /** Tipi di superficie disegnati dallo shader della città (attributo aInfo.x). */
@@ -5253,6 +5238,28 @@ class TileBuilder {
     const g = geo.index ? geo.toNonIndexed() : geo, P = g.attributes.position;
     for (let i = 0; i < P.count; i += 3) this.tri([P.getX(i), P.getY(i), P.getZ(i)], [P.getX(i + 1), P.getY(i + 1), P.getZ(i + 1)], [P.getX(i + 2), P.getY(i + 2), P.getZ(i + 2)], color);
   }
+  /** Accoda i triangoli di un altro raccoglitore (gli strati del centro storico preparati prima del riquadro). */
+  append(o) {
+    while ((this.n + o.n) * 9 > this.pos.length) this.#grow();
+    this.pos.set(o.pos.subarray(0, o.n * 9), this.n * 9);
+    this.col.set(o.col.subarray(0, o.n * 9), this.n * 9);
+    this.info.set(o.info.subarray(0, o.n * 12), this.n * 12);
+    this.n += o.n;
+  }
+  /**
+   * Parallelepipedo senza la faccia di sotto (5 facce, 10 triangoli): base al centro (e, n) alla
+   * quota y, lato sx lungo la direzione u = [est, nord], sz di traverso, alto sy.
+   */
+  box(e, n, y, sx, sy, sz, u, color) {
+    const ax = u[0] * sx / 2, an = u[1] * sx / 2, bx = -u[1] * sz / 2, bn = u[0] * sz / 2;
+    const P = (s, t, h) => [e + s * ax + t * bx, y + h, -(n + s * an + t * bn)];
+    const A = P(-1, -1, 0), B = P(1, -1, 0), C = P(1, 1, 0), D = P(-1, 1, 0), A1 = P(-1, -1, sy), B1 = P(1, -1, sy), C1 = P(1, 1, sy), D1 = P(-1, 1, sy);
+    this.quad(A1, B1, C1, D1, color, null, [0, 1, 0]);
+    this.quad(A, B, B1, A1, color, null, [-bx, 0, bn]);           // i quattro fianchi, girati verso l'esterno
+    this.quad(B, C, C1, B1, color, null, [ax, 0, -an]);
+    this.quad(C, D, D1, C1, color, null, [bx, 0, -bn]);
+    this.quad(D, A, A1, D1, color, null, [-ax, 0, an]);
+  }
   build() {
     const n = this.n, pos = this.pos.slice(0, n * 9), nrm = new Int8Array(n * 9);
     for (let t = 0; t < n; t++) {
@@ -5336,7 +5343,7 @@ const Tiles = {
       b.seed = hash2(index, 1231);
       b.index = index;
       t.buildings.push(b);
-      this.roofs.push({ pts: outer, top: b.top + (b.kind === 1 ? 4 : 0.5) });
+      this.roofs.push({ pts: outer, top: b.top + (b.kind === 1 ? 4 : 0.5), wall: b.top });
     });
   },
 
@@ -5425,20 +5432,48 @@ const Tiles = {
     return Math.max(t.cell, this.list[j * this.nx + i].cell);
   },
 
+  /**
+   * Raccoglitore dello strato `layer` ('vie', 'edifici' o 'alberi') del riquadro che contiene
+   * (e, n). Serve al centro storico: vie, case, finestre e alberi delle fasi 2–3 si preparano
+   * prima e finiscono nella mesh del loro riquadro, così il frustum culling li scarta.
+   */
+  builderAt(e, n, layer) {
+    const i = clamp(Math.floor((e - this.e0) / this.size), 0, this.nx - 1), j = clamp(Math.floor((n - this.n0) / this.size), 0, this.ny - 1);
+    const t = this.list[j * this.nx + i];
+    if (t.mesh) console.warn('[Riquadri] strato aggiunto a un riquadro già costruito', t.i, t.j, layer);
+    t.pre ??= {};
+    return (t.pre[layer] ??= new TileBuilder(1024));
+  },
+
   /** Costruisce un riquadro (se non c'è già) e lo aggiunge alla scena. Restituisce i punti per grotte e abitazioni rupestri. */
   build(t, areas) {
     if (t.built) return null;
+    const spots = this._begin(t, areas);
+    this._finish(t);
+    return spots;
+  },
+
+  /** Prima metà della costruzione: il terreno, con i punti per grotte e abitazioni rupestri. */
+  _begin(t, areas) {
     t.built = true;
-    const tb = new TileBuilder(t.cell === 5 ? 12000 : 2048);
-    const spots = this._terrain(t, tb, areas);
+    t.tb = new TileBuilder(t.cell === 5 ? 12000 : 2048);
+    return this._terrain(t, t.tb, areas);
+  },
+
+  /** Seconda metà: vie, edifici, binari e alberi (più gli strati preparati con builderAt), poi la mesh. */
+  _finish(t) {
+    const tb = t.tb, pre = t.pre ?? {};
     const s0 = tb.n;
     this._roads(t, tb);
+    if (pre.vie) tb.append(pre.vie);
     const s1 = tb.n;
     for (const b of t.buildings) this._building(tb, b);
+    if (pre.edifici) tb.append(pre.edifici);
     const s2 = tb.n;
     this._rails(t, tb);
     const s3 = tb.n;
     this._trees(t, tb);
+    if (pre.alberi) tb.append(pre.alberi);
     Object.assign(this.stats, {
       vie: this.stats.vie + s1 - s0, edifici: this.stats.edifici + s2 - s1, binari: this.stats.binari + s3 - s2, alberi: this.stats.alberi + tb.n - s3,
     });
@@ -5450,8 +5485,8 @@ const Tiles = {
     mesh.castShadow = !this.light || t.fine;
     mesh.matrixAutoUpdate = false;
     t.mesh = mesh;
+    t.tb = t.pre = null;
     this.group.add(mesh);
-    return spots;
   },
 
   /** Costruisce subito i riquadri entro `radius` m da (e, n) (teletrasporto). */
@@ -5711,23 +5746,32 @@ const Tiles = {
    * Punti su una griglia sfalsata di 8 m, mai sulle vie né dentro le case. Vanno nella mesh
    * del riquadro: si tagliano fuori dalla vista insieme al resto.
    */
-  _trees(t, tb) {
-    const shapes = this.treeShapes ?? (this.treeShapes = {
+  /** Forme degli alberi: chioma tonda (icosaedro), cono dei cipressi, tronco aperto a 4 lati. */
+  treeShapes() {
+    return this._shapes ??= {
       round: new THREE.IcosahedronGeometry(1, 0).toNonIndexed(), cone: new THREE.ConeGeometry(1, 1, 5, 1, true).toNonIndexed(),
       trunk: new THREE.CylinderGeometry(0.1, 0.16, 1, 4, 1, true).translate(0, 0.5, 0).toNonIndexed(),
-    });
+    };
+  },
+
+  /** Copia una forma (non indicizzata) nel raccoglitore: scalata, ruotata di `rot` attorno alla verticale, in (e, y, n). */
+  put(tb, geo, color, e, y, n, sx, sy, sz, rot) {
+    const P = geo.attributes.position, cr = Math.cos(rot), sr = Math.sin(rot), v = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+    const c = this._c ??= new THREE.Color();
+    for (let i = 0; i < P.count; i += 3) {
+      for (let k = 0; k < 3; k++) {
+        const x = P.getX(i + k) * sx, z = P.getZ(i + k) * sz;
+        v[k][0] = e + x * cr - z * sr; v[k][1] = y + P.getY(i + k) * sy; v[k][2] = -n + x * sr + z * cr;
+      }
+      tb.tri(v[0], v[1], v[2], c.copy(color).multiplyScalar(0.9 + hash2(i, Math.round(e)) * 0.18));
+    }
+  },
+
+  _trees(t, tb) {
+    const shapes = this.treeShapes();
     const density = { [COVER.PARCO]: 0.3, [COVER.BOSCO]: 0.5, [COVER.MACCHIA]: 0.22, [COVER.ULIVETO]: 0.45, [COVER.CIMITERO]: 0.14, [COVER.CAMPAGNA]: 0.018, [COVER.CAMPO]: 0.004, [COVER.CITTA]: 0.01, [COVER.PIAZZA]: 0.06 };
     const bark = new THREE.Color('#6b4a33'), c = new THREE.Color();
-    const put = (geo, color, e, y, n, sx, sy, sz, rot) => {
-      const P = geo.attributes.position, cr = Math.cos(rot), sr = Math.sin(rot), v = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
-      for (let i = 0; i < P.count; i += 3) {
-        for (let k = 0; k < 3; k++) {
-          const x = P.getX(i + k) * sx, z = P.getZ(i + k) * sz;
-          v[k][0] = e + x * cr - z * sr; v[k][1] = y + P.getY(i + k) * sy; v[k][2] = -n + x * sr + z * cr;
-        }
-        tb.tri(v[0], v[1], v[2], c.copy(color).multiplyScalar(0.9 + hash2(i, Math.round(e)) * 0.18));
-      }
-    };
+    const put = (geo, color, e, y, n, sx, sy, sz, rot) => this.put(tb, geo, color, e, y, n, sx, sy, sz, rot);
     const step = 8, k = this.size / step, dens = CONFIG.city.trees * (this.light ? 0.5 : 1);
     for (let gj = 0; gj < k; gj++) {
       for (let gi = 0; gi < k; gi++) {
@@ -7763,8 +7807,8 @@ async function main() {
   // Mondo: prima il centro storico, la città arriva dopo (riquadri in sottofondo)
   ui.setStatus('Terreno, case e monumenti…');
   await nextFrame();
-  scene.add(Tiles.group, World.buildPlinth(), World.buildRoads(network), World.buildRiver(), World.buildBridge(network), World.buildWalls());
-  const { tops } = Buildings.build(scene, LANDMARKS.filter((lm) => lm.rock && lm.at).map((lm) => lm.at));
+  scene.add(Tiles.group, World.buildPlinth(), World.buildRiver(), World.buildBridge(network), World.buildWalls());
+  const { tops } = Buildings.build(LANDMARKS.filter((lm) => lm.rock && lm.at).map((lm) => lm.at));
   scene.add(Buildings.arches(network));
 
   // Griglia dei tetti (celle da 10 m): dice se un punto è occupato da un edificio
@@ -7786,15 +7830,25 @@ async function main() {
     return top;
   };
   Buildings.occupied = (e, n) => Buildings.roofAt(e, n) > -Infinity;
-  // Riquadri del centro storico (maglia da 5 m), con i punti per grotte e abitazioni rupestri
+  /** Quota della cima dei muri (senza falde né margini) nel punto: per le finestre coperte dalla casa accanto. */
+  Buildings.wallAt = (e, n) => {
+    let top = -Infinity;
+    for (const r of occupancy.get(Math.floor(e / 10) * 1000 + Math.floor(n / 10)) ?? []) if (r.wall > top && Plane.contains(r.pts, e, n)) top = r.wall;
+    return top;
+  };
+  // Riquadri del centro storico (maglia da 5 m): prima il terreno, con i punti per grotte e
+  // abitazioni rupestri; vie, case, finestre e alberi del centro storico entrano negli strati
+  // dei riquadri, che si chiudono dopo i dettagli dei monumenti.
+  const fineTiles = Tiles.list.filter((t) => t.fine);
   const caveSpots = [], dwellSpots = [];
-  for (const t of Tiles.list) {
-    if (!t.fine) continue;
-    const spots = Tiles.build(t, areas);
+  for (const t of fineTiles) {
+    const spots = Tiles._begin(t, areas);
     caveSpots.push(...spots.caveSpots);
     dwellSpots.push(...spots.dwellSpots);
   }
-  scene.add(Scenery.caves(caveSpots), Scenery.dwellings(dwellSpots, network), Scenery.trees(network, areas));
+  World.buildRoads(network);
+  scene.add(Scenery.caves(caveSpots), Scenery.dwellings(dwellSpots, network));
+  Scenery.trees(network, areas);
 
   // Monumenti: posizione dai dati, quota dell'etichetta sopra il tetto
   const landmarks = [...LANDMARKS, ...CITY_LANDMARKS].map((lm) => {
@@ -7809,6 +7863,8 @@ async function main() {
   network.attachLandmarks(landmarks.filter((lm) => lm.card !== false || lm.ref));
   network.markVistas();
   scene.add(Details.build(network, landmarks, tops));
+  Buildings.placeWindows();
+  for (const t of fineTiles) Tiles._finish(t);
 
   // Mezzo, conducente, camera, mappe
   const events = new Emitter();
