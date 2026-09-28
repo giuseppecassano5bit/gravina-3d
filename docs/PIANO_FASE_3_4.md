@@ -211,9 +211,9 @@ Ogni blocco ha il suo branch e una PR in bozza aperta subito. Push dopo ogni com
 `gh pr ready`, `gh pr merge`, controllo del sito.
 
 ### A · Crediti e ricerca su Google (`fase-3-4-a-crediti-seo`)
-- Togliere ogni riferimento a Nunzia Food: schermata iniziale, meta description, commento di
-  testa di `index.html`, README, DESIGN, CLAUDE.md, `docs/PROMPT_NUOVA_CHAT.md` e ogni altro file
-  (`grep -ri nunzia`).
+- Togliere ogni riferimento allo sponsor precedente: schermata iniziale, meta description,
+  commento di testa di `index.html`, README, DESIGN, CLAUDE.md, `docs/PROMPT_NUOVA_CHAT.md` e
+  ogni altro file (un `grep -ri` sul nome non deve trovare nulla).
 - Unico credito: **Giuseppe Cassano** (github.com/giuseppecassano5bit), nella schermata iniziale
   e come autore nei metadati.
 - Metadati:
@@ -231,7 +231,8 @@ Ogni blocco ha il suo branch e una PR in bozza aperta subito. Push dopo ogni com
   - un pannello "Il progetto" apribile dalla schermata iniziale, con testo vero nel DOM e non
     nascosto con trucchi: cos'è, cosa si vede, come si usa, crediti, licenze, fonti;
   - un `<noscript>` più ricco.
-- `sitemap.xml` e `robots.txt` con `Sitemap:`.
+- `sitemap.xml`. Il `robots.txt` è stato tolto durante il lavoro: in `/gravina-3d/` i motori di
+  ricerca non lo leggono (vale solo quello alla radice del dominio).
 - Chiedere il codice di verifica di Google Search Console e inserirlo come
   `<meta name="google-site-verification" …>`. Dopo l'unione, il committente invia la sitemap
   dalla console.

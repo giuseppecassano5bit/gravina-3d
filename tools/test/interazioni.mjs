@@ -1,5 +1,5 @@
 /**
- * Prova delle interazioni come le fa un visitatore: scelta del mezzo, partenza,
+ * Prova delle interazioni come le fa un visitatore: credito e pannello «Il progetto», scelta del mezzo, partenza,
  * pausa e ripresa da tastiera, minimappa, teletrasporto da etichetta 3D e da
  * elenco, cambio mezzo in pausa, pausa automatica a scheda nascosta, mezzo
  * ricordato alla riapertura. Fallisce alla prima attesa non rispettata.
@@ -14,6 +14,13 @@ const check = (label, ok, info = '') => {
   console.log(`${ok ? '✓' : '✗'} ${label}${info ? ` · ${info}` : ''}`);
   if (!ok) failures++;
 };
+
+const credit = await page.textContent('.credit__name');
+check('nella schermata iniziale c’è il credito', credit.trim() === 'Giuseppe Cassano', credit.trim());
+await page.click('#btn-about');
+check('«Il progetto» apre il pannello', await page.isVisible('#about') && await page.evaluate(() => document.activeElement.id === 'about-close'));
+await page.keyboard.press('Escape');
+check('Esc chiude il pannello e il fuoco torna al pulsante', !(await page.isVisible('#about')) && await page.evaluate(() => document.activeElement.id === 'btn-about'));
 
 await page.click('#start-picker .vcard[data-id="rs6"]');
 await page.click('#btn-start');

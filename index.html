@@ -3,15 +3,100 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Gravina 3D</title>
-<meta name="description" content="Diorama 3D interattivo low-poly del centro storico di Gravina in Puglia, costruito sulle vie e sugli edifici reali. Progetto open source realizzato per Nunzia Food - Eccellenze Pugliesi.">
+<title>Gravina 3D – il centro storico di Gravina in Puglia in 3D</title>
+<meta name="description" content="Diorama 3D interattivo del centro storico di Gravina in Puglia sulle vie reali: Ponte Acquedotto, Cattedrale, chiese rupestri. Progetto di Giuseppe Cassano.">
+<meta name="author" content="Giuseppe Cassano">
+<link rel="canonical" href="https://giuseppecassano5bit.github.io/gravina-3d/">
+<meta name="theme-color" content="#1E2536">
+<!-- Verifica della proprietà in Google Search Console (non toglierla: la verifica decadrebbe) -->
+<meta name="google-site-verification" content="OrvuQo3D902P8zzL9d8LwW0-cGLkJZnESRxY53cyTtM" />
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3CclipPath id='c'%3E%3Crect width='64' height='64' rx='14'/%3E%3C/clipPath%3E%3Cg clip-path='url(%23c)'%3E%3Crect width='64' height='64' fill='%231E2536'/%3E%3Ccircle cx='45' cy='20' r='9' fill='%23F0A04B'/%3E%3Cpath fill='%23E8D2A0' fill-rule='evenodd' d='M0 32H64V64H0Z M8 64V47a6 6 0 0 1 12 0V64Z M26 64V47a6 6 0 0 1 12 0V64Z M44 64V47a6 6 0 0 1 12 0V64Z'/%3E%3C/g%3E%3C/svg%3E">
+<!-- Anteprima nei social e nelle chat (immagine generata da tools/test/anteprima.mjs) -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="it_IT">
+<meta property="og:site_name" content="Gravina 3D">
+<meta property="og:title" content="Gravina 3D – il centro storico di Gravina in Puglia in 3D">
+<meta property="og:description" content="Scegli il mezzo e percorri le vie reali del centro storico di Gravina in Puglia, dal Ponte Acquedotto alla Cattedrale, al calar del sole.">
+<meta property="og:url" content="https://giuseppecassano5bit.github.io/gravina-3d/">
+<meta property="og:image" content="https://giuseppecassano5bit.github.io/gravina-3d/og-image.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Il Ponte Acquedotto e il centro storico di Gravina in Puglia nel diorama 3D low-poly, al tramonto">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Gravina 3D – il centro storico di Gravina in Puglia in 3D">
+<meta name="twitter:description" content="Scegli il mezzo e percorri le vie reali del centro storico di Gravina in Puglia, dal Ponte Acquedotto alla Cattedrale, al calar del sole.">
+<meta name="twitter:image" content="https://giuseppecassano5bit.github.io/gravina-3d/og-image.jpg">
+<meta name="twitter:image:alt" content="Il Ponte Acquedotto e il centro storico di Gravina in Puglia nel diorama 3D low-poly, al tramonto">
+<!-- Dati strutturati per i motori di ricerca: sito, opera, luogo e autore -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://giuseppecassano5bit.github.io/gravina-3d/#sito",
+      "url": "https://giuseppecassano5bit.github.io/gravina-3d/",
+      "name": "Gravina 3D",
+      "inLanguage": "it-IT",
+      "author": { "@id": "https://giuseppecassano5bit.github.io/gravina-3d/#autore" }
+    },
+    {
+      "@type": "CreativeWork",
+      "@id": "https://giuseppecassano5bit.github.io/gravina-3d/#diorama",
+      "name": "Gravina 3D",
+      "alternateName": "Diorama 3D del centro storico di Gravina in Puglia",
+      "description": "Diorama 3D interattivo e low-poly del centro storico di Gravina in Puglia, costruito sulle vie e sugli edifici reali di OpenStreetMap: si sceglie un mezzo e si percorrono le vie, con schede sui monumenti.",
+      "url": "https://giuseppecassano5bit.github.io/gravina-3d/",
+      "image": "https://giuseppecassano5bit.github.io/gravina-3d/og-image.jpg",
+      "inLanguage": "it-IT",
+      "isAccessibleForFree": true,
+      "isPartOf": { "@id": "https://giuseppecassano5bit.github.io/gravina-3d/#sito" },
+      "about": { "@id": "https://giuseppecassano5bit.github.io/gravina-3d/#gravina" },
+      "spatialCoverage": { "@id": "https://giuseppecassano5bit.github.io/gravina-3d/#gravina" },
+      "author": { "@id": "https://giuseppecassano5bit.github.io/gravina-3d/#autore" },
+      "sameAs": "https://github.com/giuseppecassano5bit/gravina-3d",
+      "isBasedOn": [
+        {
+          "@type": "Dataset",
+          "name": "OpenStreetMap",
+          "url": "https://www.openstreetmap.org/copyright",
+          "creator": { "@type": "Organization", "name": "OpenStreetMap contributors" },
+          "license": "https://opendatacommons.org/licenses/odbl/1-0/"
+        },
+        {
+          "@type": "Dataset",
+          "name": "Overture Maps",
+          "url": "https://overturemaps.org",
+          "version": "2026-09-23.1"
+        }
+      ]
+    },
+    {
+      "@type": "Place",
+      "@id": "https://giuseppecassano5bit.github.io/gravina-3d/#gravina",
+      "name": "Gravina in Puglia",
+      "geo": { "@type": "GeoCoordinates", "latitude": 40.8206, "longitude": 16.4233 },
+      "containedInPlace": { "@type": "AdministrativeArea", "name": "Puglia" },
+      "sameAs": ["https://it.wikipedia.org/wiki/Gravina_in_Puglia", "https://www.wikidata.org/wiki/Q51829"]
+    },
+    {
+      "@type": "Person",
+      "@id": "https://giuseppecassano5bit.github.io/gravina-3d/#autore",
+      "name": "Giuseppe Cassano",
+      "url": "https://github.com/giuseppecassano5bit",
+      "sameAs": ["https://github.com/giuseppecassano5bit"]
+    }
+  ]
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus+SC&family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap">
 <!--
   ╔══════════════════════════════════════════════════════════════════════╗
   ║  GRAVINA 3D · Diorama low-poly del centro storico di Gravina in Puglia ║
-  ║  Progetto open source realizzato per Nunzia Food - Eccellenze Pugliesi ║
+  ║  Progetto open source di Giuseppe Cassano                              ║
   ║                                                                        ║
   ║  Un unico file: CSS + HTML + JavaScript (Three.js da CDN).             ║
   ║  Geometria procedurale su dati reali incorporati (vie, edifici,        ║
@@ -114,12 +199,86 @@
     font: 600 0.8rem/1 var(--font-sign); color: var(--ink);
     background: var(--marble); border-radius: 3px; box-shadow: 0 2px 0 var(--marble-edge);
   }
-  .sponsor {
-    display: grid; gap: 0.2rem; padding-top: 1rem; margin-top: 0.3rem;
+  /* Credito e accesso al pannello "Il progetto" */
+  .credit {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.6rem 1rem;
+    padding-top: 1rem; margin-top: 0.3rem;
     border-top: 1px solid rgba(232, 210, 160, 0.28);
   }
-  .sponsor__label { font: 600 0.7rem/1 var(--font-sign); letter-spacing: 0.2em; text-transform: uppercase; color: #CDBB98; }
-  .sponsor__name { font: 400 1.25rem/1.2 var(--font-display); color: var(--tufo); letter-spacing: 0.04em; }
+  .credit__by { margin: 0; display: grid; gap: 0.2rem; }
+  .credit__label { font: 600 0.7rem/1 var(--font-sign); letter-spacing: 0.2em; text-transform: uppercase; color: #CDBB98; }
+  .credit__name { font: 400 1.25rem/1.2 var(--font-display); color: var(--tufo); letter-spacing: 0.04em; }
+  .btn-about {
+    display: inline-flex; align-items: center; gap: 0.5rem; min-height: 44px; padding: 0 1rem 0 0.8rem;
+    font: 700 0.8rem/1 var(--font-sign); letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--tufo); background: rgba(244, 238, 226, 0.06);
+    border: 1.5px solid rgba(232, 210, 160, 0.55); border-radius: 99px; cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease;
+  }
+  .btn-about svg { width: 18px; height: 18px; flex: none; }
+  .btn-about:hover { background: rgba(244, 238, 226, 0.14); border-color: var(--tufo); }
+
+  /* Senza JavaScript: due righe su cos'è il progetto al posto dei comandi */
+  .noscript { margin: 0; padding: 0.8rem 1rem; font: 400 0.95rem/1.5 var(--font-ui); color: var(--ink); background: var(--marble); border-radius: 3px; }
+  .noscript p { margin: 0 0 0.5rem; }
+  .noscript p:last-child { margin: 0; }
+  .noscript a { color: var(--sign-brown); }
+
+  /* ── Pannello "Il progetto" ─────────────────────────────────────────────
+   * Un foglio di marmo come le targhe del centro storico, con la testata
+   * marrone dei cartelli turistici. Testo vero nel DOM: lo leggono anche i
+   * motori di ricerca. È un <dialog> nativo: Esc chiude, il fuoco resta dentro. */
+  .about {
+    position: fixed; inset: 0 auto 0 0; box-sizing: border-box;
+    width: min(38rem, 100vw); height: 100%; max-width: none; max-height: none;
+    margin: 0; padding: 0; border: 0; overflow: visible;
+    color: var(--ink); background: transparent;
+  }
+  .about::backdrop { background: rgba(22, 24, 36, 0.5); }
+  .about__sheet {
+    box-sizing: border-box; height: 100%;
+    display: grid; grid-template-rows: auto minmax(0, 1fr); row-gap: 5px;
+    padding: calc(12px + var(--safe-top)) 12px 0 calc(12px + var(--safe-left));
+    background: var(--marble);
+    box-shadow: 18px 0 48px rgba(0, 0, 0, 0.35);
+  }
+  .about[open] .about__sheet { animation: sheet-in-left 0.35s ease both; }
+  @keyframes sheet-in-left { from { transform: translateX(-32px); opacity: 0; } }
+  .about__head {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: 0.85rem 0.85rem 0.85rem 1.25rem;
+    color: #fff; background: var(--sign-brown);
+    border: 2px solid #fff; outline: 3px solid var(--sign-brown); border-radius: 4px;
+  }
+  .about__title { margin: 0; font: 400 1.7rem/1.1 var(--font-display); letter-spacing: 0.04em; }
+  .about__close {
+    flex: none; display: grid; place-items: center; width: 44px; height: 44px; padding: 0;
+    color: #fff; background: transparent; border: 2px solid rgba(255, 255, 255, 0.85); border-radius: 50%; cursor: pointer;
+  }
+  .about__close svg { width: 18px; height: 18px; }
+  .about__close:hover { background: rgba(255, 255, 255, 0.14); }
+  .about__body {
+    overflow-y: auto; overscroll-behavior: contain;
+    padding: 1.2rem 1.3rem calc(2rem + var(--safe-bottom)) 1.3rem;
+    /* il testo che scorre sfuma sotto la testata invece di tagliarsi di netto */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 14px);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 14px);
+    font: 400 1rem/1.6 var(--font-ui); color: #3D352D;
+    user-select: text;
+  }
+  .about__body > * { max-width: 62ch; }
+  .about__lede { margin: 0; font-size: 1.1rem; line-height: 1.55; color: var(--ink); }
+  .about__body h3 { margin: 1.7rem 0 0.45rem; font: 400 1.22rem/1.2 var(--font-display); letter-spacing: 0.03em; color: var(--sign-brown); }
+  .about__body p { margin: 0 0 0.7rem; }
+  .about__body a { color: var(--sign-brown); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  .about__body a:hover { text-decoration-thickness: 2px; }
+  .about__body ul { margin: 0.2rem 0 0; padding-left: 1.2rem; }
+  .about__body li { margin-bottom: 0.45rem; }
+  .about__body li::marker { color: var(--tufo-deep); }
+  .about__keys { display: grid; grid-template-columns: 9rem minmax(0, 1fr); gap: 0.55rem 1rem; margin: 0.3rem 0 0; }
+  .about__keys dt { font: 600 0.98rem/1.6 var(--font-sign); color: var(--ink); }
+  .about__keys dd { margin: 0; }
+  .about kbd { background: #fff; box-shadow: inset 0 0 0 1px var(--marble-edge), 0 2px 0 var(--marble-edge); }
 
   /* ── HUD durante la visita ──────────────────────────────────────────── */
   .hud { position: fixed; inset: 0; pointer-events: none; transition: opacity 0.8s ease; }
@@ -349,8 +508,16 @@
     .lede { font-size: 0.93rem; line-height: 1.45; }
     .btn-primary { flex: 1 1 auto; }
     .controls-hint { display: none; }
-    .sponsor { padding-top: 0.6rem; margin-top: 0; }
-    .sponsor__name { font-size: 1.1rem; }
+    .credit { padding-top: 0.6rem; margin-top: 0; }
+    .credit__name { font-size: 1.1rem; }
+    /* il pannello del progetto occupa tutto lo schermo e sale dal basso */
+    .about { width: 100vw; }
+    .about__sheet { padding: calc(10px + var(--safe-top)) calc(10px + var(--safe-right)) 0 calc(10px + var(--safe-left)); box-shadow: none; }
+    .about[open] .about__sheet { animation-name: sheet-in-up; }
+    .about__title { font-size: 1.4rem; }
+    .about__body { padding: 1.1rem 0.6rem calc(1.6rem + var(--safe-bottom)); font-size: 1rem; }
+    .about__keys { grid-template-columns: minmax(0, 1fr); gap: 0.1rem; }
+    .about__keys dd { margin-bottom: 0.6rem; }
     .vcard { min-height: 50px; grid-template-columns: 44px minmax(0, 1fr); padding: 0.4rem 0.55rem; column-gap: 0.5rem; }
     .start .vcard__tag { display: none; }
     .vcard__icon { width: 44px; height: 22px; }
@@ -384,6 +551,16 @@
     .btn-resume { padding: 0.85rem 1.05rem; }
   }
 
+  /* ── Portatili e finestre basse: la schermata iniziale deve entrare tutta,
+   *    credito e attribuzione compresi (a 1280×720 finivano sotto il bordo). */
+  @media (min-width: 641px) and (max-height: 880px) {
+    .start { padding-bottom: calc(clamp(16px, 3vh, 32px) + var(--safe-bottom)); }
+    .start__panel { gap: 0.8rem; }
+    .start h1 { font-size: clamp(2.3rem, 8.2vh, 4.8rem); }
+    .lede { font-size: 1rem; line-height: 1.5; }
+    .credit { padding-top: 0.7rem; margin-top: 0; }
+  }
+
   /* ── Schermi bassi (telefono in orizzontale) ────────────────────────── */
   @media (max-height: 520px) {
     .start { align-items: center; padding-top: calc(12px + var(--safe-top)); padding-bottom: calc(12px + var(--safe-bottom)); }
@@ -393,7 +570,10 @@
     .lede, .controls-hint { display: none; }
     .vcard { min-height: 48px; }
     .vcard__tag { display: none; }
-    .sponsor { padding-top: 0.5rem; }
+    .credit { padding-top: 0.5rem; }
+    .about { width: min(36rem, 72vw); }
+    .about__head { padding-top: 0.55rem; padding-bottom: 0.55rem; }
+    .about__title { font-size: 1.3rem; }
     .minimap { width: 92px; height: 92px; }
     .attribution--hud { top: calc(var(--gutter) + 92px + 4px + var(--safe-top)); }
     .pause-btn { top: calc(var(--gutter) + 92px + 24px + var(--safe-top)); }
@@ -414,8 +594,8 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .start, .card, .sign, .sign__arrow, .btn-primary, .vcard, .fade { transition: none; }
-    .pause__sheet { animation: none; }
+    .start, .card, .sign, .sign__arrow, .btn-primary, .vcard, .fade, .btn-about { transition: none; }
+    .pause__sheet, .about[open] .about__sheet { animation: none; }
   }
 </style>
 </head>
@@ -433,6 +613,13 @@
     <p class="eyebrow">Centro storico · 40°49′ N 16°25′ E</p>
     <h1 id="start-title"><small>Benvenuti a</small>Gravina in Puglia</h1>
     <p class="lede">Si parte dal Ponte Acquedotto: scegli il mezzo e percorri le vie reali del centro storico, al calar del sole.</p>
+    <noscript>
+      <div class="noscript">
+        <p><strong>Gravina 3D</strong> è un diorama 3D interattivo del centro storico di Gravina in Puglia, costruito sulle vie e sugli edifici reali di OpenStreetMap. Per visitarlo servono JavaScript e WebGL attivi.</p>
+        <p>Codice, dati e fonti su <a href="https://github.com/giuseppecassano5bit/gravina-3d">github.com/giuseppecassano5bit/gravina-3d</a>.</p>
+      </div>
+      <style>#start-picker-label, #start-picker, .start__actions, .controls-hint, #btn-about { display: none; }</style>
+    </noscript>
     <div>
       <p class="picker__legend" id="start-picker-label">Scegli il mezzo</p>
       <div class="picker" id="start-picker" role="radiogroup" aria-labelledby="start-picker-label" aria-disabled="true"></div>
@@ -442,13 +629,69 @@
       <span class="status" id="status" role="status">Preparazione del diorama…</span>
     </div>
     <p class="controls-hint" id="controls-hint">Agli incroci scegli la via con <kbd>←</kbd> <kbd>→</kbd> · <kbd>P</kbd> per la pausa: cambi mezzo o ti teletrasporti.</p>
-    <div class="sponsor">
-      <span class="sponsor__label">Realizzato per</span>
-      <span class="sponsor__name">Nunzia Food · Eccellenze Pugliesi</span>
+    <div class="credit">
+      <p class="credit__by">
+        <span class="credit__label">Un progetto di</span>
+        <span class="credit__name">Giuseppe Cassano</span>
+      </p>
+      <button class="btn-about" id="btn-about" type="button" aria-haspopup="dialog" aria-controls="about">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8.2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="10" cy="6.2" r="1.15" fill="currentColor"/><path d="M10 9v5.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Il progetto
+      </button>
     </div>
     <p class="attribution">Mappa: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors (ODbL), via <a href="https://overturemaps.org" target="_blank" rel="noopener">Overture Maps</a></p>
   </div>
 </section>
+
+<!-- Pannello "Il progetto": cos'è, cosa si vede, come si usa, dati, crediti e licenze -->
+<dialog class="about" id="about" aria-labelledby="about-title">
+  <div class="about__sheet">
+    <header class="about__head">
+      <h2 class="about__title" id="about-title">Il progetto</h2>
+      <button class="about__close" id="about-close" type="button" aria-label="Chiudi e torna al diorama">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+    </header>
+    <div class="about__body">
+      <p class="about__lede"><strong>Gravina 3D</strong> è il centro storico di Gravina in Puglia ricostruito come un diorama in 3D, da percorrere nel browser, anche dal telefono. Vie, incroci e sagome delle case sono quelli reali; lo stile è a blocchi, low-poly, con la luce del tramonto.</p>
+
+      <h3>Cosa si vede</h3>
+      <p>Il Ponte Acquedotto sulla gravina, la Cattedrale di Santa Maria Assunta, la Chiesa del Purgatorio con il portale degli orsi, il Palazzo Ducale Orsini, le chiese rupestri di San Michele delle Grotte e della Madonna della Stella, i rioni Piaggio e Fondovico con le loro scalinate. Passando vicino a un monumento compare una breve scheda storica.</p>
+
+      <h3>Come si usa</h3>
+      <dl class="about__keys">
+        <dt>Partenza</dt>
+        <dd>Scegli il mezzo (Fiat Panda 4x4 del 1999, Audi RS6 Avant, Lamborghini Huracán o trattore John Deere) e premi Parti: il mezzo va avanti da solo.</dd>
+        <dt>Agli incroci</dt>
+        <dd>Scegli la via con <kbd>←</kbd> <kbd>→</kbd> o toccando i cartelli marroni. Se non scegli, prosegue dritto.</dd>
+        <dt>In pausa</dt>
+        <dd>Con <kbd>P</kbd>, <kbd>Spazio</kbd> o il pulsante Pausa ti fermi: puoi cambiare mezzo o toccare un luogo sulla mappa per andarci.</dd>
+      </dl>
+
+      <h3>Dati e fonti</h3>
+      <p>Vie, edifici e torrente vengono da OpenStreetMap, tramite Overture Maps. Il mezzo percorre solo vie reali; l’unica eccezione è il Ponte Acquedotto, che nella realtà è pedonale. Le altezze delle case, che nei dati quasi sempre mancano, sono stimate per zona.</p>
+      <p>Le schede storiche riportano solo fatti verificati. Le fonti, tra cui Wikipedia, la Carta dei Beni Culturali della Regione Puglia, il FAI, il Museo Capitolare, GravinaLife e GravinaOggi, sono elencate nel <a href="https://github.com/giuseppecassano5bit/gravina-3d#fonti" target="_blank" rel="noopener">README del progetto</a>.</p>
+
+      <h3>Crediti e licenze</h3>
+      <p>Un progetto di <a href="https://github.com/giuseppecassano5bit" target="_blank" rel="author noopener">Giuseppe Cassano</a>. Il codice è pubblico su <a href="https://github.com/giuseppecassano5bit/gravina-3d" target="_blank" rel="noopener">GitHub</a>.</p>
+      <ul>
+        <li>Dati cartografici © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors, con licenza <a href="https://opendatacommons.org/licenses/odbl/" target="_blank" rel="noopener">ODbL 1.0</a>, tramite <a href="https://overturemaps.org" target="_blank" rel="noopener">Overture Maps</a>.</li>
+        <li>Grafica 3D con <a href="https://threejs.org" target="_blank" rel="noopener">Three.js</a> (licenza MIT). Caratteri Marcellus SC e Barlow (SIL Open Font License), da Google Fonts.</li>
+        <li>Fiat, Panda, Audi, RS6, Lamborghini, Huracán e John Deere sono marchi dei rispettivi proprietari. I mezzi del diorama sono interpretazioni stilizzate e non ufficiali, senza loghi.</li>
+      </ul>
+    </div>
+  </div>
+</dialog>
+<script>
+  // Pannello "Il progetto": script a parte, così si apre anche se il diorama non parte (niente WebGL).
+  (() => {
+    const dialog = document.getElementById('about'), opener = document.getElementById('btn-about');
+    opener.addEventListener('click', () => dialog.showModal());
+    document.getElementById('about-close').addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', (ev) => { if (ev.target === dialog) dialog.close(); });   // tocco sullo sfondo
+    dialog.addEventListener('close', () => opener.focus({ preventScroll: true }));
+  })();
+</script>
 
 <!-- Interfaccia di guida -->
 <div class="hud" id="hud" hidden>
@@ -529,8 +772,6 @@
 
 <!-- Dissolvenza per il teletrasporto -->
 <div class="fade" id="fade" aria-hidden="true"></div>
-
-<noscript><p style="position:fixed;inset:auto 16px 16px;color:#fff">Per visitare il diorama serve JavaScript attivo.</p></noscript>
 
 <script type="importmap">
 {

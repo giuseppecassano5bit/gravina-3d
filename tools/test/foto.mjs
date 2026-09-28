@@ -1,6 +1,6 @@
 /**
  * Screenshot delle scene principali in tools/test/shots/:
- * vetrina dei quattro mezzi vicino al ponte e campo lungo sulle arcate, partenza sul ponte, incrocio,
+ * vetrina dei quattro mezzi vicino al ponte e campo lungo sulle arcate, pannello «Il progetto», partenza sul ponte, incrocio,
  * menu di pausa, teletrasporto, un arco sulla via e il centro.
  * Con "mobile" usa un telefono in verticale, con "orizzontale" un telefono in orizzontale.
  */
@@ -26,6 +26,10 @@ for (const [i, id] of ['panda', 'rs6', 'huracan', 'deere'].entries()) {
 // Vetrina, secondo tempo: il campo lungo sul Ponte Acquedotto con le arcate.
 await run(() => window.gravina.advance(14));
 await shot('04-vetrina-ponte', 700);
+// Il pannello «Il progetto», aperto dalla schermata iniziale.
+await page.click('#btn-about');
+await shot('05-progetto', 600);
+await page.keyboard.press('Escape');
 await page.click('#start-picker .vcard[data-id="huracan"]');
 
 // Partenza: si attraversa il ponte.

@@ -4,7 +4,7 @@ Diorama interattivo low-poly del centro storico di Gravina in Puglia, costruito 
 **vie, gli edifici e il torrente reali**. È un unico file HTML (`index.html`) con Three.js:
 tutta la geometria è procedurale, i dati geografici sono incorporati come costante.
 
-Progetto open source realizzato per **Nunzia Food, Eccellenze Pugliesi**.
+Progetto open source di **Giuseppe Cassano** ([github.com/giuseppecassano5bit](https://github.com/giuseppecassano5bit)).
 
 ---
 
@@ -200,6 +200,31 @@ riusato: il cambio è istantaneo.
 * **Pannelli**: l'inquadratura si sposta (view offset) nella parte di schermo libera dal pannello iniziale o dal menu di pausa.
 * **Ponte**: la camera entra nel canyon, 80 m a monte lungo il torrente, all'altezza dell'impalcato.
 * **Ciglio**: sulle vie che corrono lungo il ciglio (Via giudice Montea, Via Fontana la Stella, il sentiero ovest) fa una ripresa "da drone" di tre quarti dall'alto verso il canyon, con 25 s di pausa tra una e l'altra.
+
+---
+
+## 7b. Schermata iniziale, crediti e ricerca su Google
+
+* **Credito**: uno solo, «Un progetto di Giuseppe Cassano», in fondo alla schermata iniziale,
+  accanto al pulsante **Il progetto**; nella mappa non ci sono crediti né marchi.
+* **Pannello «Il progetto»**: un `<dialog>` nativo (Esc chiude, il fuoco resta dentro e torna al
+  pulsante), foglio di marmo con la testata marrone dei cartelli turistici. Dice cos'è il
+  diorama, cosa si vede, come si usa, da dove vengono dati e fonti, crediti e licenze. È testo
+  vero nel DOM, quindi lo leggono anche i motori di ricerca, e ha uno script suo: si apre anche
+  se il diorama non parte. Su telefono occupa tutto lo schermo.
+* **Finestre basse** (portatili a 720–880 px d'altezza): la schermata iniziale si compatta
+  (titolo, spaziature) perché credito e attribuzione ODbL restino dentro lo schermo.
+* **Metadati** nel `<head>`: titolo e descrizione con «Gravina in Puglia», «centro storico» e
+  «3D», autore, canonical, Open Graph e Twitter card con `og-image.jpg`, `theme-color`, icona SVG
+  in linea (il Ponte Acquedotto al tramonto), JSON-LD con `WebSite`, `CreativeWork` (basato su
+  OpenStreetMap, ODbL, e Overture Maps), `Place` Gravina in Puglia (Wikipedia, Wikidata Q51829) e
+  `Person` Giuseppe Cassano.
+* **File separati** (eccezione al file unico: il diorama non li usa):
+  - `og-image.jpg`, 1200×630, generata dal diorama con `npm run anteprima` (`tools/test/anteprima.mjs`);
+  - `sitemap.xml`, da inviare da Google Search Console.
+  - Niente `robots.txt`: su GitHub Pages il sito sta in `/gravina-3d/`, mentre i motori di
+    ricerca leggono solo `https://giuseppecassano5bit.github.io/robots.txt`, alla radice del
+    dominio, che questo repository non controlla. Senza `robots.txt` tutto è già indicizzabile.
 
 ---
 
