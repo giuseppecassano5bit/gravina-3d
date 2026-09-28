@@ -5,7 +5,7 @@ Stato al 28 settembre 2026: fase 3 approvata e online. Aggiornare questo file a 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
 del lavoro su due chat in [`PIANO_FASE_3_4.md`](PIANO_FASE_3_4.md).
 
-### Fase 3.4, blocco A · crediti e ricerca su Google (PR #7, in revisione)
+### Fase 3.4, blocco A · crediti e ricerca su Google (PR #7, unita il 28/09/2026) ✅
 
 - [x] Unico credito Giuseppe Cassano; nessun riferimento allo sponsor precedente nei file.
 - [x] Metadati (titolo, descrizione, canonical, Open Graph, Twitter card, JSON-LD, icona).
@@ -14,9 +14,12 @@ del lavoro su due chat in [`PIANO_FASE_3_4.md`](PIANO_FASE_3_4.md).
 - [x] Schermata iniziale compattata: a 1280×720 credito e attribuzione ODbL uscivano dallo schermo.
 - [x] Proprietà creata in Google Search Console (prefisso URL) e `<meta name="google-site-verification">`
       nel `<head>`: non va tolto, altrimenti la verifica decade.
-- [ ] Dopo l'unione: verifica in Search Console e invio di `sitemap.xml` (istruzioni nel README).
-- [ ] Descrizione del repository su GitHub: cita ancora lo sponsor precedente (si cambia da
-      **About** sulla pagina del repository).
+- [x] Search Console (28/09/2026): proprietà verificata con il tag HTML, `sitemap.xml` inviata,
+      indicizzazione della pagina richiesta (è in coda di scansione prioritaria).
+- [ ] **Ricontrollare la sitemap tra qualche giorno** (Search Console → Sitemap). Subito dopo
+      l'invio risultava «Impossibile recuperare», senza nessuna lettura: è normale per una
+      proprietà appena creata, e il file è valido (200, `application/xml`). Se resta così, reinviarla.
+- [x] Descrizione del repository su GitHub aggiornata, con il link al sito nel riquadro About.
 
 ## Fatto finora
 

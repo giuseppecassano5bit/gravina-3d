@@ -43,7 +43,8 @@ per le anteprime (l'immagine è `og-image.jpg`) e i dati strutturati JSON-LD (si
 luogo e autore). Il pannello **Il progetto** della schermata iniziale è testo vero, leggibile
 anche dai motori di ricerca.
 
-Per far conoscere il sito a Google, una volta sola:
+Fatto il 28 settembre 2026: la proprietà è verificata e la sitemap inviata. I passi, se mai
+servisse ripeterli (per esempio con un altro account):
 
 1. apri [Google Search Console](https://search.google.com/search-console) e aggiungi una
    proprietà di tipo **Prefisso URL**: `https://giuseppecassano5bit.github.io/gravina-3d/`;
