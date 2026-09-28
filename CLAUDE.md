@@ -44,6 +44,11 @@ slides). Se non risultano caricate, dillo prima di procedere.
 - Con il mezzo si percorrono **solo vie reali** che si incrociano con altre vie reali. Non
   inventare vie. Eccezioni ammesse: il Ponte Acquedotto (pedonale nella realtà) e le
   inversioni a goccia negli slarghi reali.
+- **Tracciato reale compresso** (eccezione come il Ponte Acquedotto, fase 3.4 blocco F): la
+  strada per il Bosco Difesa Grande segue il tracciato reale (provinciale Matera–Gravina, poi
+  la strada verso il bosco, circa 5,6 km) ridotto in scala a circa 700 m. Gli angoli di svolta
+  restano quelli reali, le lunghezze si accorciano. Nessun'altra via si comprime: la strada del
+  P.I.P. - Zona Artigianale resta a scala reale.
 - Le vie cieche reali della città (`GEO.deco`) si disegnano ma **non si percorrono**. La
   sterrata reale del Castello Svevo è percorribile: con la strada di servizio e la vicinale
   chiude un anello (flag 8, `CASTLE_BOX` in `genera_dati.py`).
