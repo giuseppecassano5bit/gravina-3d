@@ -48,11 +48,17 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
 - Con il mezzo si percorrono **solo vie reali** che si incrociano con altre vie reali. Non
   inventare vie. Eccezioni ammesse: il Ponte Acquedotto (pedonale nella realtà) e le
   inversioni a goccia negli slarghi reali.
-- **Tracciato reale compresso** (eccezione come il Ponte Acquedotto, fase 3.4 blocco F): la
+- **Tracciato reale compresso** (eccezione come il Ponte Acquedotto, fase 3.4 blocchi F e L): la
   strada per il Bosco Difesa Grande segue il tracciato reale (provinciale Matera–Gravina, poi
-  la strada verso il bosco, circa 5,6 km) ridotto in scala a circa 700 m. Gli angoli di svolta
-  restano quelli reali, le lunghezze si accorciano. Nessun'altra via si comprime: la strada del
-  P.I.P. - Zona Artigianale resta a scala reale.
+  la strada verso il bosco, circa 5,3 km) ridotto in scala (`BOSCO_SCALA`) fino all'area Quercus,
+  e prosegue con la stessa regola fino al vivaio forestale (3,2 km reali, circa 670 m). Gli angoli
+  di svolta restano quelli reali, le lunghezze si accorciano. Le zone attorno all'area Quercus e
+  al vivaio restano a scala reale (`ZONA_Q`, `ZONA_V`), e i sentieri del bosco non si comprimono.
+  Nessun'altra via si comprime: la strada del P.I.P. - Zona Artigianale resta a scala reale.
+- **A piedi nel bosco** (blocco L): i sentieri reali OSM attorno all'area Quercus
+  (`QUERCUS_SENTIERI` in `genera_dati.py`) si percorrono con la figurina, come nel centro storico.
+- **Acceleratore** (blocco E): solo su PC, Shift tenuto premuto (`CONFIG.drive.boost`). Sul
+  telefono non c'è, per non rischiare rallentamenti (decisione del committente).
 - **A piedi** (blocco G): marciapiedi, passaggi e scalinate reali del centro storico (flag 32,
   `WALK` in `genera_dati.py`) si percorrono con la figurina, solo se chiudono un anello con altre
   vie reali. Il mezzo si ferma all'imbocco e aspetta al tratto carrabile d'uscita (eccezione: ci
@@ -60,7 +66,8 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
   decorative: non si inventano raccordi.
 - Nel centro storico le quote Copernicus fanno solo da **guida** (`GEO.rioni`, discesa dei rioni):
   canyon, cigli, falesia e gradoni restano disegnati a mano, e le vie non devono diventare più
-  ripide di prima: le vie del mezzo stanno entro il 18% (`CONFIG.road.maxGrade`, blocco D).
+  ripide di prima: le vie del mezzo stanno entro il 18% (`CONFIG.road.maxGrade`, blocco D; dal
+  blocco E in tutta la città).
 - **Musica**: solo brani originali generati dal codice (sezione 11b). Niente canzoni o campioni di
   terzi, anche se richiesti: sono protetti e pesano più dell'intero diorama.
 - Le vie cieche reali della città (`GEO.deco`) si disegnano ma **non si percorrono**. La

@@ -26,16 +26,32 @@ Ordine: I → D → E → L → M → N, dettagli e decisioni nella sezione 7 de
       città. 264 KB compressi (+9), telefono 175 300 triangoli, PC 246 000, draw call invariate.
 - [x] **Peso**: il 30/09/2026 il committente ha alzato il tetto da 280 a **360 KB compressi**
       (≤ 1,2 MB non compressi). Dopo il blocco D restano circa 96 KB per E, L, M e N.
-- [ ] **E + L insieme** (`fase-3-4-e-l-luoghi-bosco`, decisione del 30/09/2026), più un **pulsante
-      acceleratore** **solo su PC** (Shift tenuto premuto): sul telefono no, per non rischiare
-      rallentamenti (risposta del committente del 30/09/2026).
-- [ ] **E · luoghi della città, scuole e chiese**. Risposte del committente: Liceo G. Tarantino,
-      ITC Bachelet e IPSIA G. Galilei (P.I.P.) per forza, poi più scuole possibili dove c'è la
-      sagoma; «La caccia» è il parco La Caccia vicino a Largo Cappuccini; il Casino Meninni è su Via
-      Guardialto e le «case rosa» tra Via Guardialto e Via Guardialto Piccolo.
-- [ ] **L · il Bosco da vicino**: Area Quercus, strada fino al vivaio, Base Scout, area pic-nic,
-      scritta «SIC DIFESA GRANDE», giro a piedi, suoni del bosco (solo dentro il bosco: scelta
-      lasciata a Claude, «basta che sia spettacolare»).
+- [x] **E + L insieme** (`fase-3-4-e-l-luoghi-bosco`, PR #15, in attesa di approvazione), più
+      l'**acceleratore solo su PC** (Shift tenuto premuto, ×1,8; sul telefono no, decisione del
+      committente del 30/09/2026): agli incroci il cartello si apre prima e il mezzo torna alla
+      crociera. 60 fps e fotogramma peggiore come senza, subito dopo Parti e dopo un teletrasporto.
+- [x] **E · luoghi della città, scuole e chiese**: 16 scuole sull'edificio reale (Liceo
+      G. Tarantino scientifico e linguistico, ITT Bachelet · IPSIA G. Galilei al P.I.P., come chiesto,
+      più le altre con la sagoma), con pennoni, pensilina, campo da gioco e recinzione; chiese della
+      città con portale, oculo e croce (niente campanili: nessuna foto verificata); Casino di Meninni
+      (scheda FAI), case rosa, La Caccia, Largo Cappuccini e gli altri luoghi; schede nuove per Fiera
+      di San Giorgio, stadio Stefano Vicino, stazione FAL. Vie del mezzo entro il 18% in tutta la
+      città (raccordo del terreno a nord e a est da 110 a 230 m): da 27 vie oltre il 20% a una.
+- [x] **L · il Bosco da vicino**: strada compressa fino al vivaio (674 m per 3,2 km reali), zone
+      dell'area Quercus e del vivaio a scala reale, area Quercus (ristorante, campi, tribunetta,
+      maneggio, giochi, tavoli, parcheggio; scheda), vivaio con vasche e aiuole (scheda senza dire
+      che il centro visite è aperto), Base Scout, area pic-nic con la scritta «SIC DIFESA GRANDE»,
+      524 m di sentieri reali a piedi, bosco fitto istanziato che si apre tra camera e figurina,
+      foschia, suoni del bosco solo dentro il bosco (interruttore nella pausa).
+- [ ] Da verificare con il committente: se il maneggio, i giochi e i tavoli dell'area Quercus
+      stanno dove li ricorda (posizione indicativa dal satellite); il nome della strada del bosco
+      (in OSM non ce l'ha: nel diorama «Strada nel bosco»); la chiesa di Santi Pietro e Paolo
+      (nome da Overture).
+- [ ] Telefono in orizzontale, partenza sul ponte: il contatore di debug segna 74 draw call (tetto 70),
+      uguale su `main` prima di E e L (`node foto.mjs orizzontale`). In verticale il massimo è 48.
+      Da guardare nel blocco N con i ritocchi dell'orizzontale.
+- [ ] La vasca grande del vivaio (w411138854) è fuori dalla zolla del vivaio: allargarla di un
+      riquadro verso sud, se si vuole.
 - [ ] **M · mezzi realistici e mongolfiera** (`fase-3-4-m-mezzi`).
 - [ ] **N · cartolina, giro guidato e ritocchi** (`fase-3-4-n-cartolina-giro`).
 - Versione in inglese: non ora.
@@ -119,7 +135,7 @@ commerciali e protette: il committente ha scelto musica ambient originale, gener
 - [x] Prove: guida fino alla goccia e ritorno con la scheda che si apre; `simula` e `interazioni`
       verdi; budget rispettato (telefono 241 000 triangoli e 53 draw call al massimo, PC 334 000 e
       69; 277 KB compressi).
-- [ ] **Rifugio**: se si trovano fonti affidabili, dargli una scheda.
+- [x] **Rifugio**: è l'area Quercus, con la scheda (blocco L).
 - [x] Prossimo: blocco G (percorsi a piedi e quote reali del centro storico): fatto, con la
       camera libera del blocco B.
 - [ ] Blocchi D (revisione del centro storico) ed E (nuovi luoghi): non ancora iniziati.
@@ -181,8 +197,8 @@ commerciali e protette: il committente ha scelto musica ambient originale, gener
       scalinata di Via giudice Montea sono tratti a piedi e restano ripidi.
 - [x] Gradino di 15–18 m a sud della città (da Via Goito a Via Tripoli): punti ripetuti nel ciglio
       est, corretto nel blocco D.
-- [ ] Fuori dal centro storico, a nord, alcune vie sulle quote reali sono ripide (Via Savoia,
-      Via Giardini, Corso Aldo Moro, 29–37%): da guardare nel blocco E.
+- [x] Fuori dal centro storico, a nord, alcune vie erano ripide (Via Savoia, Via Giardini, Corso
+      Aldo Moro, 29–37%): era il raccordo del terreno, allargato nel blocco E. Resta Via Goito (22%).
 
 **Camera e interfaccia**
 - [ ] Dopo il teletrasporto la camera a volte parte troppo vicina a un tetto (screenshot

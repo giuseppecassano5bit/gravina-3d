@@ -141,8 +141,13 @@ dallo Sportland al Castello Svevo):
   pedonale o scalinata (584 m), solo dove si collegano ad altre vie; le 5 scalinate che nei dati
   finiscono nel vuoto si guardano soltanto;
 * **due appendici** (blocco F): la zona artigianale **P.I.P.**, a est, con le sue vie a scala
-  reale, e il **Bosco Difesa Grande**, a sud, con un bosco di querce e un rifugio;
-* **2 038 edifici della città** (più i 518 del centro storico) con l'altezza stimata per tipo e superficie (le stime Microsoft
+  reale, e il **Bosco Difesa Grande**, a sud (blocco L: area Quercus, vivaio forestale, Base
+  Scout, area pic-nic con la scritta «SIC DIFESA GRANDE», 524 m di sentieri reali a piedi, bosco
+  dal poligono OSM del Bosco Difesa Grande e suoni del bosco generati dal codice);
+* **scuole, chiese e luoghi della città** (blocco E): 16 scuole sull'edificio reale, le chiese
+  della città con portale e croce, il Casino di Meninni, le case rosa, schede per Fiera di San
+  Giorgio, stadio, stazione FAL e Casino; le vie del mezzo stanno entro il 18% in tutta la città;
+* **2 045 edifici della città** (più i 518 del centro storico) con l'altezza stimata per tipo e superficie (le stime Microsoft
   sono troppo basse e si scartano);
 * **quote reali** dal modello di elevazione **Copernicus DEM GLO-30**, smussate (il DSM comprende
   tetti e alberi). Nel centro storico il canyon, i cigli e i gradoni restano disegnati a mano; le
@@ -162,10 +167,19 @@ Civita e Via Matteotti non c'è spazio per l'inversione a goccia: lì si prosegu
 
 **Tracciato reale compresso.** Il Bosco Difesa Grande è a circa 6 km dalla città: la strada che
 ci porta segue il tracciato reale (la provinciale Matera–Gravina, poi la strada verso il bosco,
-5 397 m secondo Overture Maps) **ridotto in scala a circa 760 m**. Gli angoli di svolta restano
-quelli reali, si accorciano solo le lunghezze; in fondo c'è un'inversione a goccia. È
-un'eccezione come il Ponte Acquedotto: nessun'altra via è compressa, e la strada del P.I.P.
-resta a scala reale. La scheda del Bosco lo dice al visitatore.
+circa 5,3 km secondo Overture Maps) **ridotto in scala a circa 950 m** fino all'area Quercus.
+Dal blocco L prosegue con la stessa regola fino al vivaio forestale, all'incrocio con Contrada
+Annunziata: 3,2 km di strada reale (OSM) diventano 674 m, e in fondo c'è l'inversione a goccia.
+Gli angoli di svolta restano quelli reali, si accorciano solo le lunghezze. Le zone attorno
+all'area Quercus e al vivaio restano **a scala reale** (edifici, campi, vasche e sentieri di OSM),
+e i sentieri del bosco non si comprimono. È un'eccezione come il Ponte Acquedotto: nessun'altra
+via è compressa, e la strada del P.I.P. resta a scala reale. La scheda del Bosco lo dice al
+visitatore. Il parcheggio «Terra Rossa», 700 m più giù lungo la strada, resta a lato della strada
+compressa, ritagliato fuori dall'area dei campi.
+
+**Acceleratore.** Sul computer, tenendo premuto **Shift** il mezzo va 1,8 volte più veloce; agli
+incroci rallenta da solo e il cartello compare prima. Sul telefono non c'è, per non rischiare
+rallentamenti.
 
 Per rigenerarli (per esempio dopo aver migliorato la mappa di Gravina su OpenStreetMap):
 
@@ -239,7 +253,7 @@ prestazioni (triangoli, draw call, tempi di costruzione, memoria) si prendono co
 | 2b | Dati reali: vie e incroci reali, edifici, torrente e cigli, ponte ad archi | ✅ |
 | 2c | Vie libere dagli edifici e archi reali; quattro mezzi a scelta; partenza dal ponte; pausa con cambio mezzo, mappa e teletrasporto; camera che scavalca i tetti; dettagli dei monumenti; versione mobile | ✅ |
 | 3 | Architettura e fedeltà: Cattedrale e Purgatorio sulle fonti, chiese rupestri scavate, rioni a gradoni con scalinate e abitazioni rupestri, altezze per zona, schede di altre cinque chiese, vetrina sulle arcate | ✅ in revisione |
-| 3.4 | Gravina oltre il centro storico: città intera (C), strade per il Bosco e il P.I.P. (F), percorsi a piedi, quote reali del centro storico, camera attorno al mezzo e radio ambient (G, in revisione) | ⏳ |
+| 3.4 | Gravina oltre il centro storico: città intera (C), strade per il Bosco e il P.I.P. (F), percorsi a piedi, quote reali del centro storico, camera attorno al mezzo e radio ambient (G), spazio sul telefono (I), centro storico (D), luoghi della città, scuole e chiese (E), il Bosco da vicino (L) e acceleratore su PC | ⏳ |
 | 4 | Rifinitura: luci, prove su telefoni reali, restyling | ⏳ |
 
 ## Crediti, licenze e marchi
@@ -292,7 +306,15 @@ Notizie storiche e posizioni dei monumenti da fonti pubbliche, tra cui:
 * Bastione medievale: [Wikipedia](https://it.wikipedia.org/wiki/Gravina_in_Puglia) («ultimo pezzo dell'antica cinta muraria, collega il quartiere di Sant'Andrea al ponte acquedotto»); posizione da OSM (n13159769942)
 * Sette Camere: [Wikipedia](https://it.wikipedia.org/wiki/Gravina_in_Puglia) (scavo artificiale in un banco di tufo, presumibilmente negli ultimi secoli dell'Alto Medioevo), [foto su Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Grotte_delle_sette_camere.jpg) (la fila di grotte sulla parete); posizione da OSM (n6365472958). Piazzetta Fondovico: prato in OSM (w385177566), solo l'etichetta
 * Bosco Difesa Grande: [Wikipedia](https://it.wikipedia.org/wiki/Bosco_Difesa_Grande) (6 km a sud della città; sito Natura 2000 IT9120008 di 5 268 ettari, zona speciale di conservazione dal 2015 con il D.M. 10/07/2015; 1 890 ettari di bosco; roverella, cerro e farnetto), [SISEF](https://www.sisef.org/2025/07/04/incendio-e-rinascita-del-bosco-difesa-grande-gravina-in-puglia/) (incendi del 12/08/2017, oltre 1 200 ettari, e del 28/07/2021, 936 ettari), [Overture Maps](https://overturemaps.org) (lunghezza del tracciato reale: 5 397 m)
-* Rifugio nel Bosco Difesa Grande: nessuna fonte affidabile trovata, quindi solo l'etichetta
+* Area Quercus (in OSM il parco «Rifugio Bosco Difesa Grande», w477739267; ristorante n11092432410, campi w1195121473/5/6, tribunetta w1195121474, parcheggio «Terra Rossa» w477738793): [GravinaLife, 14/06/2021](https://www.gravinalife.it/notizie/area-ristoro-marcuccio-assegnata-nuova-gestione/) (l'area ristoro «Marcuccio» a una nuova gestione, con due campi da calcetto, uno da tennis e l'area pic-nic), [GravinaLife, 29/06/2024](https://www.gravinalife.it/notizie/quercus-una-nuova-era-di-sport-divertimento-e-gastronomia/) (struttura rinnovata: campi da calcio e tennis, zona giochi, ristorante e pizzeria, escursioni nel bosco e gite a cavallo), [GravinaLife, 13/06/2026](https://www.gravinalife.it/notizie/presentazione-football-camp-2026-e-inaugurazione-quercus) (i «campetti dell'area Quercus»). In OSM i tre campi sono segnati da tennis: dal satellite il centrale (w1195121475) è quello da tennis, gli altri due da calcetto come dice GravinaLife. Maneggio, giochi e tavoli: posizione indicativa dal satellite, solo come riferimento visivo
+* Vivaio forestale e Centro visite «San Nicola la Macchia»: [Il Tacco di Bacco](https://iltaccodibacco.it/gravina-in-puglia/centro-visite-bosco-difesa-grande) (nel cuore del SIC Bosco Difesa Grande, indirizzo «Vivaio Forestale», attività educative, didattiche e divulgative per scuole, famiglie e turisti). Su Google Maps risulta «chiuso temporaneamente»: la scheda non dice che sia aperto. Edifici (w411142982, w411144227, w411147963) e vasche (w411138897, w411139081) da OSM; la vasca grande w411138854 resta fuori dalla zolla
+* Base Scout «Base Scout Gravina 1»: edificio OSM w411148672, solo l'etichetta. Area pic-nic e scritta «SIC DIFESA GRANDE»: non sono in OSM; posizione indicata dal committente, forme (staccionate, scaletta, vialetti, tavoli, alberi, lampione, lettere bianche con la foglia) da Street View (giugno 2022), solo come riferimento visivo
+* Sentieri dell'area Quercus: OSM `highway=path` w647001042, w647001043, w647001044, w647001046, w647001047, w759847416, w773874702, con la via di servizio w647001048; bosco dai poligoni OSM «Bosco Difesa Grande» (w330074271) e «Bosco di Gravina» (w330074290); zone di alberi bruciati dal satellite
+* Scuole (blocco E): posizioni e nomi da OSM (w411138848, w411138849, r6148449, w1384764963, n12091003369, n12039009818, n12039071161, edificio «Edificio Scolastico S.G. Bosco») e Overture Maps (licei G. Tarantino, Benedetto XIII, Don Saverio Valerio, Tommaso Fiore, Savio-Fiore, Soranno, Santomasi); l'edificio è la sagoma reale che contiene il punto. Solo le etichette. Chiese della città senza nome in OSM (Gesù Buon Pastore, SS. Crocifisso e San Sebastiano, Madonna delle Grazie, Santi Pietro e Paolo): nome da OSM o Overture, solo l'etichetta; portale e croce generici, campanili non verificati e quindi non disegnati
+* Casino di Meninni: [FAI, I Luoghi del Cuore](https://fondoambiente.it/luoghi/casino-dei-meninni) (palazzo storico che dalla collina del Guardialto sovrasta la città, giardino con altissimi pini d'Aleppo, cappella di famiglia tra i cipressi, luogo fatiscente; nei Luoghi del Cuore dal 2012 al 2022), [GravinaLife, 11/02/2026](https://www.gravinalife.it/notizie/casino-di-meninni-interrogazione-del-consigliere-conca) (fabbricati storici abbandonati). Edificio su Via Guardialto indicato dal committente (sagoma OSM, [1572, −536]). Case rosa tra Via Guardialto e Via Guardialto Piccolo: indicazione del committente, solo l'etichetta
+* Fiera di San Giorgio: [Stanze Orsini](https://www.stanzeorsini.it/la-fiera-san-giorgio-gravina-puglia/) (esisteva già prima del 1294, quando Carlo d'Angiò la ripristinò, secondo un documento del Registro Angioino; ad aprile, per San Giorgio; in origine sui terreni della chiesa di San Giorgio dei Cavalieri di Malta, oggi nel Parco Fiere dell'ex linificio in via Spinazzola); area da OSM «Zona Fiera San Giorgio» (w478401751)
+* Stadio Stefano Vicino: [Wikipedia, FBC Gravina](https://it.wikipedia.org/wiki/FBC_Gravina) (via Fazzatoia, circa 4 000 posti, intitolato nel 2015 a Stefano Vicino, erba sintetica dal 2015, lavori 2024–2025 con la copertura della tribuna ovest)
+* Stazione FAL: [Wikipedia](https://it.wikipedia.org/wiki/Stazione_di_Gravina_in_Puglia_(FAL)) (aperta nel 1915, linea Bari–Altamura–Potenza delle Ferrovie Appulo Lucane, interscambio con la stazione RFI)
 * Zona artigianale P.I.P.: solo l'etichetta (nessuna scheda)
 * Geografia generale: [Wikipedia, Gravina in Puglia](https://en.wikipedia.org/wiki/Gravina_in_Puglia)
 

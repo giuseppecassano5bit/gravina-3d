@@ -207,6 +207,47 @@ al rifugio (8 × 6 m, alto 3,6 m). Nel diorama `COVER.QUERCE` colora il terreno 
 procedurali (tronco e chioma tonda, densità 0,6) lontane dalla carreggiata. La scheda del Bosco
 si apre entro 60 m dal centro; il rifugio ha solo l'etichetta (nessuna fonte).
 
+### Il Bosco da vicino (fase 3.4, blocco L)
+
+**Strada fino al vivaio.** `bosco_chain()` costruisce il tracciato a pezzi: fino a `QUERCUS_A`
+compresso (0,125), poi a scala reale attraverso l'area Quercus fino all'incrocio `BOSCO_J`, poi
+di nuovo compresso lungo la strada reale OSM (`VIVAIO_ROUTE`, 3 212 m) fino a `VIVAIO_REAL`, e a
+scala reale fino all'incrocio con Contrada Annunziata, dove c'è la goccia. Ogni zona a scala
+reale ha un'ancora (`ZONA_Q`, `ZONA_V`): un punto reale dentro la zona va nel diorama con
+`bosco_map` (ancora + scarto reale); fuori dalle zone, a lato del vertice più vicino della strada
+compressa. Tratti di strada: 950 m fino all'area Quercus, 674 m fino al vivaio (8,5 km reali).
+Zolle: il Bosco si allarga a ovest (−120, 600, −1860, −1140) e si aggiunge `VIVAIO`
+(−600, 360, −2340, −1860); 11 riquadri in più. Le quote lì sotto sono di un altro posto (la valle
+a sud della città): si smussano molto e si dimezza il rilievo.
+
+**Area Quercus** (ex area ristoro «Marcuccio», in OSM «Rifugio Bosco Difesa Grande»): ristorante
+col tetto rosso (w411141350), i tre campi OSM (tennis al centro, calcetto ai lati, con le righe, le
+porte o la rete e la recinzione a giorno), la tribunetta, il maneggio in sabbia con la staccionata,
+altalena, scivolo e tavoli nella radura, il parcheggio «Terra Rossa» sterrato a lato della strada.
+**Vivaio forestale**: edifici OSM (il lungo col tetto in coppi), vasche con l'acqua verde, aiuole in
+file. **Base Scout** nel grande campo a nord della strada. **Area pic-nic** davanti al vivaio:
+spiazzo di ghiaia che segue il terreno, staccionate a due traverse (in basso e in alto), scaletta
+col corrimano, la **scritta «SIC DIFESA GRANDE»** (lettere a blocchi 5 × 7, alte 1,7 m, inclinate
+sul pendio e rivolte alla strada, con la foglia) e, sul prato, vialetti bordati di travetti,
+tavoli, querce giovani coi tutori, pini, cipressi e un lampione.
+
+**Uso del suolo** (`bosco_cover`): ogni cella delle zolle del bosco torna al punto reale
+(`bosco_real`) e diventa querce (12) se sta nei poligoni OSM del Bosco Difesa Grande o del Bosco di
+Gravina, campo altrimenti; `bruciato` (13) dove il satellite mostra gli alberi morti; `fitto` (14)
+entro 42 m dai sentieri; prato (`sport`) nelle radure dell'area Quercus e del pic-nic; `cava` per
+il parcheggio. Nei riquadri le querce hanno densità 0,42, le querce morte sono tronchi grigi.
+
+**A piedi nel bosco.** I sentieri OSM attorno all'area Quercus (`QUERCUS_SENTIERI`) con la via di
+servizio w647001048: 524 m a scala reale, flag 32 e 8 («Sentiero nel bosco»). Il mezzo aspetta alla
+via di servizio, come nel centro storico.
+
+**Bosco fitto** (sezione 6f, `Forest`): nelle celle `fitto`, su una griglia sfalsata di 3,1 m
+(4,3 sul telefono), querce di tre età con chioma a quattro volumi, querce morte vicino alle zone
+bruciate, arbusti, tronchi caduti, sassi e foglie a terra di cinque colori. Sei `InstancedMesh`
+(una draw call ciascuna, solo in vista), ombre delle querce solo su PC (le macchie di luce).
+Gli alberi tra la camera e la figura si abbassano in 0,3 s e tornano quando la vista è libera.
+Nel bosco la nebbia si avvicina (foschia) e la targa dice «Bosco Difesa Grande».
+
 ---
 
 ## 3. Il canyon (topologia della gravina)
@@ -283,6 +324,9 @@ si apre entro 60 m dal centro; il rifugio ha solo l'etichetta (nessuna fonte).
 | Scalinate | Le 7 scalinate reali: gradini di tufo con alzate da 16 cm che seguono il terreno e parapetti bassi, e si fermano prima delle vie. Due si percorrono a piedi (blocco G): quella di Via giudice Montea (32 gradini) e quella tra Via Lettieri e Via Fontana la Stella. Le altre cinque nei dati finiscono nel vuoto e si guardano soltanto. |
 | Abitazioni rupestri | 20 grotte chiuse da una fronte in muratura (tufo o calce) con porta e finestrella, sui salti dei gradoni lato città, lontano da vie ed edifici. Le fonti ne contano circa ottanta sui pendii, ma né i dati né le fonti le collocano una per una: nel blocco D si aggiungono solo le grotte delle Sette Camere, dove la posizione c'è. |
 | Lanterne | Lanterne a muro accese, ogni ~16 m nelle vie entro 70 m dai monumenti (circa 100). |
+| Scuole (blocco E) | 16 scuole sull'edificio reale (OSM o Overture): muri ocra o mattone con le finestre dello shader, tetto grigio chiaro; all'ingresso pensilina e due pennoni con le bandiere (Italia, Europa), un campo da gioco in resina coi canestri sul lato più libero e la recinzione verde attorno, col cancello. Solo da vicino. |
+| Chiese della città (blocco E) | Pietra col tetto a capanna, portale con timpano e oculo sul lato della via e croce in cima; senza foto verificate niente campanili. |
+| Casino di Meninni e case rosa (blocco E) | Il Casino in pietra col tetto in coppi, i pini d'Aleppo nel giardino verso la città e i cipressi dietro (FAI); le case rosa tra Via Guardialto e Via Guardialto Piccolo in intonaco rosa. |
 | Regola | Nessun dettaglio sulla carreggiata: la prova `npm run simula` controlla che nessun vertice di portali, campanile, scalinate, lanterne e parapetti stia sopra una via tra 0,3 e 3,2 m d'altezza (`dettaglisullastrada` vuoto). Nei vicoli i dettagli sporgono al massimo 0,3 m. |
 | Mura | I tratti reali di mura urbane diventano muri di tufo. |
 | Alberi | Pini e lecci nei giardini reali (Villa Comunale), ulivi verso Botromagno, macchia nel canyon. |
@@ -336,6 +380,16 @@ riusato: il cambio è istantaneo.
 * **Targa in marmo**: via corrente più rione (Centro storico, Rione Piaggio, Rione Fondovico anche sulla discesa verso il ciglio, Madonna della Stella · Botromagno), e "percorso pedonale" dove serve.
 * Le quote delle strade sono smussate (media mobile di ±6 m), così i gradoni del terreno non si sentono sotto le ruote.
 * Alla testata est del ponte il **ponte ha la precedenza** sulla scelta "più dritta".
+* **Acceleratore** (blocco E, solo su PC): tenendo premuto **Shift** la crociera si moltiplica per
+  1,8 (`CONFIG.drive.boost`), con una salita e una discesa morbide (`boostRate`). Agli incroci il
+  cartello si apre prima, in proporzione alla velocità (38 m × velocità / crociera, circa 68 m), e
+  quando la scelta è aperta il mezzo torna alla crociera: il tempo per scegliere resta quello di
+  sempre. Non vale a piedi, in pausa, nelle gocce e prima di un tratto a piedi. Sul telefono non
+  c'è: il committente ha preferito non rischiare rallentamenti. Misure: vista «accelerata» di
+  `prestazioni.mjs` subito dopo Parti (60 fps, fotogramma peggiore come senza acceleratore).
+* **Pendenze**: dal blocco E il limite del 18% vale per tutte le vie del mezzo; il raccordo tra il
+  terreno disegnato del centro storico e le quote reali è largo 230 m anche a nord e a est
+  (prima 110 m: lì c'erano vie al 29–37%). Resta sopra il 20% solo un tratto di Via Goito (22%).
 
 ### 6b. A piedi (fase 3.4, blocco G)
 
@@ -398,6 +452,14 @@ rilassante, alla Minecraft**, generata dal codice (sezione 11b, `Radio`), senza 
 * pulsante **Musica** sotto Pausa (spenta all'avvio: i browser non permettono la musica prima di
   un gesto), tasto **M**, brano successivo e volume (sul telefono bastano i tasti del volume).
   Se era accesa, si riaccende premendo Parti. Tace quando la scheda è nascosta.
+
+**Suoni del bosco** (blocco L, sezione 11c, `ForestSound`): generati con Web Audio, senza file.
+Vento a raffiche (rumore rosa filtrato), fruscio delle chiome, uccelli (merlo, cinciallegra,
+fringuello, un cuculo lontano ogni tanto, con distanza e posizione a caso), passi sulle foglie
+quando si cammina (uno ogni 0,75 m). Partono solo **dentro il bosco vero**: `forestAmount` conta
+le celle di querce in un raggio di 25 m, e il livello sale da 0,45 a 0,8, con 3 s di dissolvenza;
+uscendo si spengono e il contesto audio si sospende. Nel bosco la radio, se accesa, scende al 35%.
+Si spengono dalla pausa con l'interruttore **Suoni del bosco** (ricordato nel browser).
 
 ---
 
