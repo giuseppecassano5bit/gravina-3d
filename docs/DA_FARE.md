@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 30 settembre 2026: fase 3 approvata e online, blocchi A, C, F, G e I della fase 3.4 uniti.
+Stato al 30 settembre 2026: fase 3 approvata e online, blocchi A, C, D, F, G e I della fase 3.4 uniti.
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
@@ -15,7 +15,7 @@ Ordine: I → D → E → L → M → N, dettagli e decisioni nella sezione 7 de
       sagome semplificate, metà degli alberi; finestre e torrini solo da vicino), con isteresi e
       senza draw call in più. Fotogramma peggiore da 243 500 a 164 700 triangoli sul telefono e da
       335 400 a 235 500 su PC; «Pronto» circa 640 ms. Vista «alta» in `prestazioni.mjs`.
-- [x] **D · centro storico** (`fase-3-4-d-centro-storico`, PR #14, in attesa di approvazione):
+- [x] **D · centro storico** (`fase-3-4-d-centro-storico`, PR #14, unita il 30/09/2026):
       Porta San Michele (nicchia con San Michele all'imbocco di Via Matteotti, facciate dei due
       palazzi d'angolo), Piazza Scacchi (busti di Musacchio e Scacchi, ulivo, aiuole e sedute),
       Quattro Fontane (dalle lapidi: 1779, restauro 1859), campanile e facciata di San Francesco,
@@ -26,11 +26,16 @@ Ordine: I → D → E → L → M → N, dettagli e decisioni nella sezione 7 de
       città. 264 KB compressi (+9), telefono 175 300 triangoli, PC 246 000, draw call invariate.
 - [x] **Peso**: il 30/09/2026 il committente ha alzato il tetto da 280 a **360 KB compressi**
       (≤ 1,2 MB non compressi). Dopo il blocco D restano circa 96 KB per E, L, M e N.
-- [ ] **E + L insieme** nella prossima chat (decisione del 30/09/2026), più un **pulsante
-      acceleratore** per i mezzi, solo se non crea rallentamenti.
-- [ ] **E · luoghi della città, scuole e chiese** (`fase-3-4-e-luoghi`): il committente sceglie le scuole.
-- [ ] **L · il Bosco da vicino** (`fase-3-4-l-bosco`): Area Quercus, strada fino al vivaio,
-      Base Scout, area pic-nic, scritta «SIC DIFESA GRANDE», giro a piedi, suoni del bosco.
+- [ ] **E + L insieme** (`fase-3-4-e-l-luoghi-bosco`, decisione del 30/09/2026), più un **pulsante
+      acceleratore** **solo su PC** (Shift tenuto premuto): sul telefono no, per non rischiare
+      rallentamenti (risposta del committente del 30/09/2026).
+- [ ] **E · luoghi della città, scuole e chiese**. Risposte del committente: Liceo G. Tarantino,
+      ITC Bachelet e IPSIA G. Galilei (P.I.P.) per forza, poi più scuole possibili dove c'è la
+      sagoma; «La caccia» è il parco La Caccia vicino a Largo Cappuccini; il Casino Meninni è su Via
+      Guardialto e le «case rosa» tra Via Guardialto e Via Guardialto Piccolo.
+- [ ] **L · il Bosco da vicino**: Area Quercus, strada fino al vivaio, Base Scout, area pic-nic,
+      scritta «SIC DIFESA GRANDE», giro a piedi, suoni del bosco (solo dentro il bosco: scelta
+      lasciata a Claude, «basta che sia spettacolare»).
 - [ ] **M · mezzi realistici e mongolfiera** (`fase-3-4-m-mezzi`).
 - [ ] **N · cartolina, giro guidato e ritocchi** (`fase-3-4-n-cartolina-giro`).
 - Versione in inglese: non ora.
