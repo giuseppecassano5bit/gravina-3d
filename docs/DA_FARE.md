@@ -24,8 +24,10 @@ Ordine: I → D → E → L → M → N, dettagli e decisioni nella sezione 7 de
       Quattro Fontane, San Nicola, Bastione, Sette Camere), Piazzetta Fondovico e «Fondovito» sulla
       targa. Vie del mezzo nel centro storico entro il 18%; tolto il gradino di 15–18 m a sud della
       città. 264 KB compressi (+9), telefono 175 300 triangoli, PC 246 000, draw call invariate.
-- [ ] **Peso**: dopo il blocco D restano circa 16 KB compressi (tetto 280) per E, L, M e N.
-      Prima del blocco M va deciso se alzare il tetto o dove risparmiare.
+- [x] **Peso**: il 30/09/2026 il committente ha alzato il tetto da 280 a **360 KB compressi**
+      (≤ 1,2 MB non compressi). Dopo il blocco D restano circa 96 KB per E, L, M e N.
+- [ ] **E + L insieme** nella prossima chat (decisione del 30/09/2026), più un **pulsante
+      acceleratore** per i mezzi, solo se non crea rallentamenti.
 - [ ] **E · luoghi della città, scuole e chiese** (`fase-3-4-e-luoghi`): il committente sceglie le scuole.
 - [ ] **L · il Bosco da vicino** (`fase-3-4-l-bosco`): Area Quercus, strada fino al vivaio,
       Base Scout, area pic-nic, scritta «SIC DIFESA GRANDE», giro a piedi, suoni del bosco.

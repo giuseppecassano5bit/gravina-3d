@@ -435,7 +435,7 @@ storico, verso la città: la vista della futura mongolfiera).
 
 | Voce | Fase 3 (solo centro storico) | Fase 3.4, città intera | Dopo il blocco G | Dopo il blocco I | Dopo il blocco D | Tetto |
 |---|---|---|---|---|---|---|
-| `index.html` | 390 KB (124 KB compressi) | 737 KB (269 KB compressi) | 593 KB (251 KB compressi) | 604 KB (255 KB compressi) | 634 KB (264 KB compressi) | ≤ 900 KB (≤ 280) |
+| `index.html` | 390 KB (124 KB compressi) | 737 KB (269 KB compressi) | 593 KB (251 KB compressi) | 604 KB (255 KB compressi) | 634 KB (264 KB compressi) | ≤ 1,2 MB (≤ 360 compressi; prima 900 KB e 280, alzato dal committente il 30/09/2026) |
 | Costruzione fino a "Parti" | 282 ms | circa 500 ms | circa 520 ms | circa 640 ms (telefono 620) | circa 770 ms (telefono 680) | ≤ 1,5 s |
 | Memoria JavaScript | 41 MB | circa 100 MB | 112 MB (telefono 91) | 116 MB (telefono 129) | 117 MB (telefono 104) | ≤ 150 MB |
 | Città completa (in sottofondo) | — | circa 900 ms | circa 900 ms | circa 1 100 ms | circa 1 230 ms | — |
