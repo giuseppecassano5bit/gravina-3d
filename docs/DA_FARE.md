@@ -1,11 +1,12 @@
 # Cosa resta da fare
 
-Stato al 28 settembre 2026: fase 3 approvata e online. Aggiornare questo file a ogni fase.
+Stato al 30 settembre 2026: fase 3 approvata e online, blocchi A, C, F e G della fase 3.4 uniti.
+Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
 del lavoro su due chat in [`PIANO_FASE_3_4.md`](PIANO_FASE_3_4.md).
 
-### Fase 3.4, blocco G · percorsi a piedi, quote reali, camera e radio (PR #12, in revisione)
+### Fase 3.4, blocco G · percorsi a piedi, quote reali, camera e radio (PR #12, unita il 30/09/2026) ✅
 
 Richiesto il 28/09/2026. Oltre al blocco G del piano, il committente ha chiesto una camera che si
 muove attorno al mezzo (il blocco B) e una radio. Le canzoni di Non-Stop-Pop FM (GTA V) sono
