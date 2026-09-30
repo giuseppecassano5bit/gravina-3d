@@ -1242,7 +1242,7 @@ def city_height(b, dense, industrial):
     return floors * 3.3 + 0.6
 
 
-CITY_KIND = {'house': 0, 'church': 1, 'shed': 3, 'apartments': 4, 'public': 5, 'industry': 6, 'castle': 7}
+CITY_KIND = {'house': 0, 'church': 1, 'shed': 3, 'apartments': 4, 'public': 5, 'industry': 6, 'castle': 7, 'school': 8, 'villa': 9}
 
 
 def city_buildings(buildings, cover):
@@ -1260,6 +1260,76 @@ def city_buildings(buildings, cover):
             kind = CITY_KIND['industry']
         out.append({**b, 'height': h, 'kind': kind})
     return out
+
+
+# Blocco E (risposte del committente del 30/09/2026): scuole, chiese senza nome in OSM, Casino di
+# Meninni e «case rosa». La posizione viene da OSM o Overture (id nei commenti); l'edificio è la
+# sagoma reale che contiene il punto (o la più vicina entro 6 m). Nessun contorno da Google.
+SCHOOLS = [
+    ('Liceo scientifico G. Tarantino', (762, -471), 3),         # Overture, Via Salvatore Quasimodo
+    ('Liceo linguistico G. Tarantino', (661, 102), 3),          # Overture, Via Gorizia
+    ('ITT Bachelet · IPSIA G. Galilei', (2628, 687), 2),        # OSM w1384764963 (area), w1384764964, nel P.I.P.
+    ('Scuola primaria Padre Pio', (1117, -216), 2),             # OSM w411138848, Via Guardialto
+    ('Scuola media Don E. Montemurro', (648, -323), 3),         # OSM w411138849, Via Tripoli
+    ('Circolo didattico San Giovanni Bosco', (320, -139), 3),   # OSM r6148449, Corso Vittorio Emanuele
+    ('Edificio scolastico S.G. Bosco', (910, -21), 3),          # OSM, nome dell'edificio
+    ('Scuola secondaria N. Ingannamorte', (730, 418), 3),       # OSM n12091003369, Via Francesco Baracca
+    ('Scuola dell\'infanzia Papa Giovanni Paolo II', (1212, -187), 1),   # OSM n12039009818
+    ('Scuola dell\'infanzia Alla Fine dell\'Arcobaleno', (1368, 124), 1),   # OSM n12039071161
+    ('Scuola secondaria Benedetto XIII', (284, -44), 3),        # Overture, Via Libertà
+    ('Scuola primaria Don Saverio Valerio', (313, -766), 2),    # Overture, Via Sandro Pertini
+    ('Scuola primaria Tommaso Fiore', (837, 351), 2),           # Overture, Via Fratelli Cervi
+    ('Circolo didattico Savio-Fiore', (545, 1052), 2),          # Overture, Via Fratelli Cervi
+    ('Scuola primaria Michele Soranno', (1748, 266), 2),        # Overture, Via Michele Soranno
+    ('Scuola primaria Santomasi', (387, 596), 2),               # Overture, Corso Aldo Moro
+]
+CHURCHES = [
+    ('Chiesa Gesù Buon Pastore', (1055, -176)),                 # OSM w328013129 (edificio senza nome)
+    ('SS. Crocifisso e San Sebastiano', (442, -571)),           # OSM r6148330 e Overture
+    ('Santuario Madonna delle Grazie', (658, 826)),             # Overture, Via Madonna della Grazia
+    ('Santi Pietro e Paolo', (1080, 1140)),                     # Overture (Via Luigi Longo), edificio OSM w411139942
+]
+MENINNI = ('Casino di Meninni', (1572, -536))                   # sul Guardialto, sopra la SP201 (Via Guardialto)
+CASE_ROSA = 'Case rosa'
+# Tra Via Guardialto (SP201) e Via Guardialto Piccolo, dove si separano (indicazione del committente)
+CASE_ROSA_ZONE = [(1142, -177), (1301, -295), (1470, -500), (1360, -250), (1323, -193), (1146, -155)]
+
+
+def name_places(old, city):
+    """Dà nome e tipo agli edifici delle scuole, delle chiese senza nome, del Casino e delle case rosa."""
+    every = old + city
+    tree = STRtree([b['poly'] for b in every])
+
+    def pick(pt):
+        p = Point(pt)
+        near = [every[i] for i in tree.query(p.buffer(6))]
+        near = [b for b in near if b['poly'].distance(p) <= 6]
+        return min(near, key=lambda b: (b['poly'].distance(p), -b['poly'].area), default=None)
+
+    in_city = {id(b) for b in city}
+    found = 0
+    for name, pt, floors in SCHOOLS:
+        b = pick(pt)
+        if not b:
+            print(f'  ATTENZIONE: edificio della scuola non trovato: {name}')
+            continue
+        b['name'] = name
+        b['kind'] = CITY_KIND['school'] if id(b) in in_city else KIND['public']
+        b['height'] = floors * 3.4 + 0.8                      # piani alti 3,4 m, più il parapetto
+        found += 1
+    for name, pt in CHURCHES:
+        b = pick(pt)
+        if b:
+            b['name'], b['kind'] = name, CITY_KIND['church']
+            b['height'] = 12.0
+    b = pick(MENINNI[1])
+    if b:
+        b['name'], b['kind'], b['height'] = MENINNI[0], CITY_KIND['villa'], 9.5
+    zone = Polygon(CASE_ROSA_ZONE)
+    rosa = [b for b in city if b['kind'] != CITY_KIND['school'] and b['poly'].area > 300 and zone.contains(b['poly'].centroid) and not b['name']]
+    for b in rosa:
+        b['name'] = CASE_ROSA
+    print(f'  scuole: {found} su {len(SCHOOLS)}; case rosa: {len(rosa)} edifici')
 
 
 def castle_outline(elements):
@@ -1644,6 +1714,7 @@ def main():
     old = [b for b in buildings if inside(b['poly'].centroid.coords[0], Z0)]
     city = city_buildings([b for b in buildings if not inside(b['poly'].centroid.coords[0], Z0)], cover)
     print(f'  edifici: {len(old)} nel centro storico, {len(city)} nella città')
+    name_places(old, city)
     extra = {
         'ground': ground, 'cover': cover, 'rails': build_rails(data), 'pois': city_pois(osm),
         'riverY': river_bed(feats['river'], lambda e, n: at(e, n)), 'rims': extend_rims(feats['river'], at),
