@@ -6,6 +6,20 @@ Aggiornare questo file a ogni fase.
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
 del lavoro su due chat in [`PIANO_FASE_3_4.md`](PIANO_FASE_3_4.md).
 
+### Fase 3.4, seconda parte (decisioni del 30/09/2026)
+
+Ordine: I → D → E → L → M → N, dettagli e decisioni nella sezione 7 del piano.
+
+- [ ] **I · spazio sul telefono** (`fase-3-4-i-prestazioni`): due livelli di dettaglio per
+      riquadro, fotogramma peggiore ≤ 200 000 triangoli sul telefono e ≤ 300 000 su PC, vista «alta».
+- [ ] **D · centro storico** (`fase-3-4-d-centro-storico`).
+- [ ] **E · luoghi della città, scuole e chiese** (`fase-3-4-e-luoghi`): il committente sceglie le scuole.
+- [ ] **L · il Bosco da vicino** (`fase-3-4-l-bosco`): Area Quercus, strada fino al vivaio,
+      Base Scout, area pic-nic, scritta «SIC DIFESA GRANDE», giro a piedi, suoni del bosco.
+- [ ] **M · mezzi realistici e mongolfiera** (`fase-3-4-m-mezzi`).
+- [ ] **N · cartolina, giro guidato e ritocchi** (`fase-3-4-n-cartolina-giro`).
+- Versione in inglese: non ora.
+
 ### Fase 3.4, blocco G · percorsi a piedi, quote reali, camera e radio (PR #12, unita il 30/09/2026) ✅
 
 Richiesto il 28/09/2026. Oltre al blocco G del piano, il committente ha chiesto una camera che si

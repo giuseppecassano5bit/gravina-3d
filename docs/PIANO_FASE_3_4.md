@@ -362,6 +362,69 @@ Vie e piazze riconoscibili da proporre al committente:
 `docs/DA_FARE.md` (stato, cosa resta), `docs/DESIGN.md`, README (fonti, eccezioni, crediti,
 licenze), `CLAUDE.md` (nuove regole ed eccezioni).
 
+### Seconda parte (decisioni del committente del 30/09/2026)
+
+Ordine: **I → D → E → L → M → N**, un blocco alla volta, ognuno col suo branch e la sua PR.
+Decisioni già prese:
+1. **Area Quercus** = l'ex area ristoro «Marcuccio»; in OSM «Rifugio Bosco Difesa Grande»
+   (w477739267), dove oggi finisce la strada del Bosco.
+2. **Vivaio forestale**: la strada compressa si allunga fino al vivaio con la stessa regola
+   (angoli reali, lunghezze per `BOSCO_SCALA`). Si vedono anche la Base Scout, l'area pic-nic
+   davanti al vivaio e la scritta «SIC DIFESA GRANDE» sul prato.
+3. **Auto realistiche nello stile del diorama**: low-poly, `flatShading`, procedurali, senza
+   loghi, ma non più fatte a blocchi.
+4. **Mongolfiera**: quinto mezzo, giro fisso sopra la città (eccezione come il Ponte Acquedotto).
+5. **In più**: pulsante «Cartolina», suoni del bosco (solo nel bosco), giro guidato dei monumenti.
+6. **Versione in inglese**: non ora.
+7. **Scuole**: il committente sceglie dall'elenco trovato nei dati quali rifinire.
+8. **Area Quercus e vivaio** con tono neutro, senza pubblicità; nella mappa nessun credito né sponsor.
+
+### I · Spazio sul telefono (`fase-3-4-i-prestazioni`)
+- Obiettivo: fotogramma peggiore ≤ 200 000 triangoli sul telefono e ≤ 300 000 su PC, draw call
+  non oltre quelle di oggi, nessuna differenza visibile vicino alla camera, «Pronto» ≤ 1,5 s.
+- Ogni riquadro ha due livelli nella stessa mesh (`setDrawRange`, zero draw call in più): da
+  lontano terreno a maglia doppia, edifici semplificati senza torrini e dettagli del tetto, vie
+  più rade, metà degli alberi; cambio con isteresi oltre la nebbia vicina.
+- Vista «alta» in `prestazioni.mjs` (camera a circa 120 m sopra il centro storico): è la vista
+  della futura mongolfiera.
+
+### L · Il Bosco da vicino (`fase-3-4-l-bosco`)
+- **Area Quercus** al posto della capanna generica: ristorante (n11092432410), campetti
+  (w1195121473/5/6, da verificare tennis o calcetto), tribunetta (w1195121474), area pic-nic,
+  giochi, maneggio, parcheggio «Terra Rossa» (w477738793). Scheda neutra sulle fonti GravinaLife
+  (2021, 2024, 2026).
+- **Strada fino al vivaio**: circa 3,2 km reali verso sud-ovest fino a Contrada Annunziata,
+  compressi a circa 400 m con `BOSCO_SCALA`, goccia in fondo; la zolla del Bosco si allarga.
+  Area Quercus e vivaio restano a scala reale.
+- **Vivaio forestale** con il Centro visite «San Nicola la Macchia» (edifici w411142982,
+  w411144227, w411147963; vasche w411138854, w411138897, w411139081): etichetta, scheda solo se
+  le fonti reggono (senza dire che il centro visite è aperto).
+- **Base Scout Gravina 1** (w411148672), **area pic-nic** (posizione indicata dal committente)
+  e **scritta «SIC DIFESA GRANDE»** in lettere bianche sul pendio, un'unica mesh.
+- **Giro a piedi** su un anello reale di sentieri (`highway=path`) di 400–800 m, a scala reale.
+- **Bosco che sembri vero** vicino al sentiero (querce di età diverse, sottobosco, luce), con
+  `InstancedMesh` e livelli di dettaglio; alberi sfumati tra camera e figurina.
+- **Suoni del bosco** con Web Audio, solo nella zolla del Bosco. Vista «bosco a piedi» nelle misure.
+- Google Maps e Street View solo come riferimento visivo.
+
+### M · Mezzi realistici e mongolfiera (`fase-3-4-m-mezzi`)
+- Carrozzerie per sezioni (8–14 × 10–16 punti), vetri a filo, abitacolo con il guidatore, ruote
+  e cerchi per modello, fari, stop, frecce, alone al tramonto, riflessi da una mappa d'ambiente
+  generata dal codice (solo sui mezzi). 4 000–8 000 triangoli per mezzo.
+- **Mongolfiera**, quinto mezzo: giro fisso di circa 7 minuti sopra la zolla della città, dalla
+  Zona Fiera San Giorgio (w478401751), tra 60 e 150 m dal suolo e mai meno di 30 m sopra tetti e
+  terreno; schede al passaggio, bruciatore con soffio in Web Audio, 2 000–4 000 triangoli.
+- Prove: giro campionato ogni 5 m in `simula.mjs`, decollo e cambio mezzo in `interazioni.mjs`,
+  vista «mongolfiera» nel punto peggiore del giro.
+
+### N · Cartolina, giro guidato e ritocchi (`fase-3-4-n-cartolina-giro`)
+- **Cartolina**: immagine ad alta risoluzione con cornice (Gravina in Puglia, luogo, indirizzo del
+  sito, attribuzioni OSM e Copernicus in breve), Web Share sul telefono; credito deciso dal committente.
+- **Giro guidato dei monumenti**: il mezzo sceglie le vie, anche i tratti a piedi; «Prossima
+  tappa», scheda a ogni tappa, «Esci dal giro». Prova sulle prime tre tappe in `interazioni.mjs`.
+- **Ritocchi**: schermata iniziale in orizzontale sul telefono, camera dopo il teletrasporto
+  (`rig.snap`), schede lunghe in verticale.
+
 ---
 
 ## 8. Domande aperte per il committente
