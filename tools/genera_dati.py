@@ -1374,6 +1374,9 @@ def extend_rims(river, dem_light):
         else:
             east[:0] = added_e[::-1]
             west[:0] = added_w[::-1]
+    # niente punti ripetuti (tratti lunghi zero): il diorama non saprebbe da che parte sta il canyon
+    east = [p for i, p in enumerate(east) if i == 0 or math.dist(p, east[i - 1]) > 1e-6]
+    west = [p for i, p in enumerate(west) if i == 0 or math.dist(p, west[i - 1]) > 1e-6]
     print(f'  cigli del canyon: {len(EAST_RIM)} → {len(east)} punti a est, {len(WEST_RIM)} → {len(west)} a ovest')
     return east, west
 
