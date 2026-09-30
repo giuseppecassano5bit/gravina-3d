@@ -679,7 +679,7 @@
       <button class="btn-primary" id="btn-start" type="button" disabled>Parti</button>
       <span class="status" id="status" role="status">Preparazione del diorama…</span>
     </div>
-    <p class="controls-hint" id="controls-hint">Agli incroci scegli la via con <kbd>←</kbd> <kbd>→</kbd> · <kbd>P</kbd> per la pausa: cambi mezzo o ti teletrasporti.</p>
+    <p class="controls-hint" id="controls-hint">Agli incroci scegli la via con <kbd>←</kbd> <kbd>→</kbd> · <kbd>Shift</kbd> tenuto per andare più veloce · <kbd>P</kbd> per la pausa: cambi mezzo o ti teletrasporti.</p>
     <div class="credit">
       <p class="credit__by">
         <span class="credit__label">Un progetto di</span>
@@ -715,6 +715,8 @@
         <dd>Scegli il mezzo (Fiat Panda 4x4 del 1999, Audi RS6 Avant, Lamborghini Huracán o trattore John Deere) e premi Parti: il mezzo va avanti da solo.</dd>
         <dt>Agli incroci</dt>
         <dd>Scegli la via con <kbd>←</kbd> <kbd>→</kbd> o toccando i cartelli marroni. Se non scegli, prosegue dritto.</dd>
+        <dt>Acceleratore</dt>
+        <dd>Sul computer, tieni premuto <kbd>Shift</kbd>: il mezzo va quasi al doppio della velocità e, lasciando, torna al suo passo. Agli incroci rallenta da solo e il cartello compare prima.</dd>
         <dt>A piedi</dt>
         <dd>I cartelli col pedone portano su passaggi e scalinate del centro storico: il mezzo si ferma, prosegui a piedi e lo ritrovi al tratto carrabile successivo.</dd>
         <dt>Camera</dt>
@@ -884,6 +886,10 @@ const CONFIG = {
     parkGap: 3.2,           // m: il mezzo si ferma a questa distanza dall'imbocco pedonale, e aspetta così all'uscita
     parkBrake: 2.6,         // m/s² di frenata verso l'imbocco pedonale
     stepOut: 0.9, stepIn: 0.7,   // s per scendere dal mezzo e per risalire
+    // Acceleratore (blocco E, solo su PC): con Shift tenuto premuto la crociera si moltiplica per
+    // `boost`, con una salita morbida (`boostRate`). Agli incroci il cartello si apre prima, in
+    // proporzione alla velocità, e il mezzo torna alla crociera: il tempo per scegliere resta quello di sempre.
+    boost: 1.8, boostRate: 1.6,
   },
 
   road: {
@@ -5661,6 +5667,8 @@ class Driver {
     this.running = false;
     this.paused = false;             // in pausa il mezzo frena e resta fermo
     this.pace = 1;                   // ritmo del mezzo scelto (VEHICLES[].pace)
+    this.boosting = false;           // acceleratore premuto (Shift, solo su PC)
+    this.boost = 0;                  // quanto è inserito, da 0 a 1 (sale e scende piano)
     this.decision = null;            // { node, options[], selected, straight }
     this.odometer = 0;
     // A piedi (blocco G): si muove la figurina, il mezzo resta parcheggiato (`car`) all'imbocco
@@ -5703,7 +5711,8 @@ class Driver {
 
   #advance(dt) {
     const D = CONFIG.drive;
-    if (!this.decision && this.remaining <= D.decisionDistance) this.#openDecision();
+    // A velocità più alta il cartello si apre prima, in proporzione: il tempo per scegliere non cambia.
+    if (!this.decision && this.remaining <= D.decisionDistance * Math.max(1, this.speed / (D.cruiseSpeed * this.pace))) this.#openDecision();
     const next = this.nextChoice;
     // Il prossimo tratto si fa a piedi: il mezzo si ferma a parkGap metri dall'imbocco.
     const parking = !this.onFoot && !this.edge.walk && !!next?.edge.walk;
@@ -5717,6 +5726,10 @@ class Driver {
     } else {
       // Velocità obiettivo: crociera, ponte, rallentamento agli incroci con scelta, passo a piedi.
       let target = (this.edge.bridge ? D.bridgeSpeed : D.cruiseSpeed) * this.pace;
+      // Acceleratore: non a piedi, non nelle gocce; con la scelta aperta si torna alla crociera.
+      const boost = this.boosting && !this.onFoot && !this.edge.turn && !parking && !(this.decision?.options.length > 1);
+      this.boost += ((boost ? 1 : 0) - this.boost) * damp(D.boostRate, dt);
+      target *= 1 + (D.boost - 1) * this.boost;
       if (this.edge.turn) target = Math.min(target, 4.5);
       if (this.decision?.options.length > 1 && this.remaining < D.slowDistance) target = Math.min(target, D.junctionSpeed * Math.min(1, this.pace));
       if (this.onFoot) target = D.walkSpeed;
@@ -7541,6 +7554,13 @@ async function main() {
   ui.el.btnRadio.addEventListener('click', toggleRadio);
   ui.el.btnNext.addEventListener('click', () => Radio.next());
   ui.el.radioVol.addEventListener('input', () => Radio.volume(+ui.el.radioVol.value));
+
+  // Acceleratore: Shift tenuto premuto, solo su PC (sul telefono no, per non rischiare rallentamenti).
+  if (!ui.isTouch) {
+    addEventListener('keydown', (ev) => { if (ev.key === 'Shift') driver.boosting = true; });
+    addEventListener('keyup', (ev) => { if (ev.key === 'Shift') driver.boosting = false; });
+    addEventListener('blur', () => { driver.boosting = false; });
+  }
 
   // Tastiera: frecce agli incroci, P / Spazio per la pausa, Esc per riprendere.
   addEventListener('keydown', (ev) => {

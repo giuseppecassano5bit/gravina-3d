@@ -3,7 +3,7 @@
  * pausa e ripresa da tastiera, minimappa, teletrasporto da etichetta 3D e da
  * elenco, cambio mezzo in pausa, pausa automatica a scheda nascosta, mezzo
  * ricordato alla riapertura, percorsi a piedi (sosta all'imbocco, figurina, pausa, ripartenza,
- * teletrasporto), camera libera e radio. Fallisce alla prima attesa non rispettata.
+ * teletrasporto), camera libera, acceleratore (solo su PC) e radio. Fallisce alla prima attesa non rispettata.
  */
 import { open } from './common.mjs';
 
@@ -144,6 +144,27 @@ if (freeSign) {
 await page.click('#btn-follow');
 await advance(0.3);
 check('«Segui il mezzo» riporta subito dietro', !(await cam()).free && await page.isHidden('#btn-follow'));
+// Acceleratore (blocco E, solo su PC): con Shift tenuto il mezzo va più veloce e lasciando torna al
+// suo passo; all'incrocio con scelta il cartello si apre prima e il tempo per scegliere non si accorcia.
+const drv = () => page.evaluate(() => { const d = window.gravina.driver; return { v: d.speed, open: !!d.decision && d.decision.options.length > 1, rem: d.remaining, edge: d.edge.id, cruise: window.gravina.CONFIG.drive.cruiseSpeed * d.pace }; });
+await page.evaluate(() => { const g = window.gravina; g.placeAt(760, -120, [1, 0]); g.rig.snap(g.driver); g.driver.decision = null; });
+await advance(4);
+const calm = await drv();
+await page.keyboard.down('Shift');
+let top = 0;                                                     // la velocità più alta in 5 s (tra un incrocio e l'altro)
+for (let k = 0; k < 25; k++) { await advance(0.2); top = Math.max(top, (await drv()).v); }
+check('con Shift tenuto il mezzo accelera', top > calm.cruise * 1.4, `crociera ${calm.cruise.toFixed(1)} m/s, con Shift fino a ${top.toFixed(1)} m/s`);
+let opened = null, t = 0;
+for (; t < 40 && !opened; t += 0.1) { const x = await drv(); if (x.open) opened = x; else await advance(0.1); }
+let told = 0;
+if (opened) { const e0 = opened.edge; for (; told < 20 && (await drv()).edge === e0; told += 0.1) await advance(0.1); }
+check('all’incrocio il cartello si apre prima e c’è tempo per scegliere', !!opened && opened.rem > 45 && told > 3.5 && await page.isVisible('.sign'),
+  opened ? `cartello a ${opened.rem.toFixed(0)} m, ${told.toFixed(1)} s per scegliere` : 'nessun incrocio');
+await page.keyboard.up('Shift');
+await advance(4);
+const calmAgain = await drv();
+check('lasciando Shift torna alla velocità normale', calmAgain.v < calm.cruise * 1.1, `${calmAgain.v.toFixed(1)} m/s`);
+
 await page.keyboard.press('m');
 await page.waitForTimeout(300);
 const radio = await page.evaluate(() => ({ on: window.gravina.Radio.on, label: document.getElementById('radio-label').textContent, pressed: document.getElementById('btn-radio').getAttribute('aria-pressed') }));
@@ -181,6 +202,8 @@ await browser.close();
   await touch('touchEnd', []);
   const two = await view();
   check('telefono: due dita allontanano la camera', two.dist > one.dist + 1, `${one.dist.toFixed(0)} → ${two.dist.toFixed(0)} m`);
+  await page.keyboard.down('Shift');
+  check('telefono: niente acceleratore', !(await page.evaluate(() => window.gravina.driver.boosting)));
   await browser.close();
 }
 process.exit(failures ? 1 : 0);
