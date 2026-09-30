@@ -81,7 +81,9 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
   della licenza WorldDEM-30 (`GEO.meta.quote`): schermata iniziale, mappa della pausa e, in
   breve, sotto la minimappa.
 - Budget (piano della fase 3.4, sezione 3): per fotogramma al massimo 400 000 triangoli su PC e
-  250 000 sul telefono, 90 e 70 draw call. Si misura con `node prestazioni.mjs`.
+  250 000 sul telefono, 90 e 70 draw call. Si misura con `node prestazioni.mjs`. I riquadri hanno
+  due livelli di dettaglio nella stessa mesh (sezione 6e, `Tiles.updateLod`): quello che si
+  aggiunge ai riquadri va anche nella versione lontana, semplificato, o solo in quella piena.
 - 60 fps su PC; comandi da tastiera e touch su telefono (verticale e orizzontale).
 
 ## Comandi

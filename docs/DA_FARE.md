@@ -10,8 +10,11 @@ del lavoro su due chat in [`PIANO_FASE_3_4.md`](PIANO_FASE_3_4.md).
 
 Ordine: I → D → E → L → M → N, dettagli e decisioni nella sezione 7 del piano.
 
-- [ ] **I · spazio sul telefono** (`fase-3-4-i-prestazioni`): due livelli di dettaglio per
-      riquadro, fotogramma peggiore ≤ 200 000 triangoli sul telefono e ≤ 300 000 su PC, vista «alta».
+- [x] **I · spazio sul telefono** (`fase-3-4-i-prestazioni`, PR #13, in attesa di approvazione):
+      due livelli di dettaglio per riquadro nella stessa mesh (terreno a maglia doppia, vie rade,
+      sagome semplificate, metà degli alberi; finestre e torrini solo da vicino), con isteresi e
+      senza draw call in più. Fotogramma peggiore da 243 500 a 164 700 triangoli sul telefono e da
+      335 400 a 235 500 su PC; «Pronto» circa 640 ms. Vista «alta» in `prestazioni.mjs`.
 - [ ] **D · centro storico** (`fase-3-4-d-centro-storico`).
 - [ ] **E · luoghi della città, scuole e chiese** (`fase-3-4-e-luoghi`): il committente sceglie le scuole.
 - [ ] **L · il Bosco da vicino** (`fase-3-4-l-bosco`): Area Quercus, strada fino al vivaio,
