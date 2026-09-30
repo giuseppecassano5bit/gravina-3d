@@ -60,7 +60,7 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
   decorative: non si inventano raccordi.
 - Nel centro storico le quote Copernicus fanno solo da **guida** (`GEO.rioni`, discesa dei rioni):
   canyon, cigli, falesia e gradoni restano disegnati a mano, e le vie non devono diventare più
-  ripide di prima (massimo circa 19%).
+  ripide di prima: le vie del mezzo stanno entro il 18% (`CONFIG.road.maxGrade`, blocco D).
 - **Musica**: solo brani originali generati dal codice (sezione 11b). Niente canzoni o campioni di
   terzi, anche se richiesti: sono protetti e pesano più dell'intero diorama.
 - Le vie cieche reali della città (`GEO.deco`) si disegnano ma **non si percorrono**. La

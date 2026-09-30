@@ -4399,6 +4399,7 @@ const Details = {
     this.keepOut = [];                   // zone senza finestre: davanti a portali e rilievi
 
     // Chiese: portale con timpano, gradino e oculo sul lato che guarda la via.
+    const agostino = DATA.locate("Parrocchia San Giovanni Battista in Sant'Agostino - Gravina in Puglia");
     GEO.buildings.forEach(([kind, nameIdx, , rings], index) => {
       const name = DATA.name(nameIdx);
       if (kind !== 1 || Buildings.rockChurches.has(index)) return;   // le chiese rupestri hanno il fronte scavato
@@ -4410,11 +4411,23 @@ const Details = {
       if (!front) return;
       const f = this.frame(front);
       const big = Math.abs(Plane.signedArea(outer)) > 250;
+      const cecilia = name === 'Chiesa di Santa Cecilia';
       if (purgatorio) this.purgatorio(f);
-      else this.churchPortal(f, big, !sanFrancesco);
+      else this.churchPortal(f, big, !sanFrancesco && !cecilia);
       if (sanFrancesco) this.sanFrancescoFront(f, front.len);
+      // Blocco D, dalle foto (Street View e Wikimedia Commons): Santa Cecilia ha una grande lunetta
+      // con la grata sopra la porta, Sant'Agostino i vasi di pietra agli angoli della facciata.
+      if (cecilia) this.lunette(f, 0, f.ground + 5.3, 1.1);
+      const top = tops.get(name ?? `#${index}`)?.top;
+      if (agostino && top && outer.some(([e, n]) => Math.hypot(e - agostino[0], n - agostino[1]) < 6)) {
+        for (const s of [-1, 1]) f.add(new THREE.LatheGeometry([[0, 0], [0.3, 0], [0.22, 0.2], [0.38, 0.55], [0.2, 0.9], [0.26, 1.0], [0, 1.1]].map(([a, b]) => new THREE.Vector2(a, b)), 6), this.col.light, s * (front.len / 2 - 0.5), top, 0.1);
+      }
       this.keepOut.push({ M: f.M, n: f.n, half: purgatorio ? 3.4 : big ? 2.6 : 2.2, top: f.ground + (purgatorio ? 9.6 : big ? 10.5 : 8.5) });
     });
+
+    // Chiesa del Gesù (nei dati è una casa): facciata bianca con il timpano e tre oculi (foto su Commons)
+    const gesu = DATA.building('Chiesa del Gesù'), gesuTop = tops.get('Chiesa del Gesù')?.top;
+    if (gesu && gesuTop) this.gesuFront(DATA.pairs(gesu[3][0]), gesuTop);
 
     // Palazzi: cornicione, fascia marcapiano e portale in bugnato.
     for (const name of ['Palazzo Ducale Orsini', 'Museo e Biblioteca Ettore Pomarici Santomasi']) {
@@ -4739,6 +4752,34 @@ const Details = {
     if (!oculus) return;
     f.add(new THREE.TorusGeometry(0.8 * s, 0.16 * s, 5, 14), light, 0, y + 7.3 * s, 0.12);
     f.add(new THREE.CylinderGeometry(0.78 * s, 0.78 * s, 0.08, 14).rotateX(Math.PI / 2), hole, 0, y + 7.3 * s, 0.04);
+  },
+
+  /** Lunetta: mezzo tondo scuro con la ghiera chiara e la grata. */
+  lunette(f, x, y, r) {
+    const { light, hole, iron } = this.col;
+    f.add(new THREE.CircleGeometry(r, 8, 0, Math.PI), hole, x, y, 0.05);
+    f.add(new THREE.TorusGeometry(r + 0.1, 0.14, 4, 8, Math.PI), light, x, y, 0.1);
+    f.box(r * 2 + 0.3, 0.2, 0.3, light, x, y - 0.2, 0.1);
+    for (const a of [0.5, 1, 1.5, 2, 2.6]) f.box(0.05, r * 0.95, 0.04, iron, x, y, 0.08, Math.PI / 2 - a);
+  },
+
+  /** CHIESA DEL GESÙ (1645): facciata bianca con il timpano in alto, tre oculi e il portale. */
+  gesuFront(outer, top) {
+    const front = this.frontEdge(outer, 4);
+    if (!front) return;
+    const f = this.frame(front), y = f.ground, w = front.len, { light, hole } = this.col;
+    const white = new THREE.Color('#f1ece0');
+    f.box(w - 0.1, top - y + 0.8, 0.08, white, 0, y - 0.8, 0.04);
+    for (const s of [-1, 1]) f.box(0.5, top - y, 0.18, light, s * (w / 2 - 0.3), y, 0.09);   // lesene
+    this.churchPortal(f, false, false);
+    const ped = new THREE.Shape();
+    ped.moveTo(-w / 2, 0); ped.lineTo(w / 2, 0); ped.lineTo(0, Math.min(2.2, w * 0.28)); ped.closePath();
+    f.add(new THREE.ExtrudeGeometry(ped, { depth: 0.35, bevelEnabled: false }), white, 0, top - 0.1, -0.1);   // timpano
+    for (const [x, yy, r] of [[0, top - 2.2, 0.55], [-w / 4, top - 3.8, 0.45], [w / 4, top - 3.8, 0.45]]) {
+      f.add(new THREE.TorusGeometry(r, 0.12, 4, 12), light, x, yy, 0.12);
+      f.add(new THREE.CylinderGeometry(r, r, 0.06, 12).rotateX(Math.PI / 2), hole, x, yy, 0.1);
+    }
+    this.keepOut.push({ M: f.M, n: f.n, half: w / 2 + 0.2, top: top + 1 });
   },
 
   /**

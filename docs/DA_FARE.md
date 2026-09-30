@@ -15,7 +15,17 @@ Ordine: I → D → E → L → M → N, dettagli e decisioni nella sezione 7 de
       sagome semplificate, metà degli alberi; finestre e torrini solo da vicino), con isteresi e
       senza draw call in più. Fotogramma peggiore da 243 500 a 164 700 triangoli sul telefono e da
       335 400 a 235 500 su PC; «Pronto» circa 640 ms. Vista «alta» in `prestazioni.mjs`.
-- [ ] **D · centro storico** (`fase-3-4-d-centro-storico`, in corso): Porta San Michele, Piazza Scacchi, Quattro Fontane, chiese, Sette Camere, pendenze.
+- [x] **D · centro storico** (`fase-3-4-d-centro-storico`, PR #14, in attesa di approvazione):
+      Porta San Michele (nicchia con San Michele all'imbocco di Via Matteotti, facciate dei due
+      palazzi d'angolo), Piazza Scacchi (busti di Musacchio e Scacchi, ulivo, aiuole e sedute),
+      Quattro Fontane (dalle lapidi: 1779, restauro 1859), campanile e facciata di San Francesco,
+      campanile della Cattedrale in fondo a est, lunetta di Santa Cecilia, facciata del Gesù, vasi
+      di Sant'Agostino, grotte delle Sette Camere; schede nuove (Porta San Michele, Piazza Scacchi,
+      Quattro Fontane, San Nicola, Bastione, Sette Camere), Piazzetta Fondovico e «Fondovito» sulla
+      targa. Vie del mezzo nel centro storico entro il 18%; tolto il gradino di 15–18 m a sud della
+      città. 264 KB compressi (+9), telefono 175 300 triangoli, PC 246 000, draw call invariate.
+- [ ] **Peso**: dopo il blocco D restano circa 16 KB compressi (tetto 280) per E, L, M e N.
+      Prima del blocco M va deciso se alzare il tetto o dove risparmiare.
 - [ ] **E · luoghi della città, scuole e chiese** (`fase-3-4-e-luoghi`): il committente sceglie le scuole.
 - [ ] **L · il Bosco da vicino** (`fase-3-4-l-bosco`): Area Quercus, strada fino al vivaio,
       Base Scout, area pic-nic, scritta «SIC DIFESA GRANDE», giro a piedi, suoni del bosco.
@@ -143,22 +153,29 @@ commerciali e protette: il committente ha scelto musica ambient originale, gener
 ## 4. Da sistemare o verificare (emerso finora)
 
 **Fedeltà**
-- [ ] Campanile di **San Francesco** (tre ordini, circa 40 m): non modellato perché dai dati non
-      si ricava dove sia. Serve una foto o una pianta.
-- [ ] Posizione esatta del **campanile della Cattedrale** lungo il fianco sud (oggi nella metà
-      verso est, a filo del muro) e del secondo rosone: verificare su foto.
-- [ ] **Addolorata**: nessuna fonte affidabile; nei dati c'è anche una "Chiesa dell'Annunziata"
-      nello stesso punto. Capire se sono la stessa chiesa.
-- [ ] In locale si leggono direttamente Wikipedia, GravinaOggi, Stanze Orsini e Algramà: vale la
-      pena rileggere le schede della fase 3 sulle pagine intere (nel cloud erano bloccate).
-- [ ] Le **abitazioni rupestri** sono 20, le fonti ne contano circa ottanta.
+- [x] Campanile di **San Francesco**: modellato nel blocco D, all'angolo nord della facciata (Street View).
+- [x] **Campanile della Cattedrale** in fondo a est del fianco sud e secondo rosone a ovest (blocco D, Street View e foto).
+- [ ] **Addolorata e Annunziata**: stessa sagoma in Via Borgo per OSM, Overture e Google; il
+      catalogo dei Beni Culturali ha l'Addolorata in «Via Borgo Vecchio», GravinaOggi l'Annunziata
+      sconsacrata nella «vecchia via Borgo». Nessuna fonte dice che siano la stessa chiesa: resta
+      l'etichetta. Se il committente lo sa, si può decidere il nome.
+- [x] Schede rilette sulle fonti per i luoghi nuovi del blocco D. Le schede della fase 3 restano
+      quelle con le fonti nel README.
+- [x] **Abitazioni rupestri**: restano 20 sui gradoni (né dati né fonti le collocano una per una);
+      nel blocco D le grotte fitte delle Sette Camere, dove la posizione c'è (OSM e foto).
+- [ ] **Altre chiese** (Santa Teresa, Santa Sofia, San Nicola, Addolorata): portale generico,
+      perché su Street View i vicoli stretti non mostrano bene le facciate. Servono foto.
 
 **Terreno e percorso**
 - [x] Le scalinate reali avevano pochi gradini perché le quote erano stilizzate: con le quote
       reali (blocco G) quella di Via giudice Montea ne ha 32 invece di 4.
-- [ ] Pendenze ripide già presenti prima della fase 3: sentiero ovest verso Botromagno (59%),
-      Via giudice Montea lato ovest (29%), Via Fontana la Stella (20%). Guardare come si comporta
-      il mezzo e, se serve, smussare di più le quote su quei tratti.
+- [x] Pendenze (blocco D): nel centro storico le vie del mezzo stanno entro il 18%
+      (`CONFIG.road.maxGrade`, Via Fontana la Stella dal 21%). Il sentiero verso Botromagno e la
+      scalinata di Via giudice Montea sono tratti a piedi e restano ripidi.
+- [x] Gradino di 15–18 m a sud della città (da Via Goito a Via Tripoli): punti ripetuti nel ciglio
+      est, corretto nel blocco D.
+- [ ] Fuori dal centro storico, a nord, alcune vie sulle quote reali sono ripide (Via Savoia,
+      Via Giardini, Corso Aldo Moro, 29–37%): da guardare nel blocco E.
 
 **Camera e interfaccia**
 - [ ] Dopo il teletrasporto la camera a volte parte troppo vicina a un tetto (screenshot
