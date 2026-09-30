@@ -53,13 +53,23 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
   la strada verso il bosco, circa 5,6 km) ridotto in scala a circa 700 m. Gli angoli di svolta
   restano quelli reali, le lunghezze si accorciano. Nessun'altra via si comprime: la strada del
   P.I.P. - Zona Artigianale resta a scala reale.
+- **A piedi** (blocco G): marciapiedi, passaggi e scalinate reali del centro storico (flag 32,
+  `WALK` in `genera_dati.py`) si percorrono con la figurina, solo se chiudono un anello con altre
+  vie reali. Il mezzo si ferma all'imbocco e aspetta al tratto carrabile d'uscita (eccezione: ci
+  compare, fuori dall'inquadratura). Le scalinate che nei dati finiscono nel vuoto restano
+  decorative: non si inventano raccordi.
+- Nel centro storico le quote Copernicus fanno solo da **guida** (`GEO.rioni`, discesa dei rioni):
+  canyon, cigli, falesia e gradoni restano disegnati a mano, e le vie non devono diventare più
+  ripide di prima (massimo circa 19%).
+- **Musica**: solo brani originali generati dal codice (sezione 11b). Niente canzoni o campioni di
+  terzi, anche se richiesti: sono protetti e pesano più dell'intero diorama.
 - Le vie cieche reali della città (`GEO.deco`) si disegnano ma **non si percorrono**. La
   sterrata reale del Castello Svevo è percorribile: con la strada di servizio e la vicinale
   chiude un anello (flag 8, `CASTLE_BOX` in `genera_dati.py`).
 - I mezzi sono i quattro scelti dal committente: Fiat Panda 4x4 del 1999, Audi RS6 Avant,
   Lamborghini Huracán, trattore John Deere. Stilizzati e senza loghi.
-- Niente sulla carreggiata: `npm run simula` deve dare `casesullastrada = 0` e
-  `dettaglisullastrada` vuoto.
+- Niente sulla carreggiata, nemmeno sui tratti a piedi: `npm run simula` deve dare
+  `casesullastrada = 0` e `dettaglisullastrada` vuoto.
 - Il giro continua all'infinito senza vicoli ciechi: `TrackNetwork.validate()` e
   `npm run simula` devono restare verdi.
 - Unico credito: **Giuseppe Cassano**, nella schermata iniziale, nel pannello «Il progetto» e
@@ -97,7 +107,9 @@ python -m venv .venv
 ```
 
 Debug nel browser: `index.html?debug` espone `window.gravina` (`advance`, `placeAt`,
-`useVehicle`, `pause`, `resume`, `goTo`, `rig`, `CONFIG`, `Buildings`, `Details`, `Scenery`…).
+`useVehicle`, `pause`, `resume`, `goTo`, `rig`, `driver`, `Radio`, `CONFIG`, `Buildings`, `Details`,
+`Scenery`…). A piedi: `driver.onFoot`, `driver.car` (dove aspetta il mezzo); camera libera:
+`rig.drag(dx, dy)`, `rig.zoom(f)`, `rig.follow()`.
 Guarda sempre gli screenshot prima di dire che una modifica è finita.
 
 ## Come si lavora

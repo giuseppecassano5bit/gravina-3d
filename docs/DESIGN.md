@@ -205,10 +205,19 @@ si apre entro 60 m dal centro; il rifugio ha solo l'etichetta (nessuna fonte).
   oltre il ciglio tracciato a mano, cioè sull'altopiano; nella realtà i rioni scendono verso la
   gravina (la Calata Grotte San Michele scende dal Fondovico; da Piazza Pellicciari una scalinata
   attraversa il rione fino a San Michele). Così, lungo il tratto di ciglio di ogni rione, il
-  terreno scende dolcemente verso il ciglio: 8 m nel Piaggio (a partire da 80 m dal ciglio),
-  12 m nel Fondovico (da 170 m, cioè da Piazza Pellicciari). Sotto il ciglio i gradoni partono da
-  quella quota. Cattedrale, Piazza Benedetto XIII e testata del ponte restano fuori; le vie nuove
-  in pendenza arrivano al 14%.
+  terreno scende dolcemente verso il ciglio. Sotto il ciglio i gradoni partono da quella quota, e
+  dove il rione scende molto la falesia si abbassa. Cattedrale, Piazza Benedetto XIII e testata del
+  ponte restano fuori.
+* **Quote reali come guida** (blocco G, `GEO.rioni`). Quanto scende il rione, e da quale distanza
+  dal ciglio, lo misura la pipeline sulle quote Copernicus ogni 15 m lungo il ciglio est
+  (`rioni_profile`): l'altopiano a 220–300 m dal ciglio contro la quota a 45 m dal ciglio, più
+  metà della pendenza che resta. I 45 m vicino al ciglio non si usano: a 30 m di maglia, e dopo lo
+  smusso, il canyon "sbava" dentro le case e la discesa verrebbe esagerata (30–40 m). Per lo
+  stesso motivo se ne usa il 45% (`RIONI_SCALA`): Piaggio fino a 17 m (prima 8 m), Fondovico circa
+  12 m come prima, con la forma presa dai dati (più profondo a sud e a metà Piaggio). Nel diorama
+  `rioneDrop` allunga larghezza e dissolvenza quando il rione scende di più (11 e 7,5 volte la
+  profondità), così le vie restano entro le pendenze di prima: massimo 19% vicino alla testata del
+  ponte. Restano disegnati a mano: linee dei cigli, fondo, falesia, gradoni e sponda di Botromagno.
 * Il canyon e i rioni sono disegnati a mano solo dentro `CONFIG.terrain.proc` (est −360…460,
   nord −380…600); fuori ci sono le quote reali Copernicus, con il letto del torrente inciso nella
   valle (`Ravine.bed`). Tra i due, una sfumatura di 110 m (`Terrain.procWeight`).
@@ -234,7 +243,7 @@ si apre entro 60 m dal centro; il rifugio ha solo l'etichetta (nessuna fonte).
 | Ponte Acquedotto | Prospetto estruso con **archi su due ordini**: 4 grandi arcate sul canyon più una fila di archetti sotto l'impalcato, circa 25 archi come l'originale. **Lesene** sui piloni, **due cornici** marcapiano, parapetti, larghezza reale 5,5 m. |
 | Fontana della Stella | Muro con nicchia ad arco, cornice, vasca con l'acqua, accanto alla testata est del ponte e fuori dalla strada (forma stilizzata). |
 | Belvederi | Parapetti in ferro sul ciglio, nei tre belvederi dei dati, solo dove non c'è la strada. |
-| Scalinate | Le 7 scalinate reali: gradini di tufo con alzate da 16 cm che seguono il terreno e parapetti bassi. Si guardano soltanto e si fermano prima delle vie. |
+| Scalinate | Le 7 scalinate reali: gradini di tufo con alzate da 16 cm che seguono il terreno e parapetti bassi, e si fermano prima delle vie. Due si percorrono a piedi (blocco G): quella di Via giudice Montea (32 gradini) e quella tra Via Lettieri e Via Fontana la Stella. Le altre cinque nei dati finiscono nel vuoto e si guardano soltanto. |
 | Abitazioni rupestri | 20 grotte chiuse da una fronte in muratura (tufo o calce) con porta e finestrella, sui salti dei gradoni lato città, lontano da vie ed edifici. Le fonti ne contano circa ottanta sui pendii. |
 | Lanterne | Lanterne a muro accese, ogni ~16 m nelle vie entro 70 m dai monumenti (circa 100). |
 | Regola | Nessun dettaglio sulla carreggiata: la prova `npm run simula` controlla che nessun vertice di portali, campanile, scalinate, lanterne e parapetti stia sopra una via tra 0,3 e 3,2 m d'altezza (`dettaglisullastrada` vuoto). Nei vicoli i dettagli sporgono al massimo 0,3 m. |
@@ -288,6 +297,30 @@ riusato: il cambio è istantaneo.
   - sotto, il prossimo monumento lungo quella via ("verso Chiesa del Purgatorio"), oppure il rione.
 * **Targa in marmo**: via corrente più rione (Centro storico, Rione Piaggio, Rione Fondovico anche sulla discesa verso il ciglio, Madonna della Stella · Botromagno), e "percorso pedonale" dove serve.
 * Le quote delle strade sono smussate (media mobile di ±6 m), così i gradoni del terreno non si sentono sotto le ruote.
+* Alla testata est del ponte il **ponte ha la precedenza** sulla scelta "più dritta".
+
+### 6b. A piedi (fase 3.4, blocco G)
+
+* **Rete**: marciapiedi, passaggi e scalinate del centro storico (`WALK` in `genera_dati.py`,
+  flag 32) entrano nella rete solo se chiudono un anello con le vie: 19 tratti reali, 584 m, di cui
+  2 scalinate (70 m); 7 anelli in più. Larghi 1,6–2,4 m: non ritagliano le case come una via.
+* **Gocce**: dove una via carrabile continua solo a piedi, la goccia lascia scegliere se scendere o
+  tornare indietro. In fondo a Via giudice Montea (verso la scalinata), Via Civita e Via Matteotti
+  la goccia non ci sta: lì si prosegue per forza a piedi. `validate()` controlla che ogni gruppo di
+  tratti pedonali arrivi a una via carrabile.
+* **Scendere**: quando l'uscita scelta è a piedi, il mezzo frena e si ferma a 3,2 m dall'imbocco;
+  la figurina scende accanto alla portiera (0,9 s) e cammina a 2,6 m/s (più svelta del passo vero,
+  1,4 m/s, per non annoiare). Sulle scalinate segue i gradini.
+* **Risalire**: appena si sceglie un'uscita carrabile, il mezzo va ad aspettare lì, 3,2 m dopo
+  l'incrocio e girato nel verso giusto (nella realtà ci arriverebbe per altre vie). Si sposta solo
+  quando il parcheggio di prima è fuori dall'inquadratura, o quando la figurina è a meno di 16 m.
+* **Figurina** (`Walker`): un visitatore stilizzato con cappello di paglia e zaino, circa 200
+  triangoli in una mesh sola, un po' più grande del vero (×1,2). Gambe e braccia oscillano
+  spostando i vertici attorno ad anca e spalla.
+* **Interfaccia**: cartelli con il pedone e "a piedi · …" (o "al mezzo · …" per tornare); targa
+  "percorso pedonale" col pittogramma; nella minimappa i tratti pedonali sono tratteggiati, la
+  figurina è un pallino con la direzione e il mezzo parcheggiato una freccia più piccola.
+* Pausa, teletrasporto (la figurina risale) e cambio mezzo funzionano anche a piedi.
 
 ---
 
@@ -296,10 +329,37 @@ riusato: il cambio è istantaneo.
 * **Vetrina** all'apertura, a due tempi (`CONFIG.camera.showroom`): per 9 s la camera ondeggia piano attorno al tre quarti posteriore del mezzo fermo, dal lato più aperto, e guarda la strada davanti; poi un volo a gru di 3,5 s porta a un **campo lungo dal canyon**, a sud del ponte, con le arcate su due ordini e il mezzo sulla testata; dopo 10 s si torna al primo piano. Scegliendo un mezzo si torna subito al primo piano. Pose diverse per schermi orizzontali e verticali, calcolate rispetto all'asse del ponte.
 * **Inseguimento dall'alto** (18 m sopra il mezzo, 12 m dietro; un po' più alto per il trattore): si vede la strada tra i tetti, come in un plastico.
 * **Tetti**: se un tetto si mette tra la camera e il mezzo, o la camera finisce a ridosso di un tetto, la camera sale (fino a 22 m in più) e si avvicina in pianta. Usa una griglia dei tetti (celle da 10 m) con la quota di ogni edificio e arco.
-* **Pausa**: vista dall'alto che gira piano sopra il mezzo.
+* **Giro automatico** (blocco G, `CONFIG.camera.auto`): mentre il mezzo avanza la camera passa
+  piano da un'inquadratura all'altra attorno al mezzo: dietro, tre quarti a sinistra, fianco destro,
+  tre quarti davanti, tre quarti a destra, con 3–7 s per inquadratura. Negli ultimi 22 m prima di un
+  incrocio con scelta torna dietro, per vedere dove si va; si ferma durante le panoramiche.
+* **Camera libera** (blocco B, fatto nel blocco G): trascinando col mouse o con un dito si gira
+  attorno al mezzo (inclinazione 10–80°), con la rotella o due dita si cambia la distanza (8–70 m).
+  Sotto i 6 px è un tocco. Dopo 4 s senza tocchi la camera torna dietro in circa 1,5 s; il pulsante
+  **Segui il mezzo** (solo con la camera libera) la riporta subito. Tetti e terreno valgono anche
+  qui; le panoramiche si sospendono.
+* **A piedi**: più bassa e vicina (6,5 m dietro, 4,6 m sopra), sale al massimo di 15 m sui tetti.
+* **Pausa**: vista dall'alto che gira piano sopra il mezzo; si gira trascinando e si zooma. Non
+  entra più nei tetti delle palazzine (stesso `#roofLift` dell'inseguimento).
 * **Pannelli**: l'inquadratura si sposta (view offset) nella parte di schermo libera dal pannello iniziale o dal menu di pausa.
 * **Ponte**: la camera entra nel canyon, 80 m a monte lungo il torrente, all'altezza dell'impalcato.
 * **Ciglio**: sulle vie che corrono lungo il ciglio (Via giudice Montea, Via Fontana la Stella, il sentiero ovest) fa una ripresa "da drone" di tre quarti dall'alto verso il canyon, con 25 s di pausa tra una e l'altra.
+
+### 7a. Radio (fase 3.4, blocco G)
+
+Il committente aveva chiesto le canzoni di Non-Stop-Pop FM (la radio di GTA V): sono brani
+commerciali protetti, e un solo MP3 pesa più di tutto il diorama. Ha scelto musica **ambient
+rilassante, alla Minecraft**, generata dal codice (sezione 11b, `Radio`), senza file:
+
+* sei brani originali con titoli di Gravina (Tufo, Chianche, Botromagno, Fondovico, Acquedotto,
+  Piaggio), ciascuno con tonalità, passo (50–62 battiti al minuto), timbro e accordi suoi;
+* pianoforte, celesta o flauto a sintesi (oscillatori con attacco breve e coda lunga), basso
+  lento a ogni cambio d'accordo, tappeto morbido, riverbero da una coda di rumore generata;
+* note rade scelte da un generatore con seme: ogni brano torna uguale; respiri ogni otto battute
+  e un finale che sfuma; 32 battute a brano (2–3 minuti), poi il successivo;
+* pulsante **Musica** sotto Pausa (spenta all'avvio: i browser non permettono la musica prima di
+  un gesto), tasto **M**, brano successivo e volume (sul telefono bastano i tasti del volume).
+  Se era accesa, si riaccende premendo Parti. Tace quando la scheda è nascosta.
 
 ---
 
@@ -334,16 +394,19 @@ Misure con `tools/test/prestazioni.mjs` (Mac M4, GPU vera, Chromium headless), n
 partenza, centro, Piazza Scacchi, pausa e panoramica sulla città (il caso peggiore).
 "Per fotogramma" è il massimo tra le viste, senza il passaggio delle ombre.
 
-| Voce | Fase 3 (solo centro storico) | Fase 3.4, città intera | Tetto |
-|---|---|---|---|
-| `index.html` | 390 KB (124 KB compressi) | 737 KB (269 KB compressi) | ≤ 900 KB (≤ 280) |
-| Costruzione fino a "Parti" | 282 ms | circa 500 ms | ≤ 1,5 s |
-| Memoria JavaScript | 41 MB | circa 100 MB | ≤ 150 MB |
-| Città completa (in sottofondo) | — | circa 900 ms | — |
-| Triangoli nella scena | 267 000 | 543 000 (telefono 483 000) | ≤ 650 000 |
-| Triangoli per fotogramma, PC | 267 000 | 334 000 | ≤ 400 000 |
-| Triangoli per fotogramma, telefono | 267 000 | 242 000 | ≤ 250 000 |
-| Draw call, PC / telefono | 39 / 38 | 69 / 54 | ≤ 90 / ≤ 70 |
+| Voce | Fase 3 (solo centro storico) | Fase 3.4, città intera | Dopo il blocco G | Tetto |
+|---|---|---|---|---|
+| `index.html` | 390 KB (124 KB compressi) | 737 KB (269 KB compressi) | 593 KB (251 KB compressi) | ≤ 900 KB (≤ 280) |
+| Costruzione fino a "Parti" | 282 ms | circa 500 ms | circa 520 ms | ≤ 1,5 s |
+| Memoria JavaScript | 41 MB | circa 100 MB | 112 MB (telefono 91) | ≤ 150 MB |
+| Città completa (in sottofondo) | — | circa 900 ms | circa 900 ms | — |
+| Triangoli nella scena | 267 000 | 543 000 (telefono 483 000) | 571 000 (telefono 505 000) | ≤ 650 000 |
+| Triangoli per fotogramma, PC | 267 000 | 334 000 | 335 000 | ≤ 400 000 |
+| Triangoli per fotogramma, telefono | 267 000 | 242 000 | 243 500 | ≤ 250 000 |
+| Draw call, PC / telefono | 39 / 38 | 69 / 54 | 69 / 48 | ≤ 90 / ≤ 70 |
+
+Nel blocco G il peso è sceso nonostante figurina, camera e radio: nodi, vie, vie decorative ed
+edifici del centro storico ora usano il `CODEC` (a 0,1 m, senza perdite), da 90 a 55 KB compressi.
 
 | Voce | Valore |
 |---|---|
@@ -364,12 +427,14 @@ partenza, centro, Piazza Scacchi, pausa e panoramica sulla città (il caso peggi
 | 3 | **Architettura e fedeltà**: Cattedrale e Purgatorio sulle fonti, San Michele e Madonna della Stella scavate nella roccia, rioni a gradoni in discesa con scalinate reali e abitazioni rupestri, altezze affidabili o stimate per zona, schede di altre cinque chiese, vetrina con il campo lungo sulle arcate | ✅ approvata il 28/09/2026 |
 | 3.4 C | **Città intera**: zolla di 2,9 × 3,1 km a riquadri, 80 km di vie, 1 828 edifici della città, quote Copernicus, binari, Castello Svevo, mappe vettoriali con zoom | ✅ (PR #8) |
 | 3.4 F | **Strade per il Bosco Difesa Grande e il P.I.P.**: tre zolle, tracciato reale compresso, bosco di querce | ✅ (PR #10) |
-| 3.4 G | **Percorsi a piedi e quote reali del centro storico** | ⏳ |
-| 4 | Rifinitura: musica procedurale (Web Audio, 40%, muto), transizioni di camera, prove su telefoni reali | ⏳ |
+| 3.4 G | **Percorsi a piedi e quote reali del centro storico**, con la camera attorno al mezzo (blocco B) e la radio ambient | ⏳ (PR #12) |
+| 4 | Rifinitura: luci, prove su telefoni reali, restyling | ⏳ |
 
 ### Da decidere insieme (fase 3, punto 6)
 
-**Percorsi pedonali e scalinate.** Nei dati ci sono 20 tratti di marciapiede o passaggio
+**Percorsi pedonali e scalinate.** *Fatto nella fase 3.4 (blocco G), con la figurina a piedi
+(sezione 6b). Sui dati di oggi entrano 19 tratti (584 m) e 2 scalinate su 7: le altre finiscono
+nel vuoto.* La stima qui sotto era fatta sul diorama piccolo. Nei dati ci sono 20 tratti di marciapiede o passaggio
 pedonale (1,7 km), 7 scalinate (165 m) e 8 sentieri (3,2 km). Aggiungendo marciapiedi e
 scalinate alla rete, sempre senza vicoli ciechi, si passa da 157 a 178 tratti e da 8,96 a
 9,83 km, con circa 1 km pedonale in più (i sentieri non aggiungono anelli). Tre strade possibili:
@@ -386,7 +451,7 @@ Santuario della Madonna delle Grazie con la facciata a stemma (circa 360 m a nor
 in più per lato l'area cresce di oltre il 50%: più edifici e triangoli, da misurare sui telefoni.
 
 **Quote reali.** *Nella fase 3.4 (blocco C) le quote Copernicus disegnano la città e la
-campagna; per ciglio, gradoni e rioni del centro storico resta da fare (blocco G).* Il modello di
+campagna; nel blocco G guidano la discesa dei rioni del centro storico (sezione 3).* Il modello di
 elevazione Copernicus GLO-30 (30 m, licenza libera con
 attribuzione) è raggiungibile dal bucket S3 pubblico. Si potrebbe usare nello script per tarare
 ciglio, gradoni e discesa dei rioni, oggi tracciati a mano, e scrivere le quote in `GEO`. A

@@ -110,6 +110,8 @@ THEMES = {                                # nome cache → tema/tipo Overture
 }
 
 DRIVABLE = {'secondary', 'tertiary', 'residential', 'living_street', 'pedestrian', 'unclassified'}
+# Tratti a piedi (blocco G): solo nel centro storico, e solo quelli che chiudono un anello con le vie.
+WALK = {'footway', 'steps'}
 # Vie cieche da conservare (con inversione a goccia) perché portano a luoghi importanti.
 KEEP_DEAD_ENDS = {'Piazza Benedetto XIII', 'Via Civita', 'Calata Grotte San Michele',
                   'Larghetto San Francesco', 'Via Matteotti'}
@@ -333,7 +335,9 @@ def build_edges(segments, connectors):
             cls = 'track'
         # vie senza classe (per lo più traverse cieche dei quartieri nuovi): solo da guardare
         deco = cls == 'unknown'
-        if cls not in DRIVABLE and not on_bridge_route and not near_bridge_west and not to_castle and not deco:
+        # marciapiedi, passaggi e scalinate del centro storico: si percorrono a piedi (blocco G)
+        walk = cls in WALK and not on_bridge_route and not near_bridge_west and all(inside(p, Z0) for p in pts)
+        if cls not in DRIVABLE and not on_bridge_route and not near_bridge_west and not to_castle and not deco and not walk:
             continue
         flags = s.get('road_flags') or []
         cuts = [(c['at'], c['connector_id']) for c in s.get('connectors', [])]
@@ -357,7 +361,7 @@ def build_edges(segments, connectors):
             edges.append({
                 'a': c0, 'b': c1, 'poly': poly, 'cls': cls, 'name': name,
                 'bridge': any(a <= mid <= b for a, b in spans['is_bridge']),
-                'foot': cls not in DRIVABLE and not to_castle and not deco, 'deco': deco,
+                'foot': cls not in DRIVABLE and not to_castle and not deco, 'deco': deco, 'walk': walk,
             })
     # posizioni dei nodi: connettori reali o punti di taglio
     pos = dict(conn_pos)
@@ -419,11 +423,11 @@ def teardrop(leaf, direction, r):
     return q, [leaf, P(0.9, -0.85), P(1.9, -0.75), q], [q, P(1.9, 0.75), P(0.9, 0.85), leaf]
 
 
-def add_turnarounds(core, extra, pos, buildings_tree, buildings):
+def add_turnarounds(core, extra, pos, buildings_tree, buildings, prune=True):
     """
     Aggiunge le vie cieche selezionate. A ogni foglia prova a inserire
     un'inversione a goccia che non tocchi gli edifici; se non c'è spazio,
-    pota l'ultimo tratto e riprova sulla nuova foglia.
+    pota l'ultimo tratto e riprova sulla nuova foglia (con prune=False la lascia com'è).
     """
     edges = core + extra
     loops = 0
@@ -431,7 +435,7 @@ def add_turnarounds(core, extra, pos, buildings_tree, buildings):
     area = ALL_ROADS
     while True:
         d = degrees(edges)
-        leaves = [n for n, k in d.items() if k == 1]
+        leaves = [n for n, k in d.items() if k == 1 and (prune or n not in tried)]
         if not leaves:
             return edges, loops
         for leaf in leaves:
@@ -457,7 +461,9 @@ def add_turnarounds(core, extra, pos, buildings_tree, buildings):
                             break
                     if placed:
                         break
-            if placed:
+            if placed or not prune:
+                if not placed:
+                    break
                 q, right, left = placed
                 qid = f'inv:{leaf}'
                 pos[qid] = q
@@ -535,7 +541,7 @@ def merge_chains(edges):
                 continue
             e1, e2 = inc[n]
             if e1 is e2 or e1['name'] != e2['name'] or e1['bridge'] or e2['bridge'] \
-                    or e1['foot'] != e2['foot'] or e1.get('turn') or e2.get('turn') \
+                    or e1['foot'] != e2['foot'] or e1.get('walk') != e2.get('walk') or e1.get('turn') or e2.get('turn') \
                     or (e1['cls'] == 'track') != (e2['cls'] == 'track'):
                 continue
             p1 = e1['poly'] if e1['b'] == n else e1['poly'][::-1]
@@ -626,15 +632,29 @@ def build_network(data, buildings):
     edges, pos = build_edges(data['segment'], data['connector'])
     edges = [e for e in edges if e['a'] != e['b'] and shapely.contains_xy(CITY_ROADS, *np.array(e['poly']).T).all()]
     edges, pos = merge_close_nodes(edges, pos)
-    drivable = [e for e in edges if not e['deco']]
-    core = two_core(drivable)
+    drivable = [e for e in edges if not e['deco'] and not e.get('walk')]
+    # Marciapiedi, passaggi e scalinate del centro storico (blocco G) contano per gli anelli: una via
+    # carrabile resta se chiude un anello anche passando a piedi.
+    walk = [e for e in edges if e.get('walk')]
+    core = two_core(drivable + walk)
     extra = [e for t in dead_end_trees(drivable, core)
              if any(x['name'] in KEEP_DEAD_ENDS for x in t) and all(inside(midpoint(x['poly']), Z0) for x in t) for e in t]
     extra += bosco_road(core, pos)
     tree = STRtree(buildings)
     net, loops = add_turnarounds(core, extra, pos, tree, buildings)
-    net = two_core(net)
+    # Dove una via carrabile continua solo a piedi, la goccia lascia scegliere: si scende o si torna
+    # indietro. Se la goccia non ci sta, la via resta e in fondo si prosegue per forza a piedi.
+    drive, more = add_turnarounds([e for e in net if not e.get('walk')], [], pos, tree, buildings, prune=False)
+    net = two_core(drive + [e for e in net if e.get('walk')])
     net = largest_component(net)
+    loops += more
+    for n, k in degrees([e for e in net if not e.get('walk')]).items():
+        if k == 1:
+            e = next(x for x in net if n in (x['a'], x['b']) and not x.get('walk'))
+            print(f'  in fondo a {e["name"] or "una via senza nome"} ({pos[n][0]:.0f}, {pos[n][1]:.0f}) si prosegue solo a piedi')
+    ped = [e for e in net if e.get('walk')]
+    print(f'  a piedi: {len(ped)} tratti su {len(walk)} ({sum(length(e["poly"]) for e in ped):.0f} m), '
+          f'di cui scalinate {sum(e["cls"] == "steps" for e in ped)} ({sum(length(e["poly"]) for e in ped if e["cls"] == "steps"):.0f} m)')
     used = {id(e) for e in net}
     net = merge_chains(net)
     # Decorative: tutto ciò che resta fuori dalla rete, nella città moderna (il centro storico resta com'era).
@@ -725,6 +745,7 @@ URBAN_WIDTH = {0: 14.0, 1: 12.0, 2: 10.0, 3: 8.0, 4: 7.0, 5: 3.2, 6: 3.6}
 RURAL_WIDTH = {0: 7.5, 1: 7.0, 2: 6.0, 3: 5.0, 4: 5.0, 5: 3.2, 6: 3.6}
 URBAN_RAY = 11.0          # m: nella città moderna le facciate si cercano più lontano
 BRIDGE_WIDTH, TURN_WIDTH = 5.5, 3.6
+WALK_WIDTH, WALK_MIN = 2.4, 1.6   # m: i tratti a piedi sono stretti come i vicoli, e non ritagliano le case
 MIN_WIDTH = 3.4           # m: il mezzo più largo (il trattore, circa 2,4 m) passa con margine
 FACADE_GAP = 0.35         # m liberi tra il bordo della carreggiata e le facciate
 MAX_SHIFT = 1.6           # m: spostamento massimo della mezzeria verso il centro del vicolo
@@ -797,6 +818,8 @@ def in_z0(e):
 def full_width(e):
     """Larghezza piena della via, prima di restringerla tra le facciate."""
     code = CLASS_CODE.get(e['cls'], 2)
+    if e.get('walk'):
+        return WALK_WIDTH
     if in_z0(e):
         return CLASS_WIDTH[code]
     return (URBAN_WIDTH if e.get('urban') else RURAL_WIDTH)[code]
@@ -862,7 +885,7 @@ def fit_width(e, tree, polys):
             gaps.append(d[0] + d[1])
     if not gaps:
         return full
-    return round(max(MIN_WIDTH, min(full, float(np.quantile(gaps, 0.2)) - 2 * FACADE_GAP)), 1)
+    return round(max(WALK_MIN if e.get('walk') else MIN_WIDTH, min(full, float(np.quantile(gaps, 0.2)) - 2 * FACADE_GAP)), 1)
 
 
 def free_roads(edges, pos, buildings):
@@ -1355,6 +1378,36 @@ def extend_rims(river, dem_light):
     return east, west
 
 
+RIONI_N = (-240, 300, 15)   # m: tratto del ciglio est in cui si misura la discesa dei rioni, e passo
+RIONI_SCALA = 0.45         # le quote a 30 m esagerano la discesa vicino al ciglio (il canyon sfocato), e il canyon del
+                           # diorama resta quello disegnato a mano: se ne usa meno della metà
+
+
+def rioni_profile(ground_at):
+    """
+    Discesa dei rioni verso la gravina, dalle quote Copernicus (blocco G). Lungo il ciglio est
+    disegnato a mano, ogni 15 m, si confronta l'altopiano (220–300 m dentro l'abitato) con la quota
+    a 45 m dal ciglio, più metà della pendenza che resta fino al ciglio: i 45 m più vicini sono
+    sporcati dal canyon, che a 30 m di maglia e dopo lo smusso "sbava" dentro le case. `da` è la
+    distanza dal ciglio a cui comincia la discesa. Il diorama la usa come guida in rioneDrop.
+    """
+    def rim_e(n):
+        for (e0, n0), (e1, n1) in zip(EAST_RIM, EAST_RIM[1:]):
+            if min(n0, n1) <= n <= max(n0, n1):
+                return e0 + (n - n0) / ((n1 - n0) or 1) * (e1 - e0)
+    S = np.arange(0, 301, 5)
+    depth, width = [], []
+    for n in range(RIONI_N[0], RIONI_N[1] + 1, RIONI_N[2]):
+        e = rim_e(n)
+        H = np.array([float(ground_at(e + s, n)) for s in S])
+        plateau, h45, h80 = H[S >= 220].max(), H[S == 45][0], H[S == 80][0]
+        d = plateau - h45 + (h80 - h45) / 35 * 45 * 0.5
+        depth.append(round(max(0.0, d) * RIONI_SCALA, 1))
+        width.append(int(S[np.argmax(H >= plateau - 0.1 * (plateau - h45))]))
+    print(f'  discesa dei rioni (quote reali × {RIONI_SCALA}): da {min(depth):.0f} a {max(depth):.0f} m, a partire da {min(width)}–{max(width)} m dal ciglio')
+    return {'n0': RIONI_N[0], 'passo': RIONI_N[2], 'd': depth, 'w': width}
+
+
 def smooth_line(pts, k=2):
     """Media mobile su una polilinea (estremi compresi)."""
     return [tuple(np.mean(pts[max(0, i - k):i + k + 1], axis=0)) for i in range(len(pts))] if len(pts) > 2 else pts
@@ -1402,6 +1455,12 @@ def ring_ints(coords, q):
     return out
 
 
+def dm_ints(flat_coords):
+    """Linea piatta a 0,1 m → interi: numero di punti, primo punto in dm, poi differenze. Senza perdite."""
+    q = [round(v * 10) for v in flat_coords]
+    return [len(q) // 2, *q[:2], *(q[k] - q[k - 2] for k in range(2, len(q)))]
+
+
 def encode(edges, deco, pos, buildings, city, arches, feats, extra):
     names, name_idx = [], {}
 
@@ -1423,17 +1482,24 @@ def encode(edges, deco, pos, buildings, city, arches, feats, extra):
 
     def flags(e):
         return ((1 if e['bridge'] else 0) | (2 if e['foot'] else 0) | (4 if e.get('turn') else 0)
-                | (8 if e['cls'] == 'track' else 0) | (16 if e.get('urban') else 0))
+                | (8 if e['cls'] == 'track' else 0) | (16 if e.get('urban') else 0) | (32 if e.get('walk') else 0))
+    # Vie, vie decorative ed edifici del centro storico in forma compatta (CODEC), a 0,1 m come prima:
+    # index.html li riporta alle righe di sempre in DATA.unpack().
     E = []
     for e in edges:
         poly = list(e['poly'])
         poly[0], poly[-1] = pos[e['a']], pos[e['b']]        # estremi esattamente sui nodi
-        E.append([node_ids[e['a']], node_ids[e['b']], CLASS_CODE.get(e['cls'], 2), nid(e['name']), flags(e), flat(poly), e['width']])
-    D = [[CLASS_CODE.get(e['cls'], 2), nid(e['name']), flags(e), e['width'], flat(e['poly'])] for e in deco]
+        E += [node_ids[e['a']], node_ids[e['b']], CLASS_CODE.get(e['cls'], 2), nid(e['name']), flags(e),
+              round(e['width'] * 10), *dm_ints(flat(poly))]
+    D = []
+    for e in deco:
+        D += [CLASS_CODE.get(e['cls'], 2), nid(e['name']), flags(e), round(e['width'] * 10), *dm_ints(flat(e['poly']))]
     B = []
     for b in buildings:
         rings = [flat(b['poly'].exterior.coords[:-1])] + [flat(r.coords[:-1]) for r in b['poly'].interiors]
-        B.append([b['kind'], nid(b['name']), round(b['height'] or 0, 1), rings])
+        B += [b['kind'], nid(b['name']), round((b['height'] or 0) * 10), len(rings)]
+        for r in rings:
+            B += dm_ints(r)
     # Edifici della città moderna: tipo, nome, altezza in dm, anelli a passo di 0,25 m.
     C = []
     for b in city:
@@ -1461,10 +1527,10 @@ def encode(edges, deco, pos, buildings, city, arches, feats, extra):
             'origine': list(ORIGIN), 'area': list(BOUND), 'zolle': [list(z) for z in ZOLLE], 'z0': list(Z0), 'riquadro': TILE, 'quota0': ALT0,
         },
         'names': names,
-        'nodes': flat(nodes),
-        'edges': E,
-        'deco': D,
-        'buildings': B,
+        'nodes': varint(dm_ints(flat(nodes))),
+        'edges': varint(E),
+        'deco': varint(D),
+        'buildings': varint(B),
         'city': varint(C),
         'dem': {'passo': DEM_STEP, 'nx': g.shape[1], 'ny': g.shape[0], 'q': 0.25, 'dati': varint(dem)},
         'cover': {'passo': COVER_STEP, 'nx': extra['cover'].shape[1], 'ny': extra['cover'].shape[0], 'dati': varint(runs)},
@@ -1481,10 +1547,11 @@ def encode(edges, deco, pos, buildings, city, arches, feats, extra):
         'pois': [[e, n, nid(nm), kind, osm, wd or ''] for e, n, nm, kind, osm, wd in extra['pois']],
         'steps': [[nid(nm), flat(g.coords)] for nm, g in feats['steps']],
         'rims': {'east': flat(extra['rims'][0]), 'west': flat(extra['rims'][1])},
+        'rioni': extra['rioni'],
     }
     lines = ['const GEO = {']
     for k, v in geo.items():
-        if k in ('edges', 'deco', 'buildings', 'arches', 'places', 'pois', 'areas', 'cliffs', 'walls', 'views', 'bridges', 'steps', 'rails'):
+        if k in ('arches', 'places', 'pois', 'areas', 'cliffs', 'walls', 'views', 'bridges', 'steps', 'rails'):
             lines.append(f'  {k}: [')
             lines += [f'    {json.dumps(x, ensure_ascii=False, separators=(",", ":"))},' for x in v]
             lines.append('  ],')
@@ -1577,6 +1644,7 @@ def main():
     extra = {
         'ground': ground, 'cover': cover, 'rails': build_rails(data), 'pois': city_pois(osm),
         'riverY': river_bed(feats['river'], lambda e, n: at(e, n)), 'rims': extend_rims(feats['river'], at),
+        'rioni': rioni_profile(at),
     }
     print('5. Scrittura')
     write_html(encode(edges, deco, pos, old, city, arches, feats, extra))
