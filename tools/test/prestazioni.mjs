@@ -6,7 +6,9 @@
  * Profili: "pc" (1280×720 a 2×) e "telefono" (390×844 a 3×, touch: profilo leggero).
  * Viste: partenza (vetrina sul ponte), centro (inseguimento in Piazza Benedetto XIII),
  * scacchi (inseguimento da Piazza Scacchi verso la città moderna), pausa (vista dall'alto),
- * panoramica (camera alta sopra la città: il caso peggiore).
+ * panoramica (camera alta sopra la città), alta (camera 120 m sopra il centro storico, inclinata
+ * verso la città: la vista della futura mongolfiera).
+ * I riquadri lontani usano la versione semplificata (livelli di dettaglio, sezione 6e).
  *
  * Uso: node prestazioni.mjs [etichetta]   → tabella in console e shots/prestazioni-<etichetta>.json
  */
@@ -31,6 +33,7 @@ const VIEWS = {
   scacchi: { at: [415, 0], heading: [1, 0] },
   pausa: { at: [415, 0], heading: [1, 0], pause: true },
   panoramica: { camera: [950, -750, 320], look: [350, 150, 0] },
+  alta: { camera: [-60, -120, 120], look: [400, 300, 0], above: true },   // quota sopra il suolo
 };
 
 async function measure(profile) {
@@ -80,8 +83,10 @@ async function measure(profile) {
       if (v.pause) g.pause();
       if (v.camera) {
         g.rig.mode = 'free';
-        g.camera.position.set(v.camera[0], v.camera[2], -v.camera[1]);
-        g.camera.lookAt(v.look[0], v.look[2], -v.look[1]);
+        const y = v.camera[2] + (v.above ? g.Terrain.heightAt(v.camera[0], v.camera[1]) : 0);
+        const ly = v.look[2] + (v.above ? g.Terrain.heightAt(v.look[0], v.look[1]) : 0);
+        g.camera.position.set(v.camera[0], y, -v.camera[1]);
+        g.camera.lookAt(v.look[0], ly, -v.look[1]);
       }
     }, v);
     // fps reali (la pagina disegna da sola con la GPU), poi triangoli e draw call del fotogramma più pesante.
