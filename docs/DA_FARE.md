@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 30 settembre 2026: fase 3 approvata e online, blocchi A, C, F e G della fase 3.4 uniti.
+Stato al 30 settembre 2026: fase 3 approvata e online, blocchi A, C, F, G e I della fase 3.4 uniti.
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
@@ -10,12 +10,12 @@ del lavoro su due chat in [`PIANO_FASE_3_4.md`](PIANO_FASE_3_4.md).
 
 Ordine: I → D → E → L → M → N, dettagli e decisioni nella sezione 7 del piano.
 
-- [x] **I · spazio sul telefono** (`fase-3-4-i-prestazioni`, PR #13, in attesa di approvazione):
+- [x] **I · spazio sul telefono** (`fase-3-4-i-prestazioni`, PR #13, unita il 30/09/2026):
       due livelli di dettaglio per riquadro nella stessa mesh (terreno a maglia doppia, vie rade,
       sagome semplificate, metà degli alberi; finestre e torrini solo da vicino), con isteresi e
       senza draw call in più. Fotogramma peggiore da 243 500 a 164 700 triangoli sul telefono e da
       335 400 a 235 500 su PC; «Pronto» circa 640 ms. Vista «alta» in `prestazioni.mjs`.
-- [ ] **D · centro storico** (`fase-3-4-d-centro-storico`).
+- [ ] **D · centro storico** (`fase-3-4-d-centro-storico`, in corso): Porta San Michele, Piazza Scacchi, Quattro Fontane, chiese, Sette Camere, pendenze.
 - [ ] **E · luoghi della città, scuole e chiese** (`fase-3-4-e-luoghi`): il committente sceglie le scuole.
 - [ ] **L · il Bosco da vicino** (`fase-3-4-l-bosco`): Area Quercus, strada fino al vivaio,
       Base Scout, area pic-nic, scritta «SIC DIFESA GRANDE», giro a piedi, suoni del bosco.
