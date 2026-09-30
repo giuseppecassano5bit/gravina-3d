@@ -107,7 +107,7 @@ Misure di oggi (branch `main`) su Mac M4, 1280×720 a 2×, GPU vera, browser int
 
 | Voce | Oggi | Tetto dopo il blocco C |
 |---|---|---|
-| `index.html` | 399 KB (127 KB compresso) | ≤ 900 KB (≤ 280 KB compresso) |
+| `index.html` | 399 KB (127 KB compresso) | ≤ 900 KB (≤ 280 KB compresso); dal 30/09/2026 ≤ 1,2 MB (≤ 360 KB compresso), deciso dal committente |
 | Triangoli nella scena | 267 000 (terreno 72k, finestre 50k, edifici 44k, alberi 35k, strade 32k, dettagli 15k) | ≤ 650 000 |
 | Triangoli per fotogramma | 266 000 | ≤ 400 000 su PC, ≤ 250 000 su telefono |
 | Draw call | 37–38 | ≤ 90 su PC, ≤ 70 su telefono |

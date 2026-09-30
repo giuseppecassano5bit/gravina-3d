@@ -239,9 +239,24 @@ si apre entro 60 m dal centro; il rifugio ha solo l'etichetta (nessuna fonte).
   ponte. Restano disegnati a mano: linee dei cigli, fondo, falesia, gradoni e sponda di Botromagno.
 * Il canyon e i rioni sono disegnati a mano solo dentro `CONFIG.terrain.proc` (est −360…460,
   nord −380…600); fuori ci sono le quote reali Copernicus, con il letto del torrente inciso nella
-  valle (`Ravine.bed`). Tra i due, una sfumatura di 110 m (`Terrain.procWeight`).
+  valle (`Ravine.bed`). Tra i due, una sfumatura di 110 m (`Terrain.procWeight`), di 220 m a sud
+  (`bandSouth`, blocco D), dove le quote reali stanno 15–30 m sotto l'altopiano del centro.
+* **Gradino a sud della città, corretto nel blocco D.** Il ciglio est prolungato dalla pipeline
+  cominciava con lo stesso punto ripetuto tre volte: il tratto lungo zero, senza verso, faceva
+  credere al terreno che tutta la fascia a sud-est di quel punto stesse dentro il canyon. Lungo
+  il confine della fascia (circa nord −390…−430, da Via Goito a Via Tripoli) c'era un salto di
+  15–18 m che le vie salivano quasi in verticale (fino al 1 600% su 5 m). `Polyline2D` ora scarta i
+  punti ripetuti, e `extend_rims` non li scrive più.
+* **Pendenze** (blocco D). Le vie del mezzo nel centro storico (zona Z0) non superano il 18%
+  (`CONFIG.road.maxGrade`): le quote di ogni tratto passano da un limitatore con gli incroci fermi,
+  solo dove la salita media tra i due incroci lo permette. Via Fontana la Stella scende dal 21% al
+  18%. Restano ripidi i tratti a piedi (sentiero verso Botromagno, scalinata di Via giudice Montea)
+  e, fuori dal centro storico, alcune vie dei quartieri a nord sulle quote reali (Via Savoia,
+  Via Giardini, Corso Aldo Moro: 29–37%).
 * Il terreno viene **spianato sotto le strade** (con raccordi di 9 m), tranne sotto il ponte.
 * Le **grotte** sono bocche ad arco sulle pareti lato città. Aggiungono l'effetto "città di pietra scavata".
+  Di fronte al Fondovito, sulla parete di Botromagno, le **Sette Camere** (OSM n6365472958): fino a
+  36 bocche fitte entro 40 m, come nella foto del complesso (blocco D).
 
 ---
 
@@ -253,9 +268,12 @@ si apre entro 60 m dal centro; il rifugio ha solo l'etichetta (nessuna fonte).
 | Tetti | Terrazze piane con torrini, cisterne e comignoli; i piccoli corpi rettangolari hanno spesso un **tetto a capanna in coppi**. Le falde sono **ritagliate sulla sagoma reale** (divise lungo il colmo e triangolate): nessun tetto sporge sulla strada. |
 | Archi | Volume di tufo con volta a tutto sesto sopra la carreggiata, ghiera in pietra chiara e finestrella sulle due fronti. |
 | Finestre e porte | Pannelli istanziati lungo ogni facciata, piano per piano: persiane marroni o verdi, portoni al piano terra (fino a 32 000 istanze, una sola draw call). |
-| Chiese | Pietra di tufo, tetto a capanna, **campanile a vela** sul colmo; sul lato che guarda la via un **portale** con stipiti, architrave, timpano, gradino e **oculo**. |
+| Chiese | Pietra di tufo, tetto a capanna, **campanile a vela** sul colmo; sul lato che guarda la via un **portale** con stipiti, architrave, timpano, gradino e **oculo**. Blocco D, dalle foto: Santa Cecilia con la **lunetta** con la grata sopra la porta, Sant'Agostino con i **vasi di pietra** agli angoli della facciata, la Chiesa del Gesù (nei dati è una casa) con la **facciata bianca**, il timpano e **tre oculi**. |
+| San Francesco | Facciata sul Larghetto con **rosone**, cornice marcapiano e due porte laterali con un **oculo** sopra. **Campanile** (1766, circa 40 m) all'angolo nord della facciata, tra la chiesa e il convento, un poco avanti: base con le lesene d'angolo, due ordini con finestra ad arco e balaustra, cella con quattro arcate, cupolina con lanterna e croce (Street View, blocco D). |
+| Porta San Michele e Piazza Scacchi | All'imbocco di Via Matteotti le **facciate dipinte** dei due palazzi d'angolo (rosa con due balconi lunghi e giallo), con persiane verdi e botteghe; nell'angolo del palazzo rosa, al primo piano, la **nicchia** con **San Michele** (ali, spada, drago). A sud, sotto un **ulivo** in un'aiuola rotonda, il **busto in bronzo di Canio Musacchio** sul blocco con la lapide e il muretto curvo; a nord il **busto in pietra di Arcangelo Scacchi** su un alto piedistallo, con le catene (basamento da OSM). Lungo Via Garibaldi un'**aiuola rialzata** con gli alberi e le **sedute di pietra**; fioriere tonde e i due pannelli con la pianta della città. Tutto nello strato dei dettagli dei riquadri: si vede solo da vicino. |
+| Quattro Fontane | Blocco di pietra dalla sagoma OSM (circa 2,6 × 2,3 m) con una lapide per lato sotto il coronamento curvo, pinnacoli agli angoli, sui lati lunghi i **due serpenti marini** e la vasca. Nel diorama l'incrocio passa più vicino che nella realtà: la fontana si sposta di quel poco che serve per stare fuori dalla carreggiata. |
 | Chiesa del Purgatorio | Portale sul lato corto a sud, su Piazza Notar Domenico (dove i dati segnano la chiesa). Ai lati della porta due **pilastri di tre torri sovrapposte**, sempre più strette e rigonfie al centro (lo stemma dei Frangipane della Tolfa), che **poggiano sugli orsi** degli Orsini; sulla trabeazione il **timpano spezzato** con i **due scheletri distesi**; al centro lo **stemma Orsini** e sotto il **drappo di pietra con l'epigrafe** (fonte FAI). |
-| Cattedrale | Sagoma reale orientata est-ovest. La sporgenza a nord della sagoma non sposta più l'asse. Navate laterali sulla sagoma e navata centrale rialzata con le finestre alte. **Facciata ovest tripartita da due lesene**, con **tre portali** (il centrale più grande e incompiuto, i laterali con lunetta e un **oculo** sopra), il **rosone a 24 raggi** con l'Assunta al centro, la cornice di coronamento e la croce. **Fianco sud**: portale dorico con due colonne, architrave e timpano, il rilievo della Madonna col Bambino tra San Pietro e San Paolo, e un **secondo rosone accanto al campanile**. **Campanile** a filo del fianco sud (nei dati non è un edificio a sé): quattro ordini decrescenti separati da cornici, bifore cieche, cella con arcate e balaustra, **cupola a cipolla** del 1698 con la croce di ferro. **Cappellone del Santissimo** a due piani sulla sporgenza nord. Niente abside esterna: la sagoma reale finisce piatta a est, contro un altro edificio. |
+| Cattedrale | Sagoma reale orientata est-ovest (blocco D: campanile in fondo a est del fianco sud, contro la Curia, e secondo rosone subito a ovest, come su Street View). La sporgenza a nord della sagoma non sposta più l'asse. Navate laterali sulla sagoma e navata centrale rialzata con le finestre alte. **Facciata ovest tripartita da due lesene**, con **tre portali** (il centrale più grande e incompiuto, i laterali con lunetta e un **oculo** sopra), il **rosone a 24 raggi** con l'Assunta al centro, la cornice di coronamento e la croce. **Fianco sud**: portale dorico con due colonne, architrave e timpano, il rilievo della Madonna col Bambino tra San Pietro e San Paolo, e un **secondo rosone accanto al campanile**. **Campanile** a filo del fianco sud (nei dati non è un edificio a sé): quattro ordini decrescenti separati da cornici, bifore cieche, cella con arcate e balaustra, **cupola a cipolla** del 1698 con la croce di ferro. **Cappellone del Santissimo** a due piani sulla sporgenza nord. Niente abside esterna: la sagoma reale finisce piatta a est, contro un altro edificio. |
 | San Michele delle Grotte | Fuori terra non c'è un edificio: la sagoma dei dati diventa lo **sperone di tufo a strati** in cui è scavata la chiesa, con l'ingresso laterale alto e stretto, le bocche delle grotte e il **corridoio panoramico** con il parapetto verso la gravina. |
 | Madonna della Stella | Chiesetta **imbiancata** con la facciata a capanna rivolta alla gravina, **campanile a vela in mattoni** sul vertice, **corpo basso con tetto a una falda** e finestra, la **roccia** alle spalle in cui è scavata la chiesa vera. |
 | Palazzi | Palazzo Ducale Orsini e Museo Pomarici Santomasi: **cornicione**, fascia marcapiano e **portale in bugnato**. |
@@ -263,7 +281,7 @@ si apre entro 60 m dal centro; il rifugio ha solo l'etichetta (nessuna fonte).
 | Fontana della Stella | Muro con nicchia ad arco, cornice, vasca con l'acqua, accanto alla testata est del ponte e fuori dalla strada (forma stilizzata). |
 | Belvederi | Parapetti in ferro sul ciglio, nei tre belvederi dei dati, solo dove non c'è la strada. |
 | Scalinate | Le 7 scalinate reali: gradini di tufo con alzate da 16 cm che seguono il terreno e parapetti bassi, e si fermano prima delle vie. Due si percorrono a piedi (blocco G): quella di Via giudice Montea (32 gradini) e quella tra Via Lettieri e Via Fontana la Stella. Le altre cinque nei dati finiscono nel vuoto e si guardano soltanto. |
-| Abitazioni rupestri | 20 grotte chiuse da una fronte in muratura (tufo o calce) con porta e finestrella, sui salti dei gradoni lato città, lontano da vie ed edifici. Le fonti ne contano circa ottanta sui pendii. |
+| Abitazioni rupestri | 20 grotte chiuse da una fronte in muratura (tufo o calce) con porta e finestrella, sui salti dei gradoni lato città, lontano da vie ed edifici. Le fonti ne contano circa ottanta sui pendii, ma né i dati né le fonti le collocano una per una: nel blocco D si aggiungono solo le grotte delle Sette Camere, dove la posizione c'è. |
 | Lanterne | Lanterne a muro accese, ogni ~16 m nelle vie entro 70 m dai monumenti (circa 100). |
 | Regola | Nessun dettaglio sulla carreggiata: la prova `npm run simula` controlla che nessun vertice di portali, campanile, scalinate, lanterne e parapetti stia sopra una via tra 0,3 e 3,2 m d'altezza (`dettaglisullastrada` vuoto). Nei vicoli i dettagli sporgono al massimo 0,3 m. |
 | Mura | I tratti reali di mura urbane diventano muri di tufo. |
@@ -273,12 +291,13 @@ Monumenti con scheda (solo fatti verificati): Cattedrale, la Gravina (belvedere)
 Purgatorio, Palazzo Ducale Orsini, Museo Pomarici Santomasi, Santa Lucia (Piaggio), Gravina
 Sotterranea, Piazza Pellicciari, Sant'Agostino, San Michele delle Grotte (Fondovico), Ponte
 Acquedotto, Fontana della Stella, Madonna della Stella, Botromagno, e dalla fase 3 San
-Francesco, Santa Sofia, Santa Cecilia, Santa Teresa e Chiesa del Gesù. L'Addolorata e le piazze
-hanno solo l'etichetta (per l'Addolorata non ci sono fonti affidabili).
+Francesco, Santa Sofia, Santa Cecilia, Santa Teresa e Chiesa del Gesù, e dal blocco D Porta San
+Michele, Piazza Scacchi, Quattro Fontane, San Nicola, Bastione medievale e Sette Camere. L'Addolorata
+e le altre piazze (con la Piazzetta Fondovico) hanno solo l'etichetta: Addolorata e Annunziata sono
+sulla stessa sagoma, ma nessuna fonte dice che siano la stessa chiesa.
 
-Non verificato, e quindi non modellato: il campanile di San Francesco (le fonti dicono tre
-ordini e circa 40 m, ma la sua posizione non si ricava dai dati) e la posizione esatta del
-campanile della Cattedrale lungo il fianco sud (è nella metà verso est). Una fonte (Wikivoyage)
+Il campanile di San Francesco e la posizione del campanile della Cattedrale sono stati verificati
+su Street View nel blocco D. Una fonte (Wikivoyage)
 parla di una "facciata a due ordini con oculi ovali": non è chiaro a quale chiesa si riferisca,
 e le fonti principali descrivono la facciata della Cattedrale come tripartita.
 
@@ -414,16 +433,16 @@ partenza, centro, Piazza Scacchi, pausa, panoramica sulla città e alta (120 m s
 storico, verso la città: la vista della futura mongolfiera).
 "Per fotogramma" è il massimo tra le viste, senza il passaggio delle ombre.
 
-| Voce | Fase 3 (solo centro storico) | Fase 3.4, città intera | Dopo il blocco G | Dopo il blocco I | Tetto |
-|---|---|---|---|---|---|
-| `index.html` | 390 KB (124 KB compressi) | 737 KB (269 KB compressi) | 593 KB (251 KB compressi) | 604 KB (255 KB compressi) | ≤ 900 KB (≤ 280) |
-| Costruzione fino a "Parti" | 282 ms | circa 500 ms | circa 520 ms | circa 640 ms (telefono 620) | ≤ 1,5 s |
-| Memoria JavaScript | 41 MB | circa 100 MB | 112 MB (telefono 91) | 116 MB (telefono 129) | ≤ 150 MB |
-| Città completa (in sottofondo) | — | circa 900 ms | circa 900 ms | circa 1 100 ms | — |
-| Triangoli nella scena | 267 000 | 543 000 (telefono 483 000) | 571 000 (telefono 505 000) | 572 000 + 138 000 della versione lontana, mai disegnate insieme (telefono 505 000 + 116 000) | ≤ 650 000 |
-| Triangoli per fotogramma, PC | 267 000 | 334 000 | 335 000 | 235 500 (alta) | ≤ 400 000 (obiettivo del blocco I: 300 000) |
-| Triangoli per fotogramma, telefono | 267 000 | 242 000 | 243 500 | 164 700 (centro) | ≤ 250 000 (obiettivo del blocco I: 200 000) |
-| Draw call, PC / telefono | 39 / 38 | 69 / 54 | 69 / 48 | 68 / 48 | ≤ 90 / ≤ 70 |
+| Voce | Fase 3 (solo centro storico) | Fase 3.4, città intera | Dopo il blocco G | Dopo il blocco I | Dopo il blocco D | Tetto |
+|---|---|---|---|---|---|---|
+| `index.html` | 390 KB (124 KB compressi) | 737 KB (269 KB compressi) | 593 KB (251 KB compressi) | 604 KB (255 KB compressi) | 634 KB (264 KB compressi) | ≤ 1,2 MB (≤ 360 compressi; prima 900 KB e 280, alzato dal committente il 30/09/2026) |
+| Costruzione fino a "Parti" | 282 ms | circa 500 ms | circa 520 ms | circa 640 ms (telefono 620) | circa 770 ms (telefono 680) | ≤ 1,5 s |
+| Memoria JavaScript | 41 MB | circa 100 MB | 112 MB (telefono 91) | 116 MB (telefono 129) | 117 MB (telefono 104) | ≤ 150 MB |
+| Città completa (in sottofondo) | — | circa 900 ms | circa 900 ms | circa 1 100 ms | circa 1 230 ms | — |
+| Triangoli nella scena | 267 000 | 543 000 (telefono 483 000) | 571 000 (telefono 505 000) | 572 000 + 138 000 della versione lontana, mai disegnate insieme (telefono 505 000 + 116 000) | 580 000 + 138 000 (telefono 514 000 + 116 000) | ≤ 650 000 |
+| Triangoli per fotogramma, PC | 267 000 | 334 000 | 335 000 | 235 500 (alta) | 246 000 (alta) | ≤ 400 000 (obiettivo del blocco I: 300 000) |
+| Triangoli per fotogramma, telefono | 267 000 | 242 000 | 243 500 | 164 700 (centro) | 175 300 (centro) | ≤ 250 000 (obiettivo del blocco I: 200 000) |
+| Draw call, PC / telefono | 39 / 38 | 69 / 54 | 69 / 48 | 68 / 48 | 68 / 48 | ≤ 90 / ≤ 70 |
 
 Nel blocco G il peso è sceso nonostante figurina, camera e radio: nodi, vie, vie decorative ed
 edifici del centro storico ora usano il `CODEC` (a 0,1 m, senza perdite), da 90 a 55 KB compressi.

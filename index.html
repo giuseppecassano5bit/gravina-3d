@@ -707,7 +707,7 @@
       <p class="about__lede"><strong>Gravina 3D</strong> è il centro storico di Gravina in Puglia ricostruito come un diorama in 3D, da percorrere nel browser, anche dal telefono. Vie, incroci e sagome delle case sono quelli reali; lo stile è a blocchi, low-poly, con la luce del tramonto.</p>
 
       <h3>Cosa si vede</h3>
-      <p>Il Ponte Acquedotto sulla gravina, la Cattedrale di Santa Maria Assunta, la Chiesa del Purgatorio con il portale degli orsi, il Palazzo Ducale Orsini, le chiese rupestri di San Michele delle Grotte e della Madonna della Stella, i rioni Piaggio e Fondovico con le loro scalinate. Passando vicino a un monumento compare una breve scheda storica.</p>
+      <p>Il Ponte Acquedotto sulla gravina, la Cattedrale di Santa Maria Assunta, la Chiesa del Purgatorio con il portale degli orsi, il Palazzo Ducale Orsini, le chiese rupestri di San Michele delle Grotte e della Madonna della Stella, i rioni Piaggio e Fondovito con le loro scalinate. Passando vicino a un monumento compare una breve scheda storica.</p>
 
       <h3>Come si usa</h3>
       <dl class="about__keys">
@@ -888,6 +888,7 @@ const CONFIG = {
 
   road: {
     sampleStep: 1, lift: 0.06, curbDepth: 0.5,
+    maxGrade: 0.18,                      // pendenza massima delle vie carrabili del centro storico (blocco D)
     /** Larghezza (m) per classe OSM: secondaria, terziaria, residenziale, zona 30, pedonale, sentiero. */
     widths: [8, 7, 4.6, 4.2, 4.5, 3.2],
     turnWidth: 3.6,          // inversioni a goccia negli slarghi
@@ -900,9 +901,10 @@ const CONFIG = {
     baseY: -130,             // fondo della zolla (la valle a sud della città scende a −100 m)
     /**
      * Terreno disegnato a mano (canyon, rioni) in questo riquadro [est min, est max, nord min,
-     * nord max]; fuori, le quote reali Copernicus. Tra i due, una sfumatura di `band` metri.
+     * nord max]; fuori, le quote reali Copernicus. Tra i due, una sfumatura di `band` metri; a sud
+     * (`bandSouth`) più lunga, perché lì le quote reali scendono di 15–30 m sotto l'altopiano (blocco D).
      */
-    proc: [-360, 460, -380, 600], band: 110,
+    proc: [-360, 460, -380, 600], band: 110, bandSouth: 220,
   },
 
   /** Città moderna a riquadri (zona Z1) e campagna attorno (Z2). */
@@ -1492,15 +1494,40 @@ const LANDMARKS = [
     text: 'Sotto il centro storico si estende una rete di cisterne, cantine, cunicoli e grotte scavati nel tufo.',
   },
   {
-    id: 'pellicciari', name: 'Piazza Pellicciari', ref: 'Piazza Giuseppe Pellicciari', kicker: 'Porta del rione Fondovico', radius: 30,
-    text: 'Da qui una scalinata attraversa il rione medievale di Fondovico e scende fino alla chiesa rupestre di San Michele.',
+    id: 'pellicciari', name: 'Piazza Pellicciari', ref: 'Piazza Giuseppe Pellicciari', kicker: 'Porta del rione Fondovito', radius: 30,
+    text: 'Da qui una scalinata attraversa il rione medievale di Fondovito e scende fino alla chiesa rupestre di San Michele.',
+  },
+  { id: 'fondovico', name: 'Piazzetta Fondovico', at: [-18, -121], card: false },    // OSM w385177566, un prato
+  {
+    id: 'settecamere', name: 'Sette Camere', ref: 'Complesso rupestre delle Sette Camere', kicker: 'Complesso rupestre · Alto Medioevo', radius: 36,
+    text: 'Sul versante di Botromagno, di fronte al Fondovito, una fila di grotte scavate dall’uomo in un banco di tufo, presumibilmente negli ultimi secoli dell’Alto Medioevo.',
+  },
+  {
+    id: 'quattrofontane', name: 'Quattro Fontane', ref: 'Quattro Fontane', kicker: 'Fontana pubblica · 1779', radius: 24,
+    text: 'La lapide racconta che nel 1779, regnando Ferdinando IV, i gravinesi decisero di portare qui l’acqua del Pozzo Pateo, in una fontana pagata con denaro pubblico e restaurata nel 1859. L’acqua esce ancora da due serpenti marini intrecciati. Un’altra lapide ricorda l’arrivo dell’acqua del Sele, il 31 dicembre 1927.',
+  },
+  {
+    id: 'sannicola', name: 'San Nicola', ref: 'Chiesa San Nicola', kicker: 'Santi Nicola e Cecilia · facciata del 1704', radius: 26,
+    text: 'Sorge dove c’era già una chiesa nel IX–X secolo. Demolita nel 1410, fu ricostruita e completata nel Seicento; la facciata è del 1704. Qui fu fondata, molto probabilmente nel 1555, la confraternita della Santissima Annunziata.',
+  },
+  {
+    id: 'portasanmichele', name: 'Porta San Michele', at: [398.4, -24.9], kicker: 'Piazza Scacchi · statua del 1799', radius: 26,
+    text: 'Qui si apriva una porta della città, detta prima di San Tommaso e poi Reale. Fu dedicata a San Michele Arcangelo dopo il 1799, quando secondo la tradizione il santo salvò Gravina dal saccheggio delle truppe del cardinale Ruffo. La sua statua di legno, con quella data, sta nella nicchia all’angolo della piazza: restaurata, vi è tornata nel novembre 2020.',
+  },
+  {
+    id: 'scacchi', name: 'Piazza Scacchi', ref: 'Piazza Arcangelo Scacchi', kicker: 'Due busti tra le aiuole', radius: 30,
+    text: 'Il busto in pietra ricorda Arcangelo Scacchi (1810–1893), mineralogista nato a Gravina, nella piazza davanti alla sua casa natale. All’altro capo, sotto l’ulivo, il busto in bronzo di Canio Musacchio, «primo sindacalista meridionale» come dice la sua lapide.',
+  },
+  {
+    id: 'bastione', name: 'Bastione medievale', ref: 'Bastione Medioevale', kicker: 'Mura della città', radius: 20,
+    text: 'È l’ultimo tratto rimasto dell’antica cinta muraria: dal quartiere di Sant’Andrea arriva fino al Ponte Acquedotto.',
   },
   {
     id: 'agostino', name: 'Sant’Agostino', ref: "Parrocchia San Giovanni Battista in Sant'Agostino - Gravina in Puglia", kicker: 'San Giovanni Battista', radius: 28,
     text: 'La parrocchia di San Giovanni Battista in Sant’Agostino, accanto al chiostro di Sant’Agostino.',
   },
   {
-    id: 'sanmichele', name: 'San Michele delle Grotte', at: [-68, -101], rock: true, kicker: 'Rione Fondovico · X secolo', radius: 36,
+    id: 'sanmichele', name: 'San Michele delle Grotte', at: [-68, -101], rock: true, kicker: 'Rione Fondovito · X secolo', radius: 36,
     text: 'Chiesa rupestre scavata nel tufo in fondo a Calata Grotte San Michele: cinque navate sorrette da quattordici pilastri. È considerata la prima cattedrale di Gravina.',
   },
   {
@@ -1546,6 +1573,9 @@ const CITY_LANDMARKS = [
  */
 const START = { back: 12, fallback: { at: [40, -12], heading: [1, 0] } };
 
+/** Complesso rupestre delle Sette Camere (OSM n6365472958): lì le grotte della parete di fronte sono fitte. */
+const SETTE_CAMERE = DATA.locate('Complesso rupestre delle Sette Camere') ?? [-190, -134];
+
 /* ═══════════════════════════════════════════════════════════════════════
  * 4. GRAVINA E TERRENO
  *    Il canyon segue il corso reale del Torrente La Gravina. Tra il
@@ -1557,6 +1587,9 @@ const START = { back: 12, fallback: { at: [40, -12], heading: [1, 0] } };
 /** Polilinea 2D [est, nord] con interrogazioni di distanza e lato. */
 class Polyline2D {
   constructor(points) {
+    // Niente tratti lunghi zero: nei dati il ciglio est comincia con un punto ripetuto e il tratto
+    // degenere (senza verso) metteva nel canyon tutta la fascia a sud-est della città (blocco D).
+    points = points.filter((p, i) => i === 0 || Math.hypot(p[0] - points[i - 1][0], p[1] - points[i - 1][1]) > 1e-6);
     this.E = Float64Array.from(points, (p) => p[0]);
     this.N = Float64Array.from(points, (p) => p[1]);
     this.result = { d: 0, cross: 0, e: 0, n: 0, i: 0 };
@@ -1609,7 +1642,8 @@ const ZONE = { BANK: 0, SLOPE: 1, WALL: 2, FLOOR: 3 };
 
 /**
  * I rioni medievali scendono verso la gravina: il Piaggio a nord della Cattedrale,
- * il Fondovico a sud, da Piazza Pellicciari fino a San Michele delle Grotte.
+ * il Fondovito (o Fondovico: sulla targa il nome scelto dal committente) a sud, da Piazza
+ * Pellicciari fino a San Michele delle Grotte.
  * Sull'altopiano, lungo il tratto di ciglio del rione (quota nord da n0 a n1, con
  * dissolvenza `fade`, disegnati a mano), il terreno scende dolcemente avvicinandosi al
  * ciglio; sotto il ciglio i gradoni partono da quella quota. Quanto scende e da quale
@@ -1619,7 +1653,7 @@ const ZONE = { BANK: 0, SLOPE: 1, WALL: 2, FLOOR: 3 };
  */
 const RIONI = [
   { name: 'Rione Piaggio', n0: 25, n1: 275, fade: 65, width: 80, depth: 8 },
-  { name: 'Rione Fondovico', n0: -200, n1: -20, fade: 50, width: 170, depth: 12 },
+  { name: 'Rione Fondovito', n0: -200, n1: -20, fade: 50, width: 170, depth: 12 },
 ];
 
 /** Quanto scende il terreno nel punto di quota nord `n`, a `s` metri oltre il ciglio: { drop, name }. */
@@ -1803,7 +1837,7 @@ const Terrain = {
   procWeight(e, n) {
     const [a, b, c, d] = CONFIG.terrain.proc;
     const dx = Math.max(a - e, 0, e - b), dn = Math.max(c - n, 0, n - d);
-    return dx === 0 && dn === 0 ? 1 : 1 - smoothstep(0, CONFIG.terrain.band, Math.hypot(dx, dn));
+    return dx === 0 && dn === 0 ? 1 : 1 - smoothstep(0, n < c ? CONFIG.terrain.bandSouth : CONFIG.terrain.band, Math.hypot(dx, dn));
   },
 
   /**
@@ -1875,7 +1909,7 @@ function districtAt(e, n) {
   if (Terrain.procWeight(e, n) < 0.5) return 'Gravina in Puglia';
   const L = Ravine.locate(e, n);
   if (L.side < 0) return 'Madonna della Stella · Botromagno';
-  if (L.t < 1) return n > 40 ? 'Rione Piaggio' : 'Rione Fondovico';
+  if (L.t < 1) return n > 40 ? 'Rione Piaggio' : 'Rione Fondovito';
   const R = rioneDrop(n, L.s);
   if (R.drop > 2) return R.name;
   return e > -60 && e < 340 && n > -160 && n < 340 ? 'Centro storico' : 'Gravina in Puglia';
@@ -1930,14 +1964,17 @@ class TrackNetwork {
     const curve = new THREE.CatmullRomCurve3(control, false, 'centripetal');
     const count = Math.max(2, Math.ceil(curve.getLength() / CONFIG.road.sampleStep));
     const pts = curve.getSpacedPoints(count);
-    if (!bridge) this.#smoothHeights(pts, A.y, B.y);
+    const mid = pts2[Math.floor(pts2.length / 2)];
+    // Nel centro storico le vie del mezzo non superano il 18% (blocco D): i tratti a piedi restano come sono.
+    const [z0a, z0b, z0c, z0d] = GEO.meta.z0;
+    const inZ0 = mid[0] >= z0a && mid[0] <= z0b && mid[1] >= z0c && mid[1] <= z0d;
+    if (!bridge) this.#smoothHeights(pts, A.y, B.y, !foot && !walk && inZ0 ? CONFIG.road.maxGrade : 0);
     const samples = new Float32Array(pts.length * 3);
     let length = 0;
     pts.forEach((p, i) => {
       samples.set([p.x, p.y, p.z], i * 3);
       if (i > 0) length += p.distanceTo(pts[i - 1]);
     });
-    const mid = pts2[Math.floor(pts2.length / 2)];
     const name = DATA.name(nameIdx) ?? (walk ? 'Passaggio pedonale' : foot ? 'Sentiero' : dirt ? 'Strada sterrata' : Terrain.procWeight(...mid) > 0.5 ? 'Vicolo' : 'Via senza nome');
     return {
       index, id: typeof index === 'number' ? `v${index}` : index, a: A, b: B, cls, name, named: nameIdx >= 0, bridge, turn, foot, dirt, urban, walk,
@@ -1961,7 +1998,7 @@ class TrackNetwork {
   }
 
   /** Media mobile sulle quote (±6 m): niente scalini dei gradoni sotto le ruote. */
-  #smoothHeights(pts, ya, yb) {
+  #smoothHeights(pts, ya, yb, maxGrade = 0) {
     const n = pts.length, win = 6;
     const ys = pts.map((p) => p.y);
     for (let i = 0; i < n; i++) {
@@ -1974,6 +2011,16 @@ class TrackNetwork {
       const wa = 1 - smoothstep(0, 5, i), wb = 1 - smoothstep(0, 5, n - 1 - i);
       pts[i].y = lerp(lerp(pts[i].y, ya, wa), yb, wb);
     }
+    // Limite di pendenza con gli estremi fermi, prima in avanti e poi all'indietro: solo se
+    // tra i due incroci la salita media lo permette (altrimenti farebbe un gradino in fondo).
+    const run = (i, j) => Math.hypot(pts[i].x - pts[j].x, pts[i].z - pts[j].z) * maxGrade;
+    let reach = 0;
+    for (let i = 1; i < n; i++) reach += run(i, i - 1);
+    if (!maxGrade || Math.abs(yb - ya) > reach * 0.9) return;
+    for (let i = 1; i < n; i++) pts[i].y = clamp(pts[i].y, pts[i - 1].y - run(i, i - 1), pts[i - 1].y + run(i, i - 1));
+    pts[n - 1].y = yb;
+    for (let i = n - 2; i >= 0; i--) pts[i].y = clamp(pts[i].y, pts[i + 1].y - run(i, i + 1), pts[i + 1].y + run(i, i + 1));
+    pts[0].y = ya;
   }
 
   /** Posizione sull'arco a distanza `s` percorsa nel verso `dir` (+1 = da a verso b). */
@@ -2641,7 +2688,8 @@ const Buildings = {
           }
         }
       }
-      if (kind === 1) this.bellGable(tb, rect, top + rise, stone, outer);
+      if (name === 'Chiesa San Francesco') this.sanFrancescoTower(tb, outer);   // il campanile vero, niente vela
+      else if (kind === 1) this.bellGable(tb, rect, top + rise, stone, outer);
 
       // Dettagli sui tetti piani: torrini delle scale, cisterne, comignoli.
       if (!tiled && kind !== 3 && area > 45) {
@@ -2735,6 +2783,69 @@ const Buildings = {
   },
 
   /**
+   * CAMPANILE DI SAN FRANCESCO (1766, circa 40 m; blocco D, visto su Street View dal Larghetto
+   * San Francesco): torre quadrata di pietra chiara all'angolo nord della facciata, che guarda a
+   * ovest-nord-ovest, un poco avanti rispetto al filo della facciata. Base alta con le lesene
+   * d'angolo, due ordini con la finestra ad arco e la balaustra, cella campanaria con quattro
+   * arcate, cupolina con lanterna e croce. Nei dati non è un edificio: sta tra la chiesa e il convento.
+   */
+  sanFrancescoTower(tb, outer) {
+    const ccw = Plane.signedArea(outer) > 0;
+    let best = null;
+    for (let i = 0; i < outer.length; i++) {
+      const P = outer[i], Q = outer[(i + 1) % outer.length], len = Math.hypot(Q[0] - P[0], Q[1] - P[1]);
+      if (len < 8) continue;
+      let nx = (Q[1] - P[1]) / len, nn = -(Q[0] - P[0]) / len;
+      if (!ccw) { nx = -nx; nn = -nn; }
+      const score = -nx * 0.87 + nn * 0.49;                               // la facciata guarda a ovest-nord-ovest
+      if (!best || score > best.score) best = { score, P, Q, n: [nx, nn], len };
+    }
+    if (!best) return;
+    let { P, Q, n, len } = best;
+    let t = [(Q[0] - P[0]) / len, (Q[1] - P[1]) / len];
+    if (t[0] * 0.49 + t[1] * 0.87 < 0) { [P, Q] = [Q, P]; t = [-t[0], -t[1]]; }   // Q: l'angolo a nord
+    const W = 5.4, c = [Q[0] + t[0] * (W / 2 - 0.6) - n[0] * (W / 2 - 0.4), Q[1] + t[1] * (W / 2 - 0.6) - n[1] * (W / 2 - 0.4)];
+    const light = new THREE.Color('#e6d6b0'), trim = new THREE.Color('#f1e6cc'), hole = new THREE.Color(PALETTE.cave), iron = new THREE.Color('#2b2723');
+    const corners = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([a, b]) => [c[0] + t[0] * a * W / 2 + n[0] * b * W / 2, c[1] + t[1] * a * W / 2 + n[1] * b * W / 2]);
+    const g = Math.min(...corners.map((p) => Terrain.heightAt(...p))) - 0.5, y0 = Terrain.heightAt(c[0] + n[0] * 5, c[1] + n[1] * 5);
+    const yaw = Math.atan2(t[1], t[0]);
+    const block = (w, h, y, color) => { const b = new THREE.BoxGeometry(w, h, w); b.rotateY(yaw); b.translate(c[0], y + h / 2, -c[1]); tb.addGeometry(b, color); };
+    const faces = [n, [-n[0], -n[1]], t, [-t[0], -t[1]]];
+    const arch = (w, h) => { const sh = new THREE.Shape(); sh.moveTo(-w / 2, 0); sh.lineTo(w / 2, 0); sh.lineTo(w / 2, h - w / 2); sh.absarc(0, h - w / 2, w / 2, 0, Math.PI, false); sh.closePath(); return new THREE.ExtrudeGeometry(sh, { depth: 0.08, bevelEnabled: false, curveSegments: 5 }); };
+    // base con le lesene d'angolo, poi due ordini con finestra e balaustra, poi la cella
+    block(W, y0 + 15 - g, g, light);
+    for (const [a, b] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
+      const k = new THREE.BoxGeometry(0.7, y0 + 15 - g, 0.7); k.rotateY(yaw);
+      k.translate(c[0] + t[0] * a * (W / 2 - 0.25) + n[0] * b * (W / 2 - 0.25), (y0 + 15 + g) / 2, -(c[1] + t[1] * a * (W / 2 - 0.25) + n[1] * b * (W / 2 - 0.25)));
+      tb.addGeometry(k, trim);
+    }
+    const orders = [[W - 0.5, y0 + 15.5, y0 + 22, 'finestra'], [W - 1, y0 + 22.5, y0 + 29, 'finestra'], [W - 1.5, y0 + 29.5, y0 + 34, 'cella']];
+    block(W + 0.5, 0.5, y0 + 15, trim);
+    for (const [w, a, b, kind] of orders) {
+      block(w, b - a, a, light);
+      block(w + 0.45, 0.5, b, trim);                                      // cornice
+      for (const [fx, fn] of faces) {
+        const f = wallFrame(tb, [c[0] + fx * w / 2, c[1] + fn * w / 2], [fx, fn]);
+        if (kind === 'cella') f.add(arch(1.5, 3.2), hole, 0, a + 0.6, 0.02);
+        else {
+          f.add(arch(1.1, 2.7), hole, 0, a + 1.4, 0.02);
+          f.box(2.2, 0.25, 0.7, trim, 0, a + 0.9, 0.3);                    // balcone
+          for (let x = -0.9; x <= 0.91; x += 0.45) f.box(0.13, 0.8, 0.13, trim, x, a + 1.15, 0.55);
+          f.box(2.2, 0.14, 0.2, trim, 0, a + 1.95, 0.55);
+        }
+      }
+    }
+    // cupolina su un tamburo ottagonale, lanterna e croce
+    const drum = new THREE.CylinderGeometry(1.5, 1.6, 0.9, 8); drum.translate(c[0], y0 + 34.9, -c[1]); tb.addGeometry(drum, light);
+    const dome = new THREE.LatheGeometry([[0, 0], [1.55, 0], [1.4, 0.8], [1, 1.45], [0.45, 1.8], [0, 1.85]].map(([x, y]) => new THREE.Vector2(x, y)), 8);
+    dome.translate(c[0], y0 + 35.8, -c[1]); tb.addGeometry(dome, trim);
+    const lantern = new THREE.CylinderGeometry(0.32, 0.36, 0.9, 6); lantern.translate(c[0], y0 + 38, -c[1]); tb.addGeometry(lantern, trim);
+    const cross = new THREE.BoxGeometry(0.14, 1.4, 0.14); cross.translate(c[0], y0 + 39.1, -c[1]); tb.addGeometry(cross, iron);
+    const arm = new THREE.BoxGeometry(0.7, 0.12, 0.14); arm.rotateY(yaw); arm.translate(c[0], y0 + 39.4, -c[1]); tb.addGeometry(arm, iron);
+    this.roofs.push({ pts: corners, top: y0 + 40, wall: y0 + 34 });
+  },
+
+  /**
    * CATTEDRALE, sulla sagoma reale orientata est-ovest (fonti nel README):
    *  - navate laterali sulla sagoma, navata centrale più alta con tetto a capanna;
    *  - facciata ovest tripartita da due lesene, con tre portali (il centrale,
@@ -2742,8 +2853,8 @@ const Buildings = {
    *    centro, oculi sopra le porte laterali e cornice di coronamento;
    *  - fianco sud, verso Piazza Benedetto XIII: portale dorico con due colonne,
    *    architrave e timpano, il rilievo della Madonna col Bambino tra le statue
-   *    dei santi Pietro e Paolo, e un secondo rosone accanto al campanile;
-   *  - campanile sul fianco sud: pianta quadrata, quattro ordini decrescenti
+   *    dei santi Pietro e Paolo, e un secondo rosone subito a ovest del campanile;
+   *  - campanile in fondo al fianco sud, contro la Curia: pianta quadrata, quattro ordini decrescenti
    *    separati da cornici, cella con arcate e cupola a cipolla (1698) con croce;
    *  - a nord, sulla sporgenza della sagoma, il cappellone del Santissimo a due piani.
    * La sagoma reale finisce piatta a est, contro un altro edificio: niente abside esterna.
@@ -2855,8 +2966,9 @@ const Buildings = {
     fw.box(0.25, 1.8, 0.25, light, 0, yA - 0.1, 0);
     fw.box(1, 0.25, 0.25, light, 0, yA + 1.05, 0);
 
-    // Campanile: dentro la sagoma, a filo del fianco sud, nella metà verso est
-    const T = 6.6, aT = lerp(aW, aE, 0.72);
+    // Campanile: dentro la sagoma, a filo del fianco sud, in fondo a est contro la Curia
+    // (blocco D, verificato su Street View e sulle foto di Piazza Benedetto XIII)
+    const T = 6.6, aT = aE - T / 2 - 0.6;
     const sT = Math.min(...[-T / 2, 0, T / 2].map((d) => section(body, aT + d)?.[0] ?? bS));
     const bT = sT - 0.4 + T / 2;
     const [te, tn] = at(aT, bT);
@@ -2893,9 +3005,9 @@ const Buildings = {
     const arm = new THREE.BoxGeometry(0.9, 0.14, 0.16); arm.rotateY(yaw + Math.PI / 2); arm.translate(te, G + 37.9, -tn); tb.addGeometry(arm, iron);
     this.roofs.push({ pts: [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([x, y]) => at(aT + (x * T) / 2, bT + (y * T) / 2)), top: G + 38 });
 
-    // Fianco sud: portale dorico, rilievo e statue; secondo rosone accanto al campanile
+    // Fianco sud: portale dorico, rilievo e statue; secondo rosone subito a ovest del campanile
     const southFrame = (a) => { const s = section(body, a); return s && wallFrame(tb, at(a, s[0]), south); };
-    const aP = lerp(aW, aE, 0.47), aR = aT + T / 2 + 2.4;
+    const aP = lerp(aW, aE, 0.47), aR = aT - T / 2 - 2.6;
     const fp = southFrame(aP), py = Terrain.heightAt(...at(aP, bS - 3));
     if (fp) {
       fp.box(2.5, 4.6, 0.12, door, 0, py, 0.04);
@@ -3258,16 +3370,22 @@ const Buildings = {
  * 6c. DETTAGLI DEL PAESAGGIO: grotte nel tufo, alberi e ulivi
  * ═══════════════════════════════════════════════════════════════════════ */
 const Scenery = {
-  /** Bocche di grotta ad arco sulle pareti del canyon, lato città. */
+  /** Bocche di grotta ad arco sulle pareti del canyon, lato città, e le Sette Camere di fronte. */
   caves(spots) {
     const shape = new THREE.Shape();
     shape.moveTo(-1, 0); shape.lineTo(1, 0); shape.lineTo(1, 1.2);
     shape.absarc(0, 1.2, 1, 0, Math.PI, false);
     shape.lineTo(-1, 0);
     const geo = new THREE.ShapeGeometry(shape, 4);
-    const picks = [];
+    const picks = [], sette = [];
     const r = rng(314);
-    for (const s of spots) if (r() < 0.12 && picks.length < 220) picks.push(s);
+    for (const s of spots) {
+      if (!s.sette) { if (r() < 0.12 && picks.length < 220) picks.push(s); continue; }
+      // Sette Camere: una fila fitta di grotte sulla parete di fronte (foto su Wikimedia Commons)
+      if (sette.length < 36 && !sette.some((q) => Math.hypot(q.e - s.e, q.n - s.n, q.y - s.y) < 3.6)) sette.push(s);
+    }
+    picks.push(...sette);
+    this.setteCount = sette.length;
     const mesh = new THREE.InstancedMesh(geo, new THREE.MeshStandardMaterial({ color: PALETTE.cave, roughness: 1, flatShading: true }), Math.max(1, picks.length));
     const m = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), p = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
     picks.forEach((s, i) => {
@@ -3946,6 +4064,7 @@ const Tiles = {
         World.faceColor(col, pal, { cy, slope, zone, side: vSide[a], ce, cn, areas });
         if (coarse) { /* niente punti per grotte e abitazioni */ }
         else if (zone === ZONE.WALL && slope < 0.55 && vSide[a] > 0 && cy < -8) caveSpots.push({ e: ce, n: cn, y: cy, nx: nx / len, nz: nz / len });
+        else if (zone === ZONE.WALL && slope < 0.6 && vSide[a] < 0 && Math.hypot(ce - SETTE_CAMERE[0], cn - SETTE_CAMERE[1]) < 40) caveSpots.push({ e: ce, n: cn, y: cy, nx: nx / len, nz: nz / len, sette: true });
         else if (zone === ZONE.SLOPE && slope < 0.62 && vSide[a] > 0) dwellSpots.push({ e: ce, n: cn, y: cy, nx: nx / len, nz: nz / len });
       } else this._groundColor(col, pal, { cy, slope, zone, ce, cn });
       if (coarse) emit(A, B, D); else tb.tri(A, B, D, col, null, [0, 1, 0]);
@@ -4280,20 +4399,35 @@ const Details = {
     this.keepOut = [];                   // zone senza finestre: davanti a portali e rilievi
 
     // Chiese: portale con timpano, gradino e oculo sul lato che guarda la via.
+    const agostino = DATA.locate("Parrocchia San Giovanni Battista in Sant'Agostino - Gravina in Puglia");
     GEO.buildings.forEach(([kind, nameIdx, , rings], index) => {
       const name = DATA.name(nameIdx);
       if (kind !== 1 || Buildings.rockChurches.has(index)) return;   // le chiese rupestri hanno il fronte scavato
       const outer = DATA.pairs(rings[0]);
-      const purgatorio = name === 'Santa Maria del Suffragio';
-      // Il Purgatorio si apre sul lato corto a sud, su Piazza Notar Domenico, dove i dati segnano la chiesa.
-      const front = this.frontEdge(outer, 5, purgatorio ? DATA.locate('Chiesa del Purgatorio') : null);
+      const purgatorio = name === 'Santa Maria del Suffragio', sanFrancesco = name === 'Chiesa San Francesco';
+      // Il Purgatorio si apre sul lato corto a sud, su Piazza Notar Domenico, dove i dati segnano la chiesa;
+      // San Francesco sul Larghetto, a ovest-nord-ovest (blocco D, Street View).
+      const front = this.frontEdge(outer, 5, purgatorio ? DATA.locate('Chiesa del Purgatorio') : sanFrancesco ? [202.2, 234.7] : null);
       if (!front) return;
       const f = this.frame(front);
       const big = Math.abs(Plane.signedArea(outer)) > 250;
+      const cecilia = name === 'Chiesa di Santa Cecilia';
       if (purgatorio) this.purgatorio(f);
-      else this.churchPortal(f, big);
+      else this.churchPortal(f, big, !sanFrancesco && !cecilia);
+      if (sanFrancesco) this.sanFrancescoFront(f, front.len);
+      // Blocco D, dalle foto (Street View e Wikimedia Commons): Santa Cecilia ha una grande lunetta
+      // con la grata sopra la porta, Sant'Agostino i vasi di pietra agli angoli della facciata.
+      if (cecilia) this.lunette(f, 0, f.ground + 5.3, 1.1);
+      const top = tops.get(name ?? `#${index}`)?.top;
+      if (agostino && top && outer.some(([e, n]) => Math.hypot(e - agostino[0], n - agostino[1]) < 6)) {
+        for (const s of [-1, 1]) f.add(new THREE.LatheGeometry([[0, 0], [0.3, 0], [0.22, 0.2], [0.38, 0.55], [0.2, 0.9], [0.26, 1.0], [0, 1.1]].map(([a, b]) => new THREE.Vector2(a, b)), 6), this.col.light, s * (front.len / 2 - 0.5), top, 0.1);
+      }
       this.keepOut.push({ M: f.M, n: f.n, half: purgatorio ? 3.4 : big ? 2.6 : 2.2, top: f.ground + (purgatorio ? 9.6 : big ? 10.5 : 8.5) });
     });
+
+    // Chiesa del Gesù (nei dati è una casa): facciata bianca con il timpano e tre oculi (foto su Commons)
+    const gesu = DATA.building('Chiesa del Gesù'), gesuTop = tops.get('Chiesa del Gesù')?.top;
+    if (gesu && gesuTop) this.gesuFront(DATA.pairs(gesu[3][0]), gesuTop);
 
     // Palazzi: cornicione, fascia marcapiano e portale in bugnato.
     for (const name of ['Palazzo Ducale Orsini', 'Museo e Biblioteca Ettore Pomarici Santomasi']) {
@@ -4303,6 +4437,10 @@ const Details = {
 
     const lm = (id) => landmarks.find((l) => l.id === id);
     if (lm('fontana')) this.fountain(lm('fontana').at);
+    // Blocco D: Porta San Michele e Piazza Scacchi, Quattro Fontane, facciata di San Francesco
+    this.portaSanMichele(tops);
+    this.piazzaScacchi();
+    if (lm('quattrofontane')) this.quattroFontane(lm('quattrofontane').at);
     for (const [e, n] of GEO.views) this.railing(e, n);
     this.stairs();
     this.placeLanterns(landmarks.filter((l) => l.card !== false));
@@ -4342,14 +4480,266 @@ const Details = {
   /**
    * Sistema locale su una facciata: x lungo il muro, y quota assoluta,
    * z verso l'esterno (0 = filo del muro). `ground` è la quota della strada.
+   * Con `tb` si disegna in un altro raccoglitore (per esempio lo strato dei dettagli di un riquadro).
    */
-  frame({ M, n, clear = 1 }) {
+  frame({ M, n, clear = 1 }, tb = this.tb) {
     const ground = Terrain.heightAt(M[0] + n[0] * 1.5, M[1] + n[1] * 1.5);
-    return { ...wallFrame(this.tb, M, n), ground, clear, M, n };
+    return { ...wallFrame(tb, M, n), ground, clear, M, n };
+  },
+
+  /** Strato dei dettagli del riquadro che contiene il punto: si vede solo da vicino. */
+  near([e, n]) { return Tiles.builderAt(e, n, 'dettagli'); },
+
+  /** Il lato di edificio più vicino al punto, entro `max` m: { P, Q, M, n (verso l'esterno), len, index }. */
+  wallNear(pt, max = 3) {
+    let best = null;
+    GEO.buildings.forEach(([, , , rings], index) => {
+      const outer = DATA.pairs(rings[0]), ccw = Plane.signedArea(outer) > 0;
+      for (let i = 0; i < outer.length; i++) {
+        const P = outer[i], Q = outer[(i + 1) % outer.length], len = Math.hypot(Q[0] - P[0], Q[1] - P[1]);
+        if (len < 1) continue;
+        const t = clamp(((pt[0] - P[0]) * (Q[0] - P[0]) + (pt[1] - P[1]) * (Q[1] - P[1])) / (len * len), 0, 1);
+        const d = Math.hypot(P[0] + (Q[0] - P[0]) * t - pt[0], P[1] + (Q[1] - P[1]) * t - pt[1]);
+        if (d > max || (best && d >= best.d)) continue;
+        const s = ccw ? 1 : -1;
+        best = { d, P, Q, M: [(P[0] + Q[0]) / 2, (P[1] + Q[1]) / 2], n: [s * (Q[1] - P[1]) / len, -s * (Q[0] - P[0]) / len], len, index };
+      }
+    });
+    return best;
+  },
+
+  /** Albero semplice (tronco e chioma a più volumi), per le aiuole delle piazze. */
+  tree(tb, e, n, h, r, trunk, leaves, seed = 1, thick = 1) {
+    const y = Terrain.heightAt(e, n), rnd = rng(seed);
+    const t = new THREE.CylinderGeometry(0.16 * r * thick, 0.26 * r * thick, h * 0.55, 5); t.translate(e, y + h * 0.27, -n); tb.addGeometry(t, trunk);
+    for (let k = 0; k < 3; k++) {
+      const c = new THREE.IcosahedronGeometry(r * (0.62 + rnd() * 0.25), 0);
+      c.scale(1, 0.72, 1);
+      c.translate(e + (rnd() - 0.5) * r * 0.9, y + h * (0.62 + rnd() * 0.2), -n + (rnd() - 0.5) * r * 0.9);
+      tb.addGeometry(c, leaves[k % leaves.length]);
+    }
+  },
+
+  /**
+   * Facciata dipinta di un palazzo sulla piazza (blocco D, dalle foto e da Street View): intonaco
+   * colorato, lesene d'angolo, marcapiani, cornicione, persiane verdi con il timpanetto, balconi
+   * di ferro (lunghi sui piani in `long`: [piano, x da, x a]) e botteghe al piano terra. Toglie le
+   * finestre generiche di quel muro. Solo da vicino.
+   */
+  paintedFront(w, top, { wall, long = [] }) {
+    const tb = this.near(w.M), f = this.frame(w, tb), y = f.ground, L = w.len, H = CONFIG.buildings.floorHeight;
+    const { light, iron } = this.col, shutter = new THREE.Color('#3f7a52'), shop = new THREE.Color('#6a635a');
+    this.keepOut.push({ M: w.M, n: w.n, half: L / 2 + 0.3, top: top + 1 });
+    f.box(L - 0.1, top - y + 0.8, 0.1, wall, 0, y - 0.8, 0.05);              // intonaco
+    for (const s of [-1, 1]) f.box(0.55, top - y, 0.2, light, s * (L / 2 - 0.3), y, 0.1);   // lesene d'angolo
+    f.box(L + 0.1, 0.45, 0.45, light, 0, top - 0.45, 0.22);                  // cornicione
+    const floors = Math.max(1, Math.floor((top - y - 0.6) / H)), cols = Math.max(1, Math.floor((L - 1.6) / 3.2));
+    const balcony = (x0, x1, by) => {
+      f.box(x1 - x0, 0.16, 0.85, light, (x0 + x1) / 2, by, 0.45);
+      f.box(x1 - x0, 0.07, 0.07, iron, (x0 + x1) / 2, by + 1.0, 0.85);
+      for (let x = x0 + 0.1; x <= x1 - 0.09; x += 0.55) f.box(0.05, 1.0, 0.05, iron, x, by + 0.08, 0.85);
+    };
+    for (let k = 1; k < floors; k++) f.box(L - 0.5, 0.2, 0.16, light, 0, y + k * H - 0.1, 0.09);   // marcapiani
+    for (let i = 0; i < cols; i++) {
+      const x = -L / 2 + 0.8 + ((i + 0.5) * (L - 1.6)) / cols;
+      f.box(1.6, 2.7, 0.06, shop, x, y, 0.12);                                // bottega
+      for (let k = 1; k < floors; k++) {
+        const wy = y + k * H + 0.2;
+        f.box(1.35, 2.3, 0.06, light, x, wy - 0.1, 0.12);                     // cornice della porta-finestra
+        for (const s of [-1, 1]) f.box(0.52, 2.1, 0.08, shutter, x + s * 0.33, wy, 0.15);   // persiane
+        f.box(1.6, 0.3, 0.22, light, x, wy + 2.15, 0.16);                     // timpanetto
+        if (!long.some(([fl]) => fl === k)) balcony(x - 0.85, x + 0.85, y + k * H);
+      }
+    }
+    for (const [k, x0, x1] of long) if (k < floors) balcony(x0, x1, y + k * H);
+    return f;
+  },
+
+  /**
+   * PORTA SAN MICHELE (fonti nel README): in Piazza Scacchi, dove c'era la porta orientale della
+   * città (in OSM la piazza ha i vecchi nomi Porta Regia e Porta San Tommaso). All'imbocco di Via
+   * Matteotti, nella nicchia ad arco all'angolo del palazzo rosa, al primo piano, la statua di
+   * San Michele del 1799: ali aperte e spada alzata. Di fronte, oltre il vicolo, il palazzo giallo.
+   * I due palazzi sono nei dati (lati di edifici più lunghi); colori e balconi da Street View.
+   */
+  portaSanMichele(tops) {
+    const top = (w) => tops.get(`#${w.index}`)?.top;
+    const pink = this.wallNear([400.6, -21.4], 1.5), yellow = this.wallNear([391.4, -36], 1.5);
+    if (yellow && top(yellow)) this.paintedFront(yellow, top(yellow), { wall: new THREE.Color('#e8c47c') });
+    if (!pink || !top(pink)) return;
+    // la nicchia sta vicino all'angolo sul vicolo: x negativo o positivo, quello verso Via Matteotti
+    const L = pink.len, H = CONFIG.buildings.floorHeight, t = [-pink.n[1], pink.n[0]];
+    const side = (403 - pink.M[0]) * t[0] + (-31 - pink.M[1]) * t[1] < 0 ? -1 : 1;
+    const run = side < 0 ? [-L / 2 + 2.1, L / 2 - 0.9] : [-L / 2 + 0.9, L / 2 - 2.1];   // balconi lunghi, lontano dalla nicchia
+    const f = this.paintedFront(pink, top(pink), { wall: new THREE.Color('#ecb8a4'), long: [[1, ...run], [2, ...run]] });
+    const x = side * (L / 2 - 1.2), y = f.ground + H + 0.5, { light, hole } = this.col;
+    const arch = (w, h, d) => { const sh = new THREE.Shape(); sh.moveTo(-w / 2, 0); sh.lineTo(w / 2, 0); sh.lineTo(w / 2, h - w / 2); sh.absarc(0, h - w / 2, w / 2, 0, Math.PI, false); sh.closePath(); return new THREE.ExtrudeGeometry(sh, { depth: d, bevelEnabled: false, curveSegments: 6 }); };
+    f.add(arch(1.4, 2.5, 0.12), light, x, y - 0.15, 0.1);                   // cornice della nicchia
+    f.add(arch(1.0, 2.1, 0.06), hole, x, y, 0.2);                            // fondo
+    f.box(1.5, 0.22, 0.5, light, x, y - 0.3, 0.3);                           // mensola
+    // San Michele: tunica dorata, ali chiare, braccio alzato con la spada, drago ai piedi
+    const gold = new THREE.Color('#b8894a'), wing = new THREE.Color('#ece0c4'), skin = new THREE.Color('#d7ad86'), steel = new THREE.Color('#c9ccd0');
+    f.box(0.62, 0.16, 0.34, new THREE.Color('#4d5a3a'), x, y - 0.08, 0.45);  // drago
+    for (const s of [-1, 1]) f.box(0.12, 0.42, 0.14, gold, x + s * 0.09, y + 0.08, 0.45);
+    f.box(0.4, 0.72, 0.24, gold, x, y + 0.48, 0.45);                          // tunica
+    f.add(new THREE.IcosahedronGeometry(0.13, 0), skin, x, y + 1.33, 0.45);   // testa
+    for (const s of [-1, 1]) f.box(0.08, 0.75, 0.34, wing, x + s * 0.27, y + 0.62, 0.3, -s * 0.35);   // ali
+    f.box(0.09, 0.5, 0.09, gold, x + 0.28, y + 1.05, 0.5, -0.5);               // braccio alzato
+    f.box(0.05, 0.7, 0.05, steel, x + 0.42, y + 1.35, 0.52);                   // spada
+  },
+
+  /**
+   * PIAZZA SCACCHI (blocco D; posizioni: busto di Scacchi dal basamento in OSM w411138256,
+   * il resto da Street View): a sud, sotto un grande ulivo in un'aiuola rotonda, il busto in
+   * bronzo di Canio Musacchio su un blocco di pietra con la lapide e un muretto curvo alle spalle;
+   * a nord il busto in pietra di Arcangelo Scacchi, su un alto piedistallo in un recinto di catene.
+   * Lungo Via Garibaldi un'aiuola rialzata con gli alberi e le sedute di pietra; davanti al palazzo
+   * rosa le fioriere tonde e i due pannelli con la pianta della città. Niente sulla carreggiata.
+   */
+  piazzaScacchi() {
+    const C = (h) => new THREE.Color(h), { light, iron, stone } = this.col;
+    const lawn = C('#7f9a4c'), curb = C('#e9dfc7'), bronze = C('#4b3c2c'), marble = C('#f0e9da');
+    const olive = [C('#95a070'), C('#87935f'), C('#a0a97b')], leaves = [C('#6f8a45'), C('#627d3d')];
+    const free = (e, n, m) => this.net.conformerClearance(e, n) > m && !Buildings.occupied(e, n);
+    const cyl = (tb, r, h, e, n, y, color, seg = 12) => { const g = new THREE.CylinderGeometry(r, r, h, seg); g.translate(e, y + h / 2, -n); tb.addGeometry(g, color); };
+
+    // Aiuola rotonda con l'ulivo e il monumento a Canio Musacchio
+    const A = [408, -40];
+    if (free(...A, 5)) {
+      const tb = this.near(A), y = Terrain.heightAt(...A);
+      cyl(tb, 4.8, 0.32, ...A, y - 0.1, curb, 16);
+      cyl(tb, 4.5, 0.36, ...A, y - 0.1, lawn, 16);
+      // l'ulivo: tronco basso e storto, chioma larga a ciuffi argentati
+      const O = [A[0] + 1.6, A[1] + 1.2], trunk = C('#6e5b45'), r = rng(7);
+      const t1 = new THREE.CylinderGeometry(0.3, 0.45, 2.4, 6); t1.rotateZ(0.18); t1.translate(O[0], y + 1.2, -O[1]); tb.addGeometry(t1, trunk);
+      for (let k = 0; k < 7; k++) {
+        const a = k * 2.4, d = k ? 1.3 + r() * 0.9 : 0, c = new THREE.IcosahedronGeometry(1.1 + r() * 0.5, 0);
+        c.scale(1, 0.65, 1);
+        c.translate(O[0] + Math.cos(a) * d, y + 3 + r() * 1.1 - d * 0.25, -(O[1] + Math.sin(a) * d));
+        tb.addGeometry(c, olive[k % 3]);
+      }
+      const d = [0.99, 0.14], f = wallFrame(tb, [A[0] - 2.4, A[1] - 1.3], d);   // lapide verso la piazza (est)
+      f.box(1.5, 1.35, 1.0, C('#cdb58a'), 0, y, 0);                           // blocco di pietra
+      for (let k = 0; k < 3; k++) f.box(k ? 0.8 : 1.1, 0.07, 0.04, C('#5a4a3a'), 0, y + 0.95 - k * 0.2, 0.52);   // lapide
+      f.box(0.72, 0.42, 0.42, bronze, 0, y + 1.35, 0);                        // busto: spalle
+      f.box(0.2, 0.16, 0.2, bronze, 0, y + 1.77, 0);
+      f.add(new THREE.IcosahedronGeometry(0.22, 0), bronze, 0, y + 2.1, 0.02);
+      for (let k = -3; k <= 3; k++) {                                         // muretto curvo alle spalle
+        const a = Math.PI + k * 0.28, R = 1.9;
+        f.add(new THREE.BoxGeometry(0.6, 0.85, 0.35).rotateY(a), C('#cdb58a'), Math.sin(a) * R, y + 0.42, Math.cos(a) * R);
+      }
+    }
+
+    // Busto di Arcangelo Scacchi, rivolto verso le case della piazza (ovest)
+    const S = [430.5, 29.6];
+    if (free(...S, 1.6)) {
+      const tb = this.near(S), y = Terrain.heightAt(...S), f = wallFrame(tb, S, [-0.96, 0.27]);   // x lungo il lato lungo del basamento
+      f.box(3.9, 0.35, 3.0, curb, 0, y - 0.1, 0);                             // piattaforma
+      for (const [px, pz] of [[-1.75, -1.3], [1.75, -1.3], [1.75, 1.3], [-1.75, 1.3]]) f.box(0.22, 0.75, 0.22, curb, px, y + 0.25, pz);
+      for (const s of [-1, 1]) {                                              // catene
+        f.box(3.5, 0.05, 0.05, iron, 0, y + 0.72, s * 1.3);
+        f.box(0.05, 0.05, 2.6, iron, s * 1.75, y + 0.72, 0);
+      }
+      f.box(1.2, 0.35, 1.2, marble, 0, y + 0.25, 0);                           // piedistallo
+      f.box(0.85, 2.1, 0.85, marble, 0, y + 0.6, 0);
+      f.box(1.05, 0.22, 1.05, marble, 0, y + 2.7, 0);
+      f.box(0.78, 0.5, 0.42, marble, 0, y + 2.92, 0);                          // busto
+      f.box(0.2, 0.14, 0.2, marble, 0, y + 3.42, 0);
+      f.add(new THREE.IcosahedronGeometry(0.23, 0), marble, 0, y + 3.72, 0.02);
+      f.box(0.26, 0.24, 0.16, marble, 0, y + 3.42, 0.2);                       // barba
+    }
+
+    // Aiuola rialzata lungo Via Garibaldi, con gli alberi e le sedute di pietra
+    const G = [[425, -28], [436, 10], [447, 56], [448, 64]];            // mezzeria di Via Garibaldi (OSM w295166976)
+    let k = 0;
+    for (let i = 0; i + 1 < G.length; i++) {
+      const [e0, n0] = G[i], [e1, n1] = G[i + 1], L = Math.hypot(e1 - e0, n1 - n0), te = (e1 - e0) / L, tn = (n1 - n0) / L;
+      for (let d = 0.5; d < L; d += 1, k++) {
+        const e = e0 + te * d - tn * 5.2, n = n0 + tn * d + te * 5.2;          // 5,2 m a ovest della mezzeria
+        if (n < -16 || n > 62 || Math.hypot(e - S[0], n - S[1]) < 3.4 || !free(e, n, 1.3)) continue;
+        const tb = this.near([e, n]), y = Terrain.heightAt(e, n), f = wallFrame(tb, [e, n], [-tn, te]);
+        f.box(1.05, 0.45, 2.2, curb, 0, y - 0.1, 0);
+        f.box(1.05, 0.08, 1.9, lawn, 0, y + 0.35, 0);
+        if (k % 4 !== 3) f.box(1.05, 0.42, 0.5, stone, 0, y - 0.05, 1.4);       // seduta sul lato della piazza
+        if (k % 7 === 3) this.tree(tb, e - tn * 0.9, n + te * 0.9, 7, 1.5, C('#6b5840'), leaves, k);   // chioma fuori dalla carreggiata
+      }
+    }
+
+    // Fioriere tonde e i due pannelli con la pianta della città, davanti al palazzo rosa
+    const pink = this.wallNear([400.6, -21.4], 1.5);
+    if (pink) {
+      const t = [-pink.n[1], pink.n[0]];
+      const at = (x, z) => [pink.M[0] + t[0] * x + pink.n[0] * z, pink.M[1] + t[1] * x + pink.n[1] * z];
+      for (const x of [0.5, 2.6, 4.7]) {
+        const p = at(x, 5.2);
+        if (!free(...p, 0.8)) continue;
+        const tb = this.near(p), y = Terrain.heightAt(...p);
+        cyl(tb, 0.62, 0.62, ...p, y, C('#b3aa9a'), 8);
+        const bush = new THREE.IcosahedronGeometry(0.55, 0); bush.scale(1, 0.6, 1); bush.translate(p[0], y + 0.8, -p[1]); tb.addGeometry(bush, leaves[0]);
+      }
+      const p = at(3.6, 6.6);
+      if (free(...p, 1.4)) {
+        const f = wallFrame(this.near(p), p, pink.n), y = Terrain.heightAt(...p);
+        for (const s of [-1, 1]) {
+          f.box(2.1, 1.5, 0.12, C('#3a2c24'), s * 1.12, y + 0.9, 0);            // pannello
+          f.box(1.8, 1.2, 0.04, C('#9a7a52'), s * 1.12, y + 1.05, -0.08);       // pianta della città
+          f.box(0.1, 2.5, 0.1, iron, s * 2.2, y, 0);
+        }
+      }
+    }
+  },
+
+  /**
+   * QUATTRO FONTANE (OSM w411137158, circa 2,6 × 2,3 m; foto e lapidi su Wikimedia Commons, fonti
+   * nel README): blocco di pietra con una lapide per lato sotto il coronamento curvo, volute ai
+   * fianchi, pinnacoli agli angoli, sui lati lunghi due serpenti marini intrecciati che versano
+   * l'acqua in una vasca. Nel diorama la via passa più vicina che nella realtà: se la sagoma tocca
+   * la carreggiata, la fontana si sposta di quel poco che serve.
+   */
+  quattroFontane([e0, n0]) {
+    const u = [0.92, -0.38], v = [0.38, 0.92];                               // assi della sagoma in OSM
+    let best = null;
+    for (let r = 0; r <= 6 && !best; r += 0.5) {
+      for (let k = 0; k < (r ? 16 : 1); k++) {
+        const a = (k / 16) * TAU, e = e0 + Math.cos(a) * r, n = n0 + Math.sin(a) * r;
+        const ok = [[-1, -1], [1, -1], [1, 1], [-1, 1], [0, 0]].every(([x, y]) => {
+          const pe = e + u[0] * x * 1.9 + v[0] * y * 1.9, pn = n + u[1] * x * 1.9 + v[1] * y * 1.9;
+          return this.net.conformerClearance(pe, pn) > 0.3 && !Buildings.occupied(pe, pn);
+        });
+        if (ok) { best = [e, n]; break; }
+      }
+    }
+    if (!best) return;
+    const tb = this.near(best), y = Terrain.heightAt(...best), { light, stone, water, dark } = this.col;
+    const marble = new THREE.Color('#f2ede2'), serpent = new THREE.Color('#d8ccb0');
+    const core = wallFrame(tb, best, v);
+    core.box(2.2, 3.1, 1.7, stone, 0, y, 0);                                  // corpo
+    core.box(2.5, 0.35, 2.0, light, 0, y + 3.1, 0);                            // cornice
+    for (const [x, z] of [[-1.1, -0.85], [1.1, -0.85], [1.1, 0.85], [-1.1, 0.85]]) {
+      core.add(new THREE.LatheGeometry([[0, 0], [0.22, 0], [0.28, 0.25], [0.18, 0.5], [0.24, 0.7], [0, 0.95]].map(([a, b]) => new THREE.Vector2(a, b)), 6), light, x, y + 3.45, z);   // pinnacoli
+    }
+    for (const [dir, w, d] of [[v, 2.2, 0.85], [[-v[0], -v[1]], 2.2, 0.85], [u, 1.7, 1.1], [[-u[0], -u[1]], 1.7, 1.1]]) {
+      const f = wallFrame(tb, [best[0] + dir[0] * d, best[1] + dir[1] * d], dir);
+      const crown = new THREE.Shape();
+      crown.moveTo(-w / 2, 0); crown.lineTo(w / 2, 0); crown.lineTo(w / 2, 0.3); crown.quadraticCurveTo(0, 1.0, -w / 2, 0.3); crown.closePath();
+      f.add(new THREE.ExtrudeGeometry(crown, { depth: 0.3, bevelEnabled: false, curveSegments: 4 }), light, 0, y + 3.45, -0.15);   // coronamento curvo
+      f.box(w * 0.62, 1.3, 0.06, marble, 0, y + 1.75, 0.03);                 // lapide
+      if (w > 2) {
+        for (const s of [-1, 1]) {                                            // serpenti marini che versano l'acqua
+          f.box(0.75, 0.2, 0.2, serpent, s * 0.45, y + 1.3, 0.1, s * 0.25);
+          f.add(new THREE.IcosahedronGeometry(0.17, 0), serpent, s * 0.88, y + 1.32, 0.16);
+        }
+        f.box(2.0, 0.55, 0.8, light, 0, y, 0.4);                              // vasca
+        f.box(1.8, 0.05, 0.6, water, 0, y + 0.5, 0.4);
+      } else {
+        f.box(0.8, 0.5, 0.5, light, 0, y, 0.25);                              // vaschetta
+        f.box(0.2, 0.2, 0.3, dark, 0, y + 1.0, 0.15);                          // cannella
+      }
+    }
   },
 
   /** Portale di chiesa: stipiti, architrave, timpano, porta, gradino e oculo. */
-  churchPortal(f, big) {
+  churchPortal(f, big, oculus = true) {
     const s = big ? 1.25 : 1, { light, stone, door, hole } = this.col, y = f.ground;
     f.box(0.42 * s, 3.7 * s, 0.3, light, -1.3 * s, y, 0.1);
     f.box(0.42 * s, 3.7 * s, 0.3, light, 1.3 * s, y, 0.1);
@@ -4359,8 +4749,57 @@ const Details = {
     gable.moveTo(-1.75 * s, 0); gable.lineTo(1.75 * s, 0); gable.lineTo(0, 1.15 * s); gable.closePath();
     f.add(new THREE.ExtrudeGeometry(gable, { depth: 0.28, bevelEnabled: false }), light, 0, y + 4.15 * s, 0);
     f.box(3.4 * s, 0.16, 0.3, stone, 0, y - 0.06, 0.12);                  // gradino
+    if (!oculus) return;
     f.add(new THREE.TorusGeometry(0.8 * s, 0.16 * s, 5, 14), light, 0, y + 7.3 * s, 0.12);
     f.add(new THREE.CylinderGeometry(0.78 * s, 0.78 * s, 0.08, 14).rotateX(Math.PI / 2), hole, 0, y + 7.3 * s, 0.04);
+  },
+
+  /** Lunetta: mezzo tondo scuro con la ghiera chiara e la grata. */
+  lunette(f, x, y, r) {
+    const { light, hole, iron } = this.col;
+    f.add(new THREE.CircleGeometry(r, 8, 0, Math.PI), hole, x, y, 0.05);
+    f.add(new THREE.TorusGeometry(r + 0.1, 0.14, 4, 8, Math.PI), light, x, y, 0.1);
+    f.box(r * 2 + 0.3, 0.2, 0.3, light, x, y - 0.2, 0.1);
+    for (const a of [0.5, 1, 1.5, 2, 2.6]) f.box(0.05, r * 0.95, 0.04, iron, x, y, 0.08, Math.PI / 2 - a);
+  },
+
+  /** CHIESA DEL GESÙ (1645): facciata bianca con il timpano in alto, tre oculi e il portale. */
+  gesuFront(outer, top) {
+    const front = this.frontEdge(outer, 4);
+    if (!front) return;
+    const f = this.frame(front), y = f.ground, w = front.len, { light, hole } = this.col;
+    const white = new THREE.Color('#f1ece0');
+    f.box(w - 0.1, top - y + 0.8, 0.08, white, 0, y - 0.8, 0.04);
+    for (const s of [-1, 1]) f.box(0.5, top - y, 0.18, light, s * (w / 2 - 0.3), y, 0.09);   // lesene
+    this.churchPortal(f, false, false);
+    const ped = new THREE.Shape();
+    ped.moveTo(-w / 2, 0); ped.lineTo(w / 2, 0); ped.lineTo(0, Math.min(2.2, w * 0.28)); ped.closePath();
+    f.add(new THREE.ExtrudeGeometry(ped, { depth: 0.35, bevelEnabled: false }), white, 0, top - 0.1, -0.1);   // timpano
+    for (const [x, yy, r] of [[0, top - 2.2, 0.55], [-w / 4, top - 3.8, 0.45], [w / 4, top - 3.8, 0.45]]) {
+      f.add(new THREE.TorusGeometry(r, 0.12, 4, 12), light, x, yy, 0.12);
+      f.add(new THREE.CylinderGeometry(r, r, 0.06, 12).rotateX(Math.PI / 2), hole, x, yy, 0.1);
+    }
+    this.keepOut.push({ M: f.M, n: f.n, half: w / 2 + 0.2, top: top + 1 });
+  },
+
+  /**
+   * SAN FRANCESCO, la facciata sul Larghetto (blocco D, Street View): rosone sopra il portale
+   * maggiore, cornice marcapiano, due porte laterali con un oculo sopra ciascuna.
+   */
+  sanFrancescoFront(f, len) {
+    const { light, door, hole } = this.col, y = f.ground;
+    f.rose(0, y + 10.4, 1.75, 16, this.col, 0);
+    f.box(len - 1, 0.3, 0.35, light, 0, y + 8.3, 0.12);
+    if (len < 12) return;
+    for (const s of [-1, 1]) {
+      const x = s * (len / 2 - 3.2);
+      f.box(1.3, 2.9, 0.1, door, x, y, 0.04);
+      f.box(1.9, 0.35, 0.3, light, x, y + 2.9, 0.1);
+      for (const k of [-1, 1]) f.box(0.3, 2.9, 0.26, light, x + k * 0.8, y, 0.08);
+      f.add(new THREE.TorusGeometry(0.55, 0.13, 5, 12), light, x, y + 6.4, 0.12);
+      f.add(new THREE.CylinderGeometry(0.54, 0.54, 0.08, 12).rotateX(Math.PI / 2), hole, x, y + 6.4, 0.04);
+    }
+    this.keepOut.push({ M: f.M, n: f.n, half: len / 2, top: y + 13 });
   },
 
   /**
@@ -5831,10 +6270,11 @@ class MiniMap {
 
 /** Luoghi dell'elenco della pausa, per gruppi (id di LANDMARKS; quelli non elencati vanno in "Altri luoghi"). */
 const POI_GROUPS = [
-  { name: 'Chiese', ids: ['duomo', 'purgatorio', 'gesu', 'sanfrancesco', 'santasofia', 'santateresa', 'santacecilia', 'agostino', 'addolorata'] },
-  { name: 'Chiese rupestri', ids: ['sanmichele', 'santalucia', 'stella'] },
+  { name: 'Chiese', ids: ['duomo', 'purgatorio', 'gesu', 'sanfrancesco', 'sannicola', 'santasofia', 'santateresa', 'santacecilia', 'agostino', 'addolorata'] },
+  { name: 'Chiese e grotte rupestri', ids: ['sanmichele', 'santalucia', 'stella', 'settecamere'] },
   { name: 'Palazzi e musei', ids: ['orsini', 'santomasi', 'sotterranea'] },
-  { name: 'Piazze e giardini', ids: ['pellicciari', 'repubblica', 'villa'] },
+  { name: 'Porte, mura e fontane', ids: ['portasanmichele', 'bastione', 'quattrofontane'] },
+  { name: 'Piazze e giardini', ids: ['scacchi', 'pellicciari', 'fondovico', 'repubblica', 'villa'] },
   { name: 'La gravina e il paesaggio', ids: ['belvedere', 'ponte', 'fontana', 'botromagno'] },
   { name: 'Fuori dal centro storico', ids: ['castello', 'pip', 'bosco', 'rifugio'] },
 ];
@@ -6327,7 +6767,7 @@ const Radio = (() => {
     { title: 'Tufo', root: 60, bpm: 60, voice: PIANO, density: 0.5, pad: true, chords: [[0, 4, 7, 11, 14], [5, 9, 12, 16], [-3, 0, 4, 7], [7, 11, 14, 19]] },
     { title: 'Chianche', root: 62, bpm: 54, voice: CELESTA, density: 0.42, pad: false, chords: [[0, 3, 7, 10, 14], [-2, 2, 5, 9], [-4, 0, 3, 7], [5, 9, 12, 15]] },
     { title: 'Botromagno', root: 55, bpm: 50, voice: PIANO, density: 0.34, pad: true, chords: [[0, 4, 7, 11], [-3, 0, 4, 7, 14], [5, 9, 12, 16], [2, 7, 9, 14]] },
-    { title: 'Fondovico', root: 57, bpm: 58, voice: FLAUTO, density: 0.46, pad: true, chords: [[0, 3, 7, 14], [-4, 0, 3, 7], [3, 7, 10, 14], [-5, -2, 2, 7]] },
+    { title: 'Fondovito', root: 57, bpm: 58, voice: FLAUTO, density: 0.46, pad: true, chords: [[0, 3, 7, 14], [-4, 0, 3, 7], [3, 7, 10, 14], [-5, -2, 2, 7]] },
     { title: 'Acquedotto', root: 64, bpm: 62, voice: PIANO, density: 0.55, pad: false, chords: [[0, 4, 7, 11, 14], [-3, 0, 4, 7], [5, 9, 12, 16], [7, 11, 14, 16]] },
     { title: 'Piaggio', root: 53, bpm: 52, voice: CELESTA, density: 0.38, pad: true, chords: [[0, 4, 7, 11], [-3, 0, 3, 7], [-2, 2, 5, 9], [0, 5, 7, 12]] },
   ];
