@@ -69,7 +69,8 @@ const r = await page.evaluate(() => {
   // Nei riquadri si controllano solo edifici (con finestre, torrini e cisterne) e alberi: terreno, vie
   // e binari sono superfici.
   const tiles = new Map(g.Tiles.list.map((t) => [t.mesh, t.ranges]));
-  const checked = (o, i) => { const r = tiles.get(o); if (!r) return true; const t = Math.floor(i / 3); return (t >= r.edifici[0] && t < r.edifici[1]) || (t >= r.alberi[0] && t < r.alberi[1]); };
+  // (di tutti e due i livelli di dettaglio: t.ranges.controllo)
+  const checked = (o, i) => { const r = tiles.get(o); if (!r) return true; const t = Math.floor(i / 3); return r.controllo.some(([a, b]) => t >= a && t < b); };
   g.scene.traverse((o) => {
     if (!o.isMesh || esclusa(o)) return;
     const P = o.geometry.attributes.position, count = o.isInstancedMesh ? o.count : 1;

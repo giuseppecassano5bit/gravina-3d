@@ -144,6 +144,25 @@ si chiude (`_begin` fa il terreno, `_finish` il resto). Tra maglie diverse i ver
 seguono la maglia più larga: niente fessure. Le finestre coperte dalla casa accanto (muri in
 comune) non si posano.
 
+**Livelli di dettaglio** (blocco I). Ogni riquadro ha due versioni nella stessa mesh, una dopo
+l'altra: le parti solo da vicino (terreno fine, vie con cordoli e marciapiedi, edifici con cortili
+e torrini, finestre, torrini e cisterne del centro storico, alberi), quelle comuni (case del
+centro storico, binari) e quelle solo da lontano. La versione lontana ha:
+- il terreno a maglia doppia (10/30/60 m);
+- vie con tratti fino a 24 m e slarghi a 6 spicchi (nel centro storico chianche senza cordoli);
+- sagome degli edifici semplificate (scarto 1,2 m) senza cortili né torrini, e il castello senza merli;
+- metà degli alberi, senza tronco.
+
+`Tiles.updateLod` sceglie la versione con `setDrawRange`, quindi senza draw call in più. Passa a
+quella lontana oltre 560 m dalla camera su PC (420 m sul telefono) e torna alla piena sotto 520 m
+(380 m): è l'isteresi, così non ci sono sfarfallii. Da lontano il riquadro non fa ombra.
+
+Come combaciano le due versioni:
+- **bordi:** sui lati verso un vicino, i triangoli della versione lontana si dividono nei vertici
+  della versione piena, così il bordo combacia qualunque versione mostri il vicino;
+- **vie:** vicino alle vie la maglia larga prende la quota più bassa dei dintorni, e le vie
+  lontane restano sopra il terreno lontano (ricerca per cella, `farCells`).
+
 **Shader della città** (`cityMaterial`): colori per faccia come il resto del diorama, più un
 attributo `aInfo` per vertice che dice il tipo di superficie. Finestre con le persiane per piano
 e campata, negozi al piano terra, lamiera dei capannoni, marciapiedi, strisce, traversine e
@@ -391,19 +410,20 @@ rilassante, alla Minecraft**, generata dal codice (sezione 11b, `Radio`), senza 
 ## 8. Prestazioni
 
 Misure con `tools/test/prestazioni.mjs` (Mac M4, GPU vera, Chromium headless), nelle viste
-partenza, centro, Piazza Scacchi, pausa e panoramica sulla città (il caso peggiore).
+partenza, centro, Piazza Scacchi, pausa, panoramica sulla città e alta (120 m sopra il centro
+storico, verso la città: la vista della futura mongolfiera).
 "Per fotogramma" è il massimo tra le viste, senza il passaggio delle ombre.
 
-| Voce | Fase 3 (solo centro storico) | Fase 3.4, città intera | Dopo il blocco G | Tetto |
-|---|---|---|---|---|
-| `index.html` | 390 KB (124 KB compressi) | 737 KB (269 KB compressi) | 593 KB (251 KB compressi) | ≤ 900 KB (≤ 280) |
-| Costruzione fino a "Parti" | 282 ms | circa 500 ms | circa 520 ms | ≤ 1,5 s |
-| Memoria JavaScript | 41 MB | circa 100 MB | 112 MB (telefono 91) | ≤ 150 MB |
-| Città completa (in sottofondo) | — | circa 900 ms | circa 900 ms | — |
-| Triangoli nella scena | 267 000 | 543 000 (telefono 483 000) | 571 000 (telefono 505 000) | ≤ 650 000 |
-| Triangoli per fotogramma, PC | 267 000 | 334 000 | 335 000 | ≤ 400 000 |
-| Triangoli per fotogramma, telefono | 267 000 | 242 000 | 243 500 | ≤ 250 000 |
-| Draw call, PC / telefono | 39 / 38 | 69 / 54 | 69 / 48 | ≤ 90 / ≤ 70 |
+| Voce | Fase 3 (solo centro storico) | Fase 3.4, città intera | Dopo il blocco G | Dopo il blocco I | Tetto |
+|---|---|---|---|---|---|
+| `index.html` | 390 KB (124 KB compressi) | 737 KB (269 KB compressi) | 593 KB (251 KB compressi) | 604 KB (255 KB compressi) | ≤ 900 KB (≤ 280) |
+| Costruzione fino a "Parti" | 282 ms | circa 500 ms | circa 520 ms | circa 640 ms (telefono 620) | ≤ 1,5 s |
+| Memoria JavaScript | 41 MB | circa 100 MB | 112 MB (telefono 91) | 116 MB (telefono 129) | ≤ 150 MB |
+| Città completa (in sottofondo) | — | circa 900 ms | circa 900 ms | circa 1 100 ms | — |
+| Triangoli nella scena | 267 000 | 543 000 (telefono 483 000) | 571 000 (telefono 505 000) | 572 000 + 138 000 della versione lontana, mai disegnate insieme (telefono 505 000 + 116 000) | ≤ 650 000 |
+| Triangoli per fotogramma, PC | 267 000 | 334 000 | 335 000 | 235 500 (alta) | ≤ 400 000 (obiettivo del blocco I: 300 000) |
+| Triangoli per fotogramma, telefono | 267 000 | 242 000 | 243 500 | 164 700 (centro) | ≤ 250 000 (obiettivo del blocco I: 200 000) |
+| Draw call, PC / telefono | 39 / 38 | 69 / 54 | 69 / 48 | 68 / 48 | ≤ 90 / ≤ 70 |
 
 Nel blocco G il peso è sceso nonostante figurina, camera e radio: nodi, vie, vie decorative ed
 edifici del centro storico ora usano il `CODEC` (a 0,1 m, senza perdite), da 90 a 55 KB compressi.
@@ -427,7 +447,8 @@ edifici del centro storico ora usano il `CODEC` (a 0,1 m, senza perdite), da 90 
 | 3 | **Architettura e fedeltà**: Cattedrale e Purgatorio sulle fonti, San Michele e Madonna della Stella scavate nella roccia, rioni a gradoni in discesa con scalinate reali e abitazioni rupestri, altezze affidabili o stimate per zona, schede di altre cinque chiese, vetrina con il campo lungo sulle arcate | ✅ approvata il 28/09/2026 |
 | 3.4 C | **Città intera**: zolla di 2,9 × 3,1 km a riquadri, 80 km di vie, 1 828 edifici della città, quote Copernicus, binari, Castello Svevo, mappe vettoriali con zoom | ✅ (PR #8) |
 | 3.4 F | **Strade per il Bosco Difesa Grande e il P.I.P.**: tre zolle, tracciato reale compresso, bosco di querce | ✅ (PR #10) |
-| 3.4 G | **Percorsi a piedi e quote reali del centro storico**, con la camera attorno al mezzo (blocco B) e la radio ambient | ⏳ (PR #12) |
+| 3.4 G | **Percorsi a piedi e quote reali del centro storico**, con la camera attorno al mezzo (blocco B) e la radio ambient | ✅ (PR #12) |
+| 3.4 I | **Spazio sul telefono**: due livelli di dettaglio per riquadro, vista «alta» nelle misure | ⏳ (PR #13) |
 | 4 | Rifinitura: luci, prove su telefoni reali, restyling | ⏳ |
 
 ### Da decidere insieme (fase 3, punto 6)

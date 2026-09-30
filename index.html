@@ -912,6 +912,9 @@ const CONFIG = {
     buildBudget: 7,          // ms per fotogramma dedicati a costruire i riquadri in sottofondo
     roadLift: 0.1,           // m: nastri delle vie sopra il terreno
     trees: 1,                // densità degli alberi (0,5 sul profilo leggero)
+    // Livelli di dettaglio dei riquadri (m dalla camera): oltre la prima soglia la versione
+    // semplificata, sotto la seconda di nuovo quella piena (isteresi, niente sfarfallii).
+    lod: { pc: [560, 520], light: [420, 380] },
   },
 
   buildings: {
@@ -1046,6 +1049,33 @@ const Plane = {
       if (fp >= 0) out.push(p);
       if ((fp >= 0) !== (fq >= 0)) { const t = fp / (fp - fq); out.push([p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t]); }
     }
+    return out;
+  },
+  /**
+   * Sagoma chiusa semplificata (Douglas–Peucker): indici dei vertici che si allontanano più di
+   * `tol` m dal lato semplificato. Parte dai due vertici più lontani tra loro; almeno 3 vertici.
+   */
+  simplify(pts, tol) {
+    const n = pts.length;
+    if (n <= 4) return pts.map((_, i) => i);
+    let far = 0, best = -1;
+    for (let i = 1; i < n; i++) { const d = Math.hypot(pts[i][0] - pts[0][0], pts[i][1] - pts[0][1]); if (d > best) { best = d; far = i; } }
+    const keep = new Uint8Array(n);
+    keep[0] = keep[far] = 1;
+    const run = (a, b) => {                                  // da a a b (indici modulo n, b dopo a)
+      const [x0, y0] = pts[a % n], [x1, y1] = pts[b % n], L = Math.hypot(x1 - x0, y1 - y0) || 1;
+      let worst = 0, at = -1;
+      for (let i = a + 1; i < b; i++) {
+        const [x, y] = pts[i % n], d = Math.abs((x1 - x0) * (y0 - y) - (x0 - x) * (y1 - y0)) / L;
+        if (d > worst) { worst = d; at = i; }
+      }
+      if (at >= 0 && worst > tol) { keep[at % n] = 1; run(a, at); run(at, b); }
+    };
+    run(0, far);
+    run(far, n);
+    const out = [];
+    for (let i = 0; i < n; i++) if (keep[i]) out.push(i);
+    if (out.length < 3) return pts.map((_, i) => i);
     return out;
   },
   bbox(pts) {
@@ -2620,9 +2650,9 @@ const Buildings = {
           const a = (rnd() - 0.5) * rect.hl * 1.2, b = (rnd() - 0.5) * rect.hw * 1.2;
           const e = rect.c[0] + rect.u[0] * a + rect.v[0] * b, n = rect.c[1] + rect.u[1] * a + rect.v[1] * b;
           if (!Plane.contains(outer, e, n)) continue;
-          const big = rnd() > 0.55;
-          if (big) tb.box(e, n, topAt(e, n), 2.4, 2.3, 2.0, rect.u, wall);   // torrino delle scale
-          else tb.box(e, n, topAt(e, n), 0.8, 1.4, 0.8, rect.u, roof);      // cisterna o comignolo
+          const big = rnd() > 0.55, db = Tiles.builderAt(ce, cn, 'dettagli');   // solo da vicino
+          if (big) db.box(e, n, topAt(e, n), 2.4, 2.3, 2.0, rect.u, wall);   // torrino delle scale
+          else db.box(e, n, topAt(e, n), 0.8, 1.4, 0.8, rect.u, roof);      // cisterna o comignolo
         }
       }
 
@@ -3112,7 +3142,7 @@ const Buildings = {
       if (this.wallAt(w.e + ox * 0.6, w.n + on * 0.6) > w.y + hh + 0.1) { this.hiddenWindows++; continue; }
       const re = -on * hw, rn = ox * hw;                               // metà larghezza, lungo il muro
       const P = (s, t) => [w.e + s * re, w.y + t * hh, -(w.n + s * rn)];
-      Tiles.builderAt(w.e, w.n, 'edifici').quad(P(-1, -1), P(1, -1), P(1, 1), P(-1, 1),
+      Tiles.builderAt(w.e, w.n, 'dettagli').quad(P(-1, -1), P(1, -1), P(1, 1), P(-1, 1),
         w.door ? shutters[3] : shutters[Math.floor(w.c * shutters.length)], null, [ox, 0, -on]);
     }
   },
@@ -3330,6 +3360,8 @@ const Scenery = {
       const g = Terrain.heightAt(t.e, t.n), rot = hash2(i, 5) * TAU, tb = Tiles.builderAt(t.e, t.n, 'alberi');
       Tiles.put(tb, shapes.trunk, bark, t.e, g - 0.2, t.n, 1.15, t.s * 0.7, 1.15, rot);
       Tiles.put(tb, shapes.round, c.set(t.tone).multiplyScalar(0.9 + hash2(i, 9) * 0.2), t.e, g + t.s * 0.95, t.n, t.s, t.s * 0.8, t.s, rot);
+      // da lontano: metà degli alberi, solo la chioma (uguale: deve restare fuori dalla carreggiata)
+      if (hash2(i, 47) < 0.5) Tiles.put(Tiles.builderAt(t.e, t.n, 'alberiLontani'), shapes.round, c, t.e, g + t.s * 0.95, t.n, t.s, t.s * 0.8, t.s, rot);
       count++;
     });
     return count;
@@ -3547,7 +3579,7 @@ const Tiles = {
   list: [],
   group: new THREE.Group(),
   /** Triangoli per strato (per le misure di prestazioni). */
-  stats: { terreno: 0, vie: 0, edifici: 0, alberi: 0, binari: 0, fianchi: 0 },
+  stats: { terreno: 0, vie: 0, edifici: 0, alberi: 0, binari: 0, fianchi: 0, lontano: 0 },
 
   /** Riquadro che contiene il punto (e, n), o null fuori dalle zolle. */
   at(e, n) {
@@ -3618,18 +3650,19 @@ const Tiles = {
    * più fitti in curva e sui cambi di pendenza), e incroci della città.
    */
   _binRoads(network) {
-    const pick = (edge, i0, i1) => {
+    /** Punti tenuti tra i1 e i2: passo massimo `maxStep` m, scarto massimo `tol` in pianta e `tolY` in quota. */
+    const pick = (edge, i0, i1, maxStep = 8, tol = 0.12, tolY = 0.08) => {
       const S = edge.samples, keep = [i0];
       let a = i0;
       while (a < i1) {
         let b = a + 1;
         for (let j = a + 2; j <= i1; j++) {
-          if ((j - a) * edge.step > 8) break;
+          if ((j - a) * edge.step > maxStep) break;
           let ok = true;
           for (let m = a + 1; m < j && ok; m++) {
             const t = (m - a) / (j - a);
             const dx = lerp(S[a * 3], S[j * 3], t) - S[m * 3], dy = lerp(S[a * 3 + 1], S[j * 3 + 1], t) - S[m * 3 + 1], dz = lerp(S[a * 3 + 2], S[j * 3 + 2], t) - S[m * 3 + 2];
-            ok = Math.hypot(dx, dz) < 0.12 && Math.abs(dy) < 0.08;
+            ok = Math.hypot(dx, dz) < tol && Math.abs(dy) < tolY;
           }
           if (!ok) break;
           b = j;
@@ -3658,10 +3691,29 @@ const Tiles = {
         }
         k = m;
       }
+      // Versione lontana: tratti fino a 24 m, anche nel centro storico (lì in chianche, senza
+      // cordoli); le vie cieche del centro storico non ci sono nemmeno da vicino.
+      const deco = network.deco.includes(edge);
+      for (let k = 0; k < idx.length - 1;) {
+        const inside = z0(k);
+        let m = k;
+        while (m < idx.length - 1 && z0(m) === inside) m++;
+        if (!(inside && deco)) {
+          const keep = pick(edge, idx[k], idx[m], 24, 0.6, 0.3);
+          for (let q = 0; q + 1 < keep.length; q++) {
+            const a = keep[q], b = keep[q + 1], t = this.at((S[a * 3] + S[b * 3]) / 2, -(S[a * 3 + 2] + S[b * 3 + 2]) / 2);
+            if (t) (t.roadsFar ??= []).push({ edge, a, b, z0: inside });
+          }
+        }
+        k = m;
+      }
     }
     for (const node of network.nodes) {
-      if (node.edges.length < 2 || this.inZ0(node.e, node.n)) continue;
-      this.at(node.e, node.n)?.nodes.push(node);
+      if (node.edges.length < 2) continue;
+      const t = this.at(node.e, node.n);
+      if (!t) continue;
+      if (!this.inZ0(node.e, node.n)) t.nodes.push(node);
+      else if (node.plaza) (t.nodesZ0 ??= []).push(node);      // slarghi del centro storico, solo da lontano
     }
   },
 
@@ -3722,37 +3774,86 @@ const Tiles = {
   /** Prima metà della costruzione: il terreno, con i punti per grotte e abitazioni rupestri. */
   _begin(t, areas) {
     t.built = true;
+    this.areas = areas;
     t.tb = new TileBuilder(t.cell === 5 ? 12000 : 2048);
     return this._terrain(t, t.tb, areas);
   },
 
-  /** Seconda metà: vie, edifici, binari e alberi (più gli strati preparati con builderAt), poi la mesh. */
+  /**
+   * Seconda metà: vie, edifici, binari e alberi (più gli strati preparati con builderAt), poi la mesh.
+   * LIVELLI DI DETTAGLIO: nella stessa mesh ci sono, in fila, le parti solo da vicino (terreno fine,
+   * vie con i cordoli, edifici con cortili e torrini, finestre, alberi), quelle comuni (case del
+   * centro storico, binari) e quelle solo da lontano (terreno a maglia doppia, vie rade, sagome
+   * semplificate, metà degli alberi). updateLod sceglie il pezzo da disegnare con setDrawRange:
+   * nessuna draw call in più.
+   */
   _finish(t) {
     const tb = t.tb, pre = t.pre ?? {};
     const s0 = tb.n;
-    this._roads(t, tb);
+    this._roads(t, tb, t.roads, t.nodes, false);
     if (pre.vie) tb.append(pre.vie);
     const s1 = tb.n;
-    for (const b of t.buildings) this._building(tb, b);
-    if (pre.edifici) tb.append(pre.edifici);
+    for (const b of t.buildings) this._building(tb, b, false);
+    if (pre.dettagli) tb.append(pre.dettagli);
     const s2 = tb.n;
-    this._rails(t, tb);
-    const s3 = tb.n;
-    this._trees(t, tb);
+    this._trees(t, tb, null);
     if (pre.alberi) tb.append(pre.alberi);
+    const s3 = tb.n;                                   // da qui: parti comuni
+    if (pre.edifici) tb.append(pre.edifici);
+    const s4 = tb.n;
+    this._rails(t, tb);
+    const s5 = tb.n;                                   // da qui: solo da lontano
+    this._terrain(t, tb, this.areas, true);
+    const s6 = tb.n;
+    this._roads(t, tb, t.roadsFar, t.nodes.concat(t.nodesZ0 ?? []), true);
+    const s7 = tb.n;
+    for (const b of t.buildings) this._building(tb, b, true);
+    const s8 = tb.n;
+    this._trees(t, null, tb);
+    if (pre.alberiLontani) tb.append(pre.alberiLontani);
+    const s9 = tb.n;
     Object.assign(this.stats, {
-      vie: this.stats.vie + s1 - s0, edifici: this.stats.edifici + s2 - s1, binari: this.stats.binari + s3 - s2, alberi: this.stats.alberi + tb.n - s3,
+      vie: this.stats.vie + s1 - s0, edifici: this.stats.edifici + s2 - s1 + s4 - s3, alberi: this.stats.alberi + s3 - s2,
+      binari: this.stats.binari + s5 - s4, lontano: this.stats.lontano + s9 - s5,
     });
-    // Intervalli di triangoli per strato: le prove (simula.mjs) controllano edifici e alberi, non le superfici.
-    t.ranges = { terreno: [0, s0], vie: [s0, s1], edifici: [s1, s2], binari: [s2, s3], alberi: [s3, tb.n] };
+    // Intervalli di triangoli: le prove (simula.mjs) controllano edifici e alberi (le parti in
+    // `controllo`, di tutti e due i livelli), non le superfici.
+    t.ranges = {
+      terreno: [0, s0], vie: [s0, s1], edifici: [s1, s2], alberi: [s2, s3], comuni: [s3, s5], lontano: [s5, s9], terrenoLontano: [s5, s6], vieLontane: [s6, s7],
+      controllo: [[s1, s3], [s3, s4], [s7, s9]],
+    };
+    t.lod = { near: [0, s5], far: [s3, s9] };
     const mesh = new THREE.Mesh(tb.build(), this.material);
     mesh.name = `riquadro-${t.i}-${t.j}`;
     mesh.receiveShadow = true;
-    mesh.castShadow = !this.light || t.fine;
     mesh.matrixAutoUpdate = false;
     t.mesh = mesh;
-    t.tb = t.pre = null;
+    t.far = null;
+    this._setLod(t, false);
+    t.tb = t.pre = t.farCells = null;
     this.group.add(mesh);
+  },
+
+  /** Mostra il livello pieno o quello semplificato del riquadro (che da lontano non fa ombra). */
+  _setLod(t, far) {
+    if (t.far === far) return;
+    t.far = far;
+    const [a, b] = far ? t.lod.far : t.lod.near;
+    t.mesh.geometry.setDrawRange(a * 3, (b - a) * 3);
+    t.mesh.castShadow = !far && (!this.light || t.fine);
+  },
+
+  /**
+   * Da chiamare a ogni fotogramma: livello di ogni riquadro secondo la distanza dalla camera
+   * (dal punto più vicino del riquadro), con l'isteresi di CONFIG.city.lod.
+   */
+  updateLod(camera) {
+    const [out, back] = CONFIG.city.lod[this.light ? 'light' : 'pc'], p = camera.position, e = p.x, n = -p.z;
+    for (const t of this.list) {
+      if (!t.mesh) continue;
+      const dx = Math.max(t.e0 - e, 0, e - t.e1), dn = Math.max(t.n0 - n, 0, n - t.n1), d = Math.hypot(dx, dn, p.y - t.y);
+      this._setLod(t, t.far ? d > back : d > out);
+    }
   },
 
   /** Costruisce subito i riquadri entro `radius` m da (e, n) (teletrasporto). */
@@ -3781,9 +3882,12 @@ const Tiles = {
    * Terreno del riquadro: griglia sfalsata come quella delle fasi 2–3; i vertici di confine
    * restano dritti e, verso un vicino a maglia più larga, seguono le sue maglie.
    * Nel centro storico colori, grotte e abitazioni rupestri come prima; fuori, uso del suolo reale.
+   * Con `coarse` la versione lontana (maglia doppia, senza punti per grotte e abitazioni): sui lati
+   * verso un vicino i triangoli si dividono nei vertici intermedi della versione piena, così il
+   * bordo combacia con il vicino qualunque livello mostri.
    */
-  _terrain(t, tb, areas) {
-    const T = CONFIG.terrain, c = t.cell, m = Math.round(this.size / c), stride = m + 1;
+  _terrain(t, tb, areas, coarse = false) {
+    const T = CONFIG.terrain, c = t.cell * (coarse ? 2 : 1), m = Math.round(this.size / c), stride = m + 1;
     const H = (e, n) => Terrain.heightAt(e, n);
     const vE = new Float32Array(stride * stride), vN = new Float32Array(vE.length), vY = new Float32Array(vE.length);
     const vZone = new Uint8Array(vE.length), vSide = new Int8Array(vE.length);
@@ -3794,6 +3898,19 @@ const Tiles = {
       const u = along / cc, k = Math.floor(u), f = u - k;
       if (f < 1e-6) return null;
       return horizontal ? lerp(H(this.e0 + k * cc, n), H(this.e0 + (k + 1) * cc, n), f) : lerp(H(e, this.n0 + k * cc), H(e, this.n0 + (k + 1) * cc), f);
+    };
+    /** Quota di un vertice di bordo (lati `h` sud/nord e `v` ovest/est), come nella versione piena; null: quella del terreno. */
+    const edgeY = (e, n, h, v) => {
+      let y = null;
+      if (h && side[h] > t.cell) y = snap(e, n, e - this.e0, side[h], true);
+      if (y === null && v && side[v] > t.cell) y = snap(e, n, n - this.n0, side[v], false);
+      return y;
+    };
+    /** Lato di bordo (con un vicino) su cui stanno P e Q, se sono a più di una maglia piena di distanza. */
+    const along = (P, Q) => {
+      if (Math.hypot(P[0] - Q[0], P[2] - Q[2]) < t.cell * 1.5) return null;
+      const on = (a, b, x) => Math.abs(a - x) < 1e-3 && Math.abs(b - x) < 1e-3;
+      return on(-P[2], -Q[2], t.n0) ? side.s && 's' : on(-P[2], -Q[2], t.n1) ? side.n && 'n' : on(P[0], Q[0], t.e0) ? side.w && 'w' : on(P[0], Q[0], t.e1) ? side.e && 'e' : null;
     };
     for (let j = 0; j <= m; j++) {
       for (let i = 0; i <= m; i++) {
@@ -3806,14 +3923,12 @@ const Tiles = {
         }
         const s = Terrain.sample(e, n);
         let y = Terrain.finalize(s, e, n);
-        if (border) {
-          let v = null;
-          if (j === 0 && side.s > c) v = snap(e, n, e - this.e0, side.s, true);
-          else if (j === m && side.n > c) v = snap(e, n, e - this.e0, side.n, true);
-          if (v === null && i === 0 && side.w > c) v = snap(e, n, n - this.n0, side.w, false);
-          else if (v === null && i === m && side.e > c) v = snap(e, n, n - this.n0, side.e, false);
-          if (v !== null) y = v;
+        // Versione lontana vicino alle vie: la quota più bassa dei dintorni, così un triangolo
+        // largo non copre la via in trincea.
+        if (coarse && !border && Terrain.conformer.clearance(e, n) < 2 * c) {
+          for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) if (a || b) y = Math.min(y, H(e + a * c / 2, n + b * c / 2));
         }
+        if (border) y = edgeY(e, n, j === 0 ? 's' : j === m ? 'n' : null, i === 0 ? 'w' : i === m ? 'e' : null) ?? y;
         vE[k] = e; vN[k] = n; vY[k] = y; vZone[k] = s.zone; vSide[k] = s.side;
       }
     }
@@ -3829,19 +3944,42 @@ const Tiles = {
       const zone = Math.max(vZone[a], vZone[b], vZone[d]);
       if (Terrain.procWeight(ce, cn) >= 0.5) {
         World.faceColor(col, pal, { cy, slope, zone, side: vSide[a], ce, cn, areas });
-        if (zone === ZONE.WALL && slope < 0.55 && vSide[a] > 0 && cy < -8) caveSpots.push({ e: ce, n: cn, y: cy, nx: nx / len, nz: nz / len });
+        if (coarse) { /* niente punti per grotte e abitazioni */ }
+        else if (zone === ZONE.WALL && slope < 0.55 && vSide[a] > 0 && cy < -8) caveSpots.push({ e: ce, n: cn, y: cy, nx: nx / len, nz: nz / len });
         else if (zone === ZONE.SLOPE && slope < 0.62 && vSide[a] > 0) dwellSpots.push({ e: ce, n: cn, y: cy, nx: nx / len, nz: nz / len });
       } else this._groundColor(col, pal, { cy, slope, zone, ce, cn });
+      if (coarse) emit(A, B, D); else tb.tri(A, B, D, col, null, [0, 1, 0]);
+    };
+    /** Versione lontana: divide il triangolo sui lati di bordo lunghi (vedi sopra). */
+    const emit = (A, B, D) => {
+      const V = [A, B, D];
+      for (let q = 0; q < 3; q++) {
+        const P = V[q], Q = V[(q + 1) % 3], R = V[(q + 2) % 3], sd = along(P, Q);
+        if (!sd) continue;
+        const e = (P[0] + Q[0]) / 2, n = -(P[2] + Q[2]) / 2, h = sd === 's' || sd === 'n';
+        const M = [e, edgeY(e, n, h ? sd : null, h ? null : sd) ?? H(e, n), -n];
+        emit(P, M, R); emit(M, Q, R);
+        return;
+      }
       tb.tri(A, B, D, col, null, [0, 1, 0]);
     };
+    // Versione lontana: primo triangolo di ogni cella, per ritrovare in fretta la quota (vie lontane)
+    const cells = coarse ? (t.farCells = { m, c, start: new Int32Array(m * m + 1) }).start : null;
     for (let j = 0; j < m; j++) {
       for (let i = 0; i < m; i++) {
         const k00 = j * stride + i, k10 = k00 + 1, k01 = k00 + stride, k11 = k01 + 1;
+        if (cells) cells[j * m + i] = tb.n;
         if ((i + j) & 1) { pushTri(k00, k10, k11); pushTri(k00, k11, k01); }
         else { pushTri(k00, k10, k01); pushTri(k10, k11, k01); }
       }
     }
-    this.stats.terreno += 2 * m * m;
+    if (cells) cells[m * m] = tb.n;
+    if (!coarse) {
+      this.stats.terreno += 2 * m * m;
+      let sum = 0;
+      for (const y of vY) sum += y;
+      t.y = sum / vY.length;                            // quota media: serve alla scelta del livello
+    }
     // Fianco della zolla, a strati di tufo, sui lati di bordo
     const n0 = tb.n, skirt = new THREE.Color('#ffffff'), info = [SURF.SKIRT, 0, 0, 0];
     const wall = (k0, k1, out) => {
@@ -3852,7 +3990,7 @@ const Tiles = {
     if (!side.n) for (let i = 0; i < m; i++) wall(m * stride + i, m * stride + i + 1, [0, 0, -1]);
     if (!side.w) for (let j = 0; j < m; j++) wall(j * stride, (j + 1) * stride, [-1, 0, 0]);
     if (!side.e) for (let j = 0; j < m; j++) wall(j * stride + m, (j + 1) * stride + m, [1, 0, 0]);
-    this.stats.fianchi += tb.n - n0;
+    if (!coarse) this.stats.fianchi += tb.n - n0;
     return { caveSpots, dwellSpots };
   },
 
@@ -3885,12 +4023,37 @@ const Tiles = {
     c.multiplyScalar(0.95 + r * 0.1);
   },
 
-  /** Nastri delle vie (asfalto, marciapiedi, sterrato: li disegna lo shader) e gli incroci. */
-  _roads(t, tb) {
-    const lift = CONFIG.city.roadLift, white = new THREE.Color('#ffffff');
-    const L = [0, 0, 0], R = [0, 0, 0];
+  /**
+   * Nastri delle vie (asfalto, marciapiedi, sterrato: li disegna lo shader) e gli incroci.
+   * Con `far` la versione lontana: tratti lunghi, un po' più alti sul terreno a maglia larga,
+   * dischi degli incroci a 6 spicchi; nel centro storico chianche in tinta unita.
+   */
+  _roads(t, tb, roads = [], nodes = [], far = false) {
+    const lift = far ? 0.3 : CONFIG.city.roadLift, white = new THREE.Color('#ffffff');
+    /**
+     * Versione lontana: la via resta sopra il terreno lontano del riquadro (maglia larga), cercato
+     * nelle celle attorno al punto (t.farCells).
+     */
+    const P = tb.pos, F = t.farCells;
+    const above = (x, z, y) => {
+      const i = Math.floor((x - t.e0) / F.c), j = Math.floor((-z - t.n0) / F.c);
+      if (i < 0 || j < 0 || i >= F.m || j >= F.m) return y;
+      for (let q = Math.max(0, j - 1) * F.m + Math.max(0, i - 1), last = Math.min(F.m - 1, j + 1) * F.m + Math.min(F.m - 1, i + 1); q <= last; q++) {
+        if (q % F.m < i - 1 || q % F.m > i + 1) continue;
+        for (let k = F.start[q]; k < F.start[q + 1]; k++) {
+        const p = k * 9, ax = P[p], az = P[p + 2], bx = P[p + 3], bz = P[p + 5], cx = P[p + 6], cz = P[p + 8];
+        const d = (bz - cz) * (ax - cx) + (cx - bx) * (az - cz);
+        if (Math.abs(d) < 1e-9) continue;
+        const l1 = ((bz - cz) * (x - cx) + (cx - bx) * (z - cz)) / d, l2 = ((cz - az) * (x - cx) + (ax - cx) * (z - cz)) / d, l3 = 1 - l1 - l2;
+        if (l1 >= -1e-4 && l2 >= -1e-4 && l3 >= -1e-4) return Math.max(y, l1 * P[p + 1] + l2 * P[p + 4] + l3 * P[p + 7] + 0.15);
+        }
+      }
+      return y;
+    };
+    const pal = this.rpal ??= { paving: new THREE.Color(PALETTE.paving), foot: new THREE.Color('#d9cba8') };
+    const L = [0, 0, 0], R = [0, 0, 0], plain = [SURF.PLAIN, 0, 0, 0];
     const kindOf = (edge) => (edge.dirt ? SURF.DIRT : edge.urban || edge.foot ? SURF.STREET : SURF.ROAD);
-    for (const { edge, a, b } of t.roads) {
+    for (const { edge, a, b, z0 } of roads) {
       const S = edge.samples, half = edge.width / 2, kind = kindOf(edge);
       const dash = edge.cls <= 1 && half >= 3.5 && !edge.dirt ? 100 : 0;
       const side = (i, out, sgn) => {
@@ -3898,20 +4061,26 @@ const Tiles = {
         let tx = S[i1] - S[i0], tz = S[i1 + 2] - S[i0 + 2];
         const l = Math.hypot(tx, tz) || 1; tx /= l; tz /= l;
         out[0] = S[i * 3] - tz * half * sgn; out[1] = S[i * 3 + 1] + lift; out[2] = S[i * 3 + 2] + tx * half * sgn;
+        if (far) out[1] = Math.max(above(out[0], out[2], out[1]), above(S[i * 3], S[i * 3 + 2], out[1]));
         return out;
       };
       const La = [...side(a, L, 1)], Ra = [...side(a, R, -1)], Lb = [...side(b, L, 1)], Rb = [...side(b, R, -1)];
+      if (z0) { tb.quad(La, Ra, Rb, Lb, edge.foot ? pal.foot : pal.paving, plain, [0, 1, 0]); continue; }
       const sa = a * edge.step, sb = b * edge.step, h = half + dash;
       const info = [kind, -half, h, sa, kind, half, h, sa, kind, half, h, sb, kind, -half, h, sb];
       tb.quad(La, Ra, Rb, Lb, white, info, [0, 1, 0]);
     }
-    for (const node of t.nodes) {
+    const spokes = far ? 6 : 14;
+    for (const node of nodes) {
       const r = node.plaza || Math.max(...node.edges.map((e) => e.width)) / 2 + 0.2;
-      const kind = node.edges.every((e) => e.dirt) ? SURF.DIRT : SURF.STREET, y = node.y + lift + 0.015;
-      const info = [kind, 0, 99, 0];
-      for (let k = 0; k < 14; k++) {
-        const a0 = (k / 14) * TAU, a1 = ((k + 1) / 14) * TAU;
-        tb.tri([node.pos.x, y, node.pos.z], [node.pos.x + Math.cos(a0) * r, y, node.pos.z + Math.sin(a0) * r], [node.pos.x + Math.cos(a1) * r, y, node.pos.z + Math.sin(a1) * r], white, info, [0, 1, 0]);
+      const z0 = this.inZ0(node.e, node.n);
+      const kind = node.edges.every((e) => e.dirt) ? SURF.DIRT : SURF.STREET;
+      let y = node.y + lift + 0.015;
+      if (far) for (let k = 0; k <= spokes; k++) y = k < spokes ? above(node.pos.x + Math.cos((k / spokes) * TAU) * r, node.pos.z + Math.sin((k / spokes) * TAU) * r, y) : above(node.pos.x, node.pos.z, y);
+      const info = z0 ? plain : [kind, 0, 99, 0], color = z0 ? pal.paving : white;
+      for (let k = 0; k < spokes; k++) {
+        const a0 = (k / spokes) * TAU, a1 = ((k + 1) / spokes) * TAU;
+        tb.tri([node.pos.x, y, node.pos.z], [node.pos.x + Math.cos(a0) * r, y, node.pos.z + Math.sin(a0) * r], [node.pos.x + Math.cos(a1) * r, y, node.pos.z + Math.sin(a1) * r], color, info, [0, 1, 0]);
       }
     }
   },
@@ -3936,14 +4105,20 @@ const Tiles = {
    * terrazza; le chiese in pietra con il tetto a capanna, il Castello Svevo come rovina
    * merlata. Finestre e negozi li disegna lo shader.
    */
-  _building(tb, b) {
+  _building(tb, b, far = false) {
     const pal = this.bpal ?? (this.bpal = {
       walls: PALETTE.facadesNew.map((h) => new THREE.Color(h)), roofs: PALETTE.roofFlat.map((h) => new THREE.Color(h)),
       tiles: PALETTE.roofTiles.map((h) => new THREE.Color(h)), stone: new THREE.Color(PALETTE.stone), stoneDark: new THREE.Color(PALETTE.stoneDark),
       shed: new THREE.Color('#d9d2c4'), shedRoof: new THREE.Color('#b9b4ac'), canopy: new THREE.Color('#a39b8e'),
     });
-    const { kind, rings, ground, base, top, seed } = b;
-    if (kind === 7) return this._castle(tb, b, pal);
+    let { kind, rings, ground, base, top, seed } = b;
+    if (kind === 7) return this._castle(tb, b, pal, far);
+    if (far) {
+      // Da lontano: sagoma semplificata (scarto 1,2 m), senza cortili né torrini.
+      const keep = Plane.simplify(rings[0], 1.2);
+      rings = [keep.map((i) => rings[0][i])];
+      ground = [keep.map((i) => ground[0][i])];
+    }
     const church = kind === 1, shed = kind === 6, canopy = kind === 3;
     const wall = church ? pal.stone : shed ? pal.shed : canopy ? pal.canopy : pal.walls[Math.floor(seed * 6) % 6];
     const roof = shed ? pal.shedRoof : church ? pal.stone : pal.roofs[Math.floor(seed * 11) % 4];
@@ -3976,7 +4151,7 @@ const Tiles = {
     c.copy(roof).multiplyScalar(0.97 + seed * 0.05);
     for (const [i, j, k] of tris) tb.tri([all[i][0], top, -all[i][1]], [all[j][0], top, -all[j][1]], [all[k][0], top, -all[k][1]], c, null, [0, 1, 0]);
     // Torrini delle scale sulle palazzine (non sul profilo leggero)
-    if (!this.light && surf === SURF.FACADE && b.height > 9 && Math.abs(Plane.signedArea(rings[0])) > 120 && seed > 0.35) {
+    if (!far && !this.light && surf === SURF.FACADE && b.height > 9 && Math.abs(Plane.signedArea(rings[0])) > 120 && seed > 0.35) {
       const rect = Plane.orientedRect(rings[0]), a = (seed - 0.5) * rect.hl, [ce, cn] = [rect.c[0] + rect.u[0] * a, rect.c[1] + rect.u[1] * a];
       if (Plane.contains(rings[0], ce, cn)) {
         const g = new THREE.BoxGeometry(3, 2.6, 3.4);
@@ -3988,14 +4163,14 @@ const Tiles = {
   },
 
   /** CASTELLO SVEVO (1231): rovina a pianta rettangolare, muri spessi merlati e il cortile aperto. */
-  _castle(tb, b, pal) {
+  _castle(tb, b, pal, far = false) {
     const ring = b.rings[0], ccw = Plane.signedArea(ring) > 0, c = new THREE.Color();
     for (let i = 0; i < ring.length; i++) {
       const P = ring[i], Q = ring[(i + 1) % ring.length], len = Math.hypot(Q[0] - P[0], Q[1] - P[1]);
       if (len < 1) continue;
       let ox = (Q[1] - P[1]) / len, on = -(Q[0] - P[0]) / len;
       if (!ccw) { ox = -ox; on = -on; }
-      const k = Math.max(1, Math.round(len / 2.4));
+      const k = far ? 1 : Math.max(1, Math.round(len / 2.4));   // da lontano un muro solo, senza merli
       for (let s = 0; s < k; s++) {
         const t0 = s / k, t1 = (s + 1) / k, merlon = s % 2 === 0;
         const A = [lerp(P[0], Q[0], t0), lerp(P[1], Q[1], t0)], B = [lerp(P[0], Q[0], t1), lerp(P[1], Q[1], t1)];
@@ -4034,11 +4209,16 @@ const Tiles = {
     }
   },
 
-  _trees(t, tb) {
+  /** Con `near` la versione piena; con `far` quella lontana: metà degli alberi, senza tronco. */
+  _trees(t, near, far) {
     const shapes = this.treeShapes();
     const density = { [COVER.PARCO]: 0.3, [COVER.BOSCO]: 0.5, [COVER.QUERCE]: 0.6, [COVER.MACCHIA]: 0.22, [COVER.ULIVETO]: 0.45, [COVER.CIMITERO]: 0.14, [COVER.CAMPAGNA]: 0.018, [COVER.CAMPO]: 0.004, [COVER.CITTA]: 0.01, [COVER.PIAZZA]: 0.06 };
     const bark = new THREE.Color('#6b4a33'), c = new THREE.Color();
-    const put = (geo, color, e, y, n, sx, sy, sz, rot) => this.put(tb, geo, color, e, y, n, sx, sy, sz, rot);
+    let keepFar = false;
+    const put = (geo, color, e, y, n, sx, sy, sz, rot) => {
+      if (near) this.put(near, geo, color, e, y, n, sx, sy, sz, rot);
+      if (far && keepFar && geo !== shapes.trunk) this.put(far, geo, color, e, y, n, sx, sy, sz, rot);
+    };
     const step = 8, k = this.size / step, dens = CONFIG.city.trees * (this.light ? 0.5 : 1);
     for (let gj = 0; gj < k; gj++) {
       for (let gi = 0; gi < k; gi++) {
@@ -4046,6 +4226,8 @@ const Tiles = {
         const e = t.e0 + (gi + h1) * step, n = t.n0 + (gj + h2) * step;
         const code = Relief.coverAt(e, n), p = (density[code] ?? 0) * dens;
         if (hash2(gi * 13 + t.i, gj * 11 + t.j) > p || Terrain.procWeight(e, n) > 0.2) continue;
+        keepFar = hash2(gi * 7 + t.j, gj * 5 + t.i) < 0.5;
+        if (!near && !keepFar) continue;
         const rot = h1 * TAU, s = 0.8 + h2 * 0.6;
         // raggio della chioma sotto i 3,5 m d'altezza: deve restare fuori dalla carreggiata
         const reach = code === COVER.CIMITERO || code === COVER.BOSCO || (code === COVER.PARCO && h1 < 0.5) ? 1
@@ -6826,7 +7008,7 @@ async function main() {
     debugEl = Object.assign(document.createElement('div'), { className: 'debug' });
     document.body.append(debugEl);
     window.gravina = {
-      THREE, CONFIG, scene, camera, renderer, network, driver, rig, Terrain, Ravine, Relief, Tiles, Buildings, Details, Scenery, DATA, GEO, Plane, problems, landmarks,
+      THREE, CONFIG, scene, camera, renderer, network, driver, rig, Terrain, Ravine, Relief, Tiles, TileBuilder, Buildings, Details, Scenery, DATA, GEO, Plane, problems, landmarks,
       /** Costruisce subito tutti i riquadri della città (prove). */
       buildAll() { for (const t of Tiles.list) Tiles.build(t, areas); cityDone = false; buildCity(); },
       get phase() { return phase; },
@@ -6853,6 +7035,7 @@ async function main() {
     buildCity();
     step(dt);
     if (phase !== 'menu') ui.updateLabels(camera, innerWidth, innerHeight, 320);
+    Tiles.updateLod(camera);
     renderer.render(scene, camera);
     if (!CONFIG.debug) quality.tick(raw);
     if (debugEl) {

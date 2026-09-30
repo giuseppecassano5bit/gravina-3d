@@ -113,7 +113,7 @@ Il file `index.html` è diviso in sezioni numerate e commentate:
 | 4 | Gravina e terreno | canyon sul corso reale del torrente, falesie, gradoni e discesa dei rioni Piaggio e Fondovico (`RIONI`) |
 | 5 | Rete stradale | vie reali come spline, uscite agli incroci, cartelli, controlli |
 | 6 | Mondo | terreno, strade, Ponte Acquedotto ad archi, edifici reali con le case a gradoni dei rioni, archi sulle vie, Cattedrale, chiese rupestri, grotte, abitazioni rupestri, alberi |
-| 6e | Città a riquadri | la zolla in riquadri da 240 m (una mesh ciascuno): terreno a 5/15/30 m, vie ed edifici della città, binari, alberi, fianco della zolla; finestre e marciapiedi disegnati dallo shader |
+| 6e | Città a riquadri | la zolla in riquadri da 240 m (una mesh ciascuno): terreno a 5/15/30 m, vie ed edifici della città, binari, alberi, fianco della zolla; finestre e marciapiedi disegnati dallo shader; da lontano una versione semplificata nella stessa mesh (livelli di dettaglio, blocco I) |
 | 6d | Dettagli | portali delle chiese, portale del Purgatorio, palazzi, Fontana della Stella, scalinate, belvederi, lanterne |
 | 7 | Mezzi | Panda 4x4, RS6, Huracán e trattore, costruiti solo da primitive |
 | 7 | Figurina | il visitatore a piedi (`Walker`), circa 200 triangoli in una mesh |
