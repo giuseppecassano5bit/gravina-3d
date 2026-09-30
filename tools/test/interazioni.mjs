@@ -175,6 +175,22 @@ check('«Brano successivo» cambia brano', second !== radio.label, second);
 await page.click('#btn-radio');
 check('il pulsante spegne la musica', !(await page.evaluate(() => window.gravina.Radio.on)));
 
+// Bosco (blocco L): dalla pausa si va all'area Quercus con la sua scheda, la targa dice «Bosco Difesa
+// Grande»; l'interruttore «Suoni del bosco» nella pausa si spegne e si riaccende.
+await page.keyboard.press('p');
+await page.click('.poi >> text=Area Quercus');
+await page.waitForTimeout(900);
+await advance(1);
+const wood = await page.evaluate(() => ({ phase: window.gravina.phase, card: document.getElementById('card')?.textContent ?? '', plate: document.getElementById('plaque-dest').textContent }));
+check('dall’elenco si va all’area Quercus, con la scheda e la targa del bosco', wood.phase === 'drive' && /Quercus/.test(wood.card) && /Bosco Difesa Grande/.test(wood.plate), wood.plate);
+await page.keyboard.press('p');
+await page.click('#btn-forest-sound');
+const off = await page.evaluate(() => [window.gravina.ForestSound.on, document.getElementById('btn-forest-sound').getAttribute('aria-checked')]);
+await page.click('#btn-forest-sound');
+const onAgain = await page.evaluate(() => window.gravina.ForestSound.on);
+check('l’interruttore «Suoni del bosco» si spegne e si riaccende', off[0] === false && off[1] === 'false' && onAgain);
+await page.keyboard.press('Escape');
+
 await page.reload();
 await page.waitForFunction(() => !document.getElementById('btn-start').disabled, null, { timeout: 120000 });
 const kept = await page.evaluate(() => document.querySelector('#start-picker .vcard.is-selected')?.dataset.id);

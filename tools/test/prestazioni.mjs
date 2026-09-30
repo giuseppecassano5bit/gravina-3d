@@ -38,6 +38,8 @@ const VIEWS = {
   panoramica: { camera: [950, -750, 320], look: [350, 150, 0] },
   alta: { camera: [-60, -120, 120], look: [400, 300, 0], above: true },   // quota sopra il suolo
   teletrasporto: { goTo: 'stadio', boost: true },
+  // Blocco L: a piedi sui sentieri dell'area Quercus, nel bosco fitto (la vista più pesante del bosco).
+  'bosco a piedi': { foot: true },
 };
 
 async function measure(profile) {
@@ -88,6 +90,20 @@ async function measure(profile) {
       if (g.phase === 'pause') g.resume();
       if (!v) return;
       if (v.boost) { g.driver.boosting = true; g.rig.follow?.(); return; }
+      if (v.foot) {
+        const d = g.driver, walks = g.network.edges.filter((e) => e.walk && e.dirt);
+        const node = walks.flatMap((w) => [w.a, w.b]).find((x) => x.edges.some((e) => !e.walk && !e.turn));
+        const car = node.edges.find((e) => !e.walk && !e.turn), dir = car.b === node ? 1 : -1;
+        d.place(car, dir, Math.max(0, car.length - 30)); d.start(); g.rig.mode = 'drive'; g.rig.snap(d);
+        for (let t = 0; t < 30 && !d.onFoot; t += 0.2) {
+          const k = d.decision?.options.findIndex((o) => o.edge.walk) ?? -1;
+          if (k >= 0 && d.decision.selected !== k) d.choose(k);
+          g.advance(0.2);
+        }
+        g.advance(8);
+        g.rig.snap(d);
+        return;
+      }
       if (v.at) { g.placeAt(v.at[0], v.at[1], v.heading); g.driver.start(); g.rig.snap(g.driver); g.advance(1.5); }
       if (v.pause) g.pause();
       if (v.camera) {
