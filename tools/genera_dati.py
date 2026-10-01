@@ -396,6 +396,13 @@ def build_edges(segments, connectors):
                     # blocco M2: un nome per ogni galleria (prima le gallerie di un segmento finivano nello stesso nodo)
                     cuts += [(between[0], f'{v}-a{k}:{s["id"]}'), (between[1], f'{v}-b{k}:{s["id"]}')]
         cuts = sorted(set(cuts))
+        # Blocco M2: le gallerie di un segmento che passa sotto i binari restano tutte (sono un sottopasso solo)
+        under_rails = False
+        for a, b in spans['is_tunnel']:
+            i0, p0 = point_at(pts, a)
+            i1, p1 = point_at(pts, b)
+            line = LineString([p0] + pts[i0 + 1:i1 + 1] + [p1])
+            under_rails |= any(rails.geometries[i].intersects(line) for i in rails.query(line))
         for (t0, c0), (t1, c1) in zip(cuts, cuts[1:]):
             if t1 - t0 < 1e-6:
                 continue
@@ -405,12 +412,10 @@ def build_edges(segments, connectors):
             poly = [p0] + pts[i0 + 1:i1 + 1] + [p1]
             osm = {w for w, a, b in ways if a <= mid <= b} or ids
             tunnel = any(a <= mid <= b for a, b in spans['is_tunnel'])
-            if tunnel:
+            if tunnel and not under_rails:
                 # Blocco M2: le gallerie sotto i binari (Corso Giuseppe di Vittorio, Via Falcone e Borsellino)
                 # sono sottopassi veri: restano, con il flag `tunnel`; le altre gallerie non si vedono.
-                line = LineString(poly)
-                if not any(rails.geometries[i].intersects(line) for i in rails.query(line)):
-                    continue
+                continue
             edges.append({
                 'a': c0, 'b': c1, 'poly': poly, 'cls': cls, 'name': name or next((WALK_NOMI[w] for w in osm if w in WALK_NOMI), None), 'osm': osm,
                 'bridge': any(a <= mid <= b for a, b in spans['is_bridge']),
@@ -997,7 +1002,7 @@ def branch_to(tree, core_nodes, target):
     return []
 
 
-def walk_paths(name, parts, edges, pos, host=lambda e: not e['deco'] and not e.get('walk')):
+def walk_paths(name, parts, edges, pos, host=lambda e: not e['deco'] and not e.get('walk'), cls='path'):
     """Percorso a piedi da un elenco di tratti (PERCORSI): incroci interni e attacchi alle vie."""
     ends = collections.Counter(p for part in parts for p in (part[0], part[-1]))
     node = {}
@@ -1007,7 +1012,7 @@ def walk_paths(name, parts, edges, pos, host=lambda e: not e['deco'] and not e.g
             pos[node[p]] = p
         else:
             node[p] = split_edge(edges, pos, p, host)
-    base = {'cls': 'path', 'name': name, 'bridge': False, 'foot': True, 'deco': False, 'walk': True, 'osm': set(), 'tunnel': False}
+    base = {'cls': cls, 'name': name, 'bridge': False, 'foot': True, 'deco': False, 'walk': True, 'osm': set(), 'tunnel': False}
     out = []
     for part in parts:
         a, b = node[part[0]], node[part[-1]]
@@ -1037,7 +1042,7 @@ def build_network(data, buildings, bosco_osm):
     # Percorsi a piedi senza dati OSM in città (eccezioni approvate: Fiera, Casino di Meninni)
     for name, where, parts in PERCORSI:
         if where == 'city':
-            new = walk_paths(name, parts, edges, pos)
+            new = walk_paths(name, parts, edges, pos, cls='footway' if 'Fiera' in name else 'path')   # la Fiera è asfaltata
             print(f'  {name}: {sum(length(e["poly"]) for e in new):.0f} m a piedi')
             edges += new
     drivable = [e for e in edges if not e['deco'] and not e.get('walk')]
