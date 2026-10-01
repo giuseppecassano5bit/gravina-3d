@@ -38,7 +38,8 @@ export async function open({ w = 1280, h = 720, mobile = false, landscape = fals
   await page.route('https://fonts.googleapis.com/**', (r) => r.fulfill({ body: '', contentType: 'text/css' }));
   await page.route('https://fonts.gstatic.com/**', (r) => r.abort());
   await page.route('http://local/**', (r) => r.fulfill({ path: path.join(ROOT, new URL(r.request().url()).pathname) }));
-  await page.goto('http://local/index.html?debug');
+  // GRAVINA_HTML: un'altra copia del diorama (percorso dalla radice), per confrontare prima e dopo
+  await page.goto(`http://local/${process.env.GRAVINA_HTML ?? 'index.html'}?debug`);
   await page.waitForFunction(() => !document.getElementById('btn-start').disabled
     || /Impossibile/.test(document.getElementById('status').textContent), null, { timeout: 120000 });
   return { browser, page, logs };

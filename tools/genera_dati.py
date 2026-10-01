@@ -614,11 +614,12 @@ QUERCUS_SENTIERI = {647001042, 647001043, 647001044, 647001046, 647001047, 75984
 BOSCO_BRUCIATO = [(-950, -825, -5665, -5540), (-745, -612, -5760, -5662)]   # alberi morti grigi (satellite, solo riferimento visivo)
 # Punti senza dati OSM (solo riferimento visivo dal satellite e indicazioni del committente), in metri reali.
 BOSCO_PUNTI = {
-    'maneggio': (-749, -5643, 59, 28, 50),    # recinto in sabbia: centro, direzione del lato lungo (gradi da est), larghezza, lunghezza
     'picnic': (-3108, -7507),                 # area pic-nic davanti al vivaio, a nord della strada (committente)
     'scritta': (-3136, -7539, 21.6),          # «SIC DIFESA GRANDE» sul pendio, rivolta alla strada: centro e direzione del testo
     'aiuole': (-3060, -7690),                 # aiuole del vivaio in file, a sud-est degli edifici
 }
+# Dove il blocco L metteva il maneggio (che non c'è): serve solo a lasciare il parcheggio com'era.
+MANEGGIO_EX = (-749, -5643)
 BOSCO_OVERPASS = """[out:json][timeout:160];
 (way["highway"](40.740,16.365,40.775,16.420);way["building"](40.740,16.365,40.775,16.420);
  way["leisure"](40.740,16.365,40.775,16.420);way["amenity"](40.740,16.365,40.775,16.420);
@@ -1097,6 +1098,46 @@ def free_roads(edges, pos, buildings):
     return out, arches
 
 
+def deco_off_roads(edges, deco):
+    """
+    Blocco M1: le vie decorative non corrono dentro la carreggiata di una via percorribile. Nei dati
+    alcune (doppioni o corsie di servizio) le stanno sopra o a un metro, a un'altra quota: si vedeva
+    un nastro doppio, e il terreno non poteva seguire tutte e due. Il tratto dentro la carreggiata
+    (meno mezzo metro dal bordo) si toglie; i pezzi che restano, se lunghi almeno 12 m, rimangono.
+    """
+    curves = [LineString(centripetal_curve(e['poly'])) for e in edges if not e['bridge']]
+    widths = [e['width'] for e in edges if not e['bridge']]
+    lanes = shapely.union_all([c.buffer(max(0.5, w / 2 - 0.5), quad_segs=4) for c, w in zip(curves, widths)])
+    roads = shapely.union_all([c.buffer(w / 2, quad_segs=4) for c, w in zip(curves, widths)])
+    out, dropped, cut, removed, narrow = [], 0, 0, 0.0, 0
+    for d in deco:
+        line = LineString(d['poly'])
+        inside_len = line.intersection(lanes).length
+        if inside_len < 6:
+            out.append(d)
+            continue
+        rest = line.difference(lanes)
+        parts = [g for g in getattr(rest, 'geoms', [rest]) if g.geom_type == 'LineString' and g.length >= 12]
+        removed += line.length - sum(g.length for g in parts)
+        if not parts:
+            dropped += 1
+            continue
+        cut += 1
+        out += [{**d, 'poly': list(g.coords)} for g in parts]
+    # Accanto a una via vera (lontano dagli innesti, 12 m da ogni capo) la decorativa si restringe
+    # quanto basta perché il suo nastro non copra quello della via.
+    for d in out:
+        line = LineString(d['poly'])
+        if line.length < 30:
+            continue
+        gap = min(roads.boundary.distance(line.interpolate(s)) for s in np.arange(12, line.length - 12, 2.0))
+        if gap < d['width'] / 2 - 0.2 and not roads.contains(line.interpolate(line.length / 2)):
+            d['width'] = round(max(3.2, 2 * gap - 0.4), 1)
+            narrow += 1
+    print(f'  vie decorative dentro le carreggiate: {dropped} tolte, {cut} accorciate ({removed:.0f} m in meno), {narrow} ristrette')
+    return out
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 4. Idrografia, morfologia, luoghi
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1485,11 +1526,10 @@ def bosco_features(elements):
     # e dal satellite quello da tennis (verde, con le righe) è il centrale, w1195121475.
     out = {'campi': [[0 if w == 1195121475 else 1, ring(w)] for w in (1195121473, 1195121475, 1195121476)],
            'tribuna': ring(1195121474), 'parcheggio': ring(477738793), 'vasche': [f for f in (ring(w) for w in (411138854, 411138897, 411139081)) if fits(f)]}
-    e, n, ang, w, l = BOSCO_PUNTI['maneggio']
-    out['maneggio'] = [*map(lambda v: round(v, 1), m((e, n))), ang, w, l]
     # Il parcheggio «Terra Rossa» è 700 m più giù lungo la strada: col tracciato compresso finirebbe sui
-    # campi. Resta a lato della strada, ritagliato fuori dall'area dei campi e del maneggio.
-    busy = MultiPoint([p for _, f in out['campi'] for p in zip(f[::2], f[1::2])]).convex_hull.buffer(8).union(Point(*out['maneggio'][:2]).buffer(32))
+    # campi. Resta a lato della strada, ritagliato fuori dall'area dei campi. (Blocco M1: il maneggio
+    # non c'è, lo ha detto il committente il 01/10/2026; il parcheggio resta com'era.)
+    busy = MultiPoint([p for _, f in out['campi'] for p in zip(f[::2], f[1::2])]).convex_hull.buffer(8).union(Point(*m(MANEGGIO_EX)).buffer(32))
     park = Polygon(list(zip(out['parcheggio'][::2], out['parcheggio'][1::2]))).buffer(0).difference(busy)
     park = max(getattr(park, 'geoms', [park]), key=lambda g: g.area)
     out['parcheggio'] = flat(park.simplify(0.5).exterior.coords[:-1])
@@ -1523,7 +1563,7 @@ def bosco_cover(grid, E, N, elements):
     anc = {'Q': anchors['Q'], 'V': anchors['V']}
     feats = bosco_features(elements)
     clear_q = MultiPoint([tuple(p) for f in [feats['tribuna'], *[r for _, r in feats['campi']]] for p in zip(f[::2], f[1::2])]).convex_hull.buffer(14)
-    clear_q = clear_q.union(Point(*feats['maneggio'][:2]).buffer(36)).union(Point(*feats['quercus']).buffer(24))
+    clear_q = clear_q.union(Point(*feats['quercus']).buffer(24))
     park = Polygon(list(zip(feats['parcheggio'][::2], feats['parcheggio'][1::2])))
     clear_v = Point(*feats['picnic']).buffer(40).union(Point(*feats['scritta'][:2]).buffer(24))   # area pic-nic: prato senza alberi dei riquadri
     paths_d = [LineString(e['poly']) for e in bosco_ways(elements, anchors, {}) if e['walk']]
@@ -1962,6 +2002,7 @@ def main():
     print('3. Rete stradale')
     edges, deco, pos = build_network(data, [b['poly'] for b in buildings], bosco_osm)
     buildings, arches = free_roads(edges + deco, pos, buildings)
+    deco = deco_off_roads(edges, deco)
     print('4. Morfologia, quote reali, uso del suolo')
     feats = build_features(data)
     at, ground, light, _, _ = ground_model(dem_at, buildings)

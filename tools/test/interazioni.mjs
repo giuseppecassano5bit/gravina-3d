@@ -113,8 +113,8 @@ f = await foot();
 check('il teletrasporto da piedi riporta sul mezzo', f.phase === 'drive' && !f.onFoot && !f.figure && f.speed > 0, f.street);
 
 // Camera libera (blocco B) e radio: il trascinamento gira la vista e il mezzo continua ad avanzare,
-// la rotella cambia la distanza, dopo 4,5 s la camera torna dietro, «Segui il mezzo» la riporta
-// subito, con la camera libera il clic sui cartelli sceglie ancora la via; M accende la musica.
+// la rotella cambia la distanza, la camera resta libera finché non si preme «Segui il mezzo» (blocco M1),
+// che la riporta subito dietro; con la camera libera il clic sui cartelli sceglie ancora la via; M accende la musica.
 const cam = () => page.evaluate(() => { const g = window.gravina;
   return { free: g.rig.free, button: !document.getElementById('btn-follow').hidden, dist: g.camera.position.distanceTo(g.driver.position), speed: g.driver.speed, odo: g.driver.odometer }; });
 await page.evaluate(() => { const g = window.gravina; g.placeAt(300, 0, [1, 0]); g.rig.snap(g.driver); });
@@ -129,9 +129,9 @@ await page.mouse.wheel(0, 500);
 await advance(0.6);
 c = await cam();
 check('la rotella allontana la camera', c.dist > near + 2, `${near.toFixed(0)} → ${c.dist.toFixed(0)} m`);
-await advance(4.5);
+await advance(6);
 c = await cam();
-check('dopo 4,5 s la camera torna dietro al mezzo', !c.free && !c.button);
+check('dopo 6 s la camera resta libera, col pulsante «Segui il mezzo»', c.free && c.button);
 await page.mouse.move(640, 420); await page.mouse.down(); await page.mouse.move(520, 440, { steps: 10 }); await page.mouse.up();
 await advance(0.2);
 const freeSign = await until(() => page.isVisible('.sign:not([aria-checked="true"])'), 20);
