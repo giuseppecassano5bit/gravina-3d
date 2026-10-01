@@ -916,9 +916,14 @@ def luoghi_m2(elements):
         'fontane': [p for p in (pt(4630401137), pt(4630401138)) if p],   # «Fontanone gemello»
         'colacola': ring(411137509),                      # historic=memorial: monumento alla Cola Cola (Via Bari)
     }
-    print(f'  luoghi del blocco M2: {len(benches)} panchine nella Villa, '
-          + ', '.join(k for k, v in out.items() if not v) + (' mancanti' if not all(out.values()) else 'tutto trovato'))
+    if not luoghi_m2.detto:
+        luoghi_m2.detto = True
+        print(f'  luoghi del blocco M2: {len(benches)} panchine nella Villa, '
+              + ', '.join(k for k, v in out.items() if not v) + (' mancanti' if not all(out.values()) else 'tutto trovato'))
     return out
+
+
+luoghi_m2.detto = False
 
 
 # Vie cieche reali che diventano percorribili fino a un punto, con l'inversione a goccia (committente,
@@ -1669,6 +1674,17 @@ def land_cover(data, buildings, bosco_osm, rock=None):
             m = dense                                    # la città è dove ci sono le case, non tutto il poligono "residenziale"
         grid[m] = COVER[kind]
     bosco_cover(grid, E, N, bosco_osm)
+    # Blocco M2: la Pineta Parco Robinson (OSM w473031981, «parco con giochi, panchine, pini») è una pineta;
+    # prato senza alberi attorno ai giochi e al busto al centro dei vialetti.
+    m2 = osm_m2()
+    pineta = osm_polygon(m2, 473031981)
+    if pineta is not None:
+        grid[raster([pineta], E, N)] = COVER['bosco']
+        lu = luoghi_m2(m2)
+        lawn = [Point(*lu['giochi']).buffer(13)] if lu['giochi'] else []
+        if lu['busto']:
+            lawn.append(Polygon(list(zip(lu['busto'][::2], lu['busto'][1::2]))).centroid.buffer(9))
+        grid[raster(lawn, E, N)] = COVER['sport']
     if rock is not None and not rock.is_empty:
         grid[raster([g for g in getattr(rock, 'geoms', [rock]) if g.geom_type == 'Polygon'], E, N)] = COVER['roccia']
     fill_masked(grid, zone_mask(E, N, s))
