@@ -7022,7 +7022,8 @@ const Forest = {
 
   build(network, light) {
     this.group.name = 'bosco-fitto';
-    const walks = network.edges.filter((e) => e.walk && e.dirt);
+    // solo i sentieri del bosco (blocco M2: ora ci sono sentieri sterrati anche in città)
+    const walks = network.edges.filter((e) => e.walk && e.dirt && e.a.n < -1140 && e.b.n < -1140);
     if (!walks.length) return this.group;
     const lobe = (r, x, y, z, sy = 0.8) => new THREE.IcosahedronGeometry(r, 0).scale(1, sy, 1).translate(x, y, z);
     const shapes = {
@@ -7059,10 +7060,13 @@ const Forest = {
     };
     const m = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), sc = new THREE.Vector3(), c = new THREE.Color();
     const material = vertexColorMaterial({ roughness: 0.95 });
-    for (const [kind, list] of Object.entries(put)) {
+    // Blocco M2: un gruppo di istanze per zona (area Quercus e vivaio), ognuno col suo ingombro: un ingombro
+    // unico, allargato fino all'anello del vivaio, entrava nelle ombre del sole anche dalla città.
+    const zones = Object.entries(put).flatMap(([kind, list]) => [[kind, list.filter((x) => x[2] >= -1860), 'q'], [kind, list.filter((x) => x[2] < -1860), 'v']]);
+    for (const [kind, list, zone] of zones) {
       if (!list.length) continue;
       const mesh = new THREE.InstancedMesh(shapes[kind], material, list.length);
-      mesh.name = `bosco-${kind}`;
+      mesh.name = `bosco-${kind}-${zone}`;
       list.forEach(([e, y, n, s, rot, h], i) => {
         m.compose(v.set(e, y - 0.15, -n), q.setFromAxisAngle(THREE.Object3D.DEFAULT_UP, rot), sc.setScalar(s));
         mesh.setMatrixAt(i, m);
@@ -9053,6 +9057,8 @@ const Radio = (() => {
     onChange: null,
     get on() { return on; },
     get title() { return TRACKS[index].title; },
+    /** Tonica (nota MIDI) e modo del brano in corso: i suoni del bosco si intonano qui (blocco M2). */
+    get scale() { const T = TRACKS[index]; return { root: T.root, minor: T.chords[0][1] === 3 }; },
     toggle() {
       on = !on;
       if (on) {
@@ -9092,75 +9098,179 @@ const Radio = (() => {
 })();
 
 /* ═══════════════════════════════════════════════════════════════════════
- * 11c. SUONI DEL BOSCO (blocco L): generati con Web Audio, nessun file.
- *      Solo quando si è davvero dentro il bosco (forestAmount), con 3 s di
- *      dissolvenza all'entrata e all'uscita: vento tra le foglie a raffiche,
- *      fruscio delle chiome, uccelli (merlo, cinciallegra, fringuello, un
- *      cuculo lontano ogni tanto), passi sulle foglie quando si cammina.
+ * 11c. SUONI DEL BOSCO (blocco L, rifatti nel blocco M2): generati con Web
+ *      Audio, nessun file. Solo quando si è davvero dentro il bosco
+ *      (forestAmount), con 3 s di dissolvenza all'entrata e all'uscita.
+ *      Niente fruscio né vento a banda larga (sembravano pioggia): un soffio
+ *      basso e lento a raffiche rare; uccelli melodici intonati sulla scala
+ *      pentatonica del brano della radio (merlo, pettirosso, capinera,
+ *      fringuello, tortora, cuculo lontano); grilli al tramonto e qualche coro
+ *      morbido di cicale; ogni tanto un allocco, il picchio che tamburella,
+ *      di rado il grugnito lontano di un cinghiale e, molto di rado, un
+ *      ululato di lupo lontano e melodico. Passi morbidi solo a piedi.
  *      Interruttore «Suoni del bosco» nella pausa (ricordato); se la radio è
  *      accesa, nel bosco scende al 35%.
  * ═══════════════════════════════════════════════════════════════════════ */
 const ForestSound = (() => {
-  let ctx = null, master, wind, windBand, rustle, noise, on = true, unlocked = false, level = 0, nextBird = 0, stride = 0;
+  let ctx = null, master, wind, windLp, near, far, noise, on = true, unlocked = false, level = 0, stride = 0;
+  const due = { bird: 0, owl: 0, wood: 0, boar: 0, wolf: 0, cuckoo: 0, crickets: 0, cicadas: 0, dove: 0 };
   try { on = localStorage.getItem('gravina3d.bosco') !== '0'; } catch { /* pazienza */ }
+  const R = Math.random, pick = (a) => a[Math.floor(R() * a.length)];
+  const hz = (m) => 440 * 2 ** ((m - 69) / 12);
 
   function setup() {
     ctx = new AudioContext();
     master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
-    // rumore rosa in un buffer di 4 s (filtro di Paul Kellet), riusato da vento, fruscio e passi
+    // rumore rosso (più cupo del rosa) in un buffer di 4 s: solo per il soffio del vento e i passi
     const n = ctx.sampleRate * 4, buf = ctx.createBuffer(1, n, ctx.sampleRate), d = buf.getChannelData(0);
-    let b0 = 0, b1 = 0, b2 = 0;
-    for (let i = 0; i < n; i++) { const w = Math.random() * 2 - 1; b0 = 0.99765 * b0 + w * 0.099; b1 = 0.963 * b1 + w * 0.2965; b2 = 0.57 * b2 + w * 1.0527; d[i] = (b0 + b1 + b2 + w * 0.1848) * 0.2; }
+    let last = 0;
+    for (let i = 0; i < n; i++) { last = (last + 0.02 * (Math.random() * 2 - 1)) / 1.02; d[i] = last * 3.2; }
     noise = buf;
-    const loop = () => { const src = ctx.createBufferSource(); src.buffer = noise; src.loop = true; src.start(0, Math.random() * 4); return src; };
-    windBand = ctx.createBiquadFilter(); windBand.type = 'bandpass'; windBand.frequency.value = 500; windBand.Q.value = 0.7;
-    wind = ctx.createGain(); wind.gain.value = 0.35;
-    loop().connect(windBand).connect(wind).connect(master);
-    const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 2600;
-    rustle = ctx.createGain(); rustle.gain.value = 0.05;
-    loop().connect(hp).connect(rustle).connect(master);
+    const src = ctx.createBufferSource(); src.buffer = noise; src.loop = true; src.start(0, Math.random() * 4);
+    windLp = ctx.createBiquadFilter(); windLp.type = 'lowpass'; windLp.frequency.value = 220; windLp.Q.value = 0.3;
+    wind = ctx.createGain(); wind.gain.value = 0;
+    src.connect(windLp).connect(wind).connect(master);
+    // vicino (asciutto) e lontano (filtrato, con un'eco morbida): i versi lontani sembrano nel bosco
+    near = ctx.createGain(); near.connect(master);
+    far = ctx.createBiquadFilter(); far.type = 'lowpass'; far.frequency.value = 2400;
+    const dly = ctx.createDelay(1), fb = ctx.createGain(), wet = ctx.createGain();
+    dly.delayTime.value = 0.23; fb.gain.value = 0.32; wet.gain.value = 0.5;
+    far.connect(master); far.connect(dly); dly.connect(fb).connect(dly); dly.connect(wet).connect(master);
   }
 
-  /** Un fischio: glissato da f0 a f1 in `len` s, con un filo di vibrato. */
-  function tone(t, f0, f1, len, amp, pan, out) {
-    const o = ctx.createOscillator(), g = ctx.createGain(), p = ctx.createStereoPanner(), vib = ctx.createOscillator(), vg = ctx.createGain();
-    o.type = 'sine'; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + len);
-    vib.frequency.value = 28 + Math.random() * 20; vg.gain.value = f0 * 0.02; vib.connect(vg).connect(o.frequency);
-    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(amp, t + Math.min(0.02, len / 3)); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+  /** Scala pentatonica del brano della radio (anche spenta: l'ultimo brano scelto). */
+  const scale = () => {
+    const { root, minor } = Radio.scale, P = minor ? [0, 3, 5, 7, 10] : [0, 2, 4, 7, 9];
+    return (oct, deg) => root + oct * 12 + P[((deg % 5) + 5) % 5] + Math.floor(deg / 5) * 12;
+  };
+
+  /** Una nota fischiata: da f0 a f1 in `len` s, attacco morbido, un filo di vibrato e un'armonica tenue. */
+  function tone(t, f0, f1, len, amp, pan, out, { vib = 0.012, harm = 0.12, type = 'sine' } = {}) {
+    const o = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain(), g2 = ctx.createGain(), p = ctx.createStereoPanner();
+    const v = ctx.createOscillator(), vg = ctx.createGain();
+    o.type = type; o2.type = 'sine';
+    o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + len);
+    o2.frequency.setValueAtTime(f0 * 2, t); o2.frequency.exponentialRampToValueAtTime(f1 * 2, t + len);
+    v.frequency.value = 5 + R() * 4; vg.gain.value = f0 * vib; v.connect(vg); vg.connect(o.frequency); vg.connect(o2.frequency);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(amp, t + Math.min(0.04, len / 3)); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+    g2.gain.value = harm;
     p.pan.value = pan;
-    o.connect(g).connect(p).connect(out);
-    o.start(t); vib.start(t); o.stop(t + len + 0.02); vib.stop(t + len + 0.02);
+    o.connect(g); o2.connect(g2).connect(g); g.connect(p).connect(out);
+    for (const x of [o, o2, v]) { x.start(t); x.stop(t + len + 0.05); }
   }
 
-  /** Un uccello a caso, a una distanza a caso (più lontano = più piano e più cupo). */
+  /** Uccelli: frasi sulla scala del brano, a una distanza a caso. */
   function bird() {
-    const t = ctx.currentTime + 0.05, far = Math.random(), pan = Math.random() * 1.6 - 0.8, amp = 0.05 * (1 - far * 0.7);
-    const lp = ctx.createBiquadFilter(); lp.frequency.value = 9000 - far * 5500; lp.connect(master);
-    const kind = Math.random();
-    if (kind < 0.35) {                                                  // merlo: frase flautata di 4–7 note
+    const t = ctx.currentTime + 0.05, dist = R(), pan = R() * 1.6 - 0.8, amp = 0.045 * (1 - dist * 0.6), out = dist > 0.55 ? far : near, S = scale(), k = R();
+    if (k < 0.3) {                                           // merlo: frase flautata, note lunghe legate
+      let tt = t, deg = Math.floor(R() * 5);
+      for (let q = 4 + Math.floor(R() * 4); q > 0; q--) {
+        const f = hz(S(2, deg)), l = 0.16 + R() * 0.22, nd = deg + pick([-2, -1, 1, 1, 2]);
+        tone(tt, f, hz(S(2, nd)) * 0.98, l, amp, pan, out, { vib: 0.008, harm: 0.2 });
+        tt += l + 0.04 + R() * 0.06; deg = nd;
+      }
+    } else if (k < 0.5) {                                    // pettirosso: cascata sottile e acuta che scende
+      let tt = t, deg = 9 + Math.floor(R() * 3);
+      for (let q = 6 + Math.floor(R() * 5); q > 0; q--) { const l = 0.06 + R() * 0.07; tone(tt, hz(S(3, deg)), hz(S(3, deg - 1)), l, amp * 0.7, pan, out, { harm: 0.05 }); tt += l + 0.025; deg -= R() < 0.6 ? 1 : -1; }
+    } else if (k < 0.68) {                                   // capinera: un borbottio, poi la frase squillante
       let tt = t;
-      for (let k = 3 + Math.floor(Math.random() * 4); k > 0; k--) { const f = 1500 + Math.random() * 1400; const l = 0.08 + Math.random() * 0.18; tone(tt, f, f * (0.8 + Math.random() * 0.5), l, amp, pan, lp); tt += l + 0.03; }
-    } else if (kind < 0.65) {                                           // cinciallegra: «ti-tu ti-tu ti-tu»
-      for (let k = 0; k < 3 + Math.floor(Math.random() * 2); k++) { tone(t + k * 0.32, 5200, 5000, 0.08, amp, pan, lp); tone(t + k * 0.32 + 0.12, 3500, 3300, 0.12, amp, pan, lp); }
-    } else if (kind < 0.95) {                                           // fringuello: trillo che scende e il ricciolo finale
-      for (let k = 0; k < 11; k++) tone(t + k * 0.075, 5400 - k * 180, 5000 - k * 180, 0.06, amp * 0.8, pan, lp);
-      tone(t + 0.9, 3000, 5200, 0.22, amp, pan, lp);
-    } else {                                                            // cuculo lontano
-      tone(t, 690, 680, 0.3, 0.035, pan, lp); tone(t + 0.42, 560, 550, 0.45, 0.035, pan, lp);
+      for (let q = 0; q < 6; q++) { tone(tt, hz(S(3, 2 + (q % 3))), hz(S(3, 1 + (q % 2))), 0.05, amp * 0.45, pan, out); tt += 0.07; }
+      for (const deg of [4, 6, 5, 7]) { tone(tt, hz(S(2, deg)), hz(S(2, deg)) * 1.01, 0.18, amp, pan, out, { harm: 0.18 }); tt += 0.21; }
+    } else if (k < 0.85) {                                   // fringuello: trillo che scende e il ricciolo finale
+      for (let q = 0; q < 10; q++) tone(t + q * 0.08 * (1 - q * 0.02), hz(S(3, 6 - Math.floor(q / 2))), hz(S(3, 5 - Math.floor(q / 2))), 0.06, amp * 0.65, pan, out);
+      tone(t + 0.88, hz(S(2, 7)), hz(S(3, 4)), 0.24, amp * 0.9, pan, out);
+    } else {                                                 // cinciallegra: «ti-tu ti-tu»
+      for (let q = 0; q < 3; q++) { tone(t + q * 0.34, hz(S(3, 4)), hz(S(3, 4)), 0.09, amp * 0.6, pan, out); tone(t + q * 0.34 + 0.13, hz(S(3, 1)), hz(S(3, 1)), 0.13, amp * 0.6, pan, out); }
     }
   }
 
-  /** Un passo sulle foglie secche: un soffio di rumore filtrato e qualche scricchiolio. */
-  function step() {
-    const t = ctx.currentTime + 0.01;
-    for (let k = 0; k < 4; k++) {
-      const src = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain(), tt = t + k * (0.012 + Math.random() * 0.02);
-      src.buffer = noise; bp.type = 'bandpass'; bp.frequency.value = 1400 + Math.random() * 2800; bp.Q.value = 1.2;
-      const a = k ? 0.12 : 0.3;
-      g.gain.setValueAtTime(0.0001, tt); g.gain.exponentialRampToValueAtTime(a, tt + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, tt + (k ? 0.03 : 0.09));
-      src.connect(bp).connect(g).connect(master);
-      src.start(tt, Math.random() * 3.5, 0.12);
+  /** Cuculo lontano e tortora: due e tre note basse e morbide, una terza maggiore o minore. */
+  function cuckoo() { const t = ctx.currentTime + 0.05, S = scale(), pan = R() * 1.4 - 0.7; for (let q = 0; q < 2 + Math.floor(R() * 3); q++) { tone(t + q * 1.1, hz(S(1, 2)), hz(S(1, 2)) * 0.99, 0.28, 0.03, pan, far, { harm: 0.04 }); tone(t + q * 1.1 + 0.4, hz(S(1, 0)), hz(S(1, 0)) * 0.99, 0.42, 0.03, pan, far, { harm: 0.04 }); } }
+  function dove() { const t = ctx.currentTime + 0.05, S = scale(), pan = R() * 1.4 - 0.7; [[0, 0.3], [0.42, 0.55], [1.05, 0.3]].forEach(([d, l], q) => tone(t + d, hz(S(1, q === 1 ? 1 : 0)), hz(S(1, 0)) * 0.97, l, 0.028, pan, far, { harm: 0.06, vib: 0.02 })); }
+
+  /** Allocco: «huu… hu-hu-huuu», basso, lontano, col vibrato. */
+  function owl() {
+    const t = ctx.currentTime + 0.05, S = scale(), f = hz(S(0, 4)), pan = R() * 1.2 - 0.6;
+    tone(t, f, f * 0.97, 0.9, 0.04, pan, far, { vib: 0.02, harm: 0.03 });
+    [[1.6, 0.18], [1.85, 0.18], [2.1, 1.2]].forEach(([d, l]) => tone(t + d, f * 1.02, f * 0.94, l, 0.035, pan, far, { vib: 0.03, harm: 0.03 }));
+  }
+
+  /** Picchio: un rullo di colpi secchi e veloci che rallenta, sul legno lontano. */
+  function woodpecker() {
+    const t = ctx.currentTime + 0.05, pan = R() * 1.6 - 0.8, f = 700 + R() * 300;
+    for (let q = 0; q < 16; q++) {
+      const tt = t + q * (0.045 + q * 0.0012), o = ctx.createOscillator(), g = ctx.createGain(), p = ctx.createStereoPanner();
+      o.type = 'triangle'; o.frequency.setValueAtTime(f, tt); o.frequency.exponentialRampToValueAtTime(f * 0.6, tt + 0.03);
+      g.gain.setValueAtTime(0.0001, tt); g.gain.exponentialRampToValueAtTime(0.05, tt + 0.002); g.gain.exponentialRampToValueAtTime(0.0001, tt + 0.035);
+      p.pan.value = pan; o.connect(g).connect(p).connect(far); o.start(tt); o.stop(tt + 0.04);
     }
+  }
+
+  /** Cinghiale: tre o quattro grugniti bassi e morbidi, lontani. */
+  function boar() {
+    const t = ctx.currentTime + 0.05, pan = R() * 1.4 - 0.7;
+    for (let q = 0; q < 3 + Math.floor(R() * 2); q++) {
+      const tt = t + q * (0.32 + R() * 0.2), o = ctx.createOscillator(), lp = ctx.createBiquadFilter(), g = ctx.createGain(), p = ctx.createStereoPanner(), f = 85 + R() * 30;
+      o.type = 'sawtooth'; o.frequency.setValueAtTime(f * 1.15, tt); o.frequency.exponentialRampToValueAtTime(f, tt + 0.18);
+      lp.type = 'lowpass'; lp.frequency.value = 380; lp.Q.value = 2;
+      g.gain.setValueAtTime(0.0001, tt); g.gain.exponentialRampToValueAtTime(0.07, tt + 0.03); g.gain.exponentialRampToValueAtTime(0.0001, tt + 0.22);
+      p.pan.value = pan; o.connect(lp).connect(g).connect(p).connect(far); o.start(tt); o.stop(tt + 0.25);
+    }
+  }
+
+  /** Lupo, molto lontano: un ululato morbido che sale di una quinta e scende piano, intonato. */
+  function wolf() {
+    const t = ctx.currentTime + 0.05, S = scale(), a = hz(S(0, 0)), b = hz(S(0, 3)), pan = R() * 1.2 - 0.6;
+    const o = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain(), g2 = ctx.createGain(), p = ctx.createStereoPanner(), v = ctx.createOscillator(), vg = ctx.createGain();
+    o.type = 'sine'; o2.type = 'triangle';
+    for (const [x, k] of [[o, 1], [o2, 2]]) {
+      x.frequency.setValueAtTime(a * 0.92 * k, t); x.frequency.exponentialRampToValueAtTime(b * k, t + 0.9);
+      x.frequency.setValueAtTime(b * k, t + 1.6); x.frequency.exponentialRampToValueAtTime(a * 0.85 * k, t + 3.4);
+    }
+    v.frequency.value = 4.5; vg.gain.value = a * 0.012; v.connect(vg); vg.connect(o.frequency);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.03, t + 0.6); g.gain.setValueAtTime(0.03, t + 1.8); g.gain.exponentialRampToValueAtTime(0.0001, t + 3.5);
+    g2.gain.value = 0.08; p.pan.value = pan;
+    o.connect(g); o2.connect(g2).connect(g); g.connect(p).connect(far);
+    for (const x of [o, o2, v]) { x.start(t); x.stop(t + 3.6); }
+  }
+
+  /** Grilli al tramonto: treni di tre impulsi acuti e brevi, per una decina di secondi. */
+  function crickets() {
+    const t0 = ctx.currentTime + 0.05, pan = R() * 1.6 - 0.8, f = 4100 + R() * 600, dur = 6 + R() * 8;
+    for (let tt = t0; tt < t0 + dur; tt += 0.7 + R() * 0.15) {
+      for (let q = 0; q < 3; q++) {
+        const s = tt + q * 0.045, o = ctx.createOscillator(), g = ctx.createGain(), p = ctx.createStereoPanner();
+        o.frequency.value = f; g.gain.setValueAtTime(0.0001, s); g.gain.exponentialRampToValueAtTime(0.012, s + 0.006); g.gain.exponentialRampToValueAtTime(0.0001, s + 0.032);
+        p.pan.value = pan; o.connect(g).connect(p).connect(far); o.start(s); o.stop(s + 0.04);
+      }
+    }
+  }
+
+  /** Coro morbido di cicale: un ronzio tonale che sale e scende piano (mai un fruscio). */
+  function cicadas() {
+    const t = ctx.currentTime + 0.05, dur = 6 + R() * 6;
+    for (let q = 0; q < 3; q++) {
+      const o = ctx.createOscillator(), am = ctx.createOscillator(), ag = ctx.createGain(), g = ctx.createGain(), p = ctx.createStereoPanner();
+      o.frequency.value = 3900 + q * 260 + R() * 120; am.frequency.value = 40 + R() * 25; ag.gain.value = 0.5;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.004, t + dur * 0.4); g.gain.linearRampToValueAtTime(0, t + dur);
+      const amp = ctx.createGain(); amp.gain.value = 0.5;
+      am.connect(ag).connect(amp.gain);
+      p.pan.value = q - 1;
+      o.connect(amp).connect(g).connect(p).connect(far);
+      for (const x of [o, am]) { x.start(t); x.stop(t + dur + 0.1); }
+    }
+  }
+
+  /** Un passo morbido sul sentiero: un tonfo basso e un soffio cupo, niente scricchiolii. */
+  function step() {
+    const t = ctx.currentTime + 0.01, src = ctx.createBufferSource(), lp = ctx.createBiquadFilter(), g = ctx.createGain();
+    src.buffer = noise; lp.type = 'lowpass'; lp.frequency.value = 520;
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.12, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.13);
+    src.connect(lp).connect(g).connect(near); src.start(t, Math.random() * 3.5, 0.16);
+    const o = ctx.createOscillator(), og = ctx.createGain();
+    o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(70, t + 0.08);
+    og.gain.setValueAtTime(0.0001, t); og.gain.exponentialRampToValueAtTime(0.05, t + 0.008); og.gain.exponentialRampToValueAtTime(0.0001, t + 0.1);
+    o.connect(og).connect(near); o.start(t); o.stop(t + 0.12);
   }
 
   // L'audio parte solo dopo un gesto (regola dei browser): il primo tocco o tasto lo sblocca.
@@ -9168,6 +9278,10 @@ const ForestSound = (() => {
   addEventListener('pointerdown', unlock, { once: true, capture: true });
   addEventListener('keydown', unlock, { once: true, capture: true });
   document.addEventListener('visibilitychange', () => { if (ctx) (document.hidden ? ctx.suspend() : level > 0 && ctx.resume()); });
+
+  // Ritmo dei versi: [funzione, secondi tra uno e l'altro (minimo, in più a caso)]
+  const CALLS = { bird: [bird, 1.6, 4], cuckoo: [cuckoo, 25, 35], dove: [dove, 18, 30], owl: [owl, 35, 50], wood: [woodpecker, 28, 40],
+    boar: [boar, 120, 140], wolf: [wolf, 260, 200], crickets: [crickets, 9, 12], cicadas: [cicadas, 40, 50] };
 
   return {
     onChange: null,
@@ -9178,6 +9292,8 @@ const ForestSound = (() => {
       try { localStorage.setItem('gravina3d.bosco', on ? '1' : '0'); } catch { /* pazienza */ }
       this.onChange?.();
     },
+    /** Prove (?debug): suona subito un verso ('bird', 'owl', 'wolf', … o 'step'). */
+    play(k) { if (!ctx) setup(); ctx.resume(); master.gain.value = 0.8; (k === 'step' ? step : CALLS[k][0])(); },
     /**
      * A ogni fotogramma: `inside` (0–1, quanto si è nel bosco), a piedi e a che velocità, in pausa.
      * Il livello sale e scende in circa 3 s; sotto una soglia il contesto audio si sospende.
@@ -9191,16 +9307,20 @@ const ForestSound = (() => {
         level = want ? level : 0;
         return;
       }
-      if (!ctx) setup();
+      if (!ctx) {
+        setup();
+        const t = ctx.currentTime;                         // i versi rari non arrivano tutti appena si entra
+        for (const [k, [, a, b]] of Object.entries(CALLS)) due[k] = t + (k === 'bird' ? 0.5 : a * 0.3 + R() * b);
+      }
       if (ctx.state !== 'running') ctx.resume();
       const t = ctx.currentTime;
       master.gain.setTargetAtTime(level * 0.8, t, 0.1);
-      const gust = 0.5 + 0.5 * Math.sin(t * 0.21) * Math.sin(t * 0.13 + 1);   // raffiche lente
-      wind.gain.setTargetAtTime(0.18 + 0.3 * gust, t, 0.5);
-      windBand.frequency.setTargetAtTime(380 + 420 * gust, t, 0.5);
-      rustle.gain.setTargetAtTime(0.02 + 0.06 * gust, t, 0.3);
-      if (t > nextBird && !paused) { bird(); nextBird = t + 1.2 + Math.random() * 4; }
-      if (onFoot && speed > 0.4 && !paused) { stride += speed * dt; if (stride > 0.75) { stride = 0; step(); } }
+      // soffio basso e lento, a raffiche rare
+      const gust = Math.max(0, Math.sin(t * 0.07) * Math.sin(t * 0.031 + 1.3) - 0.35) / 0.65;
+      wind.gain.setTargetAtTime(0.02 + 0.1 * gust, t, 1.5);
+      windLp.frequency.setTargetAtTime(160 + 140 * gust, t, 1.5);
+      if (!paused) for (const [k, [fn, a, b]] of Object.entries(CALLS)) if (t > due[k]) { fn(); due[k] = t + a + R() * b; }
+      if (onFoot && speed > 0.4 && !paused) { stride += speed * dt; if (stride > 1.2) { stride = 0; step(); } }
     },
   };
 })();
