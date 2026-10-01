@@ -45,8 +45,12 @@ Come funziona
        attaccate alla zolla (GEO.meta.zolle). Il P.I.P. - Zona Artigianale a
        scala reale, con vie e capannoni reali; la strada per il Bosco Difesa
        Grande come TRACCIATO REALE COMPRESSO (eccezione dichiarata in CLAUDE.md):
-       angoli di svolta reali, lunghezze ridotte a BOSCO_SCALA, e in fondo una
-       piccola zona di querce con la radura, il rifugio e l'inversione a goccia.
+       angoli di svolta reali, lunghezze ridotte a BOSCO_SCALA.
+    7. Il Bosco da vicino (fase 3.4, blocco L): la strada compressa arriva all'area
+       Quercus e prosegue fino al vivaio forestale; le due zone attorno restano a
+       scala reale (edifici, campi, vasche e sentieri di OSM, GEO.bosco), i
+       sentieri del bosco si percorrono a piedi, l'uso del suolo viene dal
+       poligono OSM del Bosco Difesa Grande.
 """
 from __future__ import annotations
 
@@ -66,7 +70,7 @@ import numpy as np
 import requests
 import pyarrow.parquet as pq
 import shapely
-from shapely.geometry import LineString, Point, Polygon, box, mapping, shape
+from shapely.geometry import LineString, MultiPoint, Point, Polygon, box, mapping, shape
 from shapely.strtree import STRtree
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -85,9 +89,10 @@ AREA = (-840, 2040, -1140, 1980)
 AREA_ROADS = (-830, 2030, -1130, 1970)    # binari: devono stare tutti qui dentro
 # Blocco F: appendici a riquadri interi, attaccate alla zolla.
 PIP = (2040, 2760, 300, 1260)             # P.I.P. - Zona Artigianale, a scala reale (3 × 4 riquadri)
-BOSCO = (120, 600, -1860, -1140)          # strada compressa per il Bosco Difesa Grande (2 × 3 riquadri)
-ZOLLE = (AREA, PIP, BOSCO)
-BOUND = (-840, 2760, -1860, 1980)         # rettangolo delle zolle: origine e griglie di GEO
+BOSCO = (-120, 600, -1860, -1140)         # strada compressa per il Bosco Difesa Grande e area Quercus (3 × 3 riquadri)
+VIVAIO = (-600, 360, -2340, -1860)        # blocco L: strada fino al vivaio forestale (4 × 2 riquadri)
+ZOLLE = (AREA, PIP, BOSCO, VIVAIO)
+BOUND = (-840, 2760, -2340, 1980)         # rettangolo delle zolle: origine e griglie di GEO
 ROAD_MARGIN = 10                          # le vie restano ad almeno 10 m dal bordo delle zolle
 # Zona Z0, il centro storico: edifici, vie e terreno con il dettaglio pieno (fasi 2–3).
 Z0 = (-340, 450, -320, 540)
@@ -586,45 +591,186 @@ def chaikin(pts, rounds=2):
     return pts
 
 
-def bosco_points():
+# Blocco L (decisioni del 30/09/2026): dall'area Quercus la strada reale asfaltata (OSM w107709083,
+# w1068957585, w1068957584, w252747452; su Google la SP158) scende per 3,2 km fino all'incrocio con
+# Contrada Annunziata davanti al vivaio forestale. Si comprime con la stessa regola; le zone attorno
+# all'area Quercus e al vivaio restano a scala reale (ZONA_Q, ZONA_V: rettangoli in metri reali).
+QUERCUS_A = 24                            # da questo punto di BOSCO_ROUTE la strada è a scala reale (area Quercus)
+BOSCO_J = (-785.2, -5732.3)               # incrocio sotto l'area Quercus (OSM): di qui la via di servizio e la strada del vivaio
+VIVAIO_ROUTE = [BOSCO_J, (-949, -5872), (-979, -5887), (-1001, -5894), (-1059, -5906), (-1092, -5905), (-1118, -5900),
+                (-1145, -5895), (-1181, -5909), (-1337, -6048), (-1357, -6062), (-1407, -6093), (-1571, -6189), (-1605, -6212),
+                (-1653, -6269), (-1740, -6413), (-1798, -6497), (-1839, -6532), (-1880, -6558), (-1920, -6596), (-1999, -6700),
+                (-2021, -6718), (-2166, -6814), (-2194, -6843), (-2255, -6932), (-2268, -6948), (-2333, -7009), (-2428, -7089),
+                (-2499, -7163), (-2548, -7228), (-2628, -7339), (-2687, -7396), (-2752, -7429), (-2826, -7452), (-2869, -7456),
+                (-2964, -7443), (-2988, -7446), (-3008, -7458), (-3029, -7487), (-3076, -7561), (-3102, -7569), (-3123, -7563),
+                (-3143, -7562), (-3160, -7571), (-3192, -7570), (-3198, -7575), (-3209.5, -7590.7)]
+VIVAIO_REAL = 35                          # da (-2964, -7443) la strada è di nuovo a scala reale (zona del vivaio)
+ZONA_Q = (-960, -610, -5770, -5470)       # area Quercus, a scala reale
+ZONA_V = (-3390, -2955, -7728, -7290)     # vivaio, Base Scout, area pic-nic, a scala reale
+# Sentieri reali attorno all'area Quercus (OSM highway=path) che chiudono anelli con la via di servizio
+# w647001048: circa 490 m a scala reale, lontano dalla strada del vivaio (anello nord).
+QUERCUS_SERVIZIO = 647001048
+QUERCUS_SENTIERI = {647001042, 647001043, 647001044, 647001046, 647001047, 759847416, 773874702}
+BOSCO_BRUCIATO = [(-950, -825, -5665, -5540), (-745, -612, -5760, -5662)]   # alberi morti grigi (satellite, solo riferimento visivo)
+# Punti senza dati OSM (solo riferimento visivo dal satellite e indicazioni del committente), in metri reali.
+BOSCO_PUNTI = {
+    'maneggio': (-749, -5643, 59, 28, 50),    # recinto in sabbia: centro, direzione del lato lungo (gradi da est), larghezza, lunghezza
+    'picnic': (-3108, -7507),                 # area pic-nic davanti al vivaio, a nord della strada (committente)
+    'scritta': (-3136, -7539, 21.6),          # «SIC DIFESA GRANDE» sul pendio, rivolta alla strada: centro e direzione del testo
+    'aiuole': (-3060, -7690),                 # aiuole del vivaio in file, a sud-est degli edifici
+}
+BOSCO_OVERPASS = """[out:json][timeout:160];
+(way["highway"](40.740,16.365,40.775,16.420);way["building"](40.740,16.365,40.775,16.420);
+ way["leisure"](40.740,16.365,40.775,16.420);way["amenity"](40.740,16.365,40.775,16.420);
+ way["landuse"~"reservoir|basin"](40.740,16.365,40.775,16.420);
+ way["natural"="wood"](40.735,16.36,40.785,16.425););out tags geom;"""
+
+
+def overpass_bosco():
+    """Dati OSM del Bosco Difesa Grande (sentieri, edifici, campi, vasche, poligono del bosco), in cache."""
+    out = CACHE / 'bosco.json'
+    if not out.exists():
+        for url in (OVERPASS_URL, 'https://overpass.private.coffee/api/interpreter'):
+            try:
+                r = SESSION.post(url, data={'data': BOSCO_OVERPASS}, timeout=200,
+                                 headers={'User-Agent': 'gravina-3d (github.com/giuseppecassano5bit/gravina-3d)', 'Accept': 'application/json'})
+                r.raise_for_status()
+                r.json()
+                out.write_text(r.text)
+                break
+            except (requests.RequestException, ValueError):
+                time.sleep(5)
+    return json.loads(out.read_text())['elements']
+
+
+def bosco_chain():
     """
-    Tracciato compresso: dal bordo della città ogni tratto reale si accorcia di BOSCO_SCALA
-    mantenendo la direzione, quindi gli angoli di svolta restano quelli reali.
-    Restituisce (provinciale, strada del bosco): due polilinee in metri locali.
+    Tracciato compresso: ogni tratto reale si accorcia di BOSCO_SCALA mantenendo la direzione (gli
+    angoli restano quelli reali); i tratti nelle zone Quercus e vivaio restano a scala reale.
+    Restituisce (provinciale, svolta→Quercus, Quercus→vivaio, ancore) in metri del diorama; le ancore
+    dicono dove cade nel diorama il punto reale da cui parte ogni zona a scala reale.
     """
     o = BOSCO_ROUTE[0]
     sc = lambda q: (o[0] + (q[0] - o[0]) * BOSCO_SCALA, o[1] + (q[1] - o[1]) * BOSCO_SCALA)
-    a = [sc(q) for q in LineString(BOSCO_ROUTE[:BOSCO_TURN + 1]).simplify(30).coords]
-    b = [sc(q) for q in LineString(BOSCO_ROUTE[BOSCO_TURN:]).simplify(30).coords]
-    return chaikin([BOSCO_START] + a), chaikin(b)
+    a = chaikin([BOSCO_START] + [sc(q) for q in LineString(BOSCO_ROUTE[:BOSCO_TURN + 1]).simplify(30).coords])
+
+    def walk(start_d, pieces):
+        pts, d = [start_d], start_d
+        for real, scale in pieces:
+            seg = [d]
+            q = list(LineString(real).simplify(30 if scale < 1 else 1).coords)
+            for p0, p1 in zip(q, q[1:]):
+                d = (d[0] + (p1[0] - p0[0]) * scale, d[1] + (p1[1] - p0[1]) * scale)
+                seg.append(d)
+            pts += (chaikin(seg) if scale < 1 else seg)[1:]
+        return pts
+    route = BOSCO_ROUTE[:QUERCUS_A + 2] + [BOSCO_J]
+    A = route[QUERCUS_A]
+    b = walk(a[-1], [(route[BOSCO_TURN:QUERCUS_A + 1], BOSCO_SCALA), (route[QUERCUS_A:], 1)])
+    dA = (b[-1][0] - (BOSCO_J[0] - A[0]), b[-1][1] - (BOSCO_J[1] - A[1]))
+    R = VIVAIO_ROUTE[VIVAIO_REAL]
+    c = walk(b[-1], [(VIVAIO_ROUTE[:VIVAIO_REAL + 1], BOSCO_SCALA), (VIVAIO_ROUTE[VIVAIO_REAL:], 1)])
+    dR = (c[-1][0] - (VIVAIO_ROUTE[-1][0] - R[0]), c[-1][1] - (VIVAIO_ROUTE[-1][1] - R[1]))
+    return a, b, c, {'Q': (A, dA), 'V': (R, dR), 'J': b[-1]}
+
+
+def bosco_map(p, anchors, ref=None):
+    """
+    Punto reale → diorama: a scala reale nelle zone Quercus e vivaio, altrimenti a lato del tracciato
+    compresso (per una sagoma intera si passa `ref`, il suo centro: tutti i punti usano lo stesso vertice).
+    """
+    ref = ref or p
+    for key, zone in (('Q', ZONA_Q), ('V', ZONA_V)):
+        if inside(ref, zone):
+            (A, dA) = anchors[key]
+            return (dA[0] + p[0] - A[0], dA[1] + p[1] - A[1])
+    # a lato della strada compressa: il vertice reale più vicino, più lo scarto reale
+    (J, dJ) = BOSCO_J, anchors['J']
+    q = min(VIVAIO_ROUTE[:VIVAIO_REAL + 1], key=lambda v: math.dist(v, ref))
+    return (dJ[0] + (q[0] - J[0]) * BOSCO_SCALA + p[0] - q[0], dJ[1] + (q[1] - J[1]) * BOSCO_SCALA + p[1] - q[1])
+
+
+def bosco_real(d, anchors, route_d, route_r):
+    """Diorama → punto reale (per l'uso del suolo): nelle zone a scala reale esatto, altrimenti a lato del tracciato."""
+    for key, zone in (('Q', ZONA_Q), ('V', ZONA_V)):
+        A, dA = anchors[key]
+        r = (A[0] + d[0] - dA[0], A[1] + d[1] - dA[1])
+        if inside(r, zone):
+            return r
+    k = int(np.argmin(np.hypot(route_d[:, 0] - d[0], route_d[:, 1] - d[1])))
+    return (route_r[k][0] + d[0] - route_d[k][0], route_r[k][1] + d[1] - route_d[k][1])
 
 
 def bosco_site():
-    """Fondo della strada: (punto finale, direzione, posizione del rifugio a lato della radura)."""
-    pts = bosco_points()[1]
-    (x0, y0), (x1, y1) = pts[-2], pts[-1]
+    """Fondo della strada del vivaio: (punto finale, direzione)."""
+    c = bosco_chain()[2]
+    (x0, y0), (x1, y1) = c[-2], c[-1]
     l = math.hypot(x1 - x0, y1 - y0) or 1
-    d = ((x1 - x0) / l, (y1 - y0) / l)
-    return (x1, y1), d, (x1 + d[0] * 6 - d[1] * 18, y1 + d[1] * 6 + d[0] * 18)
+    return (x1, y1), ((x1 - x0) / l, (y1 - y0) / l)
 
 
-def bosco_road(core, pos):
-    """Archi della strada compressa, attaccati al nodo reale della provinciale in città."""
+def bosco_ways(elements, anchors, pos):
+    """Via di servizio e sentieri dell'area Quercus (OSM): tratti tra i nodi condivisi, a scala reale."""
+    K = lambda g: (round(g['lon'], 7), round(g['lat'], 7))
+    ways = {el['id']: el for el in elements if el.get('type') == 'way' and el['id'] in QUERCUS_SENTIERI | {QUERCUS_SERVIZIO}}
+    count = collections.Counter(K(g) for w in ways.values() for g in w['geometry'])
+    jkey = K(ways[QUERCUS_SERVIZIO]['geometry'][0])           # il primo punto della via di servizio è l'incrocio
+    count[jkey] += 1
+    names, out = {}, []
+    base = {'bridge': False, 'deco': False, 'name': None}
+    for wid, w in ways.items():
+        g = w['geometry']
+        cur = [g[0]]
+        for pt in g[1:]:
+            cur.append(pt)
+            if count[K(pt)] > 1 or pt is g[-1]:
+                ends = (K(cur[0]), K(cur[-1]))
+                if all(count[k] > 1 for k in ends) and ends[0] != ends[1]:
+                    ids = []
+                    for k, gp in zip(ends, (cur[0], cur[-1])):
+                        nid = 'bosco:quercus' if k == jkey else names.setdefault(k, f'bosco:q{len(names)}')
+                        pos.setdefault(nid, bosco_map(to_local(gp['lon'], gp['lat']), anchors))
+                        ids.append(nid)
+                    poly = [bosco_map(to_local(q['lon'], q['lat']), anchors) for q in cur]
+                    poly[0], poly[-1] = pos[ids[0]], pos[ids[1]]
+                    path = wid != QUERCUS_SERVIZIO
+                    out.append({**base, 'a': ids[0], 'b': ids[1], 'poly': poly, 'cls': 'path' if path else 'unclassified',
+                                'foot': path, 'walk': path})
+                cur = [pt]
+    return out
+
+
+def bosco_road(core, pos, elements):
+    """Archi della strada compressa (fino al vivaio), più via di servizio e sentieri dell'area Quercus."""
     nodes = {n for e in core for n in (e['a'], e['b'])}
     start = min(nodes, key=lambda n: math.dist(pos[n], BOSCO_START))
     if math.dist(pos[start], BOSCO_START) > 3:
         print('  ATTENZIONE: incrocio di partenza della strada del bosco non trovato')
-        return []
-    a, b = bosco_points()
+        return [], []
+    a, b, c, anchors = bosco_chain()
     a[0] = pos[start]
-    pos['bosco:svolta'], pos['bosco:rifugio'] = a[-1], b[-1]
+    pos['bosco:svolta'], pos['bosco:quercus'], pos['bosco:vivaio'] = a[-1], b[-1], c[-1]
     base = {'bridge': False, 'foot': False, 'deco': False}
-    print(f'  strada del bosco: {length(a) + length(b):.0f} m (tracciato reale {length(BOSCO_ROUTE):.0f} m, scala {BOSCO_SCALA})')
-    return [{**base, 'a': start, 'b': 'bosco:svolta', 'poly': a, 'cls': 'secondary', 'name': BOSCO_PROVINCIALE},
-            {**base, 'a': 'bosco:svolta', 'b': 'bosco:rifugio', 'poly': b, 'cls': 'tertiary', 'name': None}]
+    real = length(BOSCO_ROUTE[:QUERCUS_A + 2]) + length(VIVAIO_ROUTE)
+    print(f'  strada del bosco: {length(a) + length(b) + length(c):.0f} m (tracciato reale {real:.0f} m, scala {BOSCO_SCALA}; '
+          f'fino all\'area Quercus {length(a) + length(b):.0f} m, poi {length(c):.0f} m fino al vivaio)')
+    paths = bosco_ways(elements, anchors, pos)
+    print(f'  area Quercus: via di servizio {sum(length(e["poly"]) for e in paths if not e["walk"]):.0f} m, '
+          f'sentieri {sum(length(e["poly"]) for e in paths if e["walk"]):.0f} m a scala reale')
+    # Contrada Annunziata oltre l'incrocio del vivaio (OSM w252747446): si vede, non si percorre.
+    deco = []
+    for el in elements:
+        if el.get('type') == 'way' and el['id'] == 252747446:
+            real_pts = [to_local(g['lon'], g['lat']) for g in el['geometry']]
+            keep = [bosco_map(q, anchors) for q in real_pts if inside(q, (ZONA_V[0] + 15, ZONA_V[1], ZONA_V[2] + 15, ZONA_V[3]))]
+            if len(keep) > 1:
+                deco.append({**base, 'a': None, 'b': None, 'poly': keep, 'cls': 'unclassified', 'name': None})
+    return ([{**base, 'a': start, 'b': 'bosco:svolta', 'poly': a, 'cls': 'secondary', 'name': BOSCO_PROVINCIALE},
+             {**base, 'a': 'bosco:svolta', 'b': 'bosco:quercus', 'poly': b, 'cls': 'tertiary', 'name': None},
+             {**base, 'a': 'bosco:quercus', 'b': 'bosco:vivaio', 'poly': c, 'cls': 'tertiary', 'name': None}] + paths, deco)
 
 
-def build_network(data, buildings):
+def build_network(data, buildings, bosco_osm):
     """
     Rete percorribile (2-core del grafo, più le vie cieche del centro storico con la goccia)
     e vie decorative: le vie cieche reali della città moderna, visibili ma non percorribili.
@@ -639,7 +785,8 @@ def build_network(data, buildings):
     core = two_core(drivable + walk)
     extra = [e for t in dead_end_trees(drivable, core)
              if any(x['name'] in KEEP_DEAD_ENDS for x in t) and all(inside(midpoint(x['poly']), Z0) for x in t) for e in t]
-    extra += bosco_road(core, pos)
+    bosco_edges, bosco_deco = bosco_road(core, pos, bosco_osm)
+    extra += bosco_edges
     tree = STRtree(buildings)
     net, loops = add_turnarounds(core, extra, pos, tree, buildings)
     # Dove una via carrabile continua solo a piedi, la goccia lascia scegliere: si scende o si torna
@@ -659,7 +806,7 @@ def build_network(data, buildings):
     net = merge_chains(net)
     # Decorative: tutto ciò che resta fuori dalla rete, nella città moderna (il centro storico resta com'era).
     deco = [e for e in edges if id(e) not in used and not e['foot'] and not e['bridge'] and not inside(midpoint(e['poly']), Z0)]
-    deco = merge_chains(deco)
+    deco = merge_chains(deco) + bosco_deco
     for e in net + deco:                              # geometria più leggera
         if not e.get('turn'):
             e['poly'] = list(LineString(e['poly']).simplify(0.35).coords)
@@ -959,7 +1106,7 @@ def build_features(data):
     rl = LineString([to_local(*p) for p in river['geom']['coordinates']])
     rl = rl.intersection(box(big[0], big[2], big[1], big[3]))
     # l'appendice del bosco è un paesaggio compresso: il torrente reale si ferma 80 m prima
-    rl = rl.difference(box(BOSCO[0] - 80, BOSCO[2] - 80, BOSCO[1] + 80, BOSCO[3]))
+    rl = rl.difference(box(BOSCO[0] - 80, VIVAIO[2] - 80, BOSCO[1] + 80, BOSCO[3]))
     rl = max(getattr(rl, 'geoms', [rl]), key=lambda g: g.length).simplify(1.0)
 
     cliffs = [LineString([to_local(*p) for p in l['geom']['coordinates']])
@@ -1013,9 +1160,7 @@ def build_features(data):
 DEM_STEP = 30             # m: passo della griglia delle quote in GEO
 COVER_STEP = 15           # m: passo della griglia dell'uso del suolo in GEO
 COVER = {'campagna': 0, 'citta': 1, 'parco': 2, 'bosco': 3, 'campo': 4, 'uliveto': 5, 'industria': 6,
-         'cimitero': 7, 'sport': 8, 'piazza': 9, 'macchia': 10, 'cava': 11, 'querce': 12}
-BOSCO_QUERCE = 95         # m: raggio del querceto in fondo alla strada del bosco
-BOSCO_RADURA = 24         # m: raggio della radura attorno al rifugio
+         'cimitero': 7, 'sport': 8, 'piazza': 9, 'macchia': 10, 'cava': 11, 'querce': 12, 'bruciato': 13, 'fitto': 14}
 OVERPASS_URL = 'https://overpass-api.de/api/interpreter'
 OVERPASS_BBOX = '40.79,16.39,40.85,16.46'
 OVERPASS_QUERY = f"""[out:json][timeout:160];
@@ -1108,6 +1253,16 @@ def ground_model(dem_at, buildings):
     A = blur(Z, 1.5)
     B = blur(low_percentile(Z, 9, 20), 3.5)
     G = A * (1 - U) + B * U
+    # Zolle del bosco (blocco L): il paesaggio è compresso e le quote reali lì sotto sono di un altro posto
+    # (la valle a sud della città). Colline dolci: quote molto smussate, rilievo dimezzato attorno alla media.
+    Wb = np.zeros_like(G)
+    for z in (BOSCO, VIVAIO):
+        Wb = np.maximum(Wb, ((EE > z[0] - 60) & (EE < z[1] + 60) & (NN > z[2] - 60) & (NN < z[3] + (0 if z is BOSCO else 60))).astype(float))
+    Wb = np.clip(blur(Wb, 5), 0, 1) * (NN < BOSCO[3] - 120)
+    if Wb.any():
+        S = blur(G, 10)
+        mean = float((S * Wb).sum() / Wb.sum())
+        G = G * (1 - Wb) + (mean + (S - mean) * 0.5) * Wb
     k = DEM_STEP // f
     grid = G[M // f::k, M // f::k][:(BOUND[3] - BOUND[2]) // DEM_STEP + 1, :(BOUND[1] - BOUND[0]) // DEM_STEP + 1].copy()
     ge = BOUND[0] + DEM_STEP * np.arange(grid.shape[1])
@@ -1169,7 +1324,7 @@ def raster(polys, E, N):
     return m
 
 
-def land_cover(data, buildings):
+def land_cover(data, buildings, bosco_osm):
     """Uso del suolo su una griglia di COVER_STEP m (centri delle celle): colori del terreno e alberi nella città moderna."""
     s = COVER_STEP
     E = np.arange(BOUND[0] + s / 2, BOUND[1], s, dtype=float)
@@ -1195,12 +1350,7 @@ def land_cover(data, buildings):
         if kind == 'citta':
             m = dense                                    # la città è dove ci sono le case, non tutto il poligono "residenziale"
         grid[m] = COVER[kind]
-    # fondo della strada del bosco: querce attorno, radura attorno al rifugio
-    end, d, hut = bosco_site()
-    EE, NN = np.meshgrid(E, N)
-    cx, cy = end[0] - d[0] * 40, end[1] - d[1] * 40
-    grid[(EE - cx) ** 2 + (NN - cy) ** 2 < BOSCO_QUERCE ** 2] = COVER['querce']
-    grid[(EE - hut[0]) ** 2 + (NN - hut[1]) ** 2 < BOSCO_RADURA ** 2] = COVER['campo']
+    bosco_cover(grid, E, N, bosco_osm)
     fill_masked(grid, zone_mask(E, N, s))
     print('  uso del suolo:', ', '.join(f'{k} {100 * np.mean(grid == v):.0f}%' for k, v in COVER.items() if np.any(grid == v)))
     return grid
@@ -1242,7 +1392,7 @@ def city_height(b, dense, industrial):
     return floors * 3.3 + 0.6
 
 
-CITY_KIND = {'house': 0, 'church': 1, 'shed': 3, 'apartments': 4, 'public': 5, 'industry': 6, 'castle': 7}
+CITY_KIND = {'house': 0, 'church': 1, 'shed': 3, 'apartments': 4, 'public': 5, 'industry': 6, 'castle': 7, 'school': 8, 'villa': 9}
 
 
 def city_buildings(buildings, cover):
@@ -1260,6 +1410,181 @@ def city_buildings(buildings, cover):
             kind = CITY_KIND['industry']
         out.append({**b, 'height': h, 'kind': kind})
     return out
+
+
+# Blocco E (risposte del committente del 30/09/2026): scuole, chiese senza nome in OSM, Casino di
+# Meninni e «case rosa». La posizione viene da OSM o Overture (id nei commenti); l'edificio è la
+# sagoma reale che contiene il punto (o la più vicina entro 6 m). Nessun contorno da Google.
+SCHOOLS = [
+    ('Liceo scientifico G. Tarantino', (762, -471), 3),         # Overture, Via Salvatore Quasimodo
+    ('Liceo linguistico G. Tarantino', (661, 102), 3),          # Overture, Via Gorizia
+    ('ITT Bachelet · IPSIA G. Galilei', (2628, 687), 2),        # OSM w1384764963 (area), w1384764964, nel P.I.P.
+    ('Scuola primaria Padre Pio', (1117, -216), 2),             # OSM w411138848, Via Guardialto
+    ('Scuola media Don E. Montemurro', (648, -323), 3),         # OSM w411138849, Via Tripoli
+    ('Circolo didattico San Giovanni Bosco', (320, -139), 3),   # OSM r6148449, Corso Vittorio Emanuele
+    ('Edificio scolastico S.G. Bosco', (910, -21), 3),          # OSM, nome dell'edificio
+    ('Scuola secondaria N. Ingannamorte', (730, 418), 3),       # OSM n12091003369, Via Francesco Baracca
+    ('Scuola dell\'infanzia Papa Giovanni Paolo II', (1212, -187), 1),   # OSM n12039009818
+    ('Scuola dell\'infanzia Alla Fine dell\'Arcobaleno', (1368, 124), 1),   # OSM n12039071161
+    ('Scuola secondaria Benedetto XIII', (284, -44), 3),        # Overture, Via Libertà
+    ('Scuola primaria Don Saverio Valerio', (313, -766), 2),    # Overture, Via Sandro Pertini
+    ('Scuola primaria Tommaso Fiore', (837, 351), 2),           # Overture, Via Fratelli Cervi
+    ('Circolo didattico Savio-Fiore', (545, 1052), 2),          # Overture, Via Fratelli Cervi
+    ('Scuola primaria Michele Soranno', (1748, 266), 2),        # Overture, Via Michele Soranno
+    ('Scuola primaria Santomasi', (387, 596), 2),               # Overture, Corso Aldo Moro
+]
+CHURCHES = [
+    ('Chiesa Gesù Buon Pastore', (1055, -176)),                 # OSM w328013129 (edificio senza nome)
+    ('SS. Crocifisso e San Sebastiano', (442, -571)),           # OSM r6148330 e Overture
+    ('Santuario Madonna delle Grazie', (658, 826)),             # Overture, Via Madonna della Grazia
+    ('Santi Pietro e Paolo', (1080, 1140)),                     # Overture (Via Luigi Longo), edificio OSM w411139942
+]
+MENINNI = ('Casino di Meninni', (1572, -536))                   # sul Guardialto, sopra la SP201 (Via Guardialto)
+CASE_ROSA = 'Case rosa'
+# Tra Via Guardialto (SP201) e Via Guardialto Piccolo, dove si separano (indicazione del committente)
+CASE_ROSA_ZONE = [(1142, -177), (1301, -295), (1470, -500), (1360, -250), (1323, -193), (1146, -155)]
+
+
+# Edifici OSM delle zone a scala reale del bosco: nome, tipo (9 = tetto a capanna in coppi) e altezza.
+BOSCO_EDIFICI = {411141350: ('Area Quercus', 9, 4.6),           # ristorante (amenity=restaurant n11092432410), tetto rosso
+                 411142982: ('Vivaio forestale', 9, 4.8),       # edificio lungo col tetto di coppi (satellite)
+                 411148672: ('Base Scout Gravina 1', 9, 3.8)}
+
+
+def bosco_buildings(elements):
+    """Edifici OSM attorno all'area Quercus e al vivaio, portati nel diorama (zone a scala reale)."""
+    anchors = bosco_chain()[3]
+    out = []
+    for el in elements:
+        t = el.get('tags') or {}
+        if el.get('type') != 'way' or 'building' not in t or not el.get('geometry'):
+            continue
+        real = [to_local(g['lon'], g['lat']) for g in el['geometry']]
+        c = Polygon(real).centroid
+        if not (inside((c.x, c.y), ZONA_Q) or inside((c.x, c.y), ZONA_V)):
+            continue
+        poly = Polygon([bosco_map(q, anchors, (c.x, c.y)) for q in real]).buffer(0).simplify(0.3)
+        name, kind, h = BOSCO_EDIFICI.get(el['id'], (None, KIND['shed'] if t['building'] in ('shed', 'roof') else KIND['house'], 3.4))
+        out.append({'poly': poly, 'kind': kind, 'cls': t['building'], 'name': name, 'height': h, 'level': 0})
+    print(f'  bosco: {len(out)} edifici OSM attorno all\'area Quercus e al vivaio')
+    return out
+
+
+def bosco_features(elements):
+    """Campi, tribuna, parcheggio, vasche (OSM) e punti senza dati (BOSCO_PUNTI), in metri del diorama: GEO.bosco."""
+    anchors = bosco_chain()[3]
+    m = lambda q: bosco_map(q, anchors)
+    geo = {el['id']: [to_local(g['lon'], g['lat']) for g in el['geometry']] for el in elements if el.get('type') == 'way' and el.get('geometry')}
+
+    def ring(wid):
+        c = Polygon(geo[wid]).centroid.coords[0]
+        return flat([bosco_map(q, anchors, c) for q in geo[wid][:-1]])
+    inner = shapely.union_all([box(z[0] + 6, z[2] + 6, z[1] - 6, z[3] - 6) for z in (BOSCO, VIVAIO)])
+    fits = lambda f: inner.contains(Polygon(list(zip(f[::2], f[1::2]))))
+    # tre campi: in OSM tutti «tennis»; secondo GravinaLife (2021) due da calcetto e uno da tennis,
+    # e dal satellite quello da tennis (verde, con le righe) è il centrale, w1195121475.
+    out = {'campi': [[0 if w == 1195121475 else 1, ring(w)] for w in (1195121473, 1195121475, 1195121476)],
+           'tribuna': ring(1195121474), 'parcheggio': ring(477738793), 'vasche': [f for f in (ring(w) for w in (411138854, 411138897, 411139081)) if fits(f)]}
+    e, n, ang, w, l = BOSCO_PUNTI['maneggio']
+    out['maneggio'] = [*map(lambda v: round(v, 1), m((e, n))), ang, w, l]
+    # Il parcheggio «Terra Rossa» è 700 m più giù lungo la strada: col tracciato compresso finirebbe sui
+    # campi. Resta a lato della strada, ritagliato fuori dall'area dei campi e del maneggio.
+    busy = MultiPoint([p for _, f in out['campi'] for p in zip(f[::2], f[1::2])]).convex_hull.buffer(8).union(Point(*out['maneggio'][:2]).buffer(32))
+    park = Polygon(list(zip(out['parcheggio'][::2], out['parcheggio'][1::2]))).buffer(0).difference(busy)
+    park = max(getattr(park, 'geoms', [park]), key=lambda g: g.area)
+    out['parcheggio'] = flat(park.simplify(0.5).exterior.coords[:-1])
+    out['picnic'] = [round(v, 1) for v in m(BOSCO_PUNTI['picnic'])]
+    e, n, ang = BOSCO_PUNTI['scritta']
+    out['scritta'] = [*map(lambda v: round(v, 1), m((e, n))), ang]
+    out['aiuole'] = [round(v, 1) for v in m(BOSCO_PUNTI['aiuole'])]
+    out['quercus'] = [round(v, 1) for v in m((-780, -5657))]    # parco «Rifugio Bosco Difesa Grande» (OSM w477739267)
+    return out
+
+
+def bosco_cover(grid, E, N, elements):
+    """
+    Uso del suolo nelle zolle del bosco: querce dove il punto reale corrispondente sta nel poligono OSM
+    del Bosco Difesa Grande (w330074271) o del Bosco di Gravina (w330074290), campi altrove; alberi
+    bruciati dove li mostra il satellite; radure attorno all'area Quercus e al vivaio; lungo i sentieri
+    «fitto» (niente alberi dei riquadri: lì c'è il bosco istanziato del diorama).
+    """
+    a, b, c, anchors = bosco_chain()
+    woods = [Polygon([to_local(g['lon'], g['lat']) for g in el['geometry']]).buffer(0)
+             for el in elements if el.get('type') == 'way' and el['id'] in (330074271, 330074290)]
+    wood = shapely.union_all(woods) if woods else None
+    route_d, route_r = [], []
+    o = BOSCO_ROUTE[0]
+    for q in BOSCO_ROUTE[:QUERCUS_A + 1]:                     # provinciale e strada compressa: vertici reali e nel diorama
+        route_r.append(q); route_d.append((o[0] + (q[0] - o[0]) * BOSCO_SCALA, o[1] + (q[1] - o[1]) * BOSCO_SCALA))
+    for q in VIVAIO_ROUTE[:VIVAIO_REAL + 1]:
+        route_r.append(q); route_d.append(bosco_map(q, anchors) if inside(q, ZONA_Q) else
+                                          (anchors['J'][0] + (q[0] - BOSCO_J[0]) * BOSCO_SCALA, anchors['J'][1] + (q[1] - BOSCO_J[1]) * BOSCO_SCALA))
+    route_d = np.array(route_d)
+    anc = {'Q': anchors['Q'], 'V': anchors['V']}
+    feats = bosco_features(elements)
+    clear_q = MultiPoint([tuple(p) for f in [feats['tribuna'], *[r for _, r in feats['campi']]] for p in zip(f[::2], f[1::2])]).convex_hull.buffer(14)
+    clear_q = clear_q.union(Point(*feats['maneggio'][:2]).buffer(36)).union(Point(*feats['quercus']).buffer(24))
+    park = Polygon(list(zip(feats['parcheggio'][::2], feats['parcheggio'][1::2])))
+    clear_v = Point(*feats['picnic']).buffer(40).union(Point(*feats['scritta'][:2]).buffer(24))   # area pic-nic: prato senza alberi dei riquadri
+    paths_d = [LineString(e['poly']) for e in bosco_ways(elements, anchors, {}) if e['walk']]
+    near_path = shapely.union_all([p.buffer(42) for p in paths_d]) if paths_d else None
+    burned = [box(x0, y0, x1, y1) for x0, x1, y0, y1 in BOSCO_BRUCIATO]
+    counts = collections.Counter()
+    for j, n in enumerate(N):
+        for i, e in enumerate(E):
+            if not (inside((e, n), BOSCO) or inside((e, n), VIVAIO)):
+                continue
+            r = bosco_real((e, n), anc, route_d, route_r)
+            pt = Point(r)
+            code = COVER['querce'] if wood is not None and wood.contains(pt) else COVER['campo']
+            if code == COVER['querce'] and any(bx.contains(pt) for bx in burned):
+                code = COVER['bruciato']
+            d = Point(e, n)
+            if code != COVER['campo'] and near_path is not None and near_path.contains(d):
+                code = COVER['fitto']
+            if clear_q.contains(d) or park.contains(d) or clear_v.contains(d):
+                code = COVER['cava'] if park.contains(d) else COVER['sport']      # radure (prato) e parcheggio sterrato
+            grid[j, i] = code
+            counts[code] += 1
+    inv = {v: k for k, v in COVER.items()}
+    print('  bosco, uso del suolo:', ', '.join(f'{inv[k]} {v}' for k, v in counts.most_common()))
+
+
+def name_places(old, city):
+    """Dà nome e tipo agli edifici delle scuole, delle chiese senza nome, del Casino e delle case rosa."""
+    every = old + city
+    tree = STRtree([b['poly'] for b in every])
+
+    def pick(pt):
+        p = Point(pt)
+        near = [every[i] for i in tree.query(p.buffer(6))]
+        near = [b for b in near if b['poly'].distance(p) <= 6]
+        return min(near, key=lambda b: (b['poly'].distance(p), -b['poly'].area), default=None)
+
+    in_city = {id(b) for b in city}
+    found = 0
+    for name, pt, floors in SCHOOLS:
+        b = pick(pt)
+        if not b:
+            print(f'  ATTENZIONE: edificio della scuola non trovato: {name}')
+            continue
+        b['name'] = name
+        b['kind'] = CITY_KIND['school'] if id(b) in in_city else KIND['public']
+        b['height'] = floors * 3.4 + 0.8                      # piani alti 3,4 m, più il parapetto
+        found += 1
+    for name, pt in CHURCHES:
+        b = pick(pt)
+        if b:
+            b['name'], b['kind'] = name, CITY_KIND['church']
+            b['height'] = 12.0
+    b = pick(MENINNI[1])
+    if b:
+        b['name'], b['kind'], b['height'] = MENINNI[0], CITY_KIND['villa'], 9.5
+    zone = Polygon(CASE_ROSA_ZONE)
+    rosa = [b for b in city if b['kind'] != CITY_KIND['school'] and b['poly'].area > 300 and zone.contains(b['poly'].centroid) and not b['name']]
+    for b in rosa:
+        b['name'] = CASE_ROSA
+    print(f'  scuole: {found} su {len(SCHOOLS)}; case rosa: {len(rosa)} edifici')
 
 
 def castle_outline(elements):
@@ -1485,7 +1810,7 @@ def encode(edges, deco, pos, buildings, city, arches, feats, extra):
 
     def flags(e):
         return ((1 if e['bridge'] else 0) | (2 if e['foot'] else 0) | (4 if e.get('turn') else 0)
-                | (8 if e['cls'] == 'track' else 0) | (16 if e.get('urban') else 0) | (32 if e.get('walk') else 0))
+                | (8 if e['cls'] in ('track', 'path') else 0) | (16 if e.get('urban') else 0) | (32 if e.get('walk') else 0))
     # Vie, vie decorative ed edifici del centro storico in forma compatta (CODEC), a 0,1 m come prima:
     # index.html li riporta alle righe di sempre in DATA.unpack().
     E = []
@@ -1551,6 +1876,7 @@ def encode(edges, deco, pos, buildings, city, arches, feats, extra):
         'steps': [[nid(nm), flat(g.coords)] for nm, g in feats['steps']],
         'rims': {'east': flat(extra['rims'][0]), 'west': flat(extra['rims'][1])},
         'rioni': extra['rioni'],
+        'bosco': extra['bosco'],
     }
     lines = ['const GEO = {']
     for k, v in geo.items():
@@ -1630,24 +1956,24 @@ def main():
         # la relazione OSM building=castle (r6148325) arriva da Overture come un edificio anonimo con la stessa sagoma
         buildings = [b for b in buildings if b['poly'].intersection(castle).area < 0.3 * b['poly'].area]
         buildings.append({'poly': castle, 'kind': CITY_KIND['castle'], 'cls': 'castle', 'name': 'Castello Svevo', 'height': 8.0, 'level': 0})
-    # rifugio del Bosco Difesa Grande: capanna procedurale a lato della radura (la posizione è compressa)
-    hut = bosco_site()[2]
-    buildings.append({'poly': box(hut[0] - 4, hut[1] - 3, hut[0] + 4, hut[1] + 3), 'kind': CITY_KIND['house'], 'cls': 'hut',
-                      'name': 'Rifugio Bosco Difesa Grande', 'height': 3.6, 'level': 0})
+    # Blocco L: edifici reali attorno all'area Quercus e al vivaio (al posto della capanna generica)
+    bosco_osm = overpass_bosco()
+    buildings += bosco_buildings(bosco_osm)
     print('3. Rete stradale')
-    edges, deco, pos = build_network(data, [b['poly'] for b in buildings])
+    edges, deco, pos = build_network(data, [b['poly'] for b in buildings], bosco_osm)
     buildings, arches = free_roads(edges + deco, pos, buildings)
     print('4. Morfologia, quote reali, uso del suolo')
     feats = build_features(data)
     at, ground, light, _, _ = ground_model(dem_at, buildings)
-    cover = land_cover(data, buildings)
+    cover = land_cover(data, buildings, bosco_osm)
     old = [b for b in buildings if inside(b['poly'].centroid.coords[0], Z0)]
     city = city_buildings([b for b in buildings if not inside(b['poly'].centroid.coords[0], Z0)], cover)
     print(f'  edifici: {len(old)} nel centro storico, {len(city)} nella città')
+    name_places(old, city)
     extra = {
         'ground': ground, 'cover': cover, 'rails': build_rails(data), 'pois': city_pois(osm),
         'riverY': river_bed(feats['river'], lambda e, n: at(e, n)), 'rims': extend_rims(feats['river'], at),
-        'rioni': rioni_profile(at),
+        'rioni': rioni_profile(at), 'bosco': bosco_features(bosco_osm),
     }
     print('5. Scrittura')
     write_html(encode(edges, deco, pos, old, city, arches, feats, extra))

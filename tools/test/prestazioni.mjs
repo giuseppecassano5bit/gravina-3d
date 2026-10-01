@@ -7,7 +7,8 @@
  * Viste: partenza (vetrina sul ponte), centro (inseguimento in Piazza Benedetto XIII),
  * scacchi (inseguimento da Piazza Scacchi verso la città moderna), pausa (vista dall'alto),
  * panoramica (camera alta sopra la città), alta (camera 120 m sopra il centro storico, inclinata
- * verso la città: la vista della futura mongolfiera).
+ * verso la città: la vista della futura mongolfiera), accelerata (guida con l'acceleratore subito dopo
+ * «Parti», mentre i riquadri si costruiscono) e teletrasporto (allo stadio, poi con l'acceleratore).
  * I riquadri lontani usano la versione semplificata (livelli di dettaglio, sezione 6e).
  *
  * Uso: node prestazioni.mjs [etichetta]   → tabella in console e shots/prestazioni-<etichetta>.json
@@ -28,12 +29,17 @@ const init = () => {
 };
 
 const VIEWS = {
+  // Blocco E: acceleratore (Shift, solo su PC) subito dopo «Parti», mentre la città si costruisce, e dopo un teletrasporto.
+  accelerata: { boost: true },
   partenza: null,
   centro: { at: [40, -12], heading: [1, 0] },
   scacchi: { at: [415, 0], heading: [1, 0] },
   pausa: { at: [415, 0], heading: [1, 0], pause: true },
   panoramica: { camera: [950, -750, 320], look: [350, 150, 0] },
   alta: { camera: [-60, -120, 120], look: [400, 300, 0], above: true },   // quota sopra il suolo
+  teletrasporto: { goTo: 'stadio', boost: true },
+  // Blocco L: a piedi sui sentieri dell'area Quercus, nel bosco fitto (la vista più pesante del bosco).
+  'bosco a piedi': { foot: true },
 };
 
 async function measure(profile) {
@@ -74,11 +80,30 @@ async function measure(profile) {
 
   const views = {};
   await page.click('#btn-start');
-  for (const [name, v] of Object.entries(VIEWS)) {
-    await page.evaluate((v) => {
+  for (const [name, view] of Object.entries(VIEWS)) {
+    if (profile === 'telefono' && name === 'accelerata') continue;              // sul telefono niente acceleratore
+    const v = profile === 'telefono' && view?.boost ? { ...view, boost: false } : view;
+    await page.evaluate(async (v) => {
       const g = window.gravina;
+      g.driver.boosting = false;
+      if (v?.goTo) { g.pause(); await new Promise((r) => setTimeout(r, 400)); await g.goTo(v.goTo); g.rig.mode = 'drive'; }
       if (g.phase === 'pause') g.resume();
       if (!v) return;
+      if (v.boost) { g.driver.boosting = true; g.rig.follow?.(); return; }
+      if (v.foot) {
+        const d = g.driver, walks = g.network.edges.filter((e) => e.walk && e.dirt);
+        const node = walks.flatMap((w) => [w.a, w.b]).find((x) => x.edges.some((e) => !e.walk && !e.turn));
+        const car = node.edges.find((e) => !e.walk && !e.turn), dir = car.b === node ? 1 : -1;
+        d.place(car, dir, Math.max(0, car.length - 30)); d.start(); g.rig.mode = 'drive'; g.rig.snap(d);
+        for (let t = 0; t < 30 && !d.onFoot; t += 0.2) {
+          const k = d.decision?.options.findIndex((o) => o.edge.walk) ?? -1;
+          if (k >= 0 && d.decision.selected !== k) d.choose(k);
+          g.advance(0.2);
+        }
+        g.advance(8);
+        g.rig.snap(d);
+        return;
+      }
       if (v.at) { g.placeAt(v.at[0], v.at[1], v.heading); g.driver.start(); g.rig.snap(g.driver); g.advance(1.5); }
       if (v.pause) g.pause();
       if (v.camera) {
@@ -92,7 +117,7 @@ async function measure(profile) {
     // fps reali (la pagina disegna da sola con la GPU), poi triangoli e draw call del fotogramma più pesante.
     const r = await page.evaluate(async () => {
       const g = window.gravina, info = g.renderer.info.render, R = g.renderer;
-      await new Promise((res) => setTimeout(res, 1500));
+      if (!g.driver.boosting) await new Promise((res) => setTimeout(res, 1500));
       // tempo di CPU di ogni renderer.render() (culling, stato, draw call): la GPU non ha un tetto a 60 fps
       const render = R.render, cpu = [];
       R.render = function (...a) { const t = performance.now(); render.apply(this, a); cpu.push(performance.now() - t); };

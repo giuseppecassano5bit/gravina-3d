@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 30 settembre 2026: fase 3 approvata e online, blocchi A, C, F, G e I della fase 3.4 uniti.
+Stato al 30 settembre 2026: fase 3 approvata e online, blocchi A, C, D, F, G e I della fase 3.4 uniti.
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
@@ -15,7 +15,7 @@ Ordine: I → D → E → L → M → N, dettagli e decisioni nella sezione 7 de
       sagome semplificate, metà degli alberi; finestre e torrini solo da vicino), con isteresi e
       senza draw call in più. Fotogramma peggiore da 243 500 a 164 700 triangoli sul telefono e da
       335 400 a 235 500 su PC; «Pronto» circa 640 ms. Vista «alta» in `prestazioni.mjs`.
-- [x] **D · centro storico** (`fase-3-4-d-centro-storico`, PR #14, in attesa di approvazione):
+- [x] **D · centro storico** (`fase-3-4-d-centro-storico`, PR #14, unita il 30/09/2026):
       Porta San Michele (nicchia con San Michele all'imbocco di Via Matteotti, facciate dei due
       palazzi d'angolo), Piazza Scacchi (busti di Musacchio e Scacchi, ulivo, aiuole e sedute),
       Quattro Fontane (dalle lapidi: 1779, restauro 1859), campanile e facciata di San Francesco,
@@ -26,11 +26,32 @@ Ordine: I → D → E → L → M → N, dettagli e decisioni nella sezione 7 de
       città. 264 KB compressi (+9), telefono 175 300 triangoli, PC 246 000, draw call invariate.
 - [x] **Peso**: il 30/09/2026 il committente ha alzato il tetto da 280 a **360 KB compressi**
       (≤ 1,2 MB non compressi). Dopo il blocco D restano circa 96 KB per E, L, M e N.
-- [ ] **E + L insieme** nella prossima chat (decisione del 30/09/2026), più un **pulsante
-      acceleratore** per i mezzi, solo se non crea rallentamenti.
-- [ ] **E · luoghi della città, scuole e chiese** (`fase-3-4-e-luoghi`): il committente sceglie le scuole.
-- [ ] **L · il Bosco da vicino** (`fase-3-4-l-bosco`): Area Quercus, strada fino al vivaio,
-      Base Scout, area pic-nic, scritta «SIC DIFESA GRANDE», giro a piedi, suoni del bosco.
+- [x] **E + L insieme** (`fase-3-4-e-l-luoghi-bosco`, PR #15, in attesa di approvazione), più
+      l'**acceleratore solo su PC** (Shift tenuto premuto, ×1,8; sul telefono no, decisione del
+      committente del 30/09/2026): agli incroci il cartello si apre prima e il mezzo torna alla
+      crociera. 60 fps e fotogramma peggiore come senza, subito dopo Parti e dopo un teletrasporto.
+- [x] **E · luoghi della città, scuole e chiese**: 16 scuole sull'edificio reale (Liceo
+      G. Tarantino scientifico e linguistico, ITT Bachelet · IPSIA G. Galilei al P.I.P., come chiesto,
+      più le altre con la sagoma), con pennoni, pensilina, campo da gioco e recinzione; chiese della
+      città con portale, oculo e croce (niente campanili: nessuna foto verificata); Casino di Meninni
+      (scheda FAI), case rosa, La Caccia, Largo Cappuccini e gli altri luoghi; schede nuove per Fiera
+      di San Giorgio, stadio Stefano Vicino, stazione FAL. Vie del mezzo entro il 18% in tutta la
+      città (raccordo del terreno a nord e a est da 110 a 230 m): da 27 vie oltre il 20% a una.
+- [x] **L · il Bosco da vicino**: strada compressa fino al vivaio (674 m per 3,2 km reali), zone
+      dell'area Quercus e del vivaio a scala reale, area Quercus (ristorante, campi, tribunetta,
+      maneggio, giochi, tavoli, parcheggio; scheda), vivaio con vasche e aiuole (scheda senza dire
+      che il centro visite è aperto), Base Scout, area pic-nic con la scritta «SIC DIFESA GRANDE»,
+      524 m di sentieri reali a piedi, bosco fitto istanziato che si apre tra camera e figurina,
+      foschia, suoni del bosco solo dentro il bosco (interruttore nella pausa).
+- [ ] Da verificare con il committente: se il maneggio, i giochi e i tavoli dell'area Quercus
+      stanno dove li ricorda (posizione indicativa dal satellite); il nome della strada del bosco
+      (in OSM non ce l'ha: nel diorama «Strada nel bosco»); la chiesa di Santi Pietro e Paolo
+      (nome da Overture).
+- [ ] Telefono in orizzontale, partenza sul ponte: il contatore di debug segna 74 draw call (tetto 70),
+      uguale su `main` prima di E e L (`node foto.mjs orizzontale`). In verticale il massimo è 48.
+      Da guardare nel blocco N con i ritocchi dell'orizzontale.
+- [ ] La vasca grande del vivaio (w411138854) è fuori dalla zolla del vivaio: allargarla di un
+      riquadro verso sud, se si vuole.
 - [ ] **M · mezzi realistici e mongolfiera** (`fase-3-4-m-mezzi`).
 - [ ] **N · cartolina, giro guidato e ritocchi** (`fase-3-4-n-cartolina-giro`).
 - Versione in inglese: non ora.
@@ -114,7 +135,7 @@ commerciali e protette: il committente ha scelto musica ambient originale, gener
 - [x] Prove: guida fino alla goccia e ritorno con la scheda che si apre; `simula` e `interazioni`
       verdi; budget rispettato (telefono 241 000 triangoli e 53 draw call al massimo, PC 334 000 e
       69; 277 KB compressi).
-- [ ] **Rifugio**: se si trovano fonti affidabili, dargli una scheda.
+- [x] **Rifugio**: è l'area Quercus, con la scheda (blocco L).
 - [x] Prossimo: blocco G (percorsi a piedi e quote reali del centro storico): fatto, con la
       camera libera del blocco B.
 - [ ] Blocchi D (revisione del centro storico) ed E (nuovi luoghi): non ancora iniziati.
@@ -176,8 +197,8 @@ commerciali e protette: il committente ha scelto musica ambient originale, gener
       scalinata di Via giudice Montea sono tratti a piedi e restano ripidi.
 - [x] Gradino di 15–18 m a sud della città (da Via Goito a Via Tripoli): punti ripetuti nel ciglio
       est, corretto nel blocco D.
-- [ ] Fuori dal centro storico, a nord, alcune vie sulle quote reali sono ripide (Via Savoia,
-      Via Giardini, Corso Aldo Moro, 29–37%): da guardare nel blocco E.
+- [x] Fuori dal centro storico, a nord, alcune vie erano ripide (Via Savoia, Via Giardini, Corso
+      Aldo Moro, 29–37%): era il raccordo del terreno, allargato nel blocco E. Resta Via Goito (22%).
 
 **Camera e interfaccia**
 - [ ] Dopo il teletrasporto la camera a volte parte troppo vicina a un tetto (screenshot
