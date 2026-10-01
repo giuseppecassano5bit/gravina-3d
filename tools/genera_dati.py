@@ -90,9 +90,11 @@ AREA_ROADS = (-830, 2030, -1130, 1970)    # binari: devono stare tutti qui dentr
 # Blocco F: appendici a riquadri interi, attaccate alla zolla.
 PIP = (2040, 2760, 300, 1260)             # P.I.P. - Zona Artigianale, a scala reale (3 × 4 riquadri)
 BOSCO = (-120, 600, -1860, -1140)         # strada compressa per il Bosco Difesa Grande e area Quercus (3 × 3 riquadri)
-VIVAIO = (-600, 360, -2340, -1860)        # blocco L: strada fino al vivaio forestale (4 × 2 riquadri)
-ZOLLE = (AREA, PIP, BOSCO, VIVAIO)
-BOUND = (-840, 2760, -2340, 1980)         # rettangolo delle zolle: origine e griglie di GEO
+VIVAIO = (-840, 360, -2340, -1860)        # blocco L: strada fino al vivaio forestale; blocco M2: a ovest l'anello V2 (5 × 2 riquadri)
+VIVAIO_SUD = (-600, -120, -2580, -2340)   # blocco M2: la vasca grande del vivaio (2 riquadri)
+ZOLLE = (AREA, PIP, BOSCO, VIVAIO, VIVAIO_SUD)
+BOSCHI = (BOSCO, VIVAIO, VIVAIO_SUD)      # zolle del bosco: paesaggio compresso
+BOUND = (-840, 2760, -2580, 1980)         # rettangolo delle zolle: origine e griglie di GEO
 ROAD_MARGIN = 10                          # le vie restano ad almeno 10 m dal bordo delle zolle
 # Zona Z0, il centro storico: edifici, vie e terreno con il dettaglio pieno (fasi 2–3).
 Z0 = (-340, 450, -320, 540)
@@ -120,6 +122,22 @@ WALK = {'footway', 'steps'}
 # Vie cieche da conservare (con inversione a goccia) perché portano a luoghi importanti.
 KEEP_DEAD_ENDS = {'Piazza Benedetto XIII', 'Via Civita', 'Calata Grotte San Michele',
                   'Larghetto San Francesco', 'Via Matteotti'}
+# Blocco M2: tratti a piedi reali scelti per id OSM (Overture dice da quale via OSM viene ogni pezzo),
+# anche fuori dal centro storico. Entrano nella rete solo se chiudono un anello con altre vie reali.
+WALK_OSM = {
+    578892844, 682777030, 682776965,                                  # A · sentiero degli scavi di Botromagno
+    1288066843, 1288066841, 1288066847, 1288066840, 1288066845,      # C · Pineta Parco Robinson
+    1288066844, 1288066842, 1288066846,                              # D · Parco Robinson, vialetti a sud
+    902676524,                                                       # E · Via Pietro Ianora (service, basolato)
+    1288069906, 1288069907, 1288069908, 1288069909, 1288069910,      # F · scale e sottopassaggio della stazione
+    1195312391, 1195312392, 1195312390, 1195312393, 1195312394,      # vialetti della Villa Comunale
+}
+# Villa Comunale e Piazza della Repubblica pedonali (decisione del committente del 01/10/2026, anche se OSM
+# segna residential): Viale Orsini e Via Libertà, più le vie della rete dentro le due aree OSM.
+PEDONALI_OSM = {76147726, 385225743, 385148840}
+PEDONALI_AREE = (327411255, 385148839)        # Villa Comunale, Piazza della Repubblica (area pedonale OSM)
+PEDONALI_NO = {'Corso Vittorio Emanuele'}     # resta carrabile
+SOTTOPASSO_PIEDI = {1288069909}               # sottopassaggio pedonale della stazione (OSM level=-1, tra due scalinate)
 # Percorso del ponte: pedonale nella realtà, percorribile nel diorama.
 BRIDGE_ROUTE_NAME = 'Via giudice Montea'
 BRIDGE_WEST_BOX = (-140, 40, 200, 420)    # sentieri attorno alla Madonna della Stella
@@ -323,25 +341,47 @@ def length(poly):
     return sum(math.dist(a, b) for a, b in zip(poly, poly[1:]))
 
 
+def osm_ways(s):
+    """Vie OSM da cui viene un segmento Overture: [(id, t0, t1)] lungo il segmento."""
+    out = []
+    for src in s.get('sources') or []:
+        rid = src.get('record_id') or ''
+        if rid.startswith('w'):
+            a, b = src.get('between') or (0, 1)
+            out.append((int(rid[1:].split('@')[0]), a, b))
+    return out
+
+
+def rail_lines(segments):
+    """Binari (FAL e RFI) come linee in metri locali: servono a riconoscere i sottopassi."""
+    return [LineString([to_local(*p) for p in s['geom']['coordinates']]) for s in segments
+            if s.get('subtype') == 'rail' and s.get('class') in ('narrow_gauge', 'standard_gauge')]
+
+
 def build_edges(segments, connectors):
     """Spezza i segmenti Overture nei loro connettori → archi tra incroci reali."""
     conn_pos = {c['id']: to_local(*c['geom']['coordinates']) for c in connectors}
+    rails = STRtree(rail_lines(segments))
     edges = []
     for s in segments:
         cls, name = s.get('class'), (s.get('names') or {}).get('primary')
         if s.get('subtype') != 'road':
             continue
         pts = [to_local(*p) for p in s['geom']['coordinates']]
+        ways = osm_ways(s)
+        ids = {w for w, _, _ in ways}
+        walk_osm = bool(ids & WALK_OSM)
         on_bridge_route = name == BRIDGE_ROUTE_NAME and cls != 'steps'
-        near_bridge_west = cls in ('footway', 'path') and any(
+        near_bridge_west = cls in ('footway', 'path') and not walk_osm and any(
             BRIDGE_WEST_BOX[0] < p[0] < BRIDGE_WEST_BOX[1] and BRIDGE_WEST_BOX[2] < p[1] < BRIDGE_WEST_BOX[3] for p in pts)
         to_castle = cls in ('track', 'service') and all(inside(p, CASTLE_BOX) for p in pts)
         if to_castle:
             cls = 'track'
         # vie senza classe (per lo più traverse cieche dei quartieri nuovi): solo da guardare
         deco = cls == 'unknown'
-        # marciapiedi, passaggi e scalinate del centro storico: si percorrono a piedi (blocco G)
-        walk = cls in WALK and not on_bridge_route and not near_bridge_west and all(inside(p, Z0) for p in pts)
+        # marciapiedi, passaggi e scalinate del centro storico: si percorrono a piedi (blocco G);
+        # dal blocco M2 anche i tratti reali scelti per id OSM (WALK_OSM), in tutta la città
+        walk = (cls in WALK and not on_bridge_route and not near_bridge_west and all(inside(p, Z0) for p in pts)) or walk_osm
         if cls not in DRIVABLE and not on_bridge_route and not near_bridge_west and not to_castle and not deco and not walk:
             continue
         flags = s.get('road_flags') or []
@@ -351,22 +391,32 @@ def build_edges(segments, connectors):
             for v in f.get('values', []):
                 if v in spans:
                     between = f.get('between') or [0, 1]
+                    k = len(spans[v])
                     spans[v].append(between)
-                    cuts += [(between[0], f'{v}-a:{s["id"]}'), (between[1], f'{v}-b:{s["id"]}')]
+                    # blocco M2: un nome per ogni galleria (prima le gallerie di un segmento finivano nello stesso nodo)
+                    cuts += [(between[0], f'{v}-a{k}:{s["id"]}'), (between[1], f'{v}-b{k}:{s["id"]}')]
         cuts = sorted(set(cuts))
         for (t0, c0), (t1, c1) in zip(cuts, cuts[1:]):
             if t1 - t0 < 1e-6:
                 continue
             mid = (t0 + t1) / 2
-            if any(a <= mid <= b for a, b in spans['is_tunnel']):
-                continue                                   # le gallerie non si vedono: escluse
             i0, p0 = point_at(pts, t0)
             i1, p1 = point_at(pts, t1)
             poly = [p0] + pts[i0 + 1:i1 + 1] + [p1]
+            osm = {w for w, a, b in ways if a <= mid <= b} or ids
+            tunnel = any(a <= mid <= b for a, b in spans['is_tunnel'])
+            if tunnel:
+                # Blocco M2: le gallerie sotto i binari (Corso Giuseppe di Vittorio, Via Falcone e Borsellino)
+                # sono sottopassi veri: restano, con il flag `tunnel`; le altre gallerie non si vedono.
+                line = LineString(poly)
+                if not any(rails.geometries[i].intersects(line) for i in rails.query(line)):
+                    continue
             edges.append({
-                'a': c0, 'b': c1, 'poly': poly, 'cls': cls, 'name': name,
+                'a': c0, 'b': c1, 'poly': poly, 'cls': cls, 'name': name or next((WALK_NOMI[w] for w in osm if w in WALK_NOMI), None), 'osm': osm,
                 'bridge': any(a <= mid <= b for a, b in spans['is_bridge']),
-                'foot': cls not in DRIVABLE and not to_castle and not deco, 'deco': deco, 'walk': walk,
+                'foot': cls not in DRIVABLE and not to_castle and not deco, 'deco': deco,
+                'walk': walk and (cls in WALK or bool(osm & WALK_OSM)),
+                'tunnel': tunnel or bool(osm & SOTTOPASSO_PIEDI),
             })
     # posizioni dei nodi: connettori reali o punti di taglio
     pos = dict(conn_pos)
@@ -547,6 +597,7 @@ def merge_chains(edges):
             e1, e2 = inc[n]
             if e1 is e2 or e1['name'] != e2['name'] or e1['bridge'] or e2['bridge'] \
                     or e1['foot'] != e2['foot'] or e1.get('walk') != e2.get('walk') or e1.get('turn') or e2.get('turn') \
+                    or e1.get('tunnel') != e2.get('tunnel') \
                     or (e1['cls'] == 'track') != (e2['cls'] == 'track'):
                 continue
             p1 = e1['poly'] if e1['b'] == n else e1['poly'][::-1]
@@ -606,7 +657,7 @@ VIVAIO_ROUTE = [BOSCO_J, (-949, -5872), (-979, -5887), (-1001, -5894), (-1059, -
                 (-3143, -7562), (-3160, -7571), (-3192, -7570), (-3198, -7575), (-3209.5, -7590.7)]
 VIVAIO_REAL = 35                          # da (-2964, -7443) la strada è di nuovo a scala reale (zona del vivaio)
 ZONA_Q = (-960, -610, -5770, -5470)       # area Quercus, a scala reale
-ZONA_V = (-3390, -2955, -7728, -7290)     # vivaio, Base Scout, area pic-nic, a scala reale
+ZONA_V = (-3470, -2955, -7800, -7290)     # vivaio, Base Scout, area pic-nic, a scala reale (blocco M2: con l'anello V2 e la vasca grande)
 # Sentieri reali attorno all'area Quercus (OSM highway=path) che chiudono anelli con la via di servizio
 # w647001048: circa 490 m a scala reale, lontano dalla strada del vivaio (anello nord).
 QUERCUS_SERVIZIO = 647001048
@@ -715,15 +766,26 @@ def bosco_site():
     return (x1, y1), ((x1 - x0) / l, (y1 - y0) / l)
 
 
-def bosco_ways(elements, anchors, pos):
-    """Via di servizio e sentieri dell'area Quercus (OSM): tratti tra i nodi condivisi, a scala reale."""
+# Blocco M2: anello V2 attorno al vivaio (691 m, tutte vie OSM reali), dalla goccia di Contrada Annunziata.
+VIVAIO_ANELLO = {252747455, 621213285, 409090222, 647001064, 146025991, 621213286}
+
+
+def bosco_ways(elements, anchors, pos, ids=None, junction=None, jid='bosco:quercus', drive=QUERCUS_SERVIZIO, prefix='q'):
+    """
+    Tratti tra i nodi condivisi di vie OSM attorno all'area Quercus (via di servizio e sentieri) o al vivaio
+    (anello V2), a scala reale. `junction` è il punto reale dell'incrocio con la strada, che diventa il nodo `jid`.
+    """
     K = lambda g: (round(g['lon'], 7), round(g['lat'], 7))
-    ways = {el['id']: el for el in elements if el.get('type') == 'way' and el['id'] in QUERCUS_SENTIERI | {QUERCUS_SERVIZIO}}
+    ids = ids or QUERCUS_SENTIERI | {QUERCUS_SERVIZIO}
+    ways = {el['id']: el for el in elements if el.get('type') == 'way' and el['id'] in ids}
     count = collections.Counter(K(g) for w in ways.values() for g in w['geometry'])
-    jkey = K(ways[QUERCUS_SERVIZIO]['geometry'][0])           # il primo punto della via di servizio è l'incrocio
+    if junction is None:
+        jkey = K(ways[QUERCUS_SERVIZIO]['geometry'][0])       # il primo punto della via di servizio è l'incrocio
+    else:
+        jkey = min((K(g) for w in ways.values() for g in w['geometry']), key=lambda k: math.dist(to_local(*k), junction))
     count[jkey] += 1
     names, out = {}, []
-    base = {'bridge': False, 'deco': False, 'name': None}
+    base = {'bridge': False, 'deco': False, 'name': None, 'osm': set(), 'tunnel': False}
     for wid, w in ways.items():
         g = w['geometry']
         cur = [g[0]]
@@ -732,16 +794,16 @@ def bosco_ways(elements, anchors, pos):
             if count[K(pt)] > 1 or pt is g[-1]:
                 ends = (K(cur[0]), K(cur[-1]))
                 if all(count[k] > 1 for k in ends) and ends[0] != ends[1]:
-                    ids = []
+                    nids = []
                     for k, gp in zip(ends, (cur[0], cur[-1])):
-                        nid = 'bosco:quercus' if k == jkey else names.setdefault(k, f'bosco:q{len(names)}')
+                        nid = jid if k == jkey else names.setdefault(k, f'bosco:{prefix}{len(names)}')
                         pos.setdefault(nid, bosco_map(to_local(gp['lon'], gp['lat']), anchors))
-                        ids.append(nid)
+                        nids.append(nid)
                     poly = [bosco_map(to_local(q['lon'], q['lat']), anchors) for q in cur]
-                    poly[0], poly[-1] = pos[ids[0]], pos[ids[1]]
-                    path = wid != QUERCUS_SERVIZIO
-                    out.append({**base, 'a': ids[0], 'b': ids[1], 'poly': poly, 'cls': 'path' if path else 'unclassified',
-                                'foot': path, 'walk': path})
+                    poly[0], poly[-1] = pos[nids[0]], pos[nids[1]]
+                    path = wid != drive
+                    out.append({**base, 'a': nids[0], 'b': nids[1], 'poly': poly, 'cls': 'path' if path else 'unclassified',
+                                'foot': path, 'walk': path, 'osm': {wid}})
                 cur = [pt]
     return out
 
@@ -763,6 +825,10 @@ def bosco_road(core, pos, elements):
     paths = bosco_ways(elements, anchors, pos)
     print(f'  area Quercus: via di servizio {sum(length(e["poly"]) for e in paths if not e["walk"]):.0f} m, '
           f'sentieri {sum(length(e["poly"]) for e in paths if e["walk"]):.0f} m a scala reale')
+    # Blocco M2: anello V2 del vivaio dalla goccia, e il sentiero della Base Scout (eccezione approvata)
+    ring = bosco_ways(elements, anchors, pos, VIVAIO_ANELLO, VIVAIO_ROUTE[-1], 'bosco:vivaio', None, 'v')
+    print(f'  vivaio: anello V2 {sum(length(e["poly"]) for e in ring):.0f} m a scala reale')
+    paths += ring
     # Contrada Annunziata oltre l'incrocio del vivaio (OSM w252747446): si vede, non si percorre.
     deco = []
     for el in elements:
@@ -771,9 +837,182 @@ def bosco_road(core, pos, elements):
             keep = [bosco_map(q, anchors) for q in real_pts if inside(q, (ZONA_V[0] + 15, ZONA_V[1], ZONA_V[2] + 15, ZONA_V[3]))]
             if len(keep) > 1:
                 deco.append({**base, 'a': None, 'b': None, 'poly': keep, 'cls': 'unclassified', 'name': None})
-    return ([{**base, 'a': start, 'b': 'bosco:svolta', 'poly': a, 'cls': 'secondary', 'name': BOSCO_PROVINCIALE},
-             {**base, 'a': 'bosco:svolta', 'b': 'bosco:quercus', 'poly': b, 'cls': 'tertiary', 'name': None},
-             {**base, 'a': 'bosco:quercus', 'b': 'bosco:vivaio', 'poly': c, 'cls': 'tertiary', 'name': None}] + paths, deco)
+    base = {**base, 'osm': set(), 'tunnel': False, 'walk': False}
+    road = [{**base, 'a': start, 'b': 'bosco:svolta', 'poly': a, 'cls': 'secondary', 'name': BOSCO_PROVINCIALE},
+            {**base, 'a': 'bosco:svolta', 'b': 'bosco:quercus', 'poly': b, 'cls': 'tertiary', 'name': None},
+            {**base, 'a': 'bosco:quercus', 'b': 'bosco:vivaio', 'poly': c, 'cls': 'tertiary', 'name': None, 'vivaio': True}]
+    for name, where, parts in PERCORSI:
+        if where == 'vivaio':
+            mapped = [[bosco_map(q, anchors) for q in part] for part in parts]
+            scout = walk_paths(name, mapped, road, pos, host=lambda e: e.get('vivaio'))
+            print(f'  {name}: {sum(length(e["poly"]) for e in scout):.0f} m')
+            paths += scout
+    return road + paths, deco
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Blocco M2 · a piedi, zone pedonali, vie cieche fino ai luoghi
+# ─────────────────────────────────────────────────────────────────────────────
+M2_ZONE = {'robinson': '40.82154,16.41186,40.82469,16.41660', 'villa': '40.81587,16.41506,40.81758,16.41850',
+           'meninni': '40.81092,16.42978,40.81416,16.43453', 'stazione': '40.82451,16.41779,40.82613,16.41969',
+           'colacola': '40.81776,16.43477,40.81902,16.43714', 'fiera': '40.82550,16.41031,40.82712,16.41482'}
+def osm_m2():
+    """Dati OSM delle zone del blocco M2 (parchi, Villa, Casino di Meninni, stazione, Fiera, ponti dei binari), in cache."""
+    bb = OVERPASS_BBOX
+    return overpass_cached('m2', f"""[out:json][timeout:160];
+({''.join(f'nwr({b});' for b in M2_ZONE.values())}
+ way["railway"]["bridge"]({bb});way["highway"]["tunnel"]({bb});way["highway"]["layer"~"^-"]({bb});
+ node["railway"~"level_crossing|crossing"]({bb});way["railway"~"platform"]({bb});
+);out tags geom;""")
+
+
+def osm_polygon(elements, wid):
+    for el in elements:
+        if el.get('type') == 'way' and el['id'] == wid and el.get('geometry'):
+            return Polygon([to_local(g['lon'], g['lat']) for g in el['geometry']]).buffer(0)
+    return None
+
+
+# Nomi dei tratti a piedi senza nome in OSM (per targa e cartelli)
+WALK_NOMI = {578892844: 'Sentiero degli scavi', 682777030: 'Sentiero degli scavi', 682776965: 'Sentiero degli scavi',
+             1288066843: 'Pineta Parco Robinson', 1288066841: 'Pineta Parco Robinson', 1288066847: 'Pineta Parco Robinson',
+             1288066840: 'Pineta Parco Robinson', 1288066845: 'Pineta Parco Robinson', 1288066844: 'Parco Robinson',
+             1288066842: 'Parco Robinson', 1288066846: 'Parco Robinson', 1288069906: 'Scale della stazione',
+             1288069907: 'Scale della stazione', 1288069908: 'Scale della stazione', 1288069910: 'Scale della stazione',
+             1288069909: 'Sottopassaggio della stazione', 1195312391: 'Villa Comunale', 1195312392: 'Villa Comunale',
+             1195312390: 'Villa Comunale', 1195312393: 'Villa Comunale', 1195312394: 'Villa Comunale'}
+
+
+def luoghi_m2(elements):
+    """
+    GEO.m2: sagome e punti OSM dei luoghi del blocco M2 (Pineta e Parco Robinson, Monumento ai Caduti con le
+    panchine della Villa, monumento alla Cola Cola), in metri locali.
+    """
+    ways = {el['id']: el for el in elements if el.get('type') == 'way' and el.get('geometry')}
+    nodes = {el['id']: el for el in elements if el.get('type') == 'node'}
+    ring = lambda w: flat([to_local(g['lon'], g['lat']) for g in ways[w]['geometry'][:-1]]) if w in ways else []
+    pt = lambda n: [round(v, 1) for v in to_local(nodes[n]['lon'], nodes[n]['lat'])] if n in nodes else None
+    villa = osm_polygon(elements, 327411255)
+    benches = []
+    for el in nodes.values():
+        t = el.get('tags') or {}
+        e, n = to_local(el['lon'], el['lat'])
+        if t.get('amenity') == 'bench' and villa is not None and villa.buffer(2).contains(Point(e, n)):
+            benches.append([round(e, 1), round(n, 1), 1 if t.get('backrest') == 'yes' else 0])
+    out = {
+        'robinson': ring(473031981),                     # Pineta Parco Robinson (leisure=park, pini)
+        'giochi': pt(5659135030),                         # leisure=playground
+        'busto': ring(411137974),                         # historic=memorial, bust, al centro dei vialetti
+        'fontanella': pt(5659135226),                     # amenity=drinking_water
+        'belvederi': [p for p in (pt(11945189869), pt(11945189969)) if p],
+        'riparo': pt(5659135225),                         # amenity=shelter, «Observation»
+        'caduti': ring(411137249),                        # Monumento ai Caduti (Q136344179)
+        'panchine': sorted(benches),                      # panchine OSM della Villa Comunale
+        'fontane': [p for p in (pt(4630401137), pt(4630401138)) if p],   # «Fontanone gemello»
+        'colacola': ring(411137509),                      # historic=memorial: monumento alla Cola Cola (Via Bari)
+    }
+    print(f'  luoghi del blocco M2: {len(benches)} panchine nella Villa, '
+          + ', '.join(k for k, v in out.items() if not v) + (' mancanti' if not all(out.values()) else 'tutto trovato'))
+    return out
+
+
+# Vie cieche reali che diventano percorribili fino a un punto, con l'inversione a goccia (committente,
+# 01/10/2026, come la strada del Bosco): id OSM della via, punto dove finisce, perché.
+VIE_CIECHE = [
+    (946720266, (-160, 1044)),      # strada della Fiera fino al parcheggio dello stadio (w1340515588)
+    (1068971736, (1520, -612)),     # Via Guardialto (SP201) fino al Casino di Meninni
+    (28355376, (1912, 126)),        # Via Bari fino al monumento alla Cola Cola (OSM w411137509)
+]
+# Percorsi a piedi senza dati OSM (eccezioni approvate dal committente il 01/10/2026): si disegnano solo
+# perché chiudono un anello con vie reali. Punti scelti sul satellite (solo come riferimento) tra gli
+# edifici reali. Ogni percorso è un elenco di tratti: un estremo in comune tra due tratti è un incrocio,
+# un estremo usato una volta sola si attacca alla via più vicina.
+PERCORSI = [
+    # Fiera di San Giorgio: due tratti dal cancello OSM n8763525337 alla strada (entrata e uscita), il viale
+    # a ovest del padiglione grande e un giro nel piazzale tra i padiglioni.
+    ('Fiera di San Giorgio', 'city', [
+        [(-80, 1039), (-75, 1022)], [(-75, 1022), (-67, 1037)],
+        [(-75, 1022), (-84, 1010), (-88, 992), (-84, 978), (-70, 969)],
+        [(-70, 969), (-45, 968), (-20, 963), (-19, 945), (-22, 930)], [(-22, 930), (-45, 929), (-70, 934), (-70, 969)]]),
+    # Casino di Meninni: da Via Guardialto su per il giardino dei pini, attorno al Casino e giù di nuovo.
+    ('Giardino del Casino di Meninni', 'city', [
+        [(1462, -520), (1490, -514), (1520, -517), (1546, -526), (1552, -521), (1572, -506), (1586, -509), (1600, -527),
+         (1596, -545), (1572, -566), (1553, -562), (1540, -552), (1518, -560), (1496, -575)]]),
+    # Base Scout Gravina 1: dalla strada del vivaio su per il prato fino alla base, attorno, e giù per
+    # l'area pic-nic (coordinate reali, zona del vivaio a scala reale).
+    ('Sentiero della Base Scout', 'vivaio', [
+        [(-2990, -7447), (-3012, -7420), (-3045, -7386), (-3080, -7352), (-3097, -7334), (-3106, -7313), (-3127, -7311),
+         (-3140, -7330), (-3133, -7352), (-3110, -7385), (-3092, -7430), (-3085, -7480), (-3080, -7530), (-3076, -7561)]]),
+]
+
+
+def split_edge(edges, pos, pt, ok=lambda e: True, near=3.0):
+    """
+    Taglia la via (tra quelle che soddisfano `ok`) più vicina a `pt` nel suo punto più vicino e restituisce
+    l'id del nodo: quello vecchio se il taglio cade a meno di `near` m da un estremo.
+    """
+    P = Point(pt)
+    best = min((e for e in edges if ok(e)), key=lambda e: LineString(e['poly']).distance(P))
+    line = LineString(best['poly'])
+    d = line.project(P)
+    if d < near:
+        return best['a']
+    if line.length - d < near:
+        return best['b']
+    q = line.interpolate(d)
+    nid = f'taglio:{q.x:.1f},{q.y:.1f}'
+    pos[nid] = (q.x, q.y)
+    run, k = 0.0, 0
+    pts = best['poly']
+    while k < len(pts) - 2 and run + math.dist(pts[k], pts[k + 1]) < d:
+        run += math.dist(pts[k], pts[k + 1])
+        k += 1
+    first = {**best, 'b': nid, 'poly': pts[:k + 1] + [(q.x, q.y)]}
+    second = {**best, 'a': nid, 'poly': [(q.x, q.y)] + pts[k + 1:]}
+    edges[edges.index(best):edges.index(best) + 1] = [first, second]
+    return nid
+
+
+def branch_to(tree, core_nodes, target):
+    """Archi dell'albero cieco che portano dal nucleo al nodo `target` (ricerca in ampiezza)."""
+    adj = collections.defaultdict(list)
+    for e in tree:
+        adj[e['a']].append(e)
+        adj[e['b']].append(e)
+    prev, queue = {target: None}, [target]
+    while queue:
+        n = queue.pop(0)
+        if n in core_nodes:
+            out = []
+            while prev[n] is not None:
+                e = prev[n]
+                out.append(e)
+                n = e['a'] if e['b'] == n else e['b']
+            return out
+        for e in adj[n]:
+            m = e['b'] if e['a'] == n else e['a']
+            if m not in prev:
+                prev[m] = e
+                queue.append(m)
+    return []
+
+
+def walk_paths(name, parts, edges, pos, host=lambda e: not e['deco'] and not e.get('walk')):
+    """Percorso a piedi da un elenco di tratti (PERCORSI): incroci interni e attacchi alle vie."""
+    ends = collections.Counter(p for part in parts for p in (part[0], part[-1]))
+    node = {}
+    for p, k in ends.items():
+        if k > 1:
+            node[p] = f'piedi:{name}:{p[0]:.0f},{p[1]:.0f}'
+            pos[node[p]] = p
+        else:
+            node[p] = split_edge(edges, pos, p, host)
+    base = {'cls': 'path', 'name': name, 'bridge': False, 'foot': True, 'deco': False, 'walk': True, 'osm': set(), 'tunnel': False}
+    out = []
+    for part in parts:
+        a, b = node[part[0]], node[part[-1]]
+        out.append({**base, 'a': a, 'b': b, 'poly': [pos[a]] + list(part[1:-1]) + [pos[b]]})
+    return out
 
 
 def build_network(data, buildings, bosco_osm):
@@ -784,13 +1023,37 @@ def build_network(data, buildings, bosco_osm):
     edges, pos = build_edges(data['segment'], data['connector'])
     edges = [e for e in edges if e['a'] != e['b'] and shapely.contains_xy(CITY_ROADS, *np.array(e['poly']).T).all()]
     edges, pos = merge_close_nodes(edges, pos)
+    # Blocco M2: Villa Comunale e Piazza della Repubblica pedonali (decisione del committente)
+    m2 = osm_m2()
+    areas = [a.buffer(1.0) for a in (osm_polygon(m2, w) for w in PEDONALI_AREE) if a is not None]
+    for e in edges:
+        if e['deco'] or e.get('walk') or e['cls'] not in DRIVABLE or e['name'] in PEDONALI_NO:
+            continue
+        if e['osm'] & PEDONALI_OSM or any(a.contains(Point(midpoint(e['poly']))) for a in areas):
+            e['walk'] = True
+            print(f'  pedonale: {e["name"] or "via senza nome"} ({length(e["poly"]):.0f} m)')
+    # Vie cieche che portano a un luogo (VIE_CIECHE): si tagliano nel punto d'arrivo, dove andrà la goccia.
+    ends = [split_edge(edges, pos, pt, lambda e, w=wid: w in e['osm'] and not e['deco'] and not e.get('walk')) for wid, pt in VIE_CIECHE]
+    # Percorsi a piedi senza dati OSM in città (eccezioni approvate: Fiera, Casino di Meninni)
+    for name, where, parts in PERCORSI:
+        if where == 'city':
+            new = walk_paths(name, parts, edges, pos)
+            print(f'  {name}: {sum(length(e["poly"]) for e in new):.0f} m a piedi')
+            edges += new
     drivable = [e for e in edges if not e['deco'] and not e.get('walk')]
     # Marciapiedi, passaggi e scalinate del centro storico (blocco G) contano per gli anelli: una via
     # carrabile resta se chiude un anello anche passando a piedi.
     walk = [e for e in edges if e.get('walk')]
     core = two_core(drivable + walk)
-    extra = [e for t in dead_end_trees(drivable, core)
+    core_nodes = {n for e in core for n in (e['a'], e['b'])}
+    trees = dead_end_trees(drivable, core)
+    extra = [e for t in trees
              if any(x['name'] in KEEP_DEAD_ENDS for x in t) and all(inside(midpoint(x['poly']), Z0) for x in t) for e in t]
+    for (wid, _), end in zip(VIE_CIECHE, ends):
+        tree = next((t for t in trees if any(end in (x['a'], x['b']) for x in t)), [])
+        branch = branch_to(tree, core_nodes, end) if end not in core_nodes else []
+        print(f'  via cieca w{wid} fino a {pos[end][0]:.0f}, {pos[end][1]:.0f}: {sum(length(e["poly"]) for e in branch):.0f} m in più')
+        extra += [e for e in branch if e not in extra]
     bosco_edges, bosco_deco = bosco_road(core, pos, bosco_osm)
     extra += bosco_edges
     tree = STRtree(buildings)
@@ -811,7 +1074,8 @@ def build_network(data, buildings, bosco_osm):
     used = {id(e) for e in net}
     net = merge_chains(net)
     # Decorative: tutto ciò che resta fuori dalla rete, nella città moderna (il centro storico resta com'era).
-    deco = [e for e in edges if id(e) not in used and not e['foot'] and not e['bridge'] and not inside(midpoint(e['poly']), Z0)]
+    deco = [e for e in edges if id(e) not in used and not e['foot'] and not e['bridge'] and not e.get('tunnel') and not e.get('walk')
+            and not inside(midpoint(e['poly']), Z0)]
     deco = merge_chains(deco) + bosco_deco
     for e in net + deco:                              # geometria più leggera
         if not e.get('turn'):
@@ -1152,7 +1416,7 @@ def build_features(data):
     rl = LineString([to_local(*p) for p in river['geom']['coordinates']])
     rl = rl.intersection(box(big[0], big[2], big[1], big[3]))
     # l'appendice del bosco è un paesaggio compresso: il torrente reale si ferma 80 m prima
-    rl = rl.difference(box(BOSCO[0] - 80, VIVAIO[2] - 80, BOSCO[1] + 80, BOSCO[3]))
+    rl = rl.difference(box(BOSCO[0] - 80, VIVAIO_SUD[2] - 80, BOSCO[1] + 80, BOSCO[3]))
     rl = max(getattr(rl, 'geoms', [rl]), key=lambda g: g.length).simplify(1.0)
 
     cliffs = [LineString([to_local(*p) for p in l['geom']['coordinates']])
@@ -1302,7 +1566,7 @@ def ground_model(dem_at, buildings):
     # Zolle del bosco (blocco L): il paesaggio è compresso e le quote reali lì sotto sono di un altro posto
     # (la valle a sud della città). Colline dolci: quote molto smussate, rilievo dimezzato attorno alla media.
     Wb = np.zeros_like(G)
-    for z in (BOSCO, VIVAIO):
+    for z in BOSCHI:
         Wb = np.maximum(Wb, ((EE > z[0] - 60) & (EE < z[1] + 60) & (NN > z[2] - 60) & (NN < z[3] + (0 if z is BOSCO else 60))).astype(float))
     Wb = np.clip(blur(Wb, 5), 0, 1) * (NN < BOSCO[3] - 120)
     if Wb.any():
@@ -1530,7 +1794,7 @@ def bosco_features(elements):
     def ring(wid):
         c = Polygon(geo[wid]).centroid.coords[0]
         return flat([bosco_map(q, anchors, c) for q in geo[wid][:-1]])
-    inner = shapely.union_all([box(z[0] + 6, z[2] + 6, z[1] - 6, z[3] - 6) for z in (BOSCO, VIVAIO)])
+    inner = shapely.union_all([box(z[0], z[2], z[1], z[3]) for z in BOSCHI]).buffer(-6, join_style='mitre')
     fits = lambda f: inner.contains(Polygon(list(zip(f[::2], f[1::2]))))
     # tre campi: in OSM tutti «tennis»; secondo GravinaLife (2021) due da calcetto e uno da tennis,
     # e dal satellite quello da tennis (verde, con le righe) è il centrale, w1195121475.
@@ -1576,13 +1840,14 @@ def bosco_cover(grid, E, N, elements):
     clear_q = clear_q.union(Point(*feats['quercus']).buffer(24))
     park = Polygon(list(zip(feats['parcheggio'][::2], feats['parcheggio'][1::2])))
     clear_v = Point(*feats['picnic']).buffer(40).union(Point(*feats['scritta'][:2]).buffer(24))   # area pic-nic: prato senza alberi dei riquadri
-    paths_d = [LineString(e['poly']) for e in bosco_ways(elements, anchors, {}) if e['walk']]
+    paths_d = [LineString(e['poly']) for e in bosco_ways(elements, anchors, {}) + bosco_ways(
+        elements, anchors, {}, VIVAIO_ANELLO, VIVAIO_ROUTE[-1], 'bosco:vivaio', None, 'v') if e['walk']]
     near_path = shapely.union_all([p.buffer(42) for p in paths_d]) if paths_d else None
     burned = [box(x0, y0, x1, y1) for x0, x1, y0, y1 in BOSCO_BRUCIATO]
     counts = collections.Counter()
     for j, n in enumerate(N):
         for i, e in enumerate(E):
-            if not (inside((e, n), BOSCO) or inside((e, n), VIVAIO)):
+            if not any(inside((e, n), z) for z in BOSCHI):
                 continue
             r = bosco_real((e, n), anc, route_d, route_r)
             pt = Point(r)
@@ -1808,7 +2073,25 @@ def build_rails(data):
                 if g.geom_type == 'LineString' and g.length > 3:
                     bridge = any(a <= mid <= b for a, b in spans['is_bridge'])
                     rails.append({'gauge': 0 if sg['class'] == 'narrow_gauge' else 1, 'bridge': bridge, 'line': g.simplify(0.5)})
-    print(f'  binari: {len(rails)} tratti, {sum(r["line"].length for r in rails) / 1000:.1f} km')
+    # Blocco M2: i ponti dei binari come in OSM (Overture a Via Spinazzola chiude il ponte RFI 18 m prima,
+    # proprio sopra la via): i tratti dentro un ponte OSM diventano ponte.
+    osm_bridges = [LineString([to_local(g['lon'], g['lat']) for g in el['geometry']]) for el in osm_m2()
+                   if el.get('type') == 'way' and (el.get('tags') or {}).get('railway') and (el.get('tags') or {}).get('bridge')]
+    if osm_bridges:
+        zone = shapely.union_all([b.buffer(2.5, cap_style='flat') for b in osm_bridges])
+        out = []
+        for r in rails:
+            if r['bridge'] or not r['line'].intersects(zone):
+                out.append(r)
+                continue
+            for part, bridge in ((r['line'].intersection(zone), True), (r['line'].difference(zone), False)):
+                part = shapely.line_merge(part) if part.geom_type == 'MultiLineString' else part
+                for g in getattr(part, 'geoms', [part]):
+                    if g.geom_type == 'LineString' and g.length > 3:
+                        out.append({**r, 'bridge': bridge, 'line': g})
+        rails = out
+    print(f'  binari: {len(rails)} tratti, {sum(r["line"].length for r in rails) / 1000:.1f} km, '
+          f'ponti {sum(r["line"].length for r in rails if r["bridge"]):.0f} m')
     return rails
 
 
@@ -1971,7 +2254,8 @@ def encode(edges, deco, pos, buildings, city, arches, feats, extra):
 
     def flags(e):
         return ((1 if e['bridge'] else 0) | (2 if e['foot'] else 0) | (4 if e.get('turn') else 0)
-                | (8 if e['cls'] in ('track', 'path') else 0) | (16 if e.get('urban') else 0) | (32 if e.get('walk') else 0))
+                | (8 if e['cls'] in ('track', 'path') else 0) | (16 if e.get('urban') else 0) | (32 if e.get('walk') else 0)
+                | (64 if e.get('tunnel') else 0))
     # Vie, vie decorative ed edifici del centro storico in forma compatta (CODEC), a 0,1 m come prima:
     # index.html li riporta alle righe di sempre in DATA.unpack().
     E = []
@@ -2040,6 +2324,7 @@ def encode(edges, deco, pos, buildings, city, arches, feats, extra):
         'bosco': extra['bosco'],
         'botromagno': extra['botromagno'],
         'sport': extra['sport'],
+        'm2': extra['m2'],
     }
     lines = ['const GEO = {']
     for k, v in geo.items():
@@ -2142,7 +2427,7 @@ def main():
         'ground': ground, 'cover': cover, 'rails': build_rails(data), 'pois': city_pois(osm),
         'riverY': river_bed(feats['river'], lambda e, n: at(e, n)), 'rims': rims,
         'rioni': rioni_profile(at), 'bosco': bosco_features(bosco_osm),
-        'sport': sport,
+        'sport': sport, 'm2': luoghi_m2(osm_m2()),
         'botromagno': {'rovine': [flat(r.exterior.coords[:-1]) for r in bot['ruins']],
                        'scavi': flat(bot['scavi'].simplify(0.5).exterior.coords[:-1]) if bot['scavi'] is not None else []},
     }
