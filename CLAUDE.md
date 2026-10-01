@@ -31,7 +31,7 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
 | `index.html` | tutto il diorama: CSS, HTML e JS in sezioni numerate 0–13 |
 | `index.html`, sezione 3 | la costante `GEO` è **generata**: non modificarla a mano. Il diorama è fatto di tre zolle (città, P.I.P., Bosco) in `GEO.meta.zolle` |
 | `tools/genera_dati.py` | pipeline dei dati reali (Overture Maps, OSM via Overpass, quote Copernicus → `GEO` dentro `index.html`) |
-| `tools/test/` | prove Playwright: `simula`, `interazioni`, `foto`, `prestazioni` (GPU vera: triangoli, draw call, tempi), più `vista`, `valuta`, `vetrina` per lo sviluppo e `anteprima` per `og-image.jpg` |
+| `tools/test/` | prove Playwright: `simula`, `interazioni`, `foto`, `prestazioni` (GPU vera: triangoli, draw call, tempi), `difetti` (vie sotto il terreno o sospese, dischi, decorative sovrapposte), più `vista`, `valuta`, `vetrina` per lo sviluppo e `anteprima` per `og-image.jpg` |
 | `og-image.jpg`, `sitemap.xml` | anteprima per i social (1200×630) e mappa del sito per Google: file separati, il diorama non li usa |
 | `docs/DESIGN.md` | documento di progetto aggiornato, con le decisioni aperte |
 | `docs/DA_FARE.md` | **resoconto di cosa resta da fare**: leggilo a inizio lavoro |
@@ -104,6 +104,7 @@ npm run simula                   # un'ora di guida simulata + controlli sulla ca
 npm run interazioni              # come un visitatore: partenza, pausa, teletrasporto, cambio mezzo
 npm run foto                     # screenshot in tools/test/shots/ (poi: node foto.mjs mobile / orizzontale)
 node prestazioni.mjs dopo        # triangoli, draw call, tempi e memoria con la GPU vera (PC e telefono)
+node difetti.mjs                 # difetti delle vie nei riquadri (GRAVINA_HTML=copia.html per un'altra versione)
 
 # vedere il diorama
 npx serve .                      # dalla radice del progetto, poi apri l'indirizzo che stampa

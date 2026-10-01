@@ -43,19 +43,32 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N, dettagli e decisioni nel
       che il centro visite è aperto), Base Scout, area pic-nic con la scritta «SIC DIFESA GRANDE»,
       524 m di sentieri reali a piedi, bosco fitto istanziato che si apre tra camera e figurina,
       foschia, suoni del bosco solo dentro il bosco (interruttore nella pausa).
-- [ ] Da verificare con il committente: se il maneggio, i giochi e i tavoli dell'area Quercus
-      stanno dove li ricorda (posizione indicativa dal satellite); il nome della strada del bosco
+- [x] Area Quercus: maneggio e giochi non ci sono (committente, 01/10/2026), tolti nel blocco M1;
+      i tavoli restano.
+- [ ] Da verificare con il committente: il nome della strada del bosco
       (in OSM non ce l'ha: nel diorama «Strada nel bosco»); la chiesa di Santi Pietro e Paolo
       (nome da Overture).
+- [ ] **Prestazioni**: se dopo i blocchi M e N il diorama resta pesante, il committente pensa a
+      un'impostazione che carichi il mondo solo attorno alla visuale; in città non si riduce niente,
+      al massimo in periferia dove dall'auto non si vede (01/10/2026).
 - [ ] Telefono in orizzontale, partenza sul ponte: il contatore di debug segna 74 draw call (tetto 70),
       uguale su `main` prima di E e L (`node foto.mjs orizzontale`). In verticale il massimo è 48.
       Da guardare nel blocco N con i ritocchi dell'orizzontale.
 - [ ] La vasca grande del vivaio (w411138854) è fuori dalla zolla del vivaio: allargarla di un
       riquadro verso sud, se si vuole.
-- [ ] **M1 · Botromagno, strade, stadio e Fiera** (`fase-3-4-m1-botromagno-strade`): rovine degli
-      scavi vere al posto delle case, resort basso, tombe e suolo di roccia; difetti delle vie nei
-      riquadri (dischi, vie sotto il terreno o sospese, decorative doppie); stadio e Fiera di San
-      Giorgio; via maneggio e giochi dall'area Quercus; la camera libera torna solo col pulsante.
+- [x] **M1 · Botromagno, strade, stadio e Fiera** (`fase-3-4-m1-botromagno-strade`, PR #16, in
+      attesa di approvazione):
+      - Botromagno: 46 rovine OSM sul lato di Botromagno (non solo a ovest del ciglio: tre stavano
+        nella scarpata e diventavano torri) a muri a secco con brecce, recinto funerario con sei
+        tombe, tombe a fossa, a semicamera e a camera col dromos, buche dei pali, suolo di roccia;
+        resort e versante a un piano coi coppi; scheda «Necropoli del Padre Eterno», etichette
+        «Scavi archeologici di Botromagno» e «Padre Eterno»;
+      - vie (difetti 1–6 e 8, `node difetti.mjs` sulle vie del mezzo): sotto il terreno da 283 a 0,
+        sospese da 1 001 a pochissime, dischi sfasati da 237 a 0, decorative sovrapposte da 5 a 0;
+        maglia vicina a 7,5 m dove serviva (in città non si toglie niente: decisione del committente);
+      - stadio su terrapieno con campo, gradinate, tribuna ovest coperta, torri faro e muro di cinta;
+        Fiera con recinzione, cancello, botteghino e portoni;
+      - area Quercus senza maneggio e giochi; camera libera senza ritorno automatico.
 - [ ] **M2 · percorsi a piedi, zone pedonali e suoni del bosco** (`fase-3-4-m2-a-piedi`): anello V2
       del vivaio e Base Scout, sentiero degli scavi, Parco Robinson, Via Ianora, scale della stazione,
       Villa Comunale e Piazza della Repubblica pedonali, Fiera e strada dello stadio; suoni del bosco
