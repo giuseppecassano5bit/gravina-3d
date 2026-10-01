@@ -56,8 +56,8 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N, dettagli e decisioni nel
       Da guardare nel blocco N con i ritocchi dell'orizzontale.
 - [ ] La vasca grande del vivaio (w411138854) è fuori dalla zolla del vivaio: allargarla di un
       riquadro verso sud, se si vuole.
-- [x] **M1 · Botromagno, strade, stadio e Fiera** (`fase-3-4-m1-botromagno-strade`, PR #16, in
-      attesa di approvazione):
+- [x] **M1 · Botromagno, strade, stadio e Fiera** (`fase-3-4-m1-botromagno-strade`, PR #16, unita il
+      01/10/2026):
       - Botromagno: 46 rovine OSM sul lato di Botromagno (non solo a ovest del ciglio: tre stavano
         nella scarpata e diventavano torri) a muri a secco con brecce, recinto funerario con sei
         tombe, tombe a fossa, a semicamera e a camera col dromos, buche dei pali, suolo di roccia;
@@ -72,7 +72,10 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N, dettagli e decisioni nel
 - [ ] **M2 · percorsi a piedi, zone pedonali e suoni del bosco** (`fase-3-4-m2-a-piedi`): anello V2
       del vivaio e Base Scout, sentiero degli scavi, Parco Robinson, Via Ianora, scale della stazione,
       Villa Comunale e Piazza della Repubblica pedonali, Fiera e strada dello stadio; suoni del bosco
-      senza pioggia (uccelli, cicale, gufo, cinghiale, lupi lontani).
+      senza pioggia (uccelli, cicale, gufo, cinghiale, lupi lontani). Richieste aggiunte dal
+      committente il 01/10/2026: sottopassaggi dove le vie incrociano i binari, Pineta e Parco
+      Robinson costruiti (cancelli, giostre, area pedonale), strada del Casino di Meninni
+      percorribile con un percorso a piedi dentro, il fischietto «cola cola» nel suo punto.
 - [ ] **M3 · mezzi realistici e mongolfiera** (`fase-3-4-m3-mezzi-mongolfiera`): auto per sezioni
       con guidatore, stop e frecce senza draw call in più; mongolfiera come quinto mezzo, giro fisso
       da Botromagno sopra il centro storico, prima e terza persona.
