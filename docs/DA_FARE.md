@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 1° ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I e L della fase 3.4 uniti.
+Stato al 2 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1 e M2 della fase 3.4 uniti.
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
@@ -56,8 +56,8 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N, dettagli e decisioni nel
       Da guardare nel blocco N con i ritocchi dell'orizzontale.
 - [ ] La vasca grande del vivaio (w411138854) è fuori dalla zolla del vivaio: allargarla di un
       riquadro verso sud, se si vuole.
-- [x] **M1 · Botromagno, strade, stadio e Fiera** (`fase-3-4-m1-botromagno-strade`, PR #16, in
-      attesa di approvazione):
+- [x] **M1 · Botromagno, strade, stadio e Fiera** (`fase-3-4-m1-botromagno-strade`, PR #16, unita il
+      01/10/2026):
       - Botromagno: 46 rovine OSM sul lato di Botromagno (non solo a ovest del ciglio: tre stavano
         nella scarpata e diventavano torri) a muri a secco con brecce, recinto funerario con sei
         tombe, tombe a fossa, a semicamera e a camera col dromos, buche dei pali, suolo di roccia;
@@ -69,10 +69,33 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N, dettagli e decisioni nel
       - stadio su terrapieno con campo, gradinate, tribuna ovest coperta, torri faro e muro di cinta;
         Fiera con recinzione, cancello, botteghino e portoni;
       - area Quercus senza maneggio e giochi; camera libera senza ritorno automatico.
-- [ ] **M2 · percorsi a piedi, zone pedonali e suoni del bosco** (`fase-3-4-m2-a-piedi`): anello V2
-      del vivaio e Base Scout, sentiero degli scavi, Parco Robinson, Via Ianora, scale della stazione,
-      Villa Comunale e Piazza della Repubblica pedonali, Fiera e strada dello stadio; suoni del bosco
-      senza pioggia (uccelli, cicale, gufo, cinghiale, lupi lontani).
+- [x] **M2 · percorsi a piedi, zone pedonali e suoni del bosco** (`fase-3-4-m2-a-piedi`, PR #17,
+      unita il 02/10/2026 con l'approvazione anticipata del committente):
+      - a piedi, tratti reali per id OSM: sentiero degli scavi (A, 1,5 km), Pineta e Parco Robinson
+        (C, D), Via Pietro Ianora (E), scale e sottopassaggio della stazione (F), vialetti della Villa;
+        nel vivaio l'anello V2 (692 m) e il sentiero della Base Scout; percorsi approvati nella Fiera e
+        nel giardino del Casino di Meninni. Rete: da 1 473 a 1 539 tratti, da 89,2 a 94,3 km; a piedi da
+        21 a 53 tratti (da 1,1 a 5,2 km);
+      - Villa Comunale e Piazza della Repubblica pedonali; strada della Fiera fino al parcheggio dello
+        stadio, Via Guardialto fino al Casino di Meninni e Via Bari fino alla Cola Cola con la goccia;
+      - **sottopassi** (richiesta del committente): Corso Giuseppe di Vittorio, Via Falcone e Borsellino e
+        il sottopassaggio pedonale della stazione in trincea coi muri e l'impalcato; viadotti dei binari
+        a Via Spinazzola con le pile;
+      - **Pineta e Parco Robinson** costruiti: pini a ombrello, prato, cancellata coi cancelli, area giochi
+        (altalene, scivolo, giostra, dondoli, altalena a bilico), busto, panchine, lampioni, fontanella;
+      - **Monumento ai Caduti** rifatto dalle fonti, con la **sosta in panchina** (scheda e pulsante «Esci
+        dalla piazzetta · torna al mezzo»); panchine e Fontanoni gemelli della Villa;
+      - **monumento alla Cola Cola** su Via Bari, nel punto OSM, con la scheda;
+      - vasca grande del vivaio (zolle allargate); suoni del bosco senza pioggia, intonati con la radio.
+- [ ] **Resto di M2, da fare all'inizio di M3** (il committente ha chiesto di unire e passare oltre):
+      - `interazioni.mjs`: giri a piedi nel vivaio (V2), sul sentiero degli scavi (A), nella Villa con la
+        sosta in panchina e il pulsante; controllare che la Fiera e il Casino di Meninni si raggiungano;
+      - `node difetti.mjs` sulle vie nuove (trincee, sentiero A nel canyon, goccia di Via Bari);
+      - screenshot su telefono in verticale e in orizzontale (`node foto.mjs mobile` / `orizzontale`);
+      - Street View: ingresso dello stadio, paletti agli ingressi della Villa, foto della Cola Cola;
+      - scale vere (gradini) nel sottopassaggio della stazione, oggi rampe;
+      - `DESIGN.md`: sezioni su sottopassi, parchi, sosta in panchina, suoni del bosco;
+      - suoni del bosco: farli ascoltare al committente; memoria JS su PC 166 MB (tetto 150).
 - [ ] **M3 · mezzi realistici e mongolfiera** (`fase-3-4-m3-mezzi-mongolfiera`): auto per sezioni
       con guidatore, stop e frecce senza draw call in più; mongolfiera come quinto mezzo, giro fisso
       da Botromagno sopra il centro storico, prima e terza persona.
