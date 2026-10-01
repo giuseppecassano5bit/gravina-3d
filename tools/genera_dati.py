@@ -1443,7 +1443,7 @@ def city_height(b, dense, industrial):
     return floors * 3.3 + 0.6
 
 
-CITY_KIND = {'house': 0, 'church': 1, 'shed': 3, 'apartments': 4, 'public': 5, 'industry': 6, 'castle': 7, 'school': 8, 'villa': 9}
+CITY_KIND = {'house': 0, 'church': 1, 'shed': 3, 'apartments': 4, 'public': 5, 'industry': 6, 'castle': 7, 'school': 8, 'villa': 9, 'padiglione': 10, 'tribuna': 11}
 
 
 def city_buildings(buildings, cover):
@@ -1670,6 +1670,45 @@ def versante(old, bot):
         b['height'] = 4.6 if b['poly'].area > 300 else 3.9    # il resort è a un piano, coi soffitti alti (foto sferica su Google Maps)
         count += 1
     print(f'  versante di Botromagno: {count} edifici a un piano')
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Blocco M1 · stadio «Stefano Vicino» e Fiera di San Giorgio
+#   Le tribune OSM (building=grandstand) diventavano palazzine con le finestre: restano come sagome
+#   (tipo «tribuna», per la camera e gli alberi) ma il diorama disegna campo, gradinate, tribuna
+#   coperta, torri faro e muro di cinta dalle sagome OSM (GEO.sport). I padiglioni della Fiera
+#   diventano capannoni da fiera.
+# ─────────────────────────────────────────────────────────────────────────────
+STADIO_FIERA_OVERPASS = """[out:json][timeout:120];
+(way(478401752);way(927885291);way(411149113);way(411146463);way(478401751);node(8763525337);
+ way(411148871);way(411147010);way(411147074);way(411147873););out tags geom;"""
+STADIO, CAMPO, TRIBUNA_EST, ANELLO, FIERA = 478401752, 927885291, 411149113, 411146463, 478401751
+CANCELLO_FIERA = 8763525337
+PADIGLIONI = (411148871, 411147010, 411147074, 411147873)   # il primo è il Padiglione Tobia Granieri
+
+
+def stadio_fiera(elements, city):
+    """Segna le tribune e i padiglioni della Fiera e prepara GEO.sport."""
+    geo, gate = {}, None
+    for el in elements:
+        if el.get('type') == 'way' and el.get('geometry'):
+            geo[el['id']] = Polygon([to_local(g['lon'], g['lat']) for g in el['geometry']]).buffer(0)
+        elif el.get('type') == 'node' and el['id'] == CANCELLO_FIERA:
+            gate = [round(v, 1) for v in to_local(el['lon'], el['lat'])]
+    over = lambda b, p: b['poly'].intersection(p).area > 0.5 * min(b['poly'].area, p.area)
+    stands = [geo[i] for i in (TRIBUNA_EST, ANELLO) if i in geo]
+    gone, pav = 0, 0
+    for b in city:
+        if any(over(b, p) for p in stands):
+            b['kind'], b['height'] = CITY_KIND['tribuna'], 6.0
+            gone += 1
+        elif any(i in geo and over(b, geo[i]) for i in PADIGLIONI):
+            b['kind'], b['height'] = CITY_KIND['padiglione'], 8.5
+            pav += 1
+    ring = lambda i: flat(geo[i].exterior.coords[:-1]) if i in geo else []
+    print(f'  stadio e Fiera: {gone} tribune (diventano gradinate), {pav} padiglioni')
+    return city, {'stadio': ring(STADIO), 'campo': ring(CAMPO), 'tribuna': ring(TRIBUNA_EST), 'anello': ring(ANELLO),
+                  'fiera': ring(FIERA), 'cancello': gate}
 
 
 def name_places(old, city):
@@ -2000,6 +2039,7 @@ def encode(edges, deco, pos, buildings, city, arches, feats, extra):
         'rioni': extra['rioni'],
         'bosco': extra['bosco'],
         'botromagno': extra['botromagno'],
+        'sport': extra['sport'],
     }
     lines = ['const GEO = {']
     for k, v in geo.items():
@@ -2096,11 +2136,13 @@ def main():
     city = city_buildings([b for b in buildings if not inside(b['poly'].centroid.coords[0], Z0)], cover)
     print(f'  edifici: {len(old)} nel centro storico, {len(city)} nella città')
     versante(old, bot)
+    city, sport = stadio_fiera(overpass_cached('stadio_fiera', STADIO_FIERA_OVERPASS), city)
     name_places(old, city)
     extra = {
         'ground': ground, 'cover': cover, 'rails': build_rails(data), 'pois': city_pois(osm),
         'riverY': river_bed(feats['river'], lambda e, n: at(e, n)), 'rims': rims,
         'rioni': rioni_profile(at), 'bosco': bosco_features(bosco_osm),
+        'sport': sport,
         'botromagno': {'rovine': [flat(r.exterior.coords[:-1]) for r in bot['ruins']],
                        'scavi': flat(bot['scavi'].simplify(0.5).exterior.coords[:-1]) if bot['scavi'] is not None else []},
     }
