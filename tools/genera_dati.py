@@ -1860,6 +1860,8 @@ def bosco_cover(grid, E, N, elements):
     clear_q = MultiPoint([tuple(p) for f in [feats['tribuna'], *[r for _, r in feats['campi']]] for p in zip(f[::2], f[1::2])]).convex_hull.buffer(14)
     clear_q = clear_q.union(Point(*feats['quercus']).buffer(24))
     park = Polygon(list(zip(feats['parcheggio'][::2], feats['parcheggio'][1::2])))
+    # blocco M2: niente alberi nelle vasche del vivaio (e un poco attorno)
+    clear_q = clear_q.union(shapely.union_all([Polygon(list(zip(f[::2], f[1::2]))).buffer(6) for f in feats['vasche']]))
     clear_v = Point(*feats['picnic']).buffer(40).union(Point(*feats['scritta'][:2]).buffer(24))   # area pic-nic: prato senza alberi dei riquadri
     paths_d = [LineString(e['poly']) for e in bosco_ways(elements, anchors, {}) + bosco_ways(
         elements, anchors, {}, VIVAIO_ANELLO, VIVAIO_ROUTE[-1], 'bosco:vivaio', None, 'v') if e['walk']]
