@@ -364,7 +364,7 @@ licenze), `CLAUDE.md` (nuove regole ed eccezioni).
 
 ### Seconda parte (decisioni del committente del 30/09/2026)
 
-Ordine: **I → D → E → L → M → N**, un blocco alla volta, ognuno col suo branch e la sua PR.
+Ordine: **I → D → E → L → M → N** (M diviso in M1, M2, M3 il 01/10/2026), un blocco alla volta, ognuno col suo branch e la sua PR.
 Decisioni già prese:
 1. **Area Quercus** = l'ex area ristoro «Marcuccio»; in OSM «Rifugio Bosco Difesa Grande»
    (w477739267), dove oggi finisce la strada del Bosco.
@@ -407,15 +407,42 @@ Decisioni già prese:
 - **Suoni del bosco** con Web Audio, solo nella zolla del Bosco. Vista «bosco a piedi» nelle misure.
 - Google Maps e Street View solo come riferimento visivo.
 
-### M · Mezzi realistici e mongolfiera (`fase-3-4-m-mezzi`)
-- Carrozzerie per sezioni (8–14 × 10–16 punti), vetri a filo, abitacolo con il guidatore, ruote
-  e cerchi per modello, fari, stop, frecce, alone al tramonto, riflessi da una mappa d'ambiente
-  generata dal codice (solo sui mezzi). 4 000–8 000 triangoli per mezzo.
-- **Mongolfiera**, quinto mezzo: giro fisso di circa 7 minuti sopra la zolla della città, dalla
-  Zona Fiera San Giorgio (w478401751), tra 60 e 150 m dal suolo e mai meno di 30 m sopra tetti e
-  terreno; schede al passaggio, bruciatore con soffio in Web Audio, 2 000–4 000 triangoli.
-- Prove: giro campionato ogni 5 m in `simula.mjs`, decollo e cambio mezzo in `interazioni.mjs`,
-  vista «mongolfiera» nel punto peggiore del giro.
+### M1, M2, M3 (al posto del blocco M; decisioni del committente del 01/10/2026)
+Il blocco M si divide in tre, ognuno col suo branch e la sua PR.
+
+#### M1 · Botromagno, strade, stadio e Fiera (`fase-3-4-m1-botromagno-strade`)
+- **Botromagno**: le 40 sagome OSM `building=ruins` a ovest del ciglio diventano rovine
+  realistiche (muri a secco bassi con brecce, conci caduti, tombe scavate nella roccia, buche per i
+  pali delle capanne), suolo `roccia` lungo il ciglio ovest e negli scavi; il Madonna della Stella
+  Resort e gli altri edifici del versante a uno o due piani coi coppi. Scheda nuova «Necropoli del
+  Padre Eterno», etichette «Scavi archeologici di Botromagno» e «Padre Eterno» (senza scheda).
+- **Strade**: difetti 1–6 e 8 del foglio del piano (dischi chiari agli incroci, dischi piatti in
+  salita, vie sotto il terreno o sospese, decorative sopra le vie vere), anche fuori dalla gravina
+  tra la Madonna della Stella e la strada del cimitero e lungo la strada del bosco. Il 7 (incrocio
+  a V) resta: è così nei dati.
+- **Stadio** che sembri uno stadio (campo, gradinate, tribuna coperta, muro di cinta) e **Fiera di
+  San Giorgio** con le recinzioni e i padiglioni da fiera.
+- **Area Quercus**: via il maneggio e i giochi (il maneggio non c'è).
+- **Camera**: niente ritorno automatico dopo 4 s; torna dietro solo con «Segui il mezzo».
+
+#### M2 · Percorsi a piedi, zone pedonali e suoni del bosco (`fase-3-4-m2-a-piedi`)
+- Vivaio: zolla allargata a sud (vasca grande), anello reale V2 e sentiero fino alla Base Scout.
+- Città: sentiero degli scavi (A), Parco Robinson (C, D), Via Pietro Ianora (E), scale della
+  stazione (F), vialetti della Villa Comunale; Villa e Piazza della Repubblica pedonali.
+- Fiera: percorso a piedi tra i padiglioni e strada fino all'ingresso dello stadio.
+- Eccezioni approvate: il percorso nella Fiera e quello della Base Scout (non in OSM) solo se
+  chiudono un anello; Villa e Piazza della Repubblica pedonali anche dove OSM segna `residential`.
+- Suoni del bosco senza fruscio di pioggia: uccelli intonati con la radio, cicale e grilli, gufo,
+  picchio, di rado cinghiale e lupi lontani; passi morbidi solo a piedi.
+
+#### M3 · Mezzi realistici e mongolfiera (`fase-3-4-m3-mezzi-mongolfiera`)
+- Auto realistiche nello stile (carrozzerie per sezioni, abitacolo col guidatore, stop, frecce,
+  fari al tramonto), senza draw call in più; acceleratore valido anche con le auto nuove.
+- **Mongolfiera**, quinto mezzo: giro fisso di circa 2,7 km (7 minuti) dal prato degli scavi di
+  Botromagno sopra il centro storico, quota 60–150 m e mai meno di 30 m sopra tetti e terreno;
+  pulsante prima/terza persona; a fine giro l'ultima auto riparte da dove è decollata.
+- Prove: giro campionato ogni 5 m in `simula.mjs`, decollo, scheda, cambio mezzo e fine del giro
+  in `interazioni.mjs`, vista «mongolfiera» nel punto peggiore del giro.
 
 ### N · Cartolina, giro guidato e ritocchi (`fase-3-4-n-cartolina-giro`)
 - **Cartolina**: immagine ad alta risoluzione con cornice (Gravina in Puglia, luogo, indirizzo del

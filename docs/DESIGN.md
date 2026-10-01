@@ -172,6 +172,27 @@ metri lungo il perimetro (`aInfo.w`), non dalle derivate: di sbieco sarebbero in
 **Quote.** Nel centro storico il terreno resta quello disegnato a mano; fuori, le quote
 Copernicus smussate. Le vie seguono le pendenze reali e il terreno si spiana sotto vie e binari.
 
+**Vie e terreno (blocco M1).** La maglia larga (15 m in città, 30 in campagna) non poteva seguire
+le vie in trincea o in rilevato: un triangolo che scavalcava la via la copriva (il mezzo entrava
+nella collina) o la lasciava sospesa. Ora:
+- `MeshFit` (sezione 6e), prima di costruire i riquadri, controlla la maglia vera (gli stessi
+  vertici di `_terrain`) ogni 3 m al centro, ai bordi e appena fuori da ogni via, e sui dischi
+  degli incroci; poi sposta i vertici interni del minimo che serve, con proiezioni successive in
+  cui vince «la via non va coperta». Gli scarti entrano in `Terrain.heightAt` interpolati sul
+  triangolo, così case, alberi e dettagli restano appoggiati alla maglia;
+- dove la maglia di partenza sbaglia di molto (vie in trincea o in rilevato oltre 2 m, vie vicine
+  a quote diverse, curve e cambi di pendenza) il riquadro passa da vicino a **7,5 m**
+  (`CONFIG.city.refine`); la versione lontana resta quella di prima (`t.cell0` × 2);
+- dove nessun triangolo può seguire tutte le vie (incroci in forte pendenza) un **muretto di
+  contenimento** scende dal bordo della via fin sotto il terreno (`Tiles._wall`);
+- i **dischi degli incroci** hanno l'orlo alla quota delle vie che arrivano (`Tiles.discRim`) e il
+  colore dell'asfalto (prima prendevano quello della mezzeria);
+- le **vie decorative** non corrono più dentro le carreggiate (la pipeline toglie il tratto
+  dentro, `deco_off_roads`, e restringe quelle troppo larghe accanto a una via) e partono dalla
+  quota della via su cui si innestano.
+Le misure si fanno con `tools/test/difetti.mjs` (vie sotto il terreno, sospese, dischi sfasati,
+decorative sovrapposte). Il limite del 18% non cambia.
+
 **Costruzione progressiva.** I riquadri del centro storico si costruiscono subito (il pulsante
 Parti si abilita), gli altri pochi per fotogramma (7 ms), dal più vicino al mezzo; dopo un
 teletrasporto quelli entro 420 m si costruiscono al volo. La nebbia chiude la vista tra 420 e
@@ -222,8 +243,9 @@ a sud della città): si smussano molto e si dimezza il rilievo.
 
 **Area Quercus** (ex area ristoro «Marcuccio», in OSM «Rifugio Bosco Difesa Grande»): ristorante
 col tetto rosso (w411141350), i tre campi OSM (tennis al centro, calcetto ai lati, con le righe, le
-porte o la rete e la recinzione a giorno), la tribunetta, il maneggio in sabbia con la staccionata,
-altalena, scivolo e tavoli nella radura, il parcheggio «Terra Rossa» sterrato a lato della strada.
+porte o la rete e la recinzione a giorno), la tribunetta, i tavoli nella radura, il parcheggio
+«Terra Rossa» sterrato a lato della strada. Maneggio e giochi tolti nel blocco M1: il committente
+ha detto che non ci sono, e dove stava il maneggio torna il bosco.
 **Vivaio forestale**: edifici OSM (il lungo col tetto in coppi), vasche con l'acqua verde, aiuole in
 file. **Base Scout** nel grande campo a nord della strada. **Area pic-nic** davanti al vivaio:
 spiazzo di ghiaia che segue il terreno, staccionate a due traverse (in basso e in alto), scaletta
@@ -330,13 +352,18 @@ Nel bosco la nebbia si avvicina (foschia) e la targa dice «Bosco Difesa Grande�
 | Regola | Nessun dettaglio sulla carreggiata: la prova `npm run simula` controlla che nessun vertice di portali, campanile, scalinate, lanterne e parapetti stia sopra una via tra 0,3 e 3,2 m d'altezza (`dettaglisullastrada` vuoto). Nei vicoli i dettagli sporgono al massimo 0,3 m. |
 | Mura | I tratti reali di mura urbane diventano muri di tufo. |
 | Alberi | Pini e lecci nei giardini reali (Villa Comunale), ulivi verso Botromagno, macchia nel canyon. |
+| Botromagno (blocco M1) | Le sagome OSM `building=ruins` dal lato di Botromagno (46) sono **rovine**: muri a secco di blocchi irregolari di calcare e tufo sul contorno reale, alti 0,3–1,2 m con brecce e tratti crollati, fondo di terra, conci caduti, erba secca e cespugli. Nell'area degli scavi (OSM w484764621) il **recinto funerario con sei tombe in serie**, tombe a fossa (alcune con la lastra spostata), a semicamera e a camera col dromos (gradini scavati verso l'apertura nel banco), **buche per i pali** delle capanne in anelli; suolo di **roccia** (calcare con crepe, massi ed erba secca) lungo il ciglio ovest e negli scavi. Gli edifici veri del versante (il Madonna della Stella Resort e i suoi corpi) a un piano, muri chiari e coppi. Le rovine sul lato della città restano case. |
+| Stadio «Stefano Vicino» (blocco M1) | Su un terrapieno piano alla quota del campo (le quote a 30 m lo davano in pendenza di 15 m: lo stadio sta sul ciglio della gravina). Campo in erba sintetica con strisce, righe e porte; **gradinata est** sulla sagoma OSM della tribuna, **tribuna ovest coperta** (la copertura è dei lavori 2024–2025), curva sud e settore nord in cemento con le file di seggiolini, quattro **torri faro**, **muro di cinta** sul contorno OSM con gli ingressi verso le vie (verso la gravina fa da muro di sostegno). |
+| Fiera di San Giorgio (blocco M1) | Recinzione di muretto basso in cemento con la rete metallica, cancello tra due pilastri sul punto OSM e **botteghino** giallo accanto (Street View, aprile 2025); i quattro padiglioni OSM sono capannoni chiari con i **portoni** grandi bordati di giallo. |
 
 Monumenti con scheda (solo fatti verificati): Cattedrale, la Gravina (belvedere), Chiesa del
 Purgatorio, Palazzo Ducale Orsini, Museo Pomarici Santomasi, Santa Lucia (Piaggio), Gravina
 Sotterranea, Piazza Pellicciari, Sant'Agostino, San Michele delle Grotte (Fondovico), Ponte
 Acquedotto, Fontana della Stella, Madonna della Stella, Botromagno, e dalla fase 3 San
 Francesco, Santa Sofia, Santa Cecilia, Santa Teresa e Chiesa del Gesù, e dal blocco D Porta San
-Michele, Piazza Scacchi, Quattro Fontane, San Nicola, Bastione medievale e Sette Camere. L'Addolorata
+Michele, Piazza Scacchi, Quattro Fontane, San Nicola, Bastione medievale e Sette Camere, e dal blocco
+M1 la Necropoli del Padre Eterno (con le etichette «Scavi archeologici di Botromagno» e «Padre
+Eterno», senza scheda: è con ogni probabilità la chiesa-grotta, ma non è verificato). L'Addolorata
 e le altre piazze (con la Piazzetta Fondovico) hanno solo l'etichetta: Addolorata e Annunziata sono
 sulla stessa sagoma, ma nessuna fonte dice che siano la stessa chiesa.
 
@@ -427,9 +454,9 @@ riusato: il cambio è istantaneo.
   incrocio con scelta torna dietro, per vedere dove si va; si ferma durante le panoramiche.
 * **Camera libera** (blocco B, fatto nel blocco G): trascinando col mouse o con un dito si gira
   attorno al mezzo (inclinazione 10–80°), con la rotella o due dita si cambia la distanza (8–70 m).
-  Sotto i 6 px è un tocco. Dopo 4 s senza tocchi la camera torna dietro in circa 1,5 s; il pulsante
-  **Segui il mezzo** (solo con la camera libera) la riporta subito. Tetti e terreno valgono anche
-  qui; le panoramiche si sospendono.
+  Sotto i 6 px è un tocco. Dal blocco M1 la camera resta dov'è finché non si preme **Segui il
+  mezzo** (visibile solo con la camera libera, anche sul telefono), che la riporta dietro in circa
+  1,5 s: niente ritorno automatico. Tetti e terreno valgono anche qui; le panoramiche si sospendono.
 * **A piedi**: più bassa e vicina (6,5 m dietro, 4,6 m sopra), sale al massimo di 15 m sui tetti.
 * **Pausa**: vista dall'alto che gira piano sopra il mezzo; si gira trascinando e si zooma. Non
   entra più nei tetti delle palazzine (stesso `#roofLift` dell'inseguimento).
@@ -495,16 +522,16 @@ partenza, centro, Piazza Scacchi, pausa, panoramica sulla città e alta (120 m s
 storico, verso la città: la vista della futura mongolfiera).
 "Per fotogramma" è il massimo tra le viste, senza il passaggio delle ombre.
 
-| Voce | Fase 3 (solo centro storico) | Fase 3.4, città intera | Dopo il blocco G | Dopo il blocco I | Dopo il blocco D | Tetto |
-|---|---|---|---|---|---|---|
-| `index.html` | 390 KB (124 KB compressi) | 737 KB (269 KB compressi) | 593 KB (251 KB compressi) | 604 KB (255 KB compressi) | 634 KB (264 KB compressi) | ≤ 1,2 MB (≤ 360 compressi; prima 900 KB e 280, alzato dal committente il 30/09/2026) |
-| Costruzione fino a "Parti" | 282 ms | circa 500 ms | circa 520 ms | circa 640 ms (telefono 620) | circa 770 ms (telefono 680) | ≤ 1,5 s |
-| Memoria JavaScript | 41 MB | circa 100 MB | 112 MB (telefono 91) | 116 MB (telefono 129) | 117 MB (telefono 104) | ≤ 150 MB |
-| Città completa (in sottofondo) | — | circa 900 ms | circa 900 ms | circa 1 100 ms | circa 1 230 ms | — |
-| Triangoli nella scena | 267 000 | 543 000 (telefono 483 000) | 571 000 (telefono 505 000) | 572 000 + 138 000 della versione lontana, mai disegnate insieme (telefono 505 000 + 116 000) | 580 000 + 138 000 (telefono 514 000 + 116 000) | ≤ 650 000 |
-| Triangoli per fotogramma, PC | 267 000 | 334 000 | 335 000 | 235 500 (alta) | 246 000 (alta) | ≤ 400 000 (obiettivo del blocco I: 300 000) |
-| Triangoli per fotogramma, telefono | 267 000 | 242 000 | 243 500 | 164 700 (centro) | 175 300 (centro) | ≤ 250 000 (obiettivo del blocco I: 200 000) |
-| Draw call, PC / telefono | 39 / 38 | 69 / 54 | 69 / 48 | 68 / 48 | 68 / 48 | ≤ 90 / ≤ 70 |
+| Voce | Fase 3 (solo centro storico) | Fase 3.4, città intera | Dopo il blocco G | Dopo il blocco I | Dopo il blocco D | Dopo il blocco M1 | Tetto |
+|---|---|---|---|---|---|---|---|
+| `index.html` | 390 KB (124 KB compressi) | 737 KB (269 KB compressi) | 593 KB (251 KB compressi) | 604 KB (255 KB compressi) | 634 KB (264 KB compressi) | 742 KB (298 KB compressi) | ≤ 1,2 MB (≤ 360 compressi; prima 900 KB e 280, alzato dal committente il 30/09/2026) |
+| Costruzione fino a "Parti" | 282 ms | circa 500 ms | circa 520 ms | circa 640 ms (telefono 620) | circa 770 ms (telefono 680) | circa 1 075 ms (telefono 990) | ≤ 1,5 s |
+| Memoria JavaScript | 41 MB | circa 100 MB | 112 MB (telefono 91) | 116 MB (telefono 129) | 117 MB (telefono 104) | 170 MB senza pulizia, 148 MB dopo la garbage collection (telefono 149) | ≤ 150 MB |
+| Città completa (in sottofondo) | — | circa 900 ms | circa 900 ms | circa 1 100 ms | circa 1 230 ms | circa 1 870 ms | — |
+| Triangoli nella scena | 267 000 | 543 000 (telefono 483 000) | 571 000 (telefono 505 000) | 572 000 + 138 000 della versione lontana, mai disegnate insieme (telefono 505 000 + 116 000) | 580 000 + 138 000 (telefono 514 000 + 116 000) | 978 000 + 166 000, con il bosco fitto del blocco L e il terreno a 7,5 m lungo le vie (telefono 825 000 + 134 000) | ≤ 650 000 (tetto del blocco C) |
+| Triangoli per fotogramma, PC | 267 000 | 334 000 | 335 000 | 235 500 (alta) | 246 000 (alta) | 249 000 (alta) | ≤ 400 000 (obiettivo del blocco I: 300 000) |
+| Triangoli per fotogramma, telefono | 267 000 | 242 000 | 243 500 | 164 700 (centro) | 175 300 (centro) | 176 600 (centro) | ≤ 250 000 (obiettivo del blocco I: 200 000) |
+| Draw call, PC / telefono | 39 / 38 | 69 / 54 | 69 / 48 | 68 / 48 | 68 / 48 | 71 / 48 | ≤ 90 / ≤ 70 |
 
 Nel blocco G il peso è sceso nonostante figurina, camera e radio: nodi, vie, vie decorative ed
 edifici del centro storico ora usano il `CODEC` (a 0,1 m, senza perdite), da 90 a 55 KB compressi.

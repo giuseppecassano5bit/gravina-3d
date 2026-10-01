@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 30 settembre 2026: fase 3 approvata e online, blocchi A, C, D, F, G e I della fase 3.4 uniti.
+Stato al 1° ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I e L della fase 3.4 uniti.
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
@@ -8,7 +8,7 @@ del lavoro su due chat in [`PIANO_FASE_3_4.md`](PIANO_FASE_3_4.md).
 
 ### Fase 3.4, seconda parte (decisioni del 30/09/2026)
 
-Ordine: I → D → E → L → M → N, dettagli e decisioni nella sezione 7 del piano.
+Ordine: I → D → E → L → M1 → M2 → M3 → N, dettagli e decisioni nella sezione 7 del piano.
 
 - [x] **I · spazio sul telefono** (`fase-3-4-i-prestazioni`, PR #13, unita il 30/09/2026):
       due livelli di dettaglio per riquadro nella stessa mesh (terreno a maglia doppia, vie rade,
@@ -26,7 +26,7 @@ Ordine: I → D → E → L → M → N, dettagli e decisioni nella sezione 7 de
       città. 264 KB compressi (+9), telefono 175 300 triangoli, PC 246 000, draw call invariate.
 - [x] **Peso**: il 30/09/2026 il committente ha alzato il tetto da 280 a **360 KB compressi**
       (≤ 1,2 MB non compressi). Dopo il blocco D restano circa 96 KB per E, L, M e N.
-- [x] **E + L insieme** (`fase-3-4-e-l-luoghi-bosco`, PR #15, in attesa di approvazione), più
+- [x] **E + L insieme** (`fase-3-4-e-l-luoghi-bosco`, PR #15, unita il 01/10/2026), più
       l'**acceleratore solo su PC** (Shift tenuto premuto, ×1,8; sul telefono no, decisione del
       committente del 30/09/2026): agli incroci il cartello si apre prima e il mezzo torna alla
       crociera. 60 fps e fotogramma peggiore come senza, subito dopo Parti e dopo un teletrasporto.
@@ -43,16 +43,39 @@ Ordine: I → D → E → L → M → N, dettagli e decisioni nella sezione 7 de
       che il centro visite è aperto), Base Scout, area pic-nic con la scritta «SIC DIFESA GRANDE»,
       524 m di sentieri reali a piedi, bosco fitto istanziato che si apre tra camera e figurina,
       foschia, suoni del bosco solo dentro il bosco (interruttore nella pausa).
-- [ ] Da verificare con il committente: se il maneggio, i giochi e i tavoli dell'area Quercus
-      stanno dove li ricorda (posizione indicativa dal satellite); il nome della strada del bosco
+- [x] Area Quercus: maneggio e giochi non ci sono (committente, 01/10/2026), tolti nel blocco M1;
+      i tavoli restano.
+- [ ] Da verificare con il committente: il nome della strada del bosco
       (in OSM non ce l'ha: nel diorama «Strada nel bosco»); la chiesa di Santi Pietro e Paolo
       (nome da Overture).
+- [ ] **Prestazioni**: se dopo i blocchi M e N il diorama resta pesante, il committente pensa a
+      un'impostazione che carichi il mondo solo attorno alla visuale; in città non si riduce niente,
+      al massimo in periferia dove dall'auto non si vede (01/10/2026).
 - [ ] Telefono in orizzontale, partenza sul ponte: il contatore di debug segna 74 draw call (tetto 70),
       uguale su `main` prima di E e L (`node foto.mjs orizzontale`). In verticale il massimo è 48.
       Da guardare nel blocco N con i ritocchi dell'orizzontale.
 - [ ] La vasca grande del vivaio (w411138854) è fuori dalla zolla del vivaio: allargarla di un
       riquadro verso sud, se si vuole.
-- [ ] **M · mezzi realistici e mongolfiera** (`fase-3-4-m-mezzi`).
+- [x] **M1 · Botromagno, strade, stadio e Fiera** (`fase-3-4-m1-botromagno-strade`, PR #16, in
+      attesa di approvazione):
+      - Botromagno: 46 rovine OSM sul lato di Botromagno (non solo a ovest del ciglio: tre stavano
+        nella scarpata e diventavano torri) a muri a secco con brecce, recinto funerario con sei
+        tombe, tombe a fossa, a semicamera e a camera col dromos, buche dei pali, suolo di roccia;
+        resort e versante a un piano coi coppi; scheda «Necropoli del Padre Eterno», etichette
+        «Scavi archeologici di Botromagno» e «Padre Eterno»;
+      - vie (difetti 1–6 e 8, `node difetti.mjs` sulle vie del mezzo): sotto il terreno da 283 a 0,
+        sospese da 1 001 a pochissime, dischi sfasati da 237 a 0, decorative sovrapposte da 5 a 0;
+        maglia vicina a 7,5 m dove serviva (in città non si toglie niente: decisione del committente);
+      - stadio su terrapieno con campo, gradinate, tribuna ovest coperta, torri faro e muro di cinta;
+        Fiera con recinzione, cancello, botteghino e portoni;
+      - area Quercus senza maneggio e giochi; camera libera senza ritorno automatico.
+- [ ] **M2 · percorsi a piedi, zone pedonali e suoni del bosco** (`fase-3-4-m2-a-piedi`): anello V2
+      del vivaio e Base Scout, sentiero degli scavi, Parco Robinson, Via Ianora, scale della stazione,
+      Villa Comunale e Piazza della Repubblica pedonali, Fiera e strada dello stadio; suoni del bosco
+      senza pioggia (uccelli, cicale, gufo, cinghiale, lupi lontani).
+- [ ] **M3 · mezzi realistici e mongolfiera** (`fase-3-4-m3-mezzi-mongolfiera`): auto per sezioni
+      con guidatore, stop e frecce senza draw call in più; mongolfiera come quinto mezzo, giro fisso
+      da Botromagno sopra il centro storico, prima e terza persona.
 - [ ] **N · cartolina, giro guidato e ritocchi** (`fase-3-4-n-cartolina-giro`).
 - Versione in inglese: non ora.
 

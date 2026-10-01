@@ -34,6 +34,16 @@ di costruzione fino a "Parti" e della città completa, memoria, triangoli per st
 i riquadri) e, in cinque viste (partenza, centro, Piazza Scacchi, pausa, panoramica sulla città),
 fps, tempo di CPU, triangoli e draw call del fotogramma più pesante.
 
+Difetti delle vie nei riquadri (blocco M1; lo strumento viene dal piano dei blocchi M): vie sotto
+il terreno, vie sospese (dove sotto il bordo non c'è né terreno né un'altra via, il disco di un
+incrocio o un muretto), dischi degli incroci sfasati, curve spezzate, vie decorative sovrapposte.
+Per confrontare con un'altra versione del diorama si indica la copia con `GRAVINA_HTML`:
+
+```bash
+node difetti.mjs shots/difetti-dopo.json
+GRAVINA_HTML=tools/test/shots/prima.html node difetti.mjs shots/difetti-prima.json   # git show main:index.html > shots/prima.html
+```
+
 Due strumenti per lo sviluppo:
 
 ```bash

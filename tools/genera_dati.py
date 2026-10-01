@@ -614,11 +614,12 @@ QUERCUS_SENTIERI = {647001042, 647001043, 647001044, 647001046, 647001047, 75984
 BOSCO_BRUCIATO = [(-950, -825, -5665, -5540), (-745, -612, -5760, -5662)]   # alberi morti grigi (satellite, solo riferimento visivo)
 # Punti senza dati OSM (solo riferimento visivo dal satellite e indicazioni del committente), in metri reali.
 BOSCO_PUNTI = {
-    'maneggio': (-749, -5643, 59, 28, 50),    # recinto in sabbia: centro, direzione del lato lungo (gradi da est), larghezza, lunghezza
     'picnic': (-3108, -7507),                 # area pic-nic davanti al vivaio, a nord della strada (committente)
     'scritta': (-3136, -7539, 21.6),          # «SIC DIFESA GRANDE» sul pendio, rivolta alla strada: centro e direzione del testo
     'aiuole': (-3060, -7690),                 # aiuole del vivaio in file, a sud-est degli edifici
 }
+# Dove il blocco L metteva il maneggio (che non c'è): serve solo a lasciare il parcheggio com'era.
+MANEGGIO_EX = (-749, -5643)
 BOSCO_OVERPASS = """[out:json][timeout:160];
 (way["highway"](40.740,16.365,40.775,16.420);way["building"](40.740,16.365,40.775,16.420);
  way["leisure"](40.740,16.365,40.775,16.420);way["amenity"](40.740,16.365,40.775,16.420);
@@ -626,13 +627,13 @@ BOSCO_OVERPASS = """[out:json][timeout:160];
  way["natural"="wood"](40.735,16.36,40.785,16.425););out tags geom;"""
 
 
-def overpass_bosco():
-    """Dati OSM del Bosco Difesa Grande (sentieri, edifici, campi, vasche, poligono del bosco), in cache."""
-    out = CACHE / 'bosco.json'
+def overpass_cached(name, query):
+    """Query Overpass piccola con la sua cache (tools/.cache/<name>.json): così overpass.json non si riscarica."""
+    out = CACHE / f'{name}.json'
     if not out.exists():
         for url in (OVERPASS_URL, 'https://overpass.private.coffee/api/interpreter'):
             try:
-                r = SESSION.post(url, data={'data': BOSCO_OVERPASS}, timeout=200,
+                r = SESSION.post(url, data={'data': query}, timeout=200,
                                  headers={'User-Agent': 'gravina-3d (github.com/giuseppecassano5bit/gravina-3d)', 'Accept': 'application/json'})
                 r.raise_for_status()
                 r.json()
@@ -641,6 +642,11 @@ def overpass_bosco():
             except (requests.RequestException, ValueError):
                 time.sleep(5)
     return json.loads(out.read_text())['elements']
+
+
+def overpass_bosco():
+    """Dati OSM del Bosco Difesa Grande (sentieri, edifici, campi, vasche, poligono del bosco), in cache."""
+    return overpass_cached('bosco', BOSCO_OVERPASS)
 
 
 def bosco_chain():
@@ -820,7 +826,7 @@ def build_network(data, buildings, bosco_osm):
 # ─────────────────────────────────────────────────────────────────────────────
 # 3. Edifici
 # ─────────────────────────────────────────────────────────────────────────────
-KIND = {'house': 0, 'church': 1, 'cathedral': 2, 'shed': 3, 'apartments': 4, 'public': 5}
+KIND = {'house': 0, 'church': 1, 'cathedral': 2, 'shed': 3, 'apartments': 4, 'public': 5, 'rurale': 6}
 
 
 def building_kind(cls):
@@ -1097,6 +1103,46 @@ def free_roads(edges, pos, buildings):
     return out, arches
 
 
+def deco_off_roads(edges, deco):
+    """
+    Blocco M1: le vie decorative non corrono dentro la carreggiata di una via percorribile. Nei dati
+    alcune (doppioni o corsie di servizio) le stanno sopra o a un metro, a un'altra quota: si vedeva
+    un nastro doppio, e il terreno non poteva seguire tutte e due. Il tratto dentro la carreggiata
+    (meno mezzo metro dal bordo) si toglie; i pezzi che restano, se lunghi almeno 12 m, rimangono.
+    """
+    curves = [LineString(centripetal_curve(e['poly'])) for e in edges if not e['bridge']]
+    widths = [e['width'] for e in edges if not e['bridge']]
+    lanes = shapely.union_all([c.buffer(max(0.5, w / 2 - 0.5), quad_segs=4) for c, w in zip(curves, widths)])
+    roads = shapely.union_all([c.buffer(w / 2, quad_segs=4) for c, w in zip(curves, widths)])
+    out, dropped, cut, removed, narrow = [], 0, 0, 0.0, 0
+    for d in deco:
+        line = LineString(d['poly'])
+        inside_len = line.intersection(lanes).length
+        if inside_len < 6:
+            out.append(d)
+            continue
+        rest = line.difference(lanes)
+        parts = [g for g in getattr(rest, 'geoms', [rest]) if g.geom_type == 'LineString' and g.length >= 12]
+        removed += line.length - sum(g.length for g in parts)
+        if not parts:
+            dropped += 1
+            continue
+        cut += 1
+        out += [{**d, 'poly': list(g.coords)} for g in parts]
+    # Accanto a una via vera (lontano dagli innesti, 12 m da ogni capo) la decorativa si restringe
+    # quanto basta perché il suo nastro non copra quello della via.
+    for d in out:
+        line = LineString(d['poly'])
+        if line.length < 30:
+            continue
+        gap = min(roads.boundary.distance(line.interpolate(s)) for s in np.arange(12, line.length - 12, 2.0))
+        if gap < d['width'] / 2 - 0.2 and not roads.contains(line.interpolate(line.length / 2)):
+            d['width'] = round(max(3.2, 2 * gap - 0.4), 1)
+            narrow += 1
+    print(f'  vie decorative dentro le carreggiate: {dropped} tolte, {cut} accorciate ({removed:.0f} m in meno), {narrow} ristrette')
+    return out
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # 4. Idrografia, morfologia, luoghi
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1160,7 +1206,7 @@ def build_features(data):
 DEM_STEP = 30             # m: passo della griglia delle quote in GEO
 COVER_STEP = 15           # m: passo della griglia dell'uso del suolo in GEO
 COVER = {'campagna': 0, 'citta': 1, 'parco': 2, 'bosco': 3, 'campo': 4, 'uliveto': 5, 'industria': 6,
-         'cimitero': 7, 'sport': 8, 'piazza': 9, 'macchia': 10, 'cava': 11, 'querce': 12, 'bruciato': 13, 'fitto': 14}
+         'cimitero': 7, 'sport': 8, 'piazza': 9, 'macchia': 10, 'cava': 11, 'querce': 12, 'bruciato': 13, 'fitto': 14, 'roccia': 15}
 OVERPASS_URL = 'https://overpass-api.de/api/interpreter'
 OVERPASS_BBOX = '40.79,16.39,40.85,16.46'
 OVERPASS_QUERY = f"""[out:json][timeout:160];
@@ -1324,8 +1370,11 @@ def raster(polys, E, N):
     return m
 
 
-def land_cover(data, buildings, bosco_osm):
-    """Uso del suolo su una griglia di COVER_STEP m (centri delle celle): colori del terreno e alberi nella città moderna."""
+def land_cover(data, buildings, bosco_osm, rock=None):
+    """
+    Uso del suolo su una griglia di COVER_STEP m (centri delle celle): colori del terreno e alberi nella città moderna.
+    `rock`: la roccia di Botromagno (blocco M1), lungo il ciglio ovest e negli scavi.
+    """
     s = COVER_STEP
     E = np.arange(BOUND[0] + s / 2, BOUND[1], s, dtype=float)
     N = np.arange(BOUND[2] + s / 2, BOUND[3], s, dtype=float)
@@ -1351,6 +1400,8 @@ def land_cover(data, buildings, bosco_osm):
             m = dense                                    # la città è dove ci sono le case, non tutto il poligono "residenziale"
         grid[m] = COVER[kind]
     bosco_cover(grid, E, N, bosco_osm)
+    if rock is not None and not rock.is_empty:
+        grid[raster([g for g in getattr(rock, 'geoms', [rock]) if g.geom_type == 'Polygon'], E, N)] = COVER['roccia']
     fill_masked(grid, zone_mask(E, N, s))
     print('  uso del suolo:', ', '.join(f'{k} {100 * np.mean(grid == v):.0f}%' for k, v in COVER.items() if np.any(grid == v)))
     return grid
@@ -1392,7 +1443,7 @@ def city_height(b, dense, industrial):
     return floors * 3.3 + 0.6
 
 
-CITY_KIND = {'house': 0, 'church': 1, 'shed': 3, 'apartments': 4, 'public': 5, 'industry': 6, 'castle': 7, 'school': 8, 'villa': 9}
+CITY_KIND = {'house': 0, 'church': 1, 'shed': 3, 'apartments': 4, 'public': 5, 'industry': 6, 'castle': 7, 'school': 8, 'villa': 9, 'padiglione': 10, 'tribuna': 11}
 
 
 def city_buildings(buildings, cover):
@@ -1485,11 +1536,10 @@ def bosco_features(elements):
     # e dal satellite quello da tennis (verde, con le righe) è il centrale, w1195121475.
     out = {'campi': [[0 if w == 1195121475 else 1, ring(w)] for w in (1195121473, 1195121475, 1195121476)],
            'tribuna': ring(1195121474), 'parcheggio': ring(477738793), 'vasche': [f for f in (ring(w) for w in (411138854, 411138897, 411139081)) if fits(f)]}
-    e, n, ang, w, l = BOSCO_PUNTI['maneggio']
-    out['maneggio'] = [*map(lambda v: round(v, 1), m((e, n))), ang, w, l]
     # Il parcheggio «Terra Rossa» è 700 m più giù lungo la strada: col tracciato compresso finirebbe sui
-    # campi. Resta a lato della strada, ritagliato fuori dall'area dei campi e del maneggio.
-    busy = MultiPoint([p for _, f in out['campi'] for p in zip(f[::2], f[1::2])]).convex_hull.buffer(8).union(Point(*out['maneggio'][:2]).buffer(32))
+    # campi. Resta a lato della strada, ritagliato fuori dall'area dei campi. (Blocco M1: il maneggio
+    # non c'è, lo ha detto il committente il 01/10/2026; il parcheggio resta com'era.)
+    busy = MultiPoint([p for _, f in out['campi'] for p in zip(f[::2], f[1::2])]).convex_hull.buffer(8).union(Point(*m(MANEGGIO_EX)).buffer(32))
     park = Polygon(list(zip(out['parcheggio'][::2], out['parcheggio'][1::2]))).buffer(0).difference(busy)
     park = max(getattr(park, 'geoms', [park]), key=lambda g: g.area)
     out['parcheggio'] = flat(park.simplify(0.5).exterior.coords[:-1])
@@ -1523,7 +1573,7 @@ def bosco_cover(grid, E, N, elements):
     anc = {'Q': anchors['Q'], 'V': anchors['V']}
     feats = bosco_features(elements)
     clear_q = MultiPoint([tuple(p) for f in [feats['tribuna'], *[r for _, r in feats['campi']]] for p in zip(f[::2], f[1::2])]).convex_hull.buffer(14)
-    clear_q = clear_q.union(Point(*feats['maneggio'][:2]).buffer(36)).union(Point(*feats['quercus']).buffer(24))
+    clear_q = clear_q.union(Point(*feats['quercus']).buffer(24))
     park = Polygon(list(zip(feats['parcheggio'][::2], feats['parcheggio'][1::2])))
     clear_v = Point(*feats['picnic']).buffer(40).union(Point(*feats['scritta'][:2]).buffer(24))   # area pic-nic: prato senza alberi dei riquadri
     paths_d = [LineString(e['poly']) for e in bosco_ways(elements, anchors, {}) if e['walk']]
@@ -1548,6 +1598,117 @@ def bosco_cover(grid, E, N, elements):
             counts[code] += 1
     inv = {v: k for k, v in COVER.items()}
     print('  bosco, uso del suolo:', ', '.join(f'{inv[k]} {v}' for k, v in counts.most_common()))
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Blocco M1 · il versante di Botromagno
+#   In OSM, a ovest del ciglio, ci sono le sagome building=ruins degli scavi: Overture le passa
+#   senza classe e il diorama le faceva diventare case e torri. Diventano rovine (GEO.botromagno),
+#   con l'area degli scavi (w484764621) e un suolo di roccia lungo il ciglio. Le rovine dal lato
+#   della città (i rioni) restano case come prima. Gli edifici veri del versante (il resort
+#   Madonna della Stella e i suoi corpi) restano a uno o due piani, con i coppi.
+# ─────────────────────────────────────────────────────────────────────────────
+ROVINE_OVERPASS = """[out:json][timeout:120];
+(way["building"="ruins"](40.79,16.39,40.85,16.46);way(484764621););out tags geom;"""
+SCAVI = 484764621                          # «Scavi archeologici di Botromagno» (historic=archaeological_site, Q111644781)
+ROCCIA_N = (250, 720)                      # tratto del ciglio ovest col suolo di roccia: dalla Madonna della Stella agli scavi
+ROCCIA_LARGA = 30                          # m oltre il ciglio
+
+
+def west_side(river):
+    """
+    Il lato di Botromagno: tutto ciò che sta a ovest del torrente. Il piano diceva «a ovest del ciglio
+    ovest», ma tre rovine OSM stanno nella scarpata sotto il ciglio, dal lato di Botromagno, e il
+    diorama le faceva diventare torri sottili: vale tutta la sponda (scelta più fedele ai dati).
+    """
+    pts = list(river.coords)
+    if pts[0][1] > pts[-1][1]:
+        pts = pts[::-1]
+    return Polygon(pts + [(BOUND[0] - 50, pts[-1][1] + 50), (BOUND[0] - 50, pts[0][1] - 50)]).buffer(0)
+
+
+def botromagno(elements, river, west_rim, buildings):
+    """Rovine sul lato di Botromagno (tolte da Overture), area degli scavi e fascia di roccia: GEO.botromagno."""
+    side = west_side(river)
+    ruins = []
+    scavi = None
+    for el in elements:
+        if el.get('type') != 'way' or not el.get('geometry'):
+            continue
+        p = Polygon([to_local(g['lon'], g['lat']) for g in el['geometry']]).buffer(0)
+        if el['id'] == SCAVI:
+            scavi = p
+        elif (el.get('tags') or {}).get('building') == 'ruins' and side.contains(p.centroid) and CITY_ZONE.contains(p.centroid):
+            ruins.append(p.simplify(0.15))
+    tree = STRtree(ruins)
+    keep, gone = [], 0
+    for b in buildings:
+        hit = [ruins[i] for i in tree.query(b['poly'])]
+        if any(b['poly'].intersection(r).area > 0.5 * min(b['poly'].area, r.area) for r in hit):
+            gone += 1
+            continue
+        keep.append(b)
+    rim = LineString(west_rim)
+    part = [p for p in west_rim if ROCCIA_N[0] <= p[1] <= ROCCIA_N[1]]
+    band = LineString(part).buffer(ROCCIA_LARGA, single_sided=True) if len(part) > 1 else Polygon()
+    if band.intersection(side).area < 0.5 * band.area:     # il lato giusto è quello di Botromagno
+        band = LineString(part).buffer(-ROCCIA_LARGA, single_sided=True)
+    rock = band.union(scavi) if scavi is not None else band
+    print(f'  Botromagno: {len(ruins)} rovine dal lato di Botromagno ({gone} edifici di Overture tolti), '
+          f'area degli scavi {scavi.area if scavi is not None else 0:.0f} m², roccia {rock.area:.0f} m²')
+    return keep, {'ruins': ruins, 'scavi': scavi, 'rock': rock, 'side': side, 'rim': rim}
+
+
+def versante(old, bot):
+    """Edifici del centro storico sul versante di Botromagno: un piano, muri chiari e coppi (KIND rurale)."""
+    count = 0
+    for b in old:
+        c = b['poly'].centroid
+        if not bot['side'].contains(c) or b['kind'] in (KIND['church'], KIND['cathedral']) or b['name']:
+            continue
+        b['kind'] = KIND['rurale']
+        b['height'] = 4.6 if b['poly'].area > 300 else 3.9    # il resort è a un piano, coi soffitti alti (foto sferica su Google Maps)
+        count += 1
+    print(f'  versante di Botromagno: {count} edifici a un piano')
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Blocco M1 · stadio «Stefano Vicino» e Fiera di San Giorgio
+#   Le tribune OSM (building=grandstand) diventavano palazzine con le finestre: restano come sagome
+#   (tipo «tribuna», per la camera e gli alberi) ma il diorama disegna campo, gradinate, tribuna
+#   coperta, torri faro e muro di cinta dalle sagome OSM (GEO.sport). I padiglioni della Fiera
+#   diventano capannoni da fiera.
+# ─────────────────────────────────────────────────────────────────────────────
+STADIO_FIERA_OVERPASS = """[out:json][timeout:120];
+(way(478401752);way(927885291);way(411149113);way(411146463);way(478401751);node(8763525337);
+ way(411148871);way(411147010);way(411147074);way(411147873););out tags geom;"""
+STADIO, CAMPO, TRIBUNA_EST, ANELLO, FIERA = 478401752, 927885291, 411149113, 411146463, 478401751
+CANCELLO_FIERA = 8763525337
+PADIGLIONI = (411148871, 411147010, 411147074, 411147873)   # il primo è il Padiglione Tobia Granieri
+
+
+def stadio_fiera(elements, city):
+    """Segna le tribune e i padiglioni della Fiera e prepara GEO.sport."""
+    geo, gate = {}, None
+    for el in elements:
+        if el.get('type') == 'way' and el.get('geometry'):
+            geo[el['id']] = Polygon([to_local(g['lon'], g['lat']) for g in el['geometry']]).buffer(0)
+        elif el.get('type') == 'node' and el['id'] == CANCELLO_FIERA:
+            gate = [round(v, 1) for v in to_local(el['lon'], el['lat'])]
+    over = lambda b, p: b['poly'].intersection(p).area > 0.5 * min(b['poly'].area, p.area)
+    stands = [geo[i] for i in (TRIBUNA_EST, ANELLO) if i in geo]
+    gone, pav = 0, 0
+    for b in city:
+        if any(over(b, p) for p in stands):
+            b['kind'], b['height'] = CITY_KIND['tribuna'], 6.0
+            gone += 1
+        elif any(i in geo and over(b, geo[i]) for i in PADIGLIONI):
+            b['kind'], b['height'] = CITY_KIND['padiglione'], 8.5
+            pav += 1
+    ring = lambda i: flat(geo[i].exterior.coords[:-1]) if i in geo else []
+    print(f'  stadio e Fiera: {gone} tribune (diventano gradinate), {pav} padiglioni')
+    return city, {'stadio': ring(STADIO), 'campo': ring(CAMPO), 'tribuna': ring(TRIBUNA_EST), 'anello': ring(ANELLO),
+                  'fiera': ring(FIERA), 'cancello': gate}
 
 
 def name_places(old, city):
@@ -1877,6 +2038,8 @@ def encode(edges, deco, pos, buildings, city, arches, feats, extra):
         'rims': {'east': flat(extra['rims'][0]), 'west': flat(extra['rims'][1])},
         'rioni': extra['rioni'],
         'bosco': extra['bosco'],
+        'botromagno': extra['botromagno'],
+        'sport': extra['sport'],
     }
     lines = ['const GEO = {']
     for k, v in geo.items():
@@ -1962,18 +2125,26 @@ def main():
     print('3. Rete stradale')
     edges, deco, pos = build_network(data, [b['poly'] for b in buildings], bosco_osm)
     buildings, arches = free_roads(edges + deco, pos, buildings)
+    deco = deco_off_roads(edges, deco)
     print('4. Morfologia, quote reali, uso del suolo')
     feats = build_features(data)
     at, ground, light, _, _ = ground_model(dem_at, buildings)
-    cover = land_cover(data, buildings, bosco_osm)
+    rims = extend_rims(feats['river'], at)
+    buildings, bot = botromagno(overpass_cached('rovine', ROVINE_OVERPASS), feats['river'], rims[1], buildings)
+    cover = land_cover(data, buildings, bosco_osm, bot['rock'])
     old = [b for b in buildings if inside(b['poly'].centroid.coords[0], Z0)]
     city = city_buildings([b for b in buildings if not inside(b['poly'].centroid.coords[0], Z0)], cover)
     print(f'  edifici: {len(old)} nel centro storico, {len(city)} nella città')
+    versante(old, bot)
+    city, sport = stadio_fiera(overpass_cached('stadio_fiera', STADIO_FIERA_OVERPASS), city)
     name_places(old, city)
     extra = {
         'ground': ground, 'cover': cover, 'rails': build_rails(data), 'pois': city_pois(osm),
-        'riverY': river_bed(feats['river'], lambda e, n: at(e, n)), 'rims': extend_rims(feats['river'], at),
+        'riverY': river_bed(feats['river'], lambda e, n: at(e, n)), 'rims': rims,
         'rioni': rioni_profile(at), 'bosco': bosco_features(bosco_osm),
+        'sport': sport,
+        'botromagno': {'rovine': [flat(r.exterior.coords[:-1]) for r in bot['ruins']],
+                       'scavi': flat(bot['scavi'].simplify(0.5).exterior.coords[:-1]) if bot['scavi'] is not None else []},
     }
     print('5. Scrittura')
     write_html(encode(edges, deco, pos, old, city, arches, feats, extra))
