@@ -70,6 +70,14 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
   blocco E in tutta la città).
 - **Musica**: solo brani originali generati dal codice (sezione 11b). Niente canzoni o campioni di
   terzi, anche se richiesti: sono protetti e pesano più dell'intero diorama.
+- **Eccezioni approvate dal committente il 01/10/2026 (blocco M2)**: i percorsi a piedi dentro la
+  Fiera di San Giorgio, nel giardino del Casino di Meninni e fino alla Base Scout non sono in OSM
+  (`PERCORSI` in `genera_dati.py`) e si disegnano solo perché chiudono un anello con vie reali;
+  Villa Comunale e Piazza della Repubblica sono pedonali anche dove OSM segna `residential`; tre vie
+  cieche reali si percorrono fino al luogo, con la goccia (`VIE_CIECHE`): la strada della Fiera fino
+  al parcheggio dello stadio, Via Guardialto fino al Casino di Meninni, Via Bari fino alla Cola Cola.
+- **Sottopassi** (blocco M2): dove OSM segna una galleria sotto i binari la via scende in trincea
+  (`Sottopassi`, rampe entro il 18%) e i binari, se serve, salgono di poco; il terreno si ritaglia.
 - Le vie cieche reali della città (`GEO.deco`) si disegnano ma **non si percorrono**. La
   sterrata reale del Castello Svevo è percorribile: con la strada di servizio e la vicinale
   chiude un anello (flag 8, `CASTLE_BOX` in `genera_dati.py`).

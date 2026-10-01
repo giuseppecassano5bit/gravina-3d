@@ -929,7 +929,7 @@ luoghi_m2.detto = False
 # Vie cieche reali che diventano percorribili fino a un punto, con l'inversione a goccia (committente,
 # 01/10/2026, come la strada del Bosco): id OSM della via, punto dove finisce, perché.
 VIE_CIECHE = [
-    (946720266, (-160, 1044)),      # strada della Fiera fino al parcheggio dello stadio (w1340515588)
+    (946720266, (-140, 1044)),      # strada della Fiera fino al parcheggio dello stadio (w1340515588): la goccia resta fuori dalla recinzione
     (1068971736, (1520, -612)),     # Via Guardialto (SP201) fino al Casino di Meninni
     (28355376, (1912, 126)),        # Via Bari fino al monumento alla Cola Cola (OSM w411137509)
 ]
