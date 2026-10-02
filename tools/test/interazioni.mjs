@@ -274,24 +274,30 @@ await advance(5.5);
 const benchBtn = await page.isVisible('#btn-bench');
 check('dopo circa 5 s compare «Esci dalla piazzetta · torna al mezzo»', benchBtn && /torna al mezzo/i.test(await page.textContent('#btn-bench')));
 if (benchBtn) await page.click('#btn-bench');
-await page.waitForTimeout(1500);
+// la via si legge appena finita la dissolvenza: se il mezzo era su un tratto corto (per esempio un vicolo), dopo
+// pochi secondi è già sulla via dopo
+await page.waitForFunction(() => !window.gravina.driver.sitting, null, { timeout: 15000 }).catch(() => {});
+const backAt = await page.evaluate(() => window.gravina.driver.edge?.name);
+await page.waitForTimeout(600);
 await advance(2);
 f = await foot();
-// (la Villa non ha ingressi a piedi su Corso Vittorio Emanuele: il mezzo aspetta dove si è scesi, qui Piazza Pellicciari)
-check('il pulsante riporta al mezzo, dove era parcheggiato, e si riparte', !f.onFoot && !f.figure && f.speed > 0.5 && f.street === bench.car && await page.isHidden('#btn-bench'), f.street);
+// (la Villa non ha ingressi a piedi su Corso Vittorio Emanuele: il mezzo aspetta dove si è scesi, qui vicino a Piazza Pellicciari)
+check('il pulsante riporta al mezzo, dove era parcheggiato, e si riparte', !f.onFoot && !f.figure && f.speed > 0.5 && backAt === bench.car && await page.isHidden('#btn-bench'), `${backAt}, poi ${f.street}`);
 
 // Vie cieche reali con la goccia (blocco M2): dall'elenco dei luoghi si arriva in auto e si riparte.
 for (const [name, at] of [['Casino di Meninni', [1572, -536]], ['Monumento alla Cola Cola', [1893, 102]], ['Fiera di San Giorgio', [-53, 948]]]) {
   await page.keyboard.press('p');
   await page.click(`.poi >> text=${name}`);
-  await page.waitForTimeout(900);
-  await advance(1);
+  // con SwiftShader, a fine giro, costruire i riquadri del luogo può richiedere qualche secondo
+  await page.waitForFunction(() => window.gravina.phase === 'drive', null, { timeout: 20000 }).catch(() => {});
+  await page.waitForTimeout(300);
+  await until(() => page.evaluate((n) => document.getElementById('card-title').textContent === n, name), 4);
   const a = await page.evaluate(() => { const d = window.gravina.driver; return { phase: window.gravina.phase, odo: d.odometer, onFoot: d.onFoot, e: d.position.x, n: -d.position.z, title: document.getElementById('card-title').textContent }; });
   await advance(60);
   const b = await page.evaluate(() => window.gravina.driver.odometer);
   const dist = Math.hypot(a.e - at[0], a.n - at[1]);
   check(`dall’elenco si arriva in auto a ${name} e si riparte dalla goccia`, a.phase === 'drive' && !a.onFoot && dist < 120 && b - a.odo > 200 && a.title === name,
-    `a ${dist.toFixed(0)} m, ${(b - a.odo).toFixed(0)} m in 60 s`);
+    `a ${dist.toFixed(0)} m, ${(b - a.odo).toFixed(0)} m in 60 s${a.phase === 'drive' && a.title === name ? '' : `, ${a.phase}, scheda «${a.title}»`}`);
 }
 
 await page.reload();

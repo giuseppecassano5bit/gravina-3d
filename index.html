@@ -443,6 +443,9 @@
   .vcard__icon { grid-row: span 2; width: 52px; height: 26px; }
   .vcard__name { font: 700 0.95rem/1.15 var(--font-sign); color: var(--marble); }
   .vcard__tag { font: 500 0.74rem/1.25 var(--font-sign); color: #CDBB98; }
+  .vcard__short { display: none; }
+  /* blocco M3: la mongolfiera non è un'auto, ha una riga tutta per sé */
+  .vcard--air { grid-column: 1 / -1; }
 
   /* ── Pausa ──────────────────────────────────────────────────────────── */
   .pause-btn {
@@ -578,7 +581,7 @@
 
   /* ── Adattamento a schermi stretti (telefono in verticale) ──────────── */
   @media (max-width: 640px) {
-    .start { align-items: end; padding-top: calc(var(--gutter) + var(--safe-top)); background: linear-gradient(0deg, rgba(22, 24, 36, 0.92) 0%, rgba(22, 24, 36, 0.7) 52%, rgba(22, 24, 36, 0) 78%); }
+    .start { align-items: end; padding-top: calc(var(--gutter) + var(--safe-top)); background: linear-gradient(0deg, rgba(22, 24, 36, 0.92) 0%, rgba(22, 24, 36, 0.78) 54%, rgba(22, 24, 36, 0) 70%); }
     .start__panel { gap: 0.75rem; max-height: calc(100dvh - var(--gutter) - var(--safe-top)); overflow-y: auto; }
     .start h1 { font-size: clamp(2.1rem, 10.5vw, 2.8rem); }
     .lede { font-size: 0.93rem; line-height: 1.45; }
@@ -594,11 +597,9 @@
     .about__body { padding: 1.1rem 0.6rem calc(1.6rem + var(--safe-bottom)); font-size: 1rem; }
     .about__keys { grid-template-columns: minmax(0, 1fr); gap: 0.1rem; }
     .about__keys dd { margin-bottom: 0.6rem; }
-    .vcard { min-height: 50px; grid-template-columns: 44px minmax(0, 1fr); padding: 0.4rem 0.55rem; column-gap: 0.5rem; }
-    .start .vcard__tag { display: none; }
-    .vcard__icon { width: 44px; height: 22px; }
-    .vcard__name { font-size: 0.88rem; }
-    .vcard__tag { font-size: 0.68rem; }
+    .start { padding-bottom: calc(var(--gutter) + var(--safe-bottom)); }
+    .start__panel { gap: 0.65rem; }
+    .attribution:not(.attribution--hud):not(.attribution--map):not(.attribution--overlay) { font-size: 0.62rem; line-height: 1.35; }
     .minimap { width: 104px; height: 104px; }
     .attribution--hud { top: calc(var(--gutter) + 104px + 4px + var(--safe-top)); font-size: 0.6rem; }
     .pause-btn { top: calc(var(--gutter) + 104px + 24px + var(--safe-top)); width: 48px; height: 48px; padding: 0; justify-content: center; }
@@ -650,8 +651,7 @@
     .start h1 { font-size: 1.9rem; }
     .start h1 small { display: inline; margin-right: 0.4em; }
     .lede, .controls-hint { display: none; }
-    .vcard { min-height: 48px; }
-    .vcard__tag { display: none; }
+    .attribution:not(.attribution--hud):not(.attribution--map):not(.attribution--overlay) { font-size: 0.6rem; line-height: 1.35; }
     .credit { padding-top: 0.5rem; }
     .about { width: min(36rem, 72vw); }
     .about__head { padding-top: 0.55rem; padding-bottom: 0.55rem; }
@@ -671,6 +671,26 @@
     .sign { padding: 0.4rem 0.75rem 0.45rem 0.6rem; }
     .touch-arrow { display: none !important; }   /* in orizzontale bastano i cartelli */
     .pause__sheet { width: min(400px, 58vw); }
+  }
+
+  /* ── Telefono, verticale e orizzontale (blocco M3): con cinque mezzi le schede diventano
+   *    tessere su una sola riga, sagoma sopra e nome breve sotto; il nome intero resta per
+   *    i lettori di schermo. Il pannello iniziale si abbassa e il mezzo resta in vista. */
+  @media (max-width: 640px), (max-height: 520px) {
+    .picker { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.4rem; }
+    .picker__legend { margin-bottom: 0.45rem; }
+    .vcard {
+      grid-template-columns: minmax(0, 1fr); justify-items: center; row-gap: 0.3rem;
+      min-height: 62px; padding: 0.5rem 0.15rem 0.45rem; text-align: center;
+    }
+    .vcard--air { grid-column: auto; }
+    .vcard__icon { grid-row: auto; width: 46px; height: 23px; }
+    .vcard__name, .vcard__tag { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    .vcard__short {
+      display: block; max-width: 100%;
+      font: 700 clamp(0.62rem, 2.9vw, 0.76rem)/1.1 var(--font-sign); letter-spacing: 0.01em; color: var(--marble);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
   }
 
   /* Sui touch i suggerimenti da tastiera non servono. */
@@ -697,7 +717,7 @@
   <div class="start__panel" id="start-panel">
     <p class="eyebrow">Centro storico · 40°49′ N 16°25′ E</p>
     <h1 id="start-title"><small>Benvenuti a</small>Gravina in Puglia</h1>
-    <p class="lede">Si parte dal Ponte Acquedotto: scegli il mezzo e percorri le vie reali del centro storico, al calar del sole.</p>
+    <p class="lede" id="start-lede">Si parte dal Ponte Acquedotto: scegli il mezzo e percorri le vie reali del centro storico, al calar del sole.</p>
     <noscript>
       <div class="noscript">
         <p><strong>Gravina 3D</strong> è un diorama 3D interattivo del centro storico di Gravina in Puglia, costruito sulle vie e sugli edifici reali di OpenStreetMap. Per visitarlo servono JavaScript e WebGL attivi.</p>
@@ -1002,9 +1022,11 @@ const CONFIG = {
     /**
      * Vetrina: durata (s) del primo piano del mezzo, del volo, del campo lungo sul ponte.
      * Campo lungo, rispetto alla testata est del ponte: [di lato lungo il ponte (+ verso ovest),
-     * indietro verso sud, in alto, punto guardato lungo il ponte], in orizzontale e in verticale.
+     * indietro verso sud, in alto, punto guardato lungo il ponte, e se servono la sua quota (−3) e la
+     * sua distanza verso sud (−2)], in orizzontale e in verticale. In verticale (blocco M3) è un campo
+     * medio sul mezzo, che arriva alla testata da nord-est accanto alla Fontana della Stella.
      */
-    showroom: { close: 9, move: 3.5, wide: 10, landscape: [26, 56, 3, 8], portrait: [18, 82, 8, 6] },
+    showroom: { close: 9, move: 3.5, wide: 10, landscape: [40, 100, 0, 30], portrait: [12, 14, 6, -5, 0.5, -8.5] },
     /** Mongolfiera: giro largo attorno al pallone (distanza, inclinazione in gradi, giri al minuto) e vista dalla cesta. */
     balloon: { dist: 52, elev: 14, rpm: 0.45, minDist: 26, maxDist: 160, eye: 1.75, down: 16 },
   },
@@ -7225,24 +7247,24 @@ function forestAmount(e, n) {
  */
 const VEHICLES = [
   {
-    id: 'panda', name: 'Fiat Panda 4x4', tag: '1999 · trazione integrale Steyr-Puch', color: '#b3261e', pace: 0.9,
+    id: 'panda', name: 'Fiat Panda 4x4', short: 'Panda 4x4', tag: '1999 · trazione integrale Steyr-Puch', color: '#b3261e', pace: 0.9,
     icon: { body: 'M3 25.4V14.5L3.9 5.8l1.3-.5h32.5l9.1 8.9 13 1 1.2 1.1v9.1h-4.3a6.2 6.2 0 0 0-12.3 0H19.6a6.2 6.2 0 0 0-12.3 0z', wheels: [[13.5, 25.6, 4.6], [50.5, 25.6, 4.6]] },
   },
   {
-    id: 'rs6', name: 'Audi RS6 Avant', tag: 'Station wagon · V8 biturbo', color: '#7f8386', pace: 1.1,
+    id: 'rs6', name: 'Audi RS6 Avant', short: 'RS6 Avant', tag: 'Station wagon · V8 biturbo', color: '#7f8386', pace: 1.1,
     icon: { body: 'M3 28.1v-8.7l1.2-1.2 4.1-3.9 1.7-.4 21.1-.2 12.7 6 15.6 2.3 1.6 1.3v4.8h-6.3v-1.8a5 5 0 0 0-10.1 0v1.8H20.7v-1.8a5 5 0 0 0-10.1 0v1.8z', wheels: [[15.6, 26.3, 4], [49.6, 26.3, 4]] },
   },
   {
-    id: 'huracan', name: 'Lamborghini Huracán', tag: 'Supersportiva · V10 aspirato', color: '#f08a12', pace: 1.2,
+    id: 'huracan', name: 'Lamborghini Huracán', short: 'Huracán', tag: 'Supersportiva · V10 aspirato', color: '#f08a12', pace: 1.2,
     icon: { body: 'M3 28.7v-9.6l2-1.3 18.4-2 5-.5 13.2 5.1 16.7 3.6 2.7 1.6v3.1h-7.1v-2.5a5 5 0 0 0-10 0v2.5H20v-2.7a5.2 5.2 0 0 0-10.4 0v2.7z', wheels: [[14.8, 26, 4.3], [48.9, 26.2, 4.1]] },
   },
   {
-    id: 'deere', name: 'Trattore John Deere', tag: 'Il “motore” di campagna', color: '#367c2b', pace: 0.62,
+    id: 'deere', name: 'Trattore John Deere', short: 'Trattore', tag: 'Il “motore” di campagna', color: '#367c2b', pace: 0.62,
     icon: { body: 'M9 21V3h17v10h28l3 2v8H9z', wheels: [[18, 22, 9], [51, 25, 6]] },
   },
   // Blocco M3: il quinto mezzo vola su un giro fisso (sezione 8b) e non segue le vie.
   {
-    id: 'balloon', name: 'Mongolfiera', tag: 'Il giro da Botromagno sopra il centro storico', color: '#b5552f', pace: 1, air: true,
+    id: 'balloon', name: 'Mongolfiera', short: 'Mongolfiera', tag: 'Il giro da Botromagno sopra il centro storico', color: '#b5552f', pace: 1, air: true,
     icon: { body: 'M32 1.5c-7.2 0-12.5 4.6-12.5 10.6 0 4.6 3.4 8.3 8.5 11.4h8c5.1-3.1 8.5-6.8 8.5-11.4C44.5 6.1 39.2 1.5 32 1.5zM28.6 24.6h6.8l-.5 1.2h-5.8zM28.8 26.8h6.4v4.4h-6.4z', wheels: [] },
   },
 ];
@@ -8580,9 +8602,9 @@ class CameraRig {
    * tre quarti posteriore del mezzo fermo, dal lato più aperto (senza case, più
    * in basso), e davanti al mezzo si vede la strada che lo aspetta. Poi, se c'è
    * il ponte (`bridge`: testata est, asse verso ovest e lato sud), un volo a gru
-   * porta a un campo lungo dal canyon, di tre quarti da sud-est: il Ponte
-   * Acquedotto in prospettiva con le arcate su due ordini e il mezzo sulla
-   * testata. Poi si torna al primo piano, e così via.
+   * porta a un campo lungo dal canyon, da sud-ovest: il Ponte Acquedotto con
+   * le arcate su due ordini (in verticale un campo medio sul mezzo vicino alla
+   * testata). Poi si torna al primo piano, e così via.
    */
   showroom(driver, bridge = null) {
     this.mode = 'showroom';
@@ -8712,7 +8734,9 @@ class CameraRig {
     const R = 3.4 + length * 1.3, H = 2.2 + height * 1.2;
     const yaw = driver.yaw + this.side * THREE.MathUtils.degToRad(154 + 16 * Math.sin(this.t * 0.17));
     this._wantPos.set(car.x + Math.sin(yaw) * R, car.y + H, car.z + Math.cos(yaw) * R);
-    const ahead = this.camera.aspect < 1 ? 3 : 11;                   // in verticale il mezzo resta al centro
+    // in verticale il mezzo resta al centro; sul telefono in orizzontale il pannello è largo e il mezzo
+    // deve stare nella parte libera, a destra
+    const ahead = this.camera.aspect < 1 ? 3 : innerHeight <= 520 ? 5 : 11;
     this._wantTarget.set(car.x + f.x * ahead, car.y + 0.4, car.z + f.z * ahead);
     if (!this.bridge) return;
     // Campo lungo sul ponte, con un volo a gru tra le due inquadrature (w: 0 primo piano, 1 campo lungo)
@@ -8720,11 +8744,12 @@ class CameraRig {
     const w = smoothstep(S.close, S.close + S.move, u) * (1 - smoothstep(cycle - S.move, cycle, u));
     if (w <= 0) return;
     const { head, along, south } = this.bridge, drift = Math.sin(this.t * 0.11) * 3;
-    // Dal canyon, a sud: il ponte con le arcate verso sinistra, il mezzo sulla testata a destra.
-    // In verticale lo schermo è stretto: la camera si allontana per starci tutti e due.
-    const [side, back, up, look] = this.camera.aspect < 1 ? S.portrait : S.landscape;
+    // Dal canyon, a sud-ovest: il ponte intero con le arcate su due ordini, oltre la collina della sponda est.
+    // In verticale lo schermo è stretto e il ponte non ci sta col mezzo: un campo medio dalla sponda,
+    // il mezzo che scende verso la testata accanto alla Fontana della Stella (blocco M3, pose rifatte).
+    const [side, back, up, look, lookUp = -3, lookBack = -2] = this.camera.aspect < 1 ? S.portrait : S.landscape;
     this._showPos.copy(head).addScaledVector(along, side + drift).addScaledVector(south, back).setY(head.y + up);
-    this._showTarget.copy(head).addScaledVector(along, look + drift * 0.5).addScaledVector(south, -2).setY(head.y - 3);
+    this._showTarget.copy(head).addScaledVector(along, look + drift * 0.5).addScaledVector(south, lookBack).setY(head.y + lookUp);
     this._wantPos.lerp(this._showPos, w).y += Math.sin(Math.PI * w) * 9;   // la gru sale sopra le case
     this._wantTarget.lerp(this._showTarget, w);
   }
@@ -9412,7 +9437,7 @@ class UI {
     const $ = (id) => document.getElementById(id);
     this.el = {
       start: $('start'), startPanel: $('start-panel'), btnStart: $('btn-start'), status: $('status'),
-      startPicker: $('start-picker'), controlsHint: $('controls-hint'),
+      startPicker: $('start-picker'), controlsHint: $('controls-hint'), lede: $('start-lede'),
       btnFollow: $('btn-follow'), btnBench: $('btn-bench'), btnView: $('btn-view'), btnViewLabel: $('btn-view-label'), btnRadio: $('btn-radio'), radioLabel: $('radio-label'), btnNext: $('btn-next'), radioVol: $('radio-vol'),
       hud: $('hud'), plate: $('plaque'), street: $('plaque-street'), dest: $('plaque-dest'), minimapBtn: $('minimap-btn'), btnPause: $('btn-pause'),
       card: $('card'), cardKicker: $('card-kicker'), cardTitle: $('card-title'), cardText: $('card-text'),
@@ -9444,24 +9469,28 @@ class UI {
     for (const [el, group] of [[this.el.startPicker, 'mezzo-iniziale'], [this.el.pausePicker, 'mezzo-pausa']]) {
       el.replaceChildren(...vehicles.map((v) => {
         const card = document.createElement('label');
-        card.className = 'vcard';
+        card.className = v.air ? 'vcard vcard--air' : 'vcard';
         card.dataset.id = v.id;
-        card.innerHTML = `<input type="radio" name="${group}" value="${v.id}">${this.#icon(v)}<span class="vcard__name"></span><span class="vcard__tag"></span>`;
+        card.innerHTML = `<input type="radio" name="${group}" value="${v.id}">${this.#icon(v)}<span class="vcard__name"></span><span class="vcard__tag"></span><span class="vcard__short" aria-hidden="true"></span>`;
         card.querySelector('.vcard__name').textContent = v.name;
         card.querySelector('.vcard__tag').textContent = v.tag;
+        card.querySelector('.vcard__short').textContent = v.short;
         card.querySelector('input').addEventListener('change', () => onSelect(v.id));
         return card;
       }));
     }
   }
 
-  /** Evidenzia il mezzo scelto in entrambi i menu. */
+  /** Evidenzia il mezzo scelto in entrambi i menu; con la mongolfiera la frase d'apertura dice da dove si decolla. */
   markVehicle(id) {
     for (const card of document.querySelectorAll('.vcard')) {
       const on = card.dataset.id === id;
       card.classList.toggle('is-selected', on);
       card.querySelector('input').checked = on;
     }
+    this.el.lede.textContent = VEHICLES.find((v) => v.id === id)?.air
+      ? 'Si decolla da Botromagno: in mongolfiera sorvoli la necropoli, il Ponte Acquedotto e il centro storico, al calar del sole.'
+      : 'Si parte dal Ponte Acquedotto: scegli il mezzo e percorri le vie reali del centro storico, al calar del sole.';
   }
 
   enableStart(onStart) {
