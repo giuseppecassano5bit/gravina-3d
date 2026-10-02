@@ -107,7 +107,7 @@ Misure di oggi (branch `main`) su Mac M4, 1280×720 a 2×, GPU vera, browser int
 
 | Voce | Oggi | Tetto dopo il blocco C |
 |---|---|---|
-| `index.html` | 399 KB (127 KB compresso) | ≤ 900 KB (≤ 280 KB compresso); dal 30/09/2026 ≤ 1,2 MB (≤ 360 KB compresso), deciso dal committente |
+| `index.html` | 399 KB (127 KB compresso) | ≤ 900 KB (≤ 280 KB compresso); dal 30/09/2026 ≤ 1,2 MB (≤ 360 KB compresso), dal 03/10/2026 **≤ 450 KB compressi**, deciso dal committente |
 | Triangoli nella scena | 267 000 (terreno 72k, finestre 50k, edifici 44k, alberi 35k, strade 32k, dettagli 15k) | ≤ 650 000 |
 | Triangoli per fotogramma | 266 000 | ≤ 400 000 su PC, ≤ 250 000 su telefono |
 | Draw call | 37–38 | ≤ 90 su PC, ≤ 70 su telefono |
@@ -364,7 +364,7 @@ licenze), `CLAUDE.md` (nuove regole ed eccezioni).
 
 ### Seconda parte (decisioni del committente del 30/09/2026)
 
-Ordine: **I → D → E → L → M → N** (M diviso in M1, M2, M3 il 01/10/2026), un blocco alla volta, ognuno col suo branch e la sua PR.
+Ordine: **I → D → E → L → M → N** (M diviso in M1, M2, M3 il 01/10/2026; N in N1, N2, N3 il 03/10/2026), un blocco alla volta, ognuno col suo branch e la sua PR.
 Decisioni già prese:
 1. **Area Quercus** = l'ex area ristoro «Marcuccio»; in OSM «Rifugio Bosco Difesa Grande»
    (w477739267), dove oggi finisce la strada del Bosco.
@@ -444,13 +444,37 @@ Il blocco M si divide in tre, ognuno col suo branch e la sua PR.
 - Prove: giro campionato ogni 5 m in `simula.mjs`, decollo, scheda, cambio mezzo e fine del giro
   in `interazioni.mjs`, vista «mongolfiera» nel punto peggiore del giro.
 
-### N · Cartolina, giro guidato e ritocchi (`fase-3-4-n-cartolina-giro`)
+### N1, N2, N3 (al posto del blocco N; decisioni del committente del 03/10/2026)
+Il blocco N si divide in tre, ognuno col suo branch, il suo piano breve e la sua PR. Il tetto del
+peso sale a 450 KB compressi (sezione 3); triangoli e draw call restano quelli di prima.
+
+#### N1 · Centro storico vero (`fase-3-4-n1-centro-storico`)
+- **Salite e discese vere** (scelta del committente fra due proposte): il terreno del centro storico
+  segue le quote reali Copernicus **come guida** (smussate, senza le celle vicine al ciglio, corrette
+  per i tetti e ancorate a ciglio, ponte, scalinate e rioni) invece dell'altopiano quasi piatto;
+  vie del mezzo entro il 18%; canyon, cigli, falesia, gradoni e discesa dei rioni restano a mano.
+- Effetti che fanno sentire la pendenza: camera più bassa in salita e in discesa, case con lo
+  zoccolo a valle e i gradini alle porte, muretti e ringhiere dove la via si stacca dal terreno.
+- **Strade**: chianche, asfalto e ciottoli disegnati dallo shader secondo la superficie OSM; tombini.
+- **Edifici**: balconi con ringhiere, portoni in legno, davanzali, cornicioni, pluviali, comignoli,
+  vasi di fiori; istanziati e solo nella versione vicina dei riquadri.
+- **Arredo**: le 6 fontanine e le 3 panchine OSM, alberelli e fioriere solo dove le foto li mostrano.
+
+#### N2 · Facciate di chiese e scuole (`fase-3-4-n2-facciate`)
+- Santa Teresa, Santa Sofia, San Nicola, Addolorata (e Santa Lucia, se serve) rifatte sulle foto;
+  ritocchi alle chiese già rifatte dove le foto mostrano differenze; chiese della città coi campanili
+  se si vedono. Ogni elemento deve vedersi in una foto, altrimenti resta semplice.
+- Scuole più riconoscibili: ingresso coi gradini, finestre a nastro, scale antincendio, palestra,
+  cancello; la scritta col nome solo se si vede su Street View, generata dal codice.
+
+#### N3 · Cartolina, giro guidato e ritocchi (`fase-3-4-n3-cartolina-giro`)
 - **Cartolina**: immagine ad alta risoluzione con cornice (Gravina in Puglia, luogo, indirizzo del
   sito, attribuzioni OSM e Copernicus in breve), Web Share sul telefono; credito deciso dal committente.
 - **Giro guidato dei monumenti**: il mezzo sceglie le vie, anche i tratti a piedi; «Prossima
   tappa», scheda a ogni tappa, «Esci dal giro». Prova sulle prime tre tappe in `interazioni.mjs`.
-- **Ritocchi**: schermata iniziale in orizzontale sul telefono, camera dopo il teletrasporto
-  (`rig.snap`), schede lunghe in verticale.
+- **Ritocchi**: camera dopo il teletrasporto (`rig.snap`), schede lunghe in verticale (anche quella
+  dei Caduti in panchina), schermata iniziale in orizzontale sul telefono, Street View rimasto da M2,
+  memoria JS su PC (prima le strutture dati, senza toccare la città).
 
 ---
 
