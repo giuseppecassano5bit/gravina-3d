@@ -7209,31 +7209,32 @@ function forestAmount(e, n) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
- * 7. I MEZZI: Fiat Panda 4x4 (1999), Audi RS6 Avant, Lamborghini Huracán
- *    e trattore John Deere.
- *    Solo primitive (esaedri deformati, cilindri, profili estrusi), quote
- *    reali. Il muso punta verso +z e le ruote poggiano a y = 0.
- *    Sono interpretazioni stilizzate e senza loghi: i nomi sono marchi dei
+ * 7. I MEZZI: Fiat Panda 4x4 (1999), Audi RS6 Avant, Lamborghini Huracán,
+ *    trattore John Deere e, dal blocco M3, la mongolfiera.
+ *    Realistici nello stile (blocco M3): carrozzerie per sezioni, abitacolo
+ *    col guidatore, quote reali. Il muso punta verso +z e le ruote poggiano
+ *    a y = 0. Sono interpretazioni senza loghi: i nomi sono marchi dei
  *    rispettivi proprietari.
  * ═══════════════════════════════════════════════════════════════════════ */
 
 /**
  * I mezzi tra cui scegliere. `pace` moltiplica le velocità di CONFIG.drive:
  * il trattore va piano, la Lamborghini è la più svelta (sempre a passo da
- * centro storico). `icon`: sagoma di profilo per i menu (viewBox 64 × 32).
+ * centro storico). `icon`: sagoma di profilo per i menu (viewBox 64 × 32),
+ * dal blocco M3 ricavata dalle sezioni della carrozzeria, in proporzione.
  */
 const VEHICLES = [
   {
     id: 'panda', name: 'Fiat Panda 4x4', tag: '1999 · trazione integrale Steyr-Puch', color: '#b3261e', pace: 0.9,
-    icon: { body: 'M4 24V9l2-2h38l7 7 10 1.5V24z', wheels: [[15, 25.5, 5.5], [50, 25.5, 5.5]] },
+    icon: { body: 'M3 25.4V14.5L3.9 5.8l1.3-.5h32.5l9.1 8.9 13 1 1.2 1.1v9.1h-4.3a6.2 6.2 0 0 0-12.3 0H19.6a6.2 6.2 0 0 0-12.3 0z', wheels: [[13.5, 25.6, 4.6], [50.5, 25.6, 4.6]] },
   },
   {
     id: 'rs6', name: 'Audi RS6 Avant', tag: 'Station wagon · V8 biturbo', color: '#7f8386', pace: 1.1,
-    icon: { body: 'M2 24v-8l6-8h29l9 5 14 1.5 2 3.5v6z', wheels: [[14, 25.5, 5.5], [50, 25.5, 5.5]] },
+    icon: { body: 'M3 28.1v-8.7l1.2-1.2 4.1-3.9 1.7-.4 21.1-.2 12.7 6 15.6 2.3 1.6 1.3v4.8h-6.3v-1.8a5 5 0 0 0-10.1 0v1.8H20.7v-1.8a5 5 0 0 0-10.1 0v1.8z', wheels: [[15.6, 26.3, 4], [49.6, 26.3, 4]] },
   },
   {
     id: 'huracan', name: 'Lamborghini Huracán', tag: 'Supersportiva · V10 aspirato', color: '#f08a12', pace: 1.2,
-    icon: { body: 'M2 24v-6l2-3 18-3 10-4.5h8l10 4.5 12 4v8z', wheels: [[13, 25.5, 5.5], [50, 25.5, 5.5]] },
+    icon: { body: 'M3 28.7v-9.6l2-1.3 18.4-2 5-.5 13.2 5.1 16.7 3.6 2.7 1.6v3.1h-7.1v-2.5a5 5 0 0 0-10 0v2.5H20v-2.7a5.2 5.2 0 0 0-10.4 0v2.7z', wheels: [[14.8, 26, 4.3], [48.9, 26.2, 4.1]] },
   },
   {
     id: 'deere', name: 'Trattore John Deere', tag: 'Il “motore” di campagna', color: '#367c2b', pace: 0.62,
