@@ -4787,7 +4787,10 @@ const Tiles = {
       const La = [...side(a, L, 1)], Ra = [...side(a, R, -1)], Lb = [...side(b, L, 1)], Rb = [...side(b, R, -1)];
       if (z0) { tb.quad(La, Ra, Rb, Lb, edge.foot ? pal.foot : pal.paving, plain, [0, 1, 0]); continue; }
       // blocco M2: i tratti a piedi lastricati fuori dal centro storico (parchi, scale, Fiera) in pietra chiara
-      if (edge.walk && !edge.dirt) { tb.quad(La, Ra, Rb, Lb, pal.stone ??= new THREE.Color('#dcd6c8'), plain, [0, 1, 0]); continue; }
+      pal.stone ??= new THREE.Color('#dcd6c8');
+      // blocco M3: nel sottopassaggio pedonale della stazione, da vicino, gradini veri dove la rampa supera il 12%
+      if (edge.walk && !far && edge.under?.chain.walk && this._steps(tb, La, Ra, Lb, Rb, pal, plain)) continue;
+      if (edge.walk && !edge.dirt) { tb.quad(La, Ra, Rb, Lb, pal.stone, plain, [0, 1, 0]); continue; }
       const sa = a * edge.step, sb = b * edge.step, h = half + dash;
       const info = [kind, -half, h, sa, kind, half, h, sa, kind, half, h, sb, kind, -half, h, sb];
       tb.quad(La, Ra, Rb, Lb, white, info, [0, 1, 0]);
@@ -4809,6 +4812,27 @@ const Tiles = {
         tb.tri([node.pos.x, y, node.pos.z], [node.pos.x + Math.cos(a0) * r, ry(k), node.pos.z + Math.sin(a0) * r], [node.pos.x + Math.cos(a1) * r, ry(k + 1), node.pos.z + Math.sin(a1) * r], color, info, [0, 1, 0]);
       }
     }
+  },
+
+  /**
+   * Gradini (blocco M3) al posto della rampa tra i bordi La–Ra e Lb–Rb: alzate da 16 cm, pedate
+   * uguali, più il frontalino di ogni alzata. Falso (e niente gradini) se la pendenza resta entro il 12%.
+   */
+  _steps(tb, La, Ra, Lb, Rb, pal, info) {
+    const run = Math.hypot((La[0] + Ra[0] - Lb[0] - Rb[0]) / 2, (La[2] + Ra[2] - Lb[2] - Rb[2]) / 2), rise = Lb[1] - La[1];
+    if (run < 0.5 || Math.abs(rise) <= 0.12 * run) return false;
+    const n = Math.max(1, Math.round(Math.abs(rise) / 0.16)), riser = pal.riser ??= new THREE.Color('#b9b09e');
+    const at = (A, B, u, y) => [lerp(A[0], B[0], u), y, lerp(A[2], B[2], u)];
+    const fx = (Lb[0] + Rb[0] - La[0] - Ra[0]) / 2 / run, fz = (Lb[2] + Rb[2] - La[2] - Ra[2]) / 2 / run, up = Math.sign(rise);
+    // quote su una griglia comune di 16 cm: i gradini di due tratti vicini combaciano
+    const q = (k) => Math.round((La[1] + (rise * (k + 0.5)) / n) / 0.16) * 0.16;
+    for (let k = 0; k < n; k++) {
+      const u0 = k / n, u1 = (k + 1) / n, y = q(k);
+      tb.quad(at(La, Lb, u0, y), at(Ra, Rb, u0, y), at(Ra, Rb, u1, y), at(La, Lb, u1, y), k % 2 ? pal.stone : pal.tread ??= riser.clone().lerp(pal.stone, 0.75), info, [0, 1, 0]);
+      const y2 = k + 1 < n ? q(k + 1) : y;                               // alzata verso la pedata dopo
+      if (y2 !== y) tb.quad(at(La, Lb, u1, Math.min(y, y2)), at(Ra, Rb, u1, Math.min(y, y2)), at(Ra, Rb, u1, Math.max(y, y2)), at(La, Lb, u1, Math.max(y, y2)), riser, info, [-fx * up, 0, -fz * up]);
+    }
+    return true;
   },
 
   /** Quota della maglia vicina nel punto (e, n), dai vertici del riquadro costruito; altrimenti quella del terreno. */
