@@ -96,9 +96,10 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N, dettagli e decisioni nel
       - scale vere (gradini) nel sottopassaggio della stazione, oggi rampe;
       - `DESIGN.md`: sezioni su sottopassi, parchi, sosta in panchina, suoni del bosco;
       - suoni del bosco: farli ascoltare al committente; memoria JS su PC 166 MB (tetto 150).
-- [ ] **M3 · mezzi realistici e mongolfiera** (`fase-3-4-m3-mezzi-mongolfiera`): auto per sezioni
-      con guidatore, stop e frecce senza draw call in più; mongolfiera come quinto mezzo, giro fisso
-      da Botromagno sopra il centro storico, prima e terza persona.
+- [ ] **M3 · mezzi realistici e mongolfiera** (`fase-3-4-m3-mezzi-mongolfiera`, in corso dal
+      02/10/2026, insieme al resto di M2): auto per sezioni con guidatore, stop e frecce senza draw
+      call in più; mongolfiera come quinto mezzo, giro fisso da Botromagno sopra il centro storico,
+      prima e terza persona.
 - [ ] **N · cartolina, giro guidato e ritocchi** (`fase-3-4-n-cartolina-giro`).
 - Versione in inglese: non ora.
 
