@@ -86,9 +86,32 @@ const r = await page.evaluate(() => {
       }
     }
   });
-  return { problemi: g.problems, monumenti: g.landmarks.length, casesullastrada: invasioni, esempi, dettaglisullastrada: dettagli, simulazione: g.driver.simulate(3600, { step: 1 / 20 }) };
+  // Blocco M3: il giro della mongolfiera campionato ogni 5 m: quota minima sopra tetti, monumenti e terreno
+  // (fuori dal decollo e dall'atterraggio), dentro la zolla della città, niente NaN, fuori dal bosco
+  // (forestAmount 0); la cesta a terra a Botromagno non sta sulla carreggiata (nessuna via entro 3,2 m).
+  const V = g.Volo, B = g.CONFIG.balloon, [z0e, z1e, z0n, z1n] = g.GEO.meta.zolle[0], p = new g.THREE.Vector3();
+  const giro = { metri: Math.round(V.L), minuti: +(V.L / B.speed / 60).toFixed(1), sottoQuota: 0, fuoriZolla: 0, nan: 0, bosco: 0, quotaMin: Infinity, quotaMax: 0, margineMin: Infinity };
+  for (let s = 0; s <= V.L; s += 5) {
+    V.at(s, p);
+    const e = p.x, n = -p.z, k = Math.round(s / V.step);
+    if (![e, n, p.y].every(Number.isFinite)) { giro.nan++; continue; }
+    if (e < z0e || e > z1e || n < z0n || n > z1n) giro.fuoriZolla++;
+    if (g.forestAmount(e, n) > 0) giro.bosco++;
+    if (s > B.free[0] && s < V.L - B.free[1]) {
+      const q = p.y - g.Terrain.heightAt(e, n), margin = p.y - (V.need[k] - B.clearance);
+      giro.quotaMin = Math.min(giro.quotaMin, Math.round(q)); giro.quotaMax = Math.max(giro.quotaMax, Math.round(q));
+      giro.margineMin = Math.min(giro.margineMin, +margin.toFixed(1));
+      if (margin < B.clearance - 0.5) giro.sottoQuota++;
+    }
+  }
+  V.at(0, p);
+  const cesta = g.network.closestSample(p.x, -p.z, () => false);
+  giro.cestaDallaVia = +(cesta.d - cesta.edge.width / 2).toFixed(1);
+  return { problemi: g.problems, monumenti: g.landmarks.length, casesullastrada: invasioni, esempi, dettaglisullastrada: dettagli, giro, simulazione: g.driver.simulate(3600, { step: 1 / 20 }) };
 });
 console.log(JSON.stringify(r, null, 2));
-const ok = report(logs) && r.problemi.length === 0 && r.casesullastrada === 0 && Object.keys(r.dettaglisullastrada).length === 0;
+const G = r.giro;
+const ok = report(logs) && r.problemi.length === 0 && r.casesullastrada === 0 && Object.keys(r.dettaglisullastrada).length === 0
+  && G.sottoQuota === 0 && G.fuoriZolla === 0 && G.nan === 0 && G.bosco === 0 && G.cestaDallaVia > 3.2;
 await browser.close();
 process.exit(ok ? 0 : 1);

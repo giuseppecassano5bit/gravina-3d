@@ -299,6 +299,70 @@ await page.waitForFunction(() => !document.getElementById('btn-start').disabled,
 const kept = await page.evaluate(() => document.querySelector('#start-picker .vcard.is-selected')?.dataset.id);
 check('alla riapertura resta il mezzo scelto', kept === 'deere', kept);
 
+// Blocco M3: la mongolfiera, quinto mezzo. Decollo da Botromagno, volo, scheda, prima e terza persona,
+// pausa, teletrasporto (sul giro e lontano), cambio mezzo e fine del giro con l'auto che riparte dal decollo.
+const bal = () => page.evaluate(() => {
+  const g = window.gravina, f = g.flight, p = f.position;
+  return { mode: g.mode, phase: g.phase, s: f.s, h: p.y - g.Terrain.heightAt(p.x, -p.z), view: g.rig.view, pace: g.driver.pace, e: p.x, n: -p.z,
+    title: document.getElementById('card-title').textContent, street: g.driver.edge.name, speed: g.driver.speed, btn: !document.getElementById('btn-view').hidden };
+});
+const realUntil = async (test, n) => { for (let k = 0; k < n; k++) { if (await test()) return true; await advance(1); await page.waitForTimeout(120); } return test(); };
+await page.click('#start-picker .vcard[data-id="balloon"]');
+let b = await bal();
+check('nella schermata iniziale si sceglie la mongolfiera, a terra a Botromagno', b.mode === 'balloon' && b.h < 1 && Math.hypot(b.e + 379, b.n - 685) < 2);
+await page.click('#btn-start');
+await page.waitForTimeout(1700);
+await advance(20);
+b = await bal();
+check('decollo: la mongolfiera sale e avanza sul giro', b.phase === 'drive' && b.s > 30 && b.h > 15 && b.btn, `${b.s.toFixed(0)} m del giro, ${b.h.toFixed(0)} m dal suolo`);
+const card1 = await until(async () => /Necropoli|Botromagno/.test((await bal()).title), 120, 1);
+check('passando sopra la necropoli si apre la scheda', card1, (await bal()).title);
+await page.click('#btn-view');
+await advance(0.5);
+b = await bal();
+const eye = await page.evaluate(() => { const g = window.gravina; return g.camera.position.y - g.flight.position.y; });
+check('il pulsante passa alla vista dalla cesta', b.view === 'in' && Math.abs(eye - 1.75) < 0.6 && /Vista esterna/.test(await page.textContent('#btn-view')), `occhi a ${eye.toFixed(2)} m`);
+await page.click('#btn-view');
+await advance(1);
+check('…e torna alla vista esterna', (await bal()).view === 'out');
+await page.keyboard.press('p');
+await advance(3);
+const s0 = (await bal()).s;
+await advance(2);
+b = await bal();
+check('in pausa la mongolfiera resta sospesa', b.phase === 'pause' && Math.abs(b.s - s0) < 1.5);
+await page.click('.poi >> text=Porta San Michele');
+await page.waitForTimeout(900);
+await advance(1);
+b = await bal();
+check('teletrasporto in mongolfiera: al punto del giro più vicino', b.mode === 'balloon' && b.phase === 'drive' && Math.hypot(b.e - 398, b.n + 25) < 120, `a ${Math.hypot(b.e - 398, b.n + 25).toFixed(0)} m`);
+await page.keyboard.press('p');
+await page.click('.poi >> text=Area Quercus');
+await page.waitForTimeout(900);
+await advance(1);
+b = await bal();
+check('i luoghi lontani dal giro si raggiungono con l’ultima auto', b.mode === 'car' && b.phase === 'drive' && /bosco/i.test(b.street) && b.speed > 0, b.street);
+await page.evaluate(() => { const g = window.gravina; g.placeAt(300, 0, [1, 0]); g.rig.snap(g.driver); });
+await page.keyboard.press('p');
+await page.click('#pause-picker .vcard[data-id="balloon"]');
+b = await bal();
+check('dalla pausa la mongolfiera compare in volo sul giro', b.mode === 'balloon' && b.h > 40, `${b.h.toFixed(0)} m dal suolo`);
+await page.click('#pause-picker .vcard[data-id="rs6"]');
+await page.keyboard.press('Escape');
+await advance(2);
+b = await bal();
+check('tornando a un’auto si riparte dalla via più vicina', b.mode === 'car' && b.speed > 1, b.street);
+await page.keyboard.press('p');
+await page.click('#pause-picker .vcard[data-id="balloon"]');
+await page.keyboard.press('Escape');
+await page.evaluate(() => { const g = window.gravina; g.flight.place(g.Volo.L - 80, true); });
+const landed = await realUntil(async () => (await bal()).mode === 'car', 60);
+await page.waitForTimeout(800);
+await advance(3);
+b = await bal();
+const dTake = await page.evaluate(() => { const p = window.gravina.driver.position; return Math.hypot(p.x + 379, -p.z - 685); });
+check('fine del giro: atterra al decollo e si riparte con l’ultima auto', landed && b.mode === 'car' && b.pace === 1.1 && b.speed > 0.5 && dTake < 500, `${b.street}, a ${dTake.toFixed(0)} m dal decollo`);
+
 const errors = logs.filter((l) => /error/i.test(l));
 check('nessun errore in console', errors.length === 0, errors.join(' | '));
 await browser.close();

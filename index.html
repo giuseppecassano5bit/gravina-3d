@@ -485,6 +485,10 @@
   .follow-btn { position: absolute; top: calc(var(--gutter) + 176px + 30px + 112px + var(--safe-top)); right: calc(var(--gutter) + var(--safe-right)); }
   .follow-btn[hidden] { display: none; }
   .hud.is-paused .radio, .hud.is-paused .follow-btn { display: none; }
+  /* mongolfiera (blocco M3): «Vista dalla cesta / Vista esterna» al posto di «Segui il mezzo», che scende di una riga */
+  .view-btn { position: absolute; top: calc(var(--gutter) + 176px + 30px + 112px + var(--safe-top)); right: calc(var(--gutter) + var(--safe-right)); }
+  .view-btn[hidden], .hud.is-paused .view-btn { display: none; }
+  .hud.is-balloon .follow-btn { top: calc(var(--gutter) + 176px + 30px + 168px + var(--safe-top)); }
 
   /* A piedi: pittogramma del pedone nella targa e sui cartelli dei tratti pedonali */
   .plaque.is-walking .plaque__dest::before, .sign--walk .sign__dest::before {
@@ -603,7 +607,8 @@
     .pill span { display: none; }
     .radio { top: calc(var(--gutter) + 104px + 24px + 58px + var(--safe-top)); }
     .radio__vol { display: none !important; }     /* sul telefono bastano i tasti del volume */
-    .follow-btn { top: calc(var(--gutter) + 104px + 24px + 116px + var(--safe-top)); }
+    .follow-btn, .view-btn { top: calc(var(--gutter) + 104px + 24px + 116px + var(--safe-top)); }
+    .hud.is-balloon .follow-btn { top: calc(var(--gutter) + 104px + 24px + 174px + var(--safe-top)); }
     .plaque { max-width: calc(100vw - 2 * var(--gutter) - 116px); padding: 0.45rem 0.8rem 0.5rem; }
     .plaque__street { font-size: 1rem; }
     .card { top: calc(132px + var(--safe-top)); width: calc(100vw - 2 * var(--gutter) - 116px); padding: 0.75rem 0.9rem 0.85rem; }
@@ -655,7 +660,8 @@
     .attribution--hud { top: calc(var(--gutter) + 92px + 4px + var(--safe-top)); }
     .pause-btn { top: calc(var(--gutter) + 92px + 24px + var(--safe-top)); }
     .radio { top: calc(var(--gutter) + 92px + 24px + 58px + var(--safe-top)); }
-    .follow-btn { top: calc(var(--gutter) + 92px + 24px + 116px + var(--safe-top)); }
+    .follow-btn, .view-btn { top: calc(var(--gutter) + 92px + 24px + 116px + var(--safe-top)); }
+    .hud.is-balloon .follow-btn { top: calc(var(--gutter) + 92px + 24px + 174px + var(--safe-top)); }
     .plaque { padding: 0.4rem 0.8rem 0.45rem; }
     .plaque__street { font-size: 1rem; }
     .card { top: calc(var(--gutter) + 58px + var(--safe-top)); width: min(330px, 42vw); padding: 0.6rem 0.8rem 0.7rem; gap: 0.2rem; }
@@ -814,6 +820,11 @@
   <button class="pill follow-btn" id="btn-follow" type="button" hidden aria-label="Segui il mezzo">
     <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1v2.2M8 12.8V15M1 8h2.2M12.8 8H15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="8" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/></svg>
     <span>Segui il mezzo</span>
+  </button>
+
+  <button class="pill view-btn" id="btn-view" type="button" hidden aria-label="Vista dalla cesta">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.3c-2.9 0-5 2-5 4.6 0 2 1.5 3.6 3.6 4.9h2.8C11.5 9.5 13 7.9 13 5.9c0-2.6-2.1-4.6-5-4.6zM6.4 12h3.2l-.3 1H6.7zM6.6 13.6h2.8v1.6H6.6z" fill="currentColor"/></svg>
+    <span id="btn-view-label">Vista dalla cesta</span>
   </button>
 
   <button class="btn-primary bench-btn" id="btn-bench" type="button" hidden>
@@ -994,6 +1005,25 @@ const CONFIG = {
      * indietro verso sud, in alto, punto guardato lungo il ponte], in orizzontale e in verticale.
      */
     showroom: { close: 9, move: 3.5, wide: 10, landscape: [26, 56, 3, 8], portrait: [18, 82, 8, 6] },
+    /** Mongolfiera: giro largo attorno al pallone (distanza, inclinazione in gradi, giri al minuto) e vista dalla cesta. */
+    balloon: { dist: 52, elev: 14, rpm: 0.45, minDist: 26, maxDist: 160, eye: 1.75, down: 16 },
+  },
+
+  /**
+   * Mongolfiera (blocco M3): giro fisso, curva chiusa sui punti [est, nord, quota dal suolo] (piano del
+   * 01/10/2026). Decollo sul prato degli scavi di Botromagno (dentro w484764621, a 37 m dalla rovina più
+   * vicina e a più di 300 m dalle vie), poi Necropoli, Madonna della Stella e Ponte Acquedotto, Piaggio,
+   * San Francesco, Porta San Michele, Piazza della Repubblica, Purgatorio, Cattedrale, Fondovito, Sette
+   * Camere, il resort e il ciglio ovest. `speed` in m/s (circa 7 minuti per 2,7 km); la quota sale da sola
+   * per restare `clearance` m sopra tetti, monumenti e terreno entro `radius` m (non al decollo e
+   * all'atterraggio, `free`: metri dall'inizio e dalla fine del giro).
+   */
+  balloon: {
+    tour: [[-379, 685, 0], [-215, 470, 70], [-55, 300, 60], [30, 170, 75], [226, 222, 65], [398, -25, 65], [317, -2, 70],
+      [132, 9, 65], [12, 11, 60], [-30, -125, 70], [-170, -140, 90], [-225, 90, 100], [-300, 380, 130]],
+    speed: 6.5, ramp: [55, 70], clearance: 30, radius: 40, free: [120, 150],
+    far: 300,                // m: i luoghi più lontani dal giro si raggiungono in auto
+    minorLabels: 150,        // m: dalla mongolfiera le etichette senza scheda solo entro questa distanza
   },
 
   /** Sole al tramonto: azimut da Nord in senso orario, elevazione sull'orizzonte. */
@@ -7209,6 +7239,11 @@ const VEHICLES = [
     id: 'deere', name: 'Trattore John Deere', tag: 'Il “motore” di campagna', color: '#367c2b', pace: 0.62,
     icon: { body: 'M9 21V3h17v10h28l3 2v8H9z', wheels: [[18, 22, 9], [51, 25, 6]] },
   },
+  // Blocco M3: il quinto mezzo vola su un giro fisso (sezione 8b) e non segue le vie.
+  {
+    id: 'balloon', name: 'Mongolfiera', tag: 'Il giro da Botromagno sopra il centro storico', color: '#b5552f', pace: 1, air: true,
+    icon: { body: 'M32 1.5c-7.2 0-12.5 4.6-12.5 10.6 0 4.6 3.4 8.3 8.5 11.4h8c5.1-3.1 8.5-6.8 8.5-11.4C44.5 6.1 39.2 1.5 32 1.5zM28.6 24.6h6.8l-.5 1.2h-5.8zM28.8 26.8h6.4v4.4h-6.4z', wheels: [] },
+  },
 ];
 
 /**
@@ -7225,7 +7260,7 @@ const VEHICLES = [
 const VehicleFactory = (() => {
   let ENV = null;
   const col = (hex) => new THREE.Color(hex);
-  /** Finitura: colore, metallo, ruvidità, gruppo di luce (0 niente, 1 fari, 2 fanali e stop, 3–4 frecce sinistra e destra, 5 guidatore, 6 sempre acceso). */
+  /** Finitura: colore, metallo, ruvidità, gruppo di luce (0 niente, 1 fari, 2 fanali e stop, 3–4 frecce sinistra e destra, 5 guidatore, 6 sempre acceso, 7 fiamma). */
   const fin = (hex, m = 0, r = 0.8, g = 0) => ({ c: col(hex), m, r, g });
   const F = {
     black: fin('#141518', 0.15, 0.5), matte: fin('#1c1d20', 0, 0.85), plastic: fin('#35363a', 0, 0.9), rubber: fin('#161618', 0, 0.95),
@@ -7264,8 +7299,9 @@ varying vec2 vMR; varying float vGlow;
 void main() {`).replace('#include <begin_vertex>', `vec3 transformed = vec3(position);
 vMR = aMat.xy;
 float grp = aMat.z;
-vGlow = grp < 0.5 ? 0.0 : grp < 1.5 ? uHead : grp < 2.5 ? 0.22 * uHead + 0.78 * uBrake : grp < 3.5 ? 1.5 * uBlinkL : grp < 4.5 ? 1.5 * uBlinkR : grp < 5.5 ? 0.0 : 1.0;
+vGlow = grp < 0.5 ? 0.0 : grp < 1.5 ? uHead : grp < 2.5 ? 0.22 * uHead + 0.78 * uBrake : grp < 3.5 ? 1.5 * uBlinkL : grp < 4.5 ? 1.5 * uBlinkR : grp < 5.5 ? 0.0 : grp < 6.5 ? 1.0 : 2.2 * uHead;
 if (grp > 4.5 && grp < 5.5 && uDriver < 0.5) transformed = vec3(0.0);   // il guidatore è sceso
+if (grp > 6.5 && uHead < 0.05) transformed = vec3(0.0);                   // fiamma spenta
 if (aWheel.w != 0.0) {
   vec3 c = aWheel.xyz, p = transformed - c;
   if (aWheel.w > 0.0) { float a = c.z > 0.0 ? uSpin.y : uSpin.x, cs = cos(a), sn = sin(a); p = vec3(p.x, p.y * cs - p.z * sn, p.y * sn + p.z * cs); }
@@ -7578,7 +7614,7 @@ void main() { float a = max(0.0, 1.0 - length(vUv)); gl_FragColor = vec4(vCol * 
       }
       for (const o of this.extra) root.add(o);
       // raggi delle ruote dietro e davanti (il trattore le ha diverse)
-      const rr = this.wheelsAt.filter((w) => w.z < 0)[0]?.r ?? 0.3, rf = this.wheelsAt.filter((w) => w.z > 0)[0]?.r ?? rr;
+      const W = this.wheelsAt ?? [], rr = W.filter((w) => w.z < 0)[0]?.r ?? 0.3, rf = W.filter((w) => w.z > 0)[0]?.r ?? rr;
       let bump = 0;
       /**
        * Rotolamento, sterzo, beccheggio, rollio, vibrazione del motore (anche da fermo) e sospensioni
@@ -7858,6 +7894,75 @@ void main() { float a = max(0.0, 1.0 - length(vUv)); gl_FragColor = vec4(vCol * 
     get env() { return ENV; },
   };
 })();
+
+/**
+ * 7c. LA MONGOLFIERA (blocco M3), quinto mezzo: pallone a 14 spicchi nei colori del diorama (terracotta,
+ * ocra, crema e un tocco di blu), cesta di vimini con le funi, bruciatore con la fiamma a tratti (gruppo
+ * di luce 7, acceso da uHead) e, nella cesta, il pilota e la figurina (gruppo 5: sparisce nella vista
+ * dalla cesta, perché la camera è lei). Origine al fondo della cesta; il pallone arriva a circa 23 m.
+ */
+VehicleFactory.register('balloon', () => {
+  const { Shop, F, fin, M4 } = VehicleFactory;
+  const k = new Shop('mongolfiera');
+  const T = fin('#b5552f', 0, 0.75), O = fin('#d99a33', 0, 0.75), C = fin('#efe1c2', 0, 0.8), B = fin('#2f5d8a', 0, 0.7), D = fin('#8e3f22', 0, 0.8);
+  const gores = [T, O, C, T, O, C, T, O, C, T, O, C, B, C];
+  // profilo a goccia, dalla bocca in su: [raggio, quota sopra la bocca]
+  const prof = [[1.5, 0], [2.3, 1.3], [3.6, 2.8], [5.0, 4.6], [6.3, 6.6], [7.3, 8.7], [7.9, 10.8], [7.9, 12.6], [7.4, 14.4], [6.4, 16.0], [4.9, 17.3], [3.0, 18.2], [0, 18.6]];
+  const mouth = 4.4, N = gores.length * 3;
+  for (let i = 0; i < N; i++) {
+    const a0 = (i / N) * TAU, a1 = ((i + 1) / N) * TAU, g = gores[Math.floor(i / 3)];
+    const P = ([r, y], a) => [Math.cos(a) * r, mouth + y, Math.sin(a) * r];
+    for (let j = 0; j + 1 < prof.length; j++) {
+      const f = j === 0 ? D : j === 6 ? B : j >= 10 ? C : g;               // gonna scura, fascia blu all'equatore, corona chiara
+      k.quad(P(prof[j], a0), P(prof[j + 1], a0), P(prof[j + 1], a1), P(prof[j], a1), f);
+    }
+  }
+  /** Asta sottile da a a b (funi, telaio del bruciatore). */
+  const rod = (a, b, t, f) => {
+    const A = new THREE.Vector3(...a), Bv = new THREE.Vector3(...b), d = Bv.clone().sub(A), len = d.length();
+    const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
+    k.geo(new THREE.CylinderGeometry(t, t, len, 4, 1, true), f, new THREE.Matrix4().compose(A.clone().lerp(Bv, 0.5), q, new THREE.Vector3(1, 1, 1)));
+  };
+  // cesta di vimini: fondo, quattro pareti con le fasce dell'intreccio, bordo imbottito di cuoio
+  const wick = fin('#a8743f', 0, 0.95), weave = fin('#8a5a2e', 0, 0.95), leather = fin('#5b3a22', 0, 0.7);
+  const bw = 0.7, bd = 0.6, bh = 1.1;
+  k.box(bw * 2, 0.08, bd * 2, weave, [0, 0.04, 0]);
+  k.both((s) => {
+    k.box(0.06, bh, bd * 2, wick, [bw * s, bh / 2, 0]);
+    k.box(bw * 2, bh, 0.06, wick, [0, bh / 2, bd * s]);
+    for (const y of [0.25, 0.55, 0.85]) { k.box(0.075, 0.05, bd * 2 + 0.02, weave, [bw * s, y, 0]); k.box(bw * 2 + 0.02, 0.05, 0.075, weave, [0, y, bd * s]); }
+    k.box(0.12, 0.09, bd * 2 + 0.1, leather, [bw * s, bh, 0]);
+    k.box(bw * 2 + 0.1, 0.09, 0.12, leather, [0, bh, bd * s]);
+  });
+  // funi dagli angoli della cesta alla bocca del pallone; telaio e bruciatore
+  for (const [sx, sz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+    rod([bw * sx, bh, bd * sz], [1.1 * sx, mouth + 0.1, 1.1 * sz], 0.018, F.black);
+    rod([bw * sx * 0.9, bh, bd * sz * 0.9], [0.32 * sx, 2.55, 0.32 * sz], 0.025, F.steel);
+  }
+  for (let i = 0; i < 16; i++) {                                           // funi di carico sugli spicchi, fino all'equatore
+    const a = (i / 16) * TAU;
+    rod([Math.cos(a) * 1.5, mouth, Math.sin(a) * 1.5], [Math.cos(a) * 5.0, mouth + 4.6, Math.sin(a) * 5.0], 0.03, fin('#6b4a30', 0, 0.9));
+  }
+  k.box(0.75, 0.06, 0.75, F.steel, [0, 2.55, 0]);
+  k.cyl(0.24, 0.3, 0.38, 10, F.chrome, [0, 2.78, 0]);
+  k.geo(new THREE.TorusGeometry(0.22, 0.04, 4, 10), F.graphite, M4([0, 2.66, 0], [Math.PI / 2, 0, 0]));
+  // fiamma: due coni, il più interno quasi bianco (gruppo 7, si accende col bruciatore)
+  k.cyl(0.04, 0.22, 1.5, 7, fin('#ff8a1e', 0, 1, 7), [0, 3.72, 0]);
+  k.cyl(0.02, 0.12, 1.0, 6, fin('#ffe7a8', 0, 1, 7), [0, 3.45, 0]);
+  k.halo([0, 3.6, 0], 1.6, '#ff9430', 1).halo([0, 3.6, 0], 1.1, '#ffd890', 1);
+  // pilota (camicia blu) e figurina (la stessa del blocco G), in piedi nella cesta
+  const put = (fig, pos, yaw, f5 = false) => {
+    const m = new THREE.Matrix4().makeTranslation(...pos).multiply(new THREE.Matrix4().makeRotationY(yaw)), v = new THREE.Vector3(), c = new THREE.Color();
+    for (let i = 0; i < fig.pos.length; i += 9) {
+      const p = [0, 3, 6].map((o) => v.set(fig.pos[i + o], fig.pos[i + o + 1], fig.pos[i + o + 2]).applyMatrix4(m).toArray());
+      c.setRGB(fig.col[i], fig.col[i + 1], fig.col[i + 2]);
+      k.tri(p[0], p[1], p[2], { c, m: 0, r: 0.85, g: f5 ? 5 : 0 });
+    }
+  };
+  put(Walker.figure({ sit: 0, arms: -0.35, pack: false, colors: { shirt: '#2f5d8a', hat: '#3b3530', band: '#3b3530' } }), [0.3, 0.08, -0.28], 0.3);
+  put(Walker.figure({ sit: 0, arms: -0.6, pack: false }), [-0.32, 0.08, 0.2], -0.6, true);
+  return k.build({ dims: { length: 16, width: 16, height: 23 }, shake: 0, freq: 1 });
+});
 
 /**
  * La figurina che percorre i tratti a piedi (blocco G): un visitatore stilizzato con cappello
@@ -8270,6 +8375,162 @@ class Driver {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
+ * 8b. MONGOLFIERA (blocco M3): il giro fisso e il volo. Eccezione approvata come il
+ *     Ponte Acquedotto: vola su un giro fisso e non segue le vie.
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Il giro: curva chiusa (Catmull-Rom centripeta) sui punti di CONFIG.balloon.tour, campionata ogni 5 m
+ * con la quota. Tra un punto e l'altro la quota dal suolo passa morbida; al decollo sale svelta e
+ * all'atterraggio scende fino a terra. Fuori dal decollo e dall'atterraggio la quota non scende mai sotto
+ * 30 m sopra il punto più alto (tetti, cime dei monumenti, terreno) entro 40 m, e le salite sono dolci.
+ */
+const Volo = {
+  step: 5,
+  L: 0,
+  pts: null,            // Float32Array [est, nord, quota] per campione
+  ground: null,         // quota del terreno sotto ogni campione
+  need: null,           // quota minima chiesta (−Infinity al decollo e all'atterraggio)
+
+  init(landmarks) {
+    const B = CONFIG.balloon, T = B.tour, N = T.length, D = 40;
+    const curve = new THREE.CatmullRomCurve3(T.map(([e, n]) => new THREE.Vector3(e, 0, -n)), true, 'centripetal');
+    curve.arcLengthDivisions = N * D;
+    const lens = curve.getLengths(N * D), L = lens[N * D];
+    const sAt = T.map((_, i) => lens[i * D]).concat([L]);
+    /** Quota dal suolo a s metri: morbida tra i punti; al decollo sale svelta, all'atterraggio scende a terra. */
+    const quota = (s) => {
+      let i = 0;
+      while (i < N - 1 && s > sAt[i + 1]) i++;
+      const u = clamp((s - sAt[i]) / (sAt[i + 1] - sAt[i]), 0, 1), q0 = T[i][2], q1 = T[(i + 1) % N][2];
+      if (i === 0) return q1 * (1 - (1 - u) ** 2.2);
+      if (i === N - 1) return q0 * (1 - u ** 2.2);
+      return lerp(q0, q1, smoothstep(0, 1, u));
+    };
+    const count = Math.round(L / this.step), step = L / count;
+    this.L = L;
+    this.step = step;
+    this.pts = new Float32Array((count + 1) * 3);
+    this.ground = new Float32Array(count + 1);
+    this.need = new Float32Array(count + 1);
+    const tops = landmarks.filter((lm) => lm.labelY !== undefined).map((lm) => [lm.at[0], lm.at[1], lm.labelY - (lm.id === 'duomo' ? 2 : 4)]);
+    const want = new Float32Array(count + 1), base = new Float32Array(count + 1), w = new Float32Array(count + 1), p = new THREE.Vector3();
+    for (let k = 0; k <= count; k++) {
+      const s = k * step;
+      curve.getPointAt(Math.min(1, s / L), p);
+      const e = p.x, n = -p.z, g = Terrain.heightAt(e, n);
+      // il punto più alto entro 40 m: terreno, tetti (griglia dei tetti) e cime dei monumenti
+      let top = -Infinity;
+      for (let dx = -B.radius; dx <= B.radius; dx += 8) for (let dn = -B.radius; dn <= B.radius; dn += 8) {
+        if (dx * dx + dn * dn > B.radius * B.radius) continue;
+        top = Math.max(top, Terrain.heightAt(e + dx, n + dn), Buildings.roofAt?.(e + dx, n + dn) ?? -Infinity);
+      }
+      for (const [te, tn, ty] of tops) if (Math.hypot(te - e, tn - n) < B.radius) top = Math.max(top, ty);
+      w[k] = smoothstep(0, B.free[0], s) * smoothstep(0, B.free[1], L - s);
+      base[k] = g + quota(s);
+      this.need[k] = w[k] >= 1 ? top + B.clearance : -Infinity;
+      want[k] = Math.max(base[k], this.need[k]);
+      this.pts[k * 3] = e; this.pts[k * 3 + 1] = n;
+      this.ground[k] = g;
+    }
+    // salite dolci: massimo su ±60 m, poi media su ±40 m (resta sopra il minimo chiesto)
+    const ring = (i) => ((i % count) + count) % count, hi = new Float32Array(count + 1);
+    for (let k = 0; k <= count; k++) { let m = -Infinity; for (let j = -12; j <= 12; j++) m = Math.max(m, want[ring(k + j)]); hi[k] = m; }
+    for (let k = 0; k <= count; k++) {
+      let a = 0;
+      for (let j = -8; j <= 8; j++) a += hi[ring(k + j)];
+      this.pts[k * 3 + 2] = lerp(base[k], a / 17, w[k]);
+    }
+    this.pts[count * 3 + 2] = this.pts[2] = this.ground[0];               // a terra al decollo e all'atterraggio
+  },
+
+  get count() { return this.ground.length - 1; },
+
+  /** Punto del giro a s metri (in coordinate mondo), con la quota. */
+  at(s, out = new THREE.Vector3()) {
+    const n = this.count, x = clamp(s, 0, this.L) / this.step, i = Math.min(n - 1, Math.floor(x)), t = x - i, P = this.pts;
+    return Geo.toWorld(lerp(P[i * 3], P[i * 3 + 3], t), lerp(P[i * 3 + 1], P[i * 3 + 4], t), lerp(P[i * 3 + 2], P[i * 3 + 5], t), out);
+  },
+
+  /** Il punto del giro più vicino a (e, n): { s, d }. */
+  nearest(e, n) {
+    let best = { s: 0, d: Infinity };
+    for (let k = 0; k <= this.count; k++) {
+      const d = Math.hypot(this.pts[k * 3] - e, this.pts[k * 3 + 1] - n);
+      if (d < best.d) best = { s: k * this.step, d };
+    }
+    return best;
+  },
+};
+
+/**
+ * Il volo: la mongolfiera avanza sul giro a circa 6,5 m/s (più piano al decollo e all'atterraggio), il
+ * pallone gira piano verso la direzione del volo e il bruciatore si accende a tratti, di più in salita.
+ * In pausa si ferma sospesa. Alla fine del giro atterra al punto di decollo ed emette `balloon:landed`.
+ * Ha le stesse proprietà del conducente che servono a camera, minimappa e schede (position, forward, yaw…).
+ */
+class Flight {
+  constructor(events) {
+    this.events = events;
+    this.s = 0; this.speed = 0;
+    this.running = false; this.paused = false; this.done = false;
+    this.position = new THREE.Vector3();
+    this.forward = new THREE.Vector3(0, 0, 1);
+    this.yaw = 0; this.vy = 0; this.pitch = 0;
+    this.flame = 0; this.burning = false; this.burnT = 2;
+    this.onFoot = false; this.car = null; this.decision = null; this.nextChoice = null; this.edge = null; this.sitting = null;
+    this.title = 'In mongolfiera';
+    this._a = new THREE.Vector3(); this._b = new THREE.Vector3();
+  }
+
+  /** Mette la mongolfiera a s metri del giro: in volo (`air`, alla velocità di crociera) o ferma. */
+  place(s, air = true) {
+    Object.assign(this, { s: clamp(s, 0, Volo.L), speed: air ? CONFIG.balloon.speed : 0, done: false });
+    this.#pose(0, true);
+  }
+
+  start() { this.running = true; }
+  pause() { this.paused = true; }
+  resume() { this.paused = false; }
+  get stopped() { return this.speed < 0.05; }
+  /** Vero sul prato del decollo, prima di partire o dopo l'atterraggio. */
+  get grounded() { return this.s < 0.5 || this.s > Volo.L - 0.5; }
+
+  update(dt, time = 0) {
+    const B = CONFIG.balloon;
+    if (this.running && !this.done) {
+      // al decollo parte già a un terzo della crociera (sale svelta), all'atterraggio arriva piano
+      const ramp = Math.min(clamp(0.35 + this.s / B.ramp[0], 0, 1), clamp((Volo.L - this.s) / B.ramp[1], 0.15, 1));
+      this.speed += ((this.paused ? 0 : B.speed * ramp) - this.speed) * damp(this.paused ? 1.6 : 0.9, dt);
+      this.s = Math.min(Volo.L, this.s + this.speed * dt);
+      if (this.s >= Volo.L - 0.05) {
+        Object.assign(this, { s: Volo.L, speed: 0, done: true });
+        this.events.emit('balloon:landed', this);
+      }
+    }
+    this.#pose(dt, false);
+    // bruciatore: soffi di 1–3 s ogni 4–12 s, e sempre quando sale svelto; a terra solo prima di partire
+    if ((this.burnT -= dt) <= 0) {
+      this.burning = !this.burning;
+      this.burnT = this.burning ? 1.1 + Math.random() * 1.8 : 4 + Math.random() * 8;
+    }
+    const on = !this.done && (this.burning || this.vy > 0.7);
+    this.flame = on ? 0.8 + 0.2 * Math.sin(time * 31) * Math.sin(time * 17.3) : 0;
+  }
+
+  #pose(dt, snap) {
+    const y0 = this.position.y;
+    Volo.at(this.s, this.position);
+    Volo.at(Math.min(Volo.L, this.s + 10), this._a);
+    Volo.at(Math.max(0, this.s - 10), this._b);
+    const dx = this._a.x - this._b.x, dz = this._a.z - this._b.z;
+    if (dx * dx + dz * dz > 1) this.yaw += angleDiff(this.yaw, Math.atan2(dx, dz)) * (snap ? 1 : damp(0.35, dt));
+    this.forward.set(Math.sin(this.yaw), 0, Math.cos(this.yaw));
+    this.vy = snap || dt <= 0 ? 0 : lerp(this.vy, (this.position.y - y0) / dt, damp(2, dt));
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
  * 9. CAMERA CINEMATOGRAFICA
  *    Vetrina (il mezzo fermo, visto dal lato aperto) → inseguimento
  *    dall'alto (vista da plastico), con panoramiche sul canyon e sul ponte.
@@ -8280,7 +8541,10 @@ class Driver {
 class CameraRig {
   constructor(camera) {
     this.camera = camera;
-    this.mode = 'showroom';          // showroom | drive | aerial | free
+    this.mode = 'showroom';          // showroom | drive | aerial | free | balloon | balloonShow (blocco M3)
+    this.view = 'out';               // mongolfiera: 'out' vista esterna, 'in' dalla cesta
+    this.look = { yaw: 0, pitch: 0, on: false };   // dalla cesta: dove si guarda trascinando
+    this.spin = 0;                   // giro automatico attorno al pallone
     this.pos = new THREE.Vector3();
     this.target = new THREE.Vector3();
     this.dims = { length: 4, width: 1.9, height: 1.4 };
@@ -8345,11 +8609,40 @@ class CameraRig {
   }
 
   /** Vero mentre la camera è libera (per il pulsante «Segui il mezzo»). */
-  get free() { return this.orbit.on && this.mode === 'drive'; }
+  get free() { return (this.orbit.on && (this.mode === 'drive' || this.mode === 'balloon')) || (this.mode === 'balloon' && this.look.on); }
+
+  /** Mongolfiera (blocco M3): giro largo attorno al pallone, o in vetrina sul prato del decollo (`show`). */
+  balloon(show = false) {
+    this.mode = show ? 'balloonShow' : 'balloon';
+    Object.assign(this.orbit, { on: false, w: 0 });
+    Object.assign(this.look, { yaw: 0, pitch: 0, on: false });
+    this.t = 0;
+    if (show) this.pending = true;
+  }
+
+  /** Passa dalla vista dalla cesta (prima persona) a quella esterna (terza) e viceversa. */
+  toggleView() {
+    this.view = this.view === 'in' ? 'out' : 'in';
+    Object.assign(this.orbit, { on: false, w: 0 });
+    Object.assign(this.look, { yaw: 0, pitch: 0, on: false });
+    this.pending = true;
+  }
 
   /** Trascinamento di (dx, dy) pixel: gira attorno al mezzo (in pausa, attorno alla vista dall'alto). */
   drag(dx, dy) {
     if (this.mode === 'aerial') { this.aerialAngle -= dx * 0.006; return; }
+    if (this.mode === 'balloon' && this.view === 'in') {                 // dalla cesta: ci si guarda attorno
+      Object.assign(this.look, { on: true, yaw: this.look.yaw + dx * 0.005, pitch: clamp(this.look.pitch + dy * 0.004, -0.9, 0.5) });
+      return;
+    }
+    if (this.mode === 'balloon') {
+      const O = this.orbit, C = CONFIG.camera.balloon, rad = THREE.MathUtils.degToRad;
+      if (!O.on) Object.assign(O, { yaw: this.spin, elev: rad(C.elev), dist: C.dist });
+      O.on = true;
+      O.yaw -= dx * 0.006;
+      O.elev = clamp(O.elev + dy * 0.005, rad(-5), rad(80));
+      return;
+    }
     if (this.mode !== 'drive') return;
     const O = this.orbit, C = CONFIG.camera.orbit, rad = THREE.MathUtils.degToRad;
     if (!O.on && O.w < 0.05) Object.assign(O, this._current);       // si parte dalla vista di adesso
@@ -8361,6 +8654,13 @@ class CameraRig {
   /** Zoom (f > 1 allontana): rotella o pizzico. */
   zoom(f) {
     if (this.mode === 'aerial') { this.aerialZoom = clamp(this.aerialZoom * f, 0.45, 2.6); return; }
+    if (this.mode === 'balloon' && this.view === 'out') {
+      const O = this.orbit, C = CONFIG.camera.balloon;
+      if (!O.on) Object.assign(O, { yaw: this.spin, elev: THREE.MathUtils.degToRad(C.elev), dist: C.dist });
+      O.on = true;
+      O.dist = clamp(O.dist * f, C.minDist, C.maxDist);
+      return;
+    }
     if (this.mode !== 'drive') return;
     const O = this.orbit, C = CONFIG.camera.orbit;
     if (!O.on && O.w < 0.05) Object.assign(O, this._current);
@@ -8368,8 +8668,12 @@ class CameraRig {
     O.dist = clamp(O.dist * f, C.minDist, C.maxDist);
   }
 
-  /** «Segui il mezzo»: la camera torna subito dietro. */
-  follow() { Object.assign(this.orbit, { on: false, quick: true }); }
+  /** «Segui il mezzo»: la camera torna subito dietro (in mongolfiera: al giro automatico, o a guardare avanti). */
+  follow() {
+    if (this.mode === 'balloon' && this.orbit.on) this.spin = this.orbit.yaw;
+    Object.assign(this.orbit, { on: false, quick: true });
+    Object.assign(this.look, { yaw: 0, pitch: 0, on: false });
+  }
 
   /** Passa all'inseguimento del mezzo (con un volo di raccordo). */
   startDrive(driver) {
@@ -8426,10 +8730,44 @@ class CameraRig {
 
   #aerialPose(dt, driver) {
     this.aerialAngle += dt * 0.05;
-    const car = driver.position, R = 24 * this.aerialZoom;
-    this._wantPos.set(car.x + Math.sin(this.aerialAngle) * R, car.y + R, car.z + Math.cos(this.aerialAngle) * R);
+    const big = this.dims.height > 10;                               // la mongolfiera: più lontano, e si guarda il pallone
+    const car = driver.position, R = (big ? 64 : 24) * this.aerialZoom;
+    this._wantPos.set(car.x + Math.sin(this.aerialAngle) * R, car.y + R * (big ? 0.55 : 1), car.z + Math.cos(this.aerialAngle) * R);
     this._wantPos.y += this.#roofLift(car, this._wantPos);          // mai dentro i tetti delle palazzine
-    this._wantTarget.set(car.x, car.y + 1, car.z);
+    this._wantTarget.set(car.x, car.y + (big ? 10 : 1), car.z);
+  }
+
+  /**
+   * Mongolfiera (blocco M3). Vista esterna: giro largo e lento attorno al pallone, un po' dall'alto;
+   * trascinando e con la rotella la camera resta dove la si mette, finché non si preme «Segui il mezzo».
+   * Dalla cesta: occhi a 1,75 m, si guarda avanti e un po' in basso, con il dondolio della cesta.
+   * In vetrina: dal prato, a ovest del pallone, verso il centro storico.
+   */
+  #balloonPose(dt, flight) {
+    const C = CONFIG.camera.balloon, rad = THREE.MathUtils.degToRad, p = flight.position, c = this._bc ??= new THREE.Vector3();
+    this.t += dt;
+    c.set(p.x, p.y + 11, p.z);                                        // centro del pallone
+    if (this.mode === 'balloonShow') {
+      const a = -Math.PI / 2 + 0.35 * Math.sin(this.t * 0.12), R = this.camera.aspect < 1 ? 46 : 36;
+      this._wantPos.set(p.x + Math.sin(a) * R, p.y + 5, p.z + Math.cos(a) * R);
+      this._wantTarget.set(p.x, p.y + 9, p.z);
+      return;
+    }
+    if (this.view === 'in') {
+      const L = this.look, yaw = flight.yaw + L.yaw, pitch = -rad(C.down) + L.pitch, sway = Math.sin(this.t * 0.7) * 0.012;
+      this._wantPos.set(p.x - flight.forward.x * 0.1, p.y + C.eye, p.z - flight.forward.z * 0.1);
+      this._wantTarget.set(this._wantPos.x + Math.sin(yaw) * Math.cos(pitch) * 30, this._wantPos.y + Math.sin(pitch + sway) * 30, this._wantPos.z + Math.cos(yaw) * Math.cos(pitch) * 30);
+      return;
+    }
+    const O = this.orbit;
+    O.w += ((O.on ? 1 : 0) - O.w) * (dt > 0 ? damp(O.on ? 10 : 2, dt) : 1);
+    this.spin += dt * C.rpm * TAU / 60;
+    const w = smoothstep(0, 1, O.w);
+    const yaw = this.spin + angleDiff(this.spin, O.yaw ?? this.spin) * w, elev = lerp(rad(C.elev), O.elev ?? rad(C.elev), w), dist = lerp(C.dist, O.dist ?? C.dist, w);
+    this._wantPos.set(c.x + Math.sin(yaw) * Math.cos(elev) * dist, c.y + Math.sin(elev) * dist, c.z + Math.cos(yaw) * Math.cos(elev) * dist);
+    const floor = Math.max(Terrain.heightAt(this._wantPos.x, -this._wantPos.z), Buildings.roofAt?.(this._wantPos.x, -this._wantPos.z) ?? -Infinity) + 6;
+    if (this._wantPos.y < floor) this._wantPos.y = floor;
+    this._wantTarget.copy(c);
   }
 
   #chasePose(dt, driver) {
@@ -8528,8 +8866,9 @@ class CameraRig {
     if (this.mode !== 'free') {
       if (this.mode === 'showroom') this.#showroomPose(dt, driver);
       else if (this.mode === 'aerial') this.#aerialPose(dt, driver);
+      else if (this.mode === 'balloon' || this.mode === 'balloonShow') this.#balloonPose(dt, driver);
       else this.#chasePose(dt, driver);
-      if (this.pending) {
+      if (this.pending || (this.mode === 'balloon' && this.view === 'in')) {
         this.pos.copy(this._wantPos);
         this.target.copy(this._wantTarget);
         this.pending = false;
@@ -8776,9 +9115,14 @@ class MiniMap {
     };
     ctx.lineCap = ctx.lineJoin = 'round';
     ctx.strokeStyle = 'rgba(240, 160, 75, 0.95)'; ctx.lineWidth = 5;
-    stroke(driver.edge, []);
+    if (driver.edge) stroke(driver.edge, []);
     const next = driver.nextChoice;
     if (next && driver.decision.options.length > 1) stroke(next.edge, [7, 7]);
+    if (this.tour) {                                        // blocco M3: il giro della mongolfiera, tratteggiato
+      ctx.beginPath();
+      for (let k = 0; k <= Volo.count; k += 2) { const [x, y] = tr(Volo.pts[k * 3], Volo.pts[k * 3 + 1]); k ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+      ctx.strokeStyle = 'rgba(181, 85, 47, 0.95)'; ctx.lineWidth = 4; ctx.setLineDash([9, 8]); ctx.stroke(); ctx.setLineDash([]);
+    }
     // Monumenti
     for (const lm of LANDMARKS) {
       if (lm.card === false) continue;
@@ -9030,6 +9374,11 @@ class PauseMap {
       if (major && !on) { ctx.beginPath(); ctx.arc(x, y, 2.6 * k, 0, TAU); ctx.fillStyle = '#f0a04b'; ctx.fill(); }
     }
     if (this.pick?.at) { const [x, y] = this.xy(...this.pick.at); dot(x, y, 5.5 * k, '#f0a04b', '#2c2620'); }
+    if (this.mm.tour) {                                     // blocco M3: il giro della mongolfiera, tratteggiato
+      ctx.beginPath();
+      for (let q = 0; q <= Volo.count; q += 2) { const [x, y] = this.xy(Volo.pts[q * 3], Volo.pts[q * 3 + 1]); q ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+      ctx.strokeStyle = 'rgba(181, 85, 47, 0.9)'; ctx.lineWidth = 3 * k; ctx.setLineDash([8 * k, 7 * k]); ctx.stroke(); ctx.setLineDash([]);
+    }
     // Il mezzo, nel colore della carrozzeria
     const [cx, cy] = this.xy(driver.position.x, -driver.position.z);
     ctx.save();
@@ -9063,7 +9412,7 @@ class UI {
     this.el = {
       start: $('start'), startPanel: $('start-panel'), btnStart: $('btn-start'), status: $('status'),
       startPicker: $('start-picker'), controlsHint: $('controls-hint'),
-      btnFollow: $('btn-follow'), btnBench: $('btn-bench'), btnRadio: $('btn-radio'), radioLabel: $('radio-label'), btnNext: $('btn-next'), radioVol: $('radio-vol'),
+      btnFollow: $('btn-follow'), btnBench: $('btn-bench'), btnView: $('btn-view'), btnViewLabel: $('btn-view-label'), btnRadio: $('btn-radio'), radioLabel: $('radio-label'), btnNext: $('btn-next'), radioVol: $('radio-vol'),
       hud: $('hud'), plate: $('plaque'), street: $('plaque-street'), dest: $('plaque-dest'), minimapBtn: $('minimap-btn'), btnPause: $('btn-pause'),
       card: $('card'), cardKicker: $('card-kicker'), cardTitle: $('card-title'), cardText: $('card-text'),
       junction: $('junction'), junctionHead: $('junction-head'), signs: $('signs'),
@@ -9214,17 +9563,21 @@ class UI {
       el.textContent = lm.name;
       el.addEventListener('click', () => { if (this.labelsActive) onPick({ lm }); });
       this.el.labels.append(el);
-      return { el, anchor: Geo.toWorld(lm.at[0], lm.at[1], lm.labelY), visible: true };
+      return { el, anchor: Geo.toWorld(lm.at[0], lm.at[1], lm.labelY), visible: true, minor: lm.card === false };
     });
   }
 
-  /** Proietta le etichette sullo schermo; sfumano con la distanza. */
-  updateLabels(camera, width, height, far) {
+  /**
+   * Proietta le etichette sullo schermo; sfumano con la distanza. `near` (blocco M3, in mongolfiera): le
+   * etichette senza scheda (scuole, chiese della città, luoghi minori) solo entro `nearR` m da quel punto.
+   */
+  updateLabels(camera, width, height, far, near = null, nearR = 150) {
     for (const L of this.labels) {
       const v = this._v.copy(L.anchor);
       const dist = v.distanceTo(camera.position);
+      const hidden = near && L.minor && Math.hypot(L.anchor.x - near.x, L.anchor.z - near.z) > nearR;
       v.project(camera);
-      const show = v.z < 1 && Math.abs(v.x) < 1.1 && Math.abs(v.y) < 1.1 && dist < far;
+      const show = !hidden && v.z < 1 && Math.abs(v.x) < 1.1 && Math.abs(v.y) < 1.1 && dist < far;
       if (show !== L.visible) { L.el.style.display = show ? '' : 'none'; L.visible = show; }
       if (!show) continue;
       const x = (v.x * 0.5 + 0.5) * width, y = (-v.y * 0.5 + 0.5) * height;
@@ -9243,7 +9596,7 @@ class UI {
     this.labelsActive = open;
     for (const L of this.labels) L.el.tabIndex = open ? 0 : -1;
     if (open) {
-      this.el.pauseTitle.textContent = driver.edge.name;
+      this.el.pauseTitle.textContent = driver.edge?.name ?? driver.title;
       this.setPick(null);
       btnResume.focus({ preventScroll: true });
     } else if (document.activeElement && pause.contains(document.activeElement)) {
@@ -9691,6 +10044,40 @@ const ForestSound = (() => {
   };
 })();
 
+/**
+ * 11d. IL SOFFIO DEL BRUCIATORE (blocco M3): rumore filtrato generato con Web Audio, niente file. Un
+ * fruscio cupo con un ruggito basso, che sale e scende morbido seguendo la fiamma. Parte solo dopo un
+ * gesto (la regola dei browser): prima del clic su «Parti» la fiamma si vede ma non si sente.
+ */
+const Burner = (() => {
+  let ctx = null, gain = null;
+  function setup() {
+    ctx = new AudioContext();
+    const n = ctx.sampleRate * 2, buf = ctx.createBuffer(1, n, ctx.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+    const src = ctx.createBufferSource();
+    src.buffer = buf; src.loop = true; src.start();
+    const roar = ctx.createBiquadFilter(), hiss = ctx.createBiquadFilter(), lo = ctx.createGain(), hi = ctx.createGain();
+    roar.type = 'lowpass'; roar.frequency.value = 260; roar.Q.value = 0.8; lo.gain.value = 1.6;
+    hiss.type = 'bandpass'; hiss.frequency.value = 900; hiss.Q.value = 0.6; hi.gain.value = 0.35;
+    gain = ctx.createGain(); gain.gain.value = 0;
+    src.connect(roar).connect(lo).connect(gain);
+    src.connect(hiss).connect(hi).connect(gain);
+    gain.connect(ctx.destination);
+  }
+  return {
+    /** Intensità del soffio (0–1), a ogni fotogramma. */
+    set(level) {
+      if (!ctx) {
+        if (level <= 0 || !navigator.userActivation?.hasBeenActive) return;
+        try { setup(); } catch { return; }
+      }
+      if (ctx.state === 'suspended') ctx.resume();
+      gain.gain.setTargetAtTime(level * 0.1, ctx.currentTime, level > 0 ? 0.06 : 0.3);
+    },
+  };
+})();
+
 /* ═══════════════════════════════════════════════════════════════════════
  * 12. SCENA, LUCI E CIELO
  * ═══════════════════════════════════════════════════════════════════════ */
@@ -9933,6 +10320,9 @@ async function main() {
   // Mezzo, conducente, camera, mappe
   const events = new Emitter();
   const driver = new Driver(network, events);
+  Volo.init(landmarks);                  // blocco M3: il giro della mongolfiera, con le quote sopra tetti e monumenti
+  const flight = new Flight(events);
+  flight.place(0, false);
   const rig = new CameraRig(camera);
   const minimap = new MiniMap(document.getElementById('minimap'), network);
   const pauseMap = new PauseMap(ui.el.bigmap, minimap, landmarks);
@@ -10051,25 +10441,82 @@ async function main() {
     return L;
   };
 
-  /** Cambia mezzo sul posto (dal menu iniziale o dalla pausa). */
+  /**
+   * Mongolfiera (blocco M3): la cesta sul giro, il dondolio leggero, la fiamma a tratti col suo soffio.
+   * Nella vista dalla cesta la figurina sparisce (la camera è lei).
+   */
+  const poseBalloon = (dt) => {
+    const f = flight, k = f.grounded ? 0.15 : 1;
+    car.root.position.copy(f.position);
+    car.root.rotation.set(0, f.yaw, 0);
+    const sp = Math.sin(elapsed * 0.9) * 0.018 * k, sr = Math.sin(elapsed * 0.63 + 1) * 0.022 * k;
+    car.animate(dt, 0, 0, sp, sr, elapsed, { head: f.flame, driver: rig.mode === 'balloon' && rig.view === 'in' ? 0 : 1 });
+    Burner.set(phase === 'menu' ? 0 : f.flame * (phase === 'pause' ? 0.5 : 1));
+    Walker.mesh.visible = false;
+  };
+
+  /** Targa: la via (in auto e a piedi) o, in mongolfiera, il rione sotto la cesta e la quota dal suolo. */
+  const showPlate = () => {
+    if (mode !== 'balloon') { ui.showEdge(driver); return; }
+    const p = flight.position;
+    ui.el.street.textContent = 'In mongolfiera';
+    ui.el.dest.textContent = `${districtAt(p.x, -p.z)} · ${Math.max(0, Math.round(p.y - Terrain.heightAt(p.x, -p.z)))} m dal suolo`;
+    ui.el.plate?.classList.remove('is-walking');
+  };
+
+  /**
+   * Cambia mezzo sul posto (dal menu iniziale o dalla pausa). Blocco M3: dalla schermata iniziale la
+   * mongolfiera decolla da Botromagno; dalla pausa compare in volo nel punto del giro più vicino; tornando
+   * a un'auto, l'auto riparte dalla via percorribile più vicina.
+   */
+  let mode = 'car', lastCar = VEHICLES[0].id;
+  const subject = () => (mode === 'balloon' ? flight : driver);
   const useVehicle = (id) => {
     const spec = VEHICLES.find((v) => v.id === id) ?? VEHICLES[0];
+    const was = mode;
     if (car) scene.remove(car.root);
     car = VehicleFactory.get(spec.id);
     scene.add(car.root);
-    driver.pace = spec.pace;
+    if (spec.air) {
+      mode = 'balloon';
+      if (was !== 'balloon') {
+        const p = driver.onFoot ? Walker.mesh.position : driver.position;
+        if (phase === 'menu') flight.place(0, false); else flight.place(Volo.nearest(p.x, -p.z).s, true);
+        flight.running = phase !== 'menu';
+        Walker.mesh.visible = false;
+        ui.closeDecision();
+        Tiles.ensure(flight.position.x, -flight.position.z, 420, areas);
+        if (phase === 'menu') rig.balloon(true); else if (phase === 'drive') { rig.balloon(); rig.pending = true; }
+      }
+    } else {
+      lastCar = spec.id;
+      if (was === 'balloon') {
+        Burner.set(0);
+        const p = flight.position, r = network.nearest(p.x, -p.z, [flight.forward.x, -flight.forward.z]);
+        Tiles.ensure(r.edge.samples[0], -r.edge.samples[2], 420, areas);
+        place(r);
+        if (phase === 'menu') { rig.showroom(driver); rig.pending = true; } else if (phase === 'drive') rig.snap(driver);
+      }
+      mode = 'car';
+      driver.pace = spec.pace;
+    }
+    ui.el.hud.classList.toggle('is-balloon', mode === 'balloon');
+    ui.el.btnView.hidden = mode !== 'balloon';
+    minimap.tour = mode === 'balloon';
     rig.setVehicle(car.dims);
     minimap.color = spec.color;
     ui.markVehicle(spec.id);
-    poseCar(0);
-    pauseMap.draw(driver);
+    if (mode === 'balloon') poseBalloon(0); else poseCar(0);
+    if (phase === 'pause') pauseMap.showCar(subject()); else pauseMap.draw(subject());
+    showPlate();
     try { localStorage.setItem(STORE_KEY, spec.id); } catch { /* memoria del browser non disponibile: pazienza */ }
   };
   let saved = null;
   try { saved = localStorage.getItem(STORE_KEY); } catch { /* idem */ }
   ui.buildPickers(VEHICLES, (id) => { useVehicle(id); rig.showroomCloseUp(); });
+  rig.bridge = bridgeFrame();
   useVehicle(saved ?? VEHICLES[0].id);
-  rig.showroom(driver, bridgeFrame());
+  if (mode === 'balloon') rig.balloon(true); else rig.showroom(driver, rig.bridge);
 
   /** Inquadratura: la scena si sposta nella parte di schermo libera dai pannelli. */
   const reframe = () => {
@@ -10081,11 +10528,12 @@ async function main() {
     if (phase !== 'drive') return;
     phase = 'pause';
     driver.pause();
-    rig.aerial(driver);
-    ui.showPause(true, driver);
+    flight.pause();
+    rig.aerial(subject());
+    ui.showPause(true, subject());
     pauseMap.pick = null;
     pauseMap.resize();
-    pauseMap.showCar(driver);
+    pauseMap.showCar(subject());
     reframe();
   };
 
@@ -10093,9 +10541,15 @@ async function main() {
     if (phase !== 'pause') return;
     phase = 'drive';
     driver.resume();
-    driver.start();
-    if (rig.mode !== 'drive') rig.startDrive(driver);
-    ui.showPause(false, driver);
+    flight.resume();
+    if (mode === 'balloon') {
+      flight.start();
+      if (rig.mode !== 'balloon') rig.balloon();
+    } else {
+      driver.start();
+      if (rig.mode !== 'drive') rig.startDrive(driver);
+    }
+    ui.showPause(false, subject());
     reframe();
   };
 
@@ -10104,11 +10558,12 @@ async function main() {
   let proximityTimer = 0;
   const checkLandmarks = () => {
     if (ui.cardBusy) return;
-    const p = driver.position;
+    const p = subject().position, air = mode === 'balloon' && !flight.grounded;
+    if (mode === 'balloon' && !air) return;
     for (const lm of landmarks) {
       if (lm.card === false) continue;
-      const dx = lm.at[0] - p.x, dn = lm.at[1] + p.z;
-      if (dx * dx + dn * dn < lm.radius * lm.radius && elapsed - (shown.get(lm.id) ?? -1e9) > 120) {
+      const dx = lm.at[0] - p.x, dn = lm.at[1] + p.z, r = air ? Math.max(lm.radius, 45) : lm.radius;
+      if (dx * dx + dn * dn < r * r && elapsed - (shown.get(lm.id) ?? -1e9) > 120) {
         shown.set(lm.id, elapsed);
         ui.showCard(lm);
         break;
@@ -10119,14 +10574,37 @@ async function main() {
   /** Nome di ciò che si è scelto sulla mappa (un luogo o la via più vicina al tocco). */
   const describe = (pick) => {
     if (pick.lm) return { label: pick.lm.name, ok: true };
+    if (mode === 'balloon' && Volo.nearest(...pick.at).d < CONFIG.balloon.far) return { label: 'Sul giro della mongolfiera', ok: true };
     const r = network.nearest(...pick.at);
     return r.d < 30 ? { label: r.edge.name, ok: true } : { label: 'Qui non ci sono vie: tocca più vicino a una strada', ok: false };
   };
 
   /** Teletrasporto (solo a mezzo fermo, in pausa): dissolvenza, nuovo punto, si riparte. */
   let busy = false;
+  // Blocco M3: in mongolfiera questi luoghi (e quelli a più di 300 m dal giro) si raggiungono scendendo e con l'ultima auto.
+  const BY_CAR = new Set(['bosco', 'quercus', 'vivaio', 'scout', 'picnic', 'pip', 'castello', 'meninni']);
   const teleport = async (pick) => {
     if (phase !== 'pause' || busy || !pick) return;
+    if (mode === 'balloon') {
+      const at = pick.lm?.at ?? pick.at, near = Volo.nearest(at[0], at[1]);
+      if (near.d < CONFIG.balloon.far && !BY_CAR.has(pick.lm?.id)) {
+        busy = true;
+        await ui.fade(() => {
+          Tiles.ensure(at[0], at[1], 420, areas);
+          flight.place(Math.min(near.s, Volo.L - 200), true);
+          poseBalloon(0);
+          rig.balloon();
+          rig.pending = true;
+          minimap.draw(flight);
+          resume();
+          rig.setFrame(0, 0, true);
+        });
+        busy = false;
+        if (pick.lm && pick.lm.card !== false) { shown.set(pick.lm.id, elapsed); ui.showCard(pick.lm); }
+        return;
+      }
+      useVehicle(lastCar);
+    }
     if (!pick.lm && network.nearest(...pick.at).d >= 30) return;
     const spot = pick.lm?.id === 'ponte' ? startSpot() : pick.lm ? spotNear(pick.lm.at, 12) : spotNear(pick.at, 3);
     busy = true;
@@ -10200,6 +10678,28 @@ async function main() {
     rig.zoom(Math.exp(clamp(ev.deltaY, -120, 120) * 0.0015));
   }, { passive: false });
   ui.el.btnFollow.addEventListener('click', () => rig.follow());
+  // Blocco M3: in mongolfiera il pulsante passa dalla vista dalla cesta (prima persona) a quella esterna (terza)
+  ui.el.btnView.addEventListener('click', () => {
+    rig.toggleView();
+    const label = rig.view === 'in' ? 'Vista esterna' : 'Vista dalla cesta';
+    ui.el.btnViewLabel.textContent = label;
+    ui.el.btnView.setAttribute('aria-label', label);
+  });
+  // Fine del giro: la mongolfiera atterra al decollo e si riparte con l'ultima auto dalla via più vicina (decisione 3)
+  let landing = 0;
+  events.on('balloon:landed', () => { landing = 2.2; });
+  const finishTour = async () => {
+    busy = true;
+    await ui.fade(() => {
+      useVehicle(lastCar);
+      driver.resume();
+      driver.start();
+      rig.snap(driver);
+      poseCar(0);
+      minimap.draw(driver);
+    });
+    busy = false;
+  };
   // Blocco M2: dalla panchina si esce dalla piazzetta e si torna al mezzo (dissolvenza, si riparte da dov'era)
   ui.el.btnBench.addEventListener('click', async () => {
     if (busy || !driver.sitting) return;
@@ -10282,7 +10782,7 @@ async function main() {
   let cityDone = false;
   const buildCity = () => {
     if (cityDone) return;
-    const p = driver.position;
+    const p = subject().position;
     if (!Tiles.buildSome([p.x, -p.z], CONFIG.city.buildBudget, areas)) {
       cityDone = true;
       performance.mark('gravina:completo');
@@ -10291,36 +10791,41 @@ async function main() {
   ui.enableStart(() => {
     phase = 'drive';
     try { if (localStorage.getItem('gravina3d.radio') === '1' && !Radio.on) Radio.toggle(); } catch { /* pazienza */ }
-    rig.startDrive(driver);
+    if (mode === 'balloon') rig.balloon(); else rig.startDrive(driver);
     reframe();
-    setTimeout(() => { if (!driver.running) driver.start(); }, CONFIG.drive.startDelay * 1000);
+    setTimeout(() => { if (mode === 'balloon') flight.start(); else if (!driver.running) driver.start(); }, CONFIG.drive.startDelay * 1000);
   });
 
   /** Avanza la simulazione di `dt` secondi (mezzo, camera, luci, interfaccia). */
   let mapTimer = 0;
+  const _focus = new THREE.Vector3();
+  let plateTimer = 0;
   const step = (dt) => {
     elapsed += dt;
-    driver.update(dt);
-    poseCar(dt);
-    rig.update(dt, driver);
-    updateSunShadow(sun, driver.position);
+    const S = subject();
+    if (mode === 'balloon') { flight.update(dt, elapsed); poseBalloon(dt); } else { driver.update(dt); poseCar(dt); }
+    rig.update(dt, S);
+    // in mongolfiera le ombre restano attorno al suolo sotto la cesta (il riquadro delle ombre è di 180 m)
+    updateSunShadow(sun, mode === 'balloon' ? _focus.set(S.position.x, Terrain.heightAt(S.position.x, -S.position.z), S.position.z) : S.position);
     if (phase === 'menu') return;
-    minimap.draw(driver);
+    minimap.draw(S);
     ui.tickDecision(driver);
     if (ui.el.btnFollow.hidden === rig.free) ui.el.btnFollow.hidden = !rig.free;
     ui.tickCard(dt);
+    if (mode === 'balloon' && (plateTimer -= dt) <= 0) { plateTimer = 0.5; showPlate(); }
+    if (landing > 0 && phase === 'drive' && !busy && (landing -= dt) <= 0) finishTour();
     // In panchina (blocco M2): dopo qualche secondo con la scheda, il pulsante per tornare al mezzo
     if (driver.sitting && phase === 'drive' && (sitTimer += dt) > 5 && ui.el.btnBench.hidden) ui.el.btnBench.hidden = false;
     proximityTimer -= dt;
     if (proximityTimer <= 0) { proximityTimer = 0.25; checkLandmarks(); }
-    if (phase === 'pause' && (mapTimer -= dt) <= 0) { mapTimer = 0.4; pauseMap.draw(driver); }
+    if (phase === 'pause' && (mapTimer -= dt) <= 0) { mapTimer = 0.4; pauseMap.draw(S); }
     // Bosco (blocco L): alberi tra camera e figura, foschia e suoni solo dentro il bosco vero.
-    Forest.update(camera, driver.onFoot ? Walker.mesh.position : driver.position, dt);
-    if ((forestTimer -= dt) <= 0) { forestTimer = 0.2; forestIn = forestAmount(driver.position.x, -driver.position.z); }
+    Forest.update(camera, mode === 'car' && driver.onFoot ? Walker.mesh.position : S.position, dt);
+    if ((forestTimer -= dt) <= 0) { forestTimer = 0.2; forestIn = forestAmount(S.position.x, -S.position.z); }
     forestFog += (smoothstep(0.3, 0.8, forestIn) - forestFog) * damp(0.6, dt);
     scene.fog.near = lerp(CONFIG.city.fogNear, 70, forestFog);
     scene.fog.far = lerp(CONFIG.city.fogFar, 640, forestFog);
-    ForestSound.update(dt, { inside: forestIn, onFoot: driver.onFoot, speed: driver.speed, paused: phase === 'pause' });
+    ForestSound.update(dt, { inside: forestIn, onFoot: mode === 'car' && driver.onFoot, speed: S.speed, paused: phase === 'pause' });
     Radio.duck(1 - 0.65 * ForestSound.level);
   };
   let forestTimer = 0, forestIn = 0, forestFog = 0;
@@ -10343,7 +10848,8 @@ async function main() {
         driver.place(r.edge, r.dir, Math.max(0, r.s - back));
         return r.edge.name;
       },
-      useVehicle, pause, resume, teleport, pauseMap, Radio, Forest, ForestSound,
+      useVehicle, pause, resume, teleport, pauseMap, Radio, Forest, ForestSound, flight, Volo, Burner, VehicleFactory, forestAmount,
+      get mode() { return mode; },
       /** Teletrasporto verso il monumento con quell'id (in pausa). */
       goTo(id) { return teleport({ lm: landmarks.find((l) => l.id === id) }); },
     };
@@ -10357,7 +10863,7 @@ async function main() {
     const dt = Math.min(raw, 0.05);   // tetto: niente salti dopo un cambio di scheda
     buildCity();
     step(dt);
-    if (phase !== 'menu') ui.updateLabels(camera, innerWidth, innerHeight, 320);
+    if (phase !== 'menu') ui.updateLabels(camera, innerWidth, innerHeight, mode === 'balloon' ? 560 : 320, mode === 'balloon' ? flight.position : null, CONFIG.balloon.minorLabels);
     Tiles.updateLod(camera);
     renderer.render(scene, camera);
     if (!CONFIG.debug) quality.tick(raw);
