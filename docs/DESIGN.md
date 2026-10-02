@@ -354,6 +354,9 @@ Nel bosco la nebbia si avvicina (foschia) e la targa dice «Bosco Difesa Grande�
 | Alberi | Pini e lecci nei giardini reali (Villa Comunale), ulivi verso Botromagno, macchia nel canyon. |
 | Botromagno (blocco M1) | Le sagome OSM `building=ruins` dal lato di Botromagno (46) sono **rovine**: muri a secco di blocchi irregolari di calcare e tufo sul contorno reale, alti 0,3–1,2 m con brecce e tratti crollati, fondo di terra, conci caduti, erba secca e cespugli. Nell'area degli scavi (OSM w484764621) il **recinto funerario con sei tombe in serie**, tombe a fossa (alcune con la lastra spostata), a semicamera e a camera col dromos (gradini scavati verso l'apertura nel banco), **buche per i pali** delle capanne in anelli; suolo di **roccia** (calcare con crepe, massi ed erba secca) lungo il ciglio ovest e negli scavi. Gli edifici veri del versante (il Madonna della Stella Resort e i suoi corpi) a un piano, muri chiari e coppi. Le rovine sul lato della città restano case. |
 | Stadio «Stefano Vicino» (blocco M1) | Su un terrapieno piano alla quota del campo (le quote a 30 m lo davano in pendenza di 15 m: lo stadio sta sul ciglio della gravina). Campo in erba sintetica con strisce, righe e porte; **gradinata est** sulla sagoma OSM della tribuna, **tribuna ovest coperta** (la copertura è dei lavori 2024–2025), curva sud e settore nord in cemento con le file di seggiolini, quattro **torri faro**, **muro di cinta** sul contorno OSM con gli ingressi verso le vie (verso la gravina fa da muro di sostegno). |
+| Pineta e Parco Robinson (blocco M2) | Pini d'Aleppo a ombrello (tronco alto, chioma larga e piatta) sul prato; cancellata sui lati verso le vie con i cancelli dove entrano i vialetti reali; area giochi sul punto OSM (altalene, scivolo, giostra girevole, dondoli a molla, altalena a bilico) col fondo antitrauma e lo steccato; il busto al centro dei vialetti, panchine e lampioni, la fontanella, i tavoli del pic-nic e i parapetti ai belvederi (OSM w473031981). |
+| Villa Comunale e Monumento ai Caduti (blocco M2) | Il monumento rifatto dalle foto e dalle fonti: tre gradini, il dado di marmo bianco con le lapidi dei nomi e il gruppo in bronzo di Angelo Galli (1934), l'Italia a cavallo col vessillo, due soldati alla carica e il prigioniero con le catene spezzate; scheda con la **sosta in panchina** (sezione 6b). Le panchine OSM (di marmo attorno al monumento, di legno coi braccioli di ferro lungo i viali) e i due «Fontanoni gemelli». Villa e Piazza della Repubblica sono pedonali. |
+| Monumento alla Cola Cola (blocco M2) | All'ingresso della città su Via Bari, nel punto OSM (w411137509): una grande cola cola, il fischietto di terracotta di Gravina, su un basamento di pietra; corpo bianco calce con le strisce rosse, gialle, verdi e blu, base a campana, becco, cresta e coda alzata; con la scheda; Via Bari ci arriva come via cieca reale con la goccia. |
 | Fiera di San Giorgio (blocco M1) | Recinzione di muretto basso in cemento con la rete metallica, cancello tra due pilastri sul punto OSM e **botteghino** giallo accanto (Street View, aprile 2025); i quattro padiglioni OSM sono capannoni chiari con i **portoni** grandi bordati di giallo. |
 
 Monumenti con scheda (solo fatti verificati): Cattedrale, la Gravina (belvedere), Chiesa del
@@ -376,20 +379,49 @@ e le fonti principali descrivono la facciata della Cattedrale come tripartita.
 
 ## 5. I mezzi
 
-Quattro mezzi a scelta, costruiti solo da primitive (esaedri deformati, cilindri, profili
-estrusi) con quote reali. Nessun logo. La parte bassa della carrozzeria è divisa in tre blocchi
-con **passaruota a trapezio**, così le ruote si vedono. Le anteriori sterzano, tutte rotolano;
-la scocca beccheggia, rolla e vibra (anche da ferma, a motore acceso).
+Cinque mezzi a scelta (blocco M3): quattro auto **realistiche nello stile** e la mongolfiera.
+Nessun logo, nessun modello caricato: tutto è costruito dal codice (sezione 7, `VehicleFactory`).
 
-| Mezzo | Quote | Tratti riconoscibili | Ritmo |
-|---|---|---|---|
-| Fiat Panda 4x4 (1999) | 3,38 × 1,49 × 1,48 m, passo 2,16 m | due volumi squadrati, protezioni in plastica grezza, barre sul tetto, fari rettangolari, cerchi in lamiera | 0,9 |
-| Audi RS6 Avant (C8) | 5,00 × 1,95 × 1,46 m, passo 2,93 m | familiare bassa, passaruota bombati, grande calandra nera, fascia luminosa posteriore, scarichi ovali, pinze rosse, grigio opaco | 1,1 |
-| Lamborghini Huracán | 4,46 × 1,93 × 1,17 m, passo 2,62 m | cuneo, abitacolo avanzato, fari a Y, prese d'aria laterali, cofano motore a lamelle, quattro scarichi, arancione | 1,2 |
-| Trattore John Deere | 4,6 × 2,35 × 3,0 m, ruote posteriori da 1,76 m | cofano lungo verde, cabina a quattro montanti, parafanghi a settore, ruote gialle con tasselli a spina di pesce, marmitta verticale con sbuffi di fumo | 0,62 |
+| Mezzo | Quote | Tratti riconoscibili | Ritmo | Triangoli |
+|---|---|---|---|---|
+| Fiat Panda 4x4 (1999) | 3,38 × 1,49 × 1,48 m, passo 2,16 m | due volumi squadrati, protezioni in plastica grezza, barre sul tetto, fari rettangolari, cerchi in lamiera con le asole | 0,9 | 3 900 |
+| Audi RS6 Avant (C8) | 5,00 × 1,95 × 1,46 m, passo 2,93 m | familiare bassa, parafanghi allargati, grande calandra nera, fascia luminosa posteriore, scarichi ovali, cerchi a dieci razze con pinze rosse, grigio | 1,1 | 4 400 |
+| Lamborghini Huracán | 4,46 × 1,93 × 1,17 m, passo 2,62 m | cuneo, abitacolo avanzato, fari a Y, prese d'aria laterali, cofano motore a lamelle, quattro scarichi, cerchi a Y con pinze gialle, arancione | 1,2 | 4 400 |
+| Trattore John Deere | 4,6 × 2,35 × 3,0 m, ruote posteriori da 1,76 m | cofano lungo verde, cabina a quattro montanti, parafanghi a settore, ruote gialle con tasselli a spina di pesce, marmitta con gli sbuffi di fumo | 0,62 | 5 500 |
+| Mongolfiera | alta circa 23 m con la cesta | pallone a 14 spicchi nei colori del diorama (terracotta, ocra, crema) con una fascia blu, cesta di vimini, funi, bruciatore con la fiamma, pilota e visitatore | — | 2 400 |
+
+**Carrozzeria per sezioni** (`Shop.loft`): una serie di anelli di 15 punti lungo il mezzo, dal
+paraurti al baule, con le **arcate dei passaruota** ritagliate e, per RS6 e Huracán, i parafanghi
+allargati. **Vetri a filo** trasparenti: si vedono l'abitacolo con sedili, cruscotto e volante e il
+**guidatore seduto** (`Walker.figure()`, la figurina del blocco G in posa seduta, coi colori per
+nome); parcheggiato, senza guidatore. **Ruote** con la spalla della gomma e il cerchio di ogni
+modello; rotolano e sterzano nello shader (`uSpin`, `uSteer`). Sospensioni: la scocca beccheggia,
+rolla e vibra un po' di più sul basolato del centro storico e sugli sterrati.
+
+**Quattro mesh per mezzo** (prima più di 20): carrozzeria, ruote, vetri e aloni dei fari (il
+trattore ha in più il fumo, una `InstancedMesh`). Colore, metallo, ruvidità e «gruppo di luce» sono
+attributi dei vertici (`aMat`), non materiali diversi: le draw call della scena calano di 15 su PC e
+sul telefono (`prestazioni.mjs`, blocco M3).
+
+**Luci da uniform** (`uHead`, `uBrake`, `uBlinkL`, `uBlinkR`, `uDriver`, logica in `carLights`,
+sezione 13): fari accesi al tramonto con un **alone finto** che si spegne di taglio e la pozza di
+luce sull'asfalto; **stop** quando il mezzo rallenta (anche prima degli incroci, con l'acceleratore)
+e da fermo; **frecce** prima della svolta, quando l'angolo supera 0,4 rad; parcheggiato tutto spento.
+
+**Riflessi**: una mappa d'ambiente al tramonto generata dal codice (`VehicleFactory.setEnv`) vale
+solo per i mezzi; il resto della scena usa `scene.environment` come prima.
+
+**Mongolfiera** (sezione 7c, `VehicleFactory.register('balloon')`): pallone a 14 spicchi (tre
+colonne per spicchio), fascia blu, cesta di vimini con le funi, bruciatore con la **fiamma a tratti**
+(gruppo di luce 7) e il suo **soffio** generato con Web Audio (`Burner`, sezione 11d), il pilota e la
+figurina, un dondolio leggero. È un'eccezione come il Ponte Acquedotto: **vola su un giro fisso e non
+segue le vie** (sezione 6c).
 
 Il ritmo moltiplica le velocità di `CONFIG.drive`. Ogni mezzo è costruito una sola volta e poi
-riusato: il cambio è istantaneo.
+riusato: il cambio è istantaneo. Nei menu le sagome (`icon`) sono ricavate dalle sezioni delle
+carrozzerie. Sul telefono il menu ha cinque tessere su una riga, sagoma sopra e nome breve sotto
+(il nome intero resta per i lettori di schermo); su PC schede su due colonne e la mongolfiera su una
+riga intera.
 
 ---
 
@@ -440,12 +472,63 @@ riusato: il cambio è istantaneo.
   "percorso pedonale" col pittogramma; nella minimappa i tratti pedonali sono tratteggiati, la
   figurina è un pallino con la direzione e il mezzo parcheggiato una freccia più piccola.
 * Pausa, teletrasporto (la figurina risale) e cambio mezzo funzionano anche a piedi.
+* **Tratti a piedi del blocco M2**: sentiero degli scavi (A, 1,5 km), Pineta e Parco Robinson,
+  Via Pietro Ianora, scale e sottopassaggio della stazione, vialetti della Villa Comunale; nel vivaio
+  l'anello V2 (692 m) e il sentiero della Base Scout; i percorsi approvati nella Fiera e nel giardino
+  del Casino di Meninni. In tutto 53 tratti, 5,2 km a piedi.
+* **Sosta in panchina** (blocco M2, `Soste`, sezione 7b del codice): nella piazzetta del Monumento ai
+  Caduti la figurina si siede sulla panchina reale (OSM) più vicina al percorso e guarda il
+  monumento; la scheda resta aperta e dopo circa 5 s compare il pulsante **Esci dalla piazzetta ·
+  torna al mezzo**, che con una dissolvenza riporta al mezzo **dove era parcheggiato**. La Villa non
+  ha ingressi a piedi su Corso Vittorio Emanuele: il mezzo aspetta dove si è scesi (Piazza
+  Pellicciari o uno dei vicoli d'ingresso). Sul telefono il pulsante sta in basso, a tutta larghezza.
+
+### 6c. La mongolfiera (blocco M3)
+
+* **Giro fisso** (`CONFIG.balloon`, `Volo` e `Flight`, sezione 8b): curva chiusa (Catmull-Rom
+  centripeta) sui 13 punti del piano: decollo sul prato degli scavi di Botromagno, Necropoli, Madonna
+  della Stella e Ponte Acquedotto, Piaggio, San Francesco, Porta San Michele, Piazza della Repubblica,
+  Purgatorio, Cattedrale, Fondovito, Sette Camere, il resort e il ciglio ovest. **2 725 m in 7
+  minuti**, a 6,5 m/s, più piano al decollo e all'atterraggio.
+* **Quota**: 63–131 m dal suolo; sale da sola per restare **almeno 30 m sopra** tetti, cime dei
+  monumenti (anche il campanile della Cattedrale) e terreno entro 40 m, con salite dolci; fuori da
+  questa regola solo il decollo e l'atterraggio. Sempre dentro la zolla della città, lontano dal bosco
+  (`forestAmount` = 0 su tutto il giro). `simula.mjs` lo controlla ogni 5 m.
+* **Schede** quando passa sopra un luogo (raggio di almeno 45 m); le etichette senza scheda (scuole,
+  chiese della città, luoghi minori) si vedono solo entro 150 m. **Targa**: «In mongolfiera», il rione
+  sotto la cesta e i metri dal suolo. Minimappa e mappa della pausa mostrano il giro tratteggiato.
+* **Cambio mezzo**: dalla schermata iniziale si decolla da Botromagno; dalla pausa la mongolfiera
+  compare in volo nel punto del giro più vicino; tornando a un'auto si riparte dalla via percorribile
+  più vicina. L'acceleratore non fa niente in mongolfiera.
+* **Teletrasporto**: al punto del giro più vicino al luogo se è entro 300 m; altrimenti, e per i luoghi
+  del bosco, il P.I.P., il Castello Svevo e il Casino di Meninni, si scende e ci si va con l'ultima auto.
+* **Fine del giro**: atterra al decollo e si riparte con l'ultima auto dalla via percorribile più
+  vicina (Via Madonna della Stella, a 139 m), come ha chiesto il committente.
+
+### 6d. Sottopassi (blocco M2)
+
+Dove OSM segna una galleria sotto i binari (Corso Giuseppe di Vittorio, Via Falcone e Borsellino, il
+sottopassaggio pedonale della stazione) la via scende in **trincea** (`Sottopassi`, sezione 5 del
+codice): dall'incrocio di prima a quello di dopo la quota cala con le rampe (16,5%, entro il 18%)
+fino alla profondità della galleria. Il terreno si ritaglia, ai lati ci sono i muri di contenimento
+col parapetto e sopra la galleria l'**impalcato** alla quota dei binari; i binari salgono di poco se
+sotto restano meno di 3,8 m liberi. Nel sottopassaggio pedonale della stazione, dove la rampa supera
+il 12%, ci sono i **gradini** (alzate da 16 cm, `Tiles._steps`, solo nella versione vicina dei
+riquadri). A Via Spinazzola i binari passano su un viadotto con le pile.
 
 ---
 
 ## 7. Camera
 
-* **Vetrina** all'apertura, a due tempi (`CONFIG.camera.showroom`): per 9 s la camera ondeggia piano attorno al tre quarti posteriore del mezzo fermo, dal lato più aperto, e guarda la strada davanti; poi un volo a gru di 3,5 s porta a un **campo lungo dal canyon**, a sud del ponte, con le arcate su due ordini e il mezzo sulla testata; dopo 10 s si torna al primo piano. Scegliendo un mezzo si torna subito al primo piano. Pose diverse per schermi orizzontali e verticali, calcolate rispetto all'asse del ponte.
+* **Vetrina** all'apertura, a due tempi (`CONFIG.camera.showroom`): per 9 s la camera ondeggia piano attorno al tre quarti posteriore del mezzo fermo, dal lato più aperto, e guarda la strada davanti; poi un volo a gru di 3,5 s porta a un **campo lungo dal canyon**, a sud-ovest del ponte, con le arcate su due ordini; dopo 10 s si torna al primo piano. Scegliendo un mezzo si torna subito al primo piano. Pose diverse per schermi orizzontali e verticali, calcolate rispetto all'asse del ponte. Nel blocco M3 le pose sono state rifatte: quelle di prima stavano dietro la collina della sponda est, che copriva quasi tutto il ponte; in verticale, dove il ponte non ci sta insieme al mezzo, c'è un **campo medio** sul mezzo che arriva alla testata accanto alla Fontana della Stella. Sul telefono in orizzontale il primo piano guarda meno avanti, così il mezzo resta nella parte libera dal pannello.
+* **Mongolfiera** (blocco M3, `rig.balloon()`, `CONFIG.camera.balloon`): **vista esterna**, un giro
+  largo e lento attorno al pallone (52 m, 14° dall'alto, 0,45 giri al minuto), con la camera libera
+  (trascinando e con la rotella, 26–160 m) che resta dov'è fino a **Segui il mezzo**; **vista dalla
+  cesta**, occhi a 1,75 m, si guarda avanti e un po' in basso, col dondolio, e trascinando ci si guarda
+  attorno (la figurina sparisce). Il pulsante **Vista dalla cesta / Vista esterna** (`#btn-view`)
+  passa dalla prima alla terza persona e viceversa, senza timer. In vetrina il pallone si guarda dal
+  prato, a ovest, verso il centro storico (in verticale più da lontano, perché ci stia tutto sopra il
+  pannello). In pausa la vista dall'alto è più larga.
 * **Inseguimento dall'alto** (18 m sopra il mezzo, 12 m dietro; un po' più alto per il trattore): si vede la strada tra i tetti, come in un plastico.
 * **Tetti**: se un tetto si mette tra la camera e il mezzo, o la camera finisce a ridosso di un tetto, la camera sale (fino a 22 m in più) e si avvicina in pianta. Usa una griglia dei tetti (celle da 10 m) con la quota di ogni edificio e arco.
 * **Giro automatico** (blocco G, `CONFIG.camera.auto`): mentre il mezzo avanza la camera passa
@@ -480,13 +563,20 @@ rilassante, alla Minecraft**, generata dal codice (sezione 11b, `Radio`), senza 
   un gesto), tasto **M**, brano successivo e volume (sul telefono bastano i tasti del volume).
   Se era accesa, si riaccende premendo Parti. Tace quando la scheda è nascosta.
 
-**Suoni del bosco** (blocco L, sezione 11c, `ForestSound`): generati con Web Audio, senza file.
-Vento a raffiche (rumore rosa filtrato), fruscio delle chiome, uccelli (merlo, cinciallegra,
-fringuello, un cuculo lontano ogni tanto, con distanza e posizione a caso), passi sulle foglie
-quando si cammina (uno ogni 0,75 m). Partono solo **dentro il bosco vero**: `forestAmount` conta
-le celle di querce in un raggio di 25 m, e il livello sale da 0,45 a 0,8, con 3 s di dissolvenza;
-uscendo si spengono e il contesto audio si sospende. Nel bosco la radio, se accesa, scende al 35%.
-Si spengono dalla pausa con l'interruttore **Suoni del bosco** (ricordato nel browser).
+**Suoni del bosco** (blocco L, rifatti nel blocco M2; sezione 11c, `ForestSound`): generati con Web
+Audio, senza file. Il fruscio e il vento a banda larga sembravano pioggia: al loro posto un soffio
+basso e lento a raffiche rare; **uccelli melodici** intonati sulla scala pentatonica del brano della
+radio (merlo, pettirosso, capinera, fringuello, tortora, un cuculo lontano); **grilli** al tramonto e
+qualche coro morbido di **cicale**; ogni tanto un **allocco** e il **picchio** che tamburella, di rado il
+grugnito lontano di un **cinghiale** e, molto di rado, un **ululato di lupo** lontano e melodico.
+Passi morbidi solo a piedi. Partono solo **dentro il bosco vero**: `forestAmount` conta le celle di
+querce in un raggio di 25 m, con 3 s di dissolvenza; uscendo si spengono e il contesto audio si
+sospende. Nel bosco la radio, se accesa, scende al 35%. Si spengono dalla pausa con l'interruttore
+**Suoni del bosco** (ricordato nel browser). In debug si ascoltano uno per uno con
+`gravina.ForestSound.play('owl')` (`'wolf'`, `'bird'`, …).
+
+**Soffio del bruciatore** (blocco M3, sezione 11d, `Burner`): rumore filtrato, generato dal codice,
+che sale e scende con la fiamma della mongolfiera.
 
 ---
 
@@ -518,20 +608,21 @@ Si spengono dalla pausa con l'interruttore **Suoni del bosco** (ricordato nel br
 ## 8. Prestazioni
 
 Misure con `tools/test/prestazioni.mjs` (Mac M4, GPU vera, Chromium headless), nelle viste
-partenza, centro, Piazza Scacchi, pausa, panoramica sulla città e alta (120 m sopra il centro
-storico, verso la città: la vista della futura mongolfiera).
+partenza, centro, Piazza Scacchi, pausa, panoramica sulla città, alta (120 m sopra il centro
+storico, verso la città), teletrasporto, bosco a piedi e, dal blocco M3, «mongolfiera» (il punto
+più pesante del giro, guardando verso la città).
 "Per fotogramma" è il massimo tra le viste, senza il passaggio delle ombre.
 
-| Voce | Fase 3 (solo centro storico) | Fase 3.4, città intera | Dopo il blocco G | Dopo il blocco I | Dopo il blocco D | Dopo il blocco M1 | Tetto |
-|---|---|---|---|---|---|---|---|
-| `index.html` | 390 KB (124 KB compressi) | 737 KB (269 KB compressi) | 593 KB (251 KB compressi) | 604 KB (255 KB compressi) | 634 KB (264 KB compressi) | 742 KB (298 KB compressi) | ≤ 1,2 MB (≤ 360 compressi; prima 900 KB e 280, alzato dal committente il 30/09/2026) |
-| Costruzione fino a "Parti" | 282 ms | circa 500 ms | circa 520 ms | circa 640 ms (telefono 620) | circa 770 ms (telefono 680) | circa 1 075 ms (telefono 990) | ≤ 1,5 s |
-| Memoria JavaScript | 41 MB | circa 100 MB | 112 MB (telefono 91) | 116 MB (telefono 129) | 117 MB (telefono 104) | 170 MB senza pulizia, 148 MB dopo la garbage collection (telefono 149) | ≤ 150 MB |
-| Città completa (in sottofondo) | — | circa 900 ms | circa 900 ms | circa 1 100 ms | circa 1 230 ms | circa 1 870 ms | — |
-| Triangoli nella scena | 267 000 | 543 000 (telefono 483 000) | 571 000 (telefono 505 000) | 572 000 + 138 000 della versione lontana, mai disegnate insieme (telefono 505 000 + 116 000) | 580 000 + 138 000 (telefono 514 000 + 116 000) | 978 000 + 166 000, con il bosco fitto del blocco L e il terreno a 7,5 m lungo le vie (telefono 825 000 + 134 000) | ≤ 650 000 (tetto del blocco C) |
-| Triangoli per fotogramma, PC | 267 000 | 334 000 | 335 000 | 235 500 (alta) | 246 000 (alta) | 249 000 (alta) | ≤ 400 000 (obiettivo del blocco I: 300 000) |
-| Triangoli per fotogramma, telefono | 267 000 | 242 000 | 243 500 | 164 700 (centro) | 175 300 (centro) | 176 600 (centro) | ≤ 250 000 (obiettivo del blocco I: 200 000) |
-| Draw call, PC / telefono | 39 / 38 | 69 / 54 | 69 / 48 | 68 / 48 | 68 / 48 | 71 / 48 | ≤ 90 / ≤ 70 |
+| Voce | Fase 3 (solo centro storico) | Fase 3.4, città intera | Dopo il blocco G | Dopo il blocco I | Dopo il blocco D | Dopo il blocco M1 | Dopo il blocco M3 (con M2) | Tetto |
+|---|---|---|---|---|---|---|---|---|
+| `index.html` | 390 KB (124 KB compressi) | 737 KB (269 KB compressi) | 593 KB (251 KB compressi) | 604 KB (255 KB compressi) | 634 KB (264 KB compressi) | 742 KB (298 KB compressi) | 866 KB (337 KB compressi) | ≤ 1,2 MB (≤ 360 compressi; prima 900 KB e 280, alzato dal committente il 30/09/2026) |
+| Costruzione fino a "Parti" | 282 ms | circa 500 ms | circa 520 ms | circa 640 ms (telefono 620) | circa 770 ms (telefono 680) | circa 1 075 ms (telefono 990) | circa 1 130 ms (telefono 1 075) | ≤ 1,5 s |
+| Memoria JavaScript | 41 MB | circa 100 MB | 112 MB (telefono 91) | 116 MB (telefono 129) | 117 MB (telefono 104) | 170 MB senza pulizia, 148 MB dopo la garbage collection (telefono 149) | 174 MB (telefono 157); prima di M3 179 e 161 | ≤ 150 MB |
+| Città completa (in sottofondo) | — | circa 900 ms | circa 900 ms | circa 1 100 ms | circa 1 230 ms | circa 1 870 ms | circa 2 150 ms | — |
+| Triangoli nella scena | 267 000 | 543 000 (telefono 483 000) | 571 000 (telefono 505 000) | 572 000 + 138 000 della versione lontana, mai disegnate insieme (telefono 505 000 + 116 000) | 580 000 + 138 000 (telefono 514 000 + 116 000) | 978 000 + 166 000, con il bosco fitto del blocco L e il terreno a 7,5 m lungo le vie (telefono 825 000 + 134 000) | 1 333 000 tra le due versioni, con i luoghi di M2 e i mezzi nuovi (telefono 1 085 000) | ≤ 650 000 (tetto del blocco C) |
+| Triangoli per fotogramma, PC | 267 000 | 334 000 | 335 000 | 235 500 (alta) | 246 000 (alta) | 249 000 (alta) | 283 600 (mongolfiera; alta 271 700) | ≤ 400 000 (obiettivo del blocco I: 300 000) |
+| Triangoli per fotogramma, telefono | 267 000 | 242 000 | 243 500 | 164 700 (centro) | 175 300 (centro) | 176 600 (centro) | 183 200 (centro) | ≤ 250 000 (obiettivo del blocco I: 200 000) |
+| Draw call, PC / telefono | 39 / 38 | 69 / 54 | 69 / 48 | 68 / 48 | 68 / 48 | 71 / 48 | 56 / 35 (prima di M3 71 / 50): 4 mesh per mezzo invece di più di 20 | ≤ 90 / ≤ 70 |
 
 Nel blocco G il peso è sceso nonostante figurina, camera e radio: nodi, vie, vie decorative ed
 edifici del centro storico ora usano il `CODEC` (a 0,1 m, senza perdite), da 90 a 55 KB compressi.
@@ -556,7 +647,13 @@ edifici del centro storico ora usano il `CODEC` (a 0,1 m, senza perdite), da 90 
 | 3.4 C | **Città intera**: zolla di 2,9 × 3,1 km a riquadri, 80 km di vie, 1 828 edifici della città, quote Copernicus, binari, Castello Svevo, mappe vettoriali con zoom | ✅ (PR #8) |
 | 3.4 F | **Strade per il Bosco Difesa Grande e il P.I.P.**: tre zolle, tracciato reale compresso, bosco di querce | ✅ (PR #10) |
 | 3.4 G | **Percorsi a piedi e quote reali del centro storico**, con la camera attorno al mezzo (blocco B) e la radio ambient | ✅ (PR #12) |
-| 3.4 I | **Spazio sul telefono**: due livelli di dettaglio per riquadro, vista «alta» nelle misure | ⏳ (PR #13) |
+| 3.4 I | **Spazio sul telefono**: due livelli di dettaglio per riquadro, vista «alta» nelle misure | ✅ (PR #13) |
+| 3.4 D | **Centro storico**: Porta San Michele, Piazza Scacchi, Quattro Fontane, campanili, vie entro il 18% | ✅ (PR #14) |
+| 3.4 E + L | **Luoghi della città, scuole e chiese; il Bosco da vicino**, acceleratore su PC | ✅ (PR #15) |
+| 3.4 M1 | **Botromagno, strade, stadio e Fiera** | ✅ (PR #16) |
+| 3.4 M2 | **Percorsi a piedi, zone pedonali, sottopassi, parchi, suoni del bosco** | ✅ (PR #17) |
+| 3.4 M3 | **Mezzi realistici e mongolfiera**, con il resto di M2 | ⏳ (PR #18) |
+| 3.4 N | Cartolina, giro guidato e ritocchi | da fare |
 | 4 | Rifinitura: luci, prove su telefoni reali, restyling | ⏳ |
 
 ### Da decidere insieme (fase 3, punto 6)
