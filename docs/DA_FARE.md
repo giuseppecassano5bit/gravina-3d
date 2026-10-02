@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 2 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1 e M2 della fase 3.4 uniti.
+Stato al 2 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1 e M2 della fase 3.4 uniti, M3 in attesa di approvazione (PR #18).
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
@@ -51,9 +51,8 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N, dettagli e decisioni nel
 - [ ] **Prestazioni**: se dopo i blocchi M e N il diorama resta pesante, il committente pensa a
       un'impostazione che carichi il mondo solo attorno alla visuale; in città non si riduce niente,
       al massimo in periferia dove dall'auto non si vede (01/10/2026).
-- [ ] Telefono in orizzontale, partenza sul ponte: il contatore di debug segna 74 draw call (tetto 70),
-      uguale su `main` prima di E e L (`node foto.mjs orizzontale`). In verticale il massimo è 48.
-      Da guardare nel blocco N con i ritocchi dell'orizzontale.
+- [x] Telefono in orizzontale, partenza sul ponte: il contatore di debug segnava 74 draw call (tetto 70).
+      Con i mezzi del blocco M3 (4 mesh invece di più di 20) sono 57 (`node foto.mjs orizzontale`).
 - [ ] La vasca grande del vivaio (w411138854) è fuori dalla zolla del vivaio: allargarla di un
       riquadro verso sud, se si vuole.
 - [x] **M1 · Botromagno, strade, stadio e Fiera** (`fase-3-4-m1-botromagno-strade`, PR #16, unita il
@@ -87,18 +86,36 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N, dettagli e decisioni nel
         dalla piazzetta · torna al mezzo»); panchine e Fontanoni gemelli della Villa;
       - **monumento alla Cola Cola** su Via Bari, nel punto OSM, con la scheda;
       - vasca grande del vivaio (zolle allargate); suoni del bosco senza pioggia, intonati con la radio.
-- [ ] **Resto di M2, da fare all'inizio di M3** (il committente ha chiesto di unire e passare oltre):
-      - `interazioni.mjs`: giri a piedi nel vivaio (V2), sul sentiero degli scavi (A), nella Villa con la
-        sosta in panchina e il pulsante; controllare che la Fiera e il Casino di Meninni si raggiungano;
-      - `node difetti.mjs` sulle vie nuove (trincee, sentiero A nel canyon, goccia di Via Bari);
-      - screenshot su telefono in verticale e in orizzontale (`node foto.mjs mobile` / `orizzontale`);
-      - Street View: ingresso dello stadio, paletti agli ingressi della Villa, foto della Cola Cola;
-      - scale vere (gradini) nel sottopassaggio della stazione, oggi rampe;
-      - `DESIGN.md`: sezioni su sottopassi, parchi, sosta in panchina, suoni del bosco;
-      - suoni del bosco: farli ascoltare al committente; memoria JS su PC 166 MB (tetto 150).
-- [ ] **M3 · mezzi realistici e mongolfiera** (`fase-3-4-m3-mezzi-mongolfiera`): auto per sezioni
-      con guidatore, stop e frecce senza draw call in più; mongolfiera come quinto mezzo, giro fisso
-      da Botromagno sopra il centro storico, prima e terza persona.
+- [x] **Resto di M2**, fatto insieme a M3 il 02/10/2026:
+      - `interazioni.mjs`: giri a piedi nel vivaio (V2, 738 m), sul sentiero degli scavi (A, 643 m) e nella
+        Villa con la sosta in panchina e il pulsante; Fiera, Casino di Meninni e Cola Cola dall'elenco dei
+        luoghi, con la goccia;
+      - `node difetti.mjs` prima e dopo M2 (`shots/difetti-prima-m2.json`, `difetti-dopo-m2.json`): «sotto»
+        da 0 a 31, quasi tutti nelle trincee dei sottopassi (l'impalcato sopra la galleria) e 3 sui vialetti
+        del Parco Robinson, a vista a posto; «galleggia» da 16 a 20, «spezzate» da 44 a 58 (curve dei
+        sentieri nuovi);
+      - screenshot su telefono in verticale e in orizzontale, pulsante della panchina sul telefono;
+      - **gradini** nel sottopassaggio pedonale della stazione (alzate da 16 cm dove la rampa supera il 12%);
+      - `DESIGN.md`: sottopassi, Pineta e Parco Robinson, Villa e sosta in panchina, Cola Cola, suoni del bosco.
+- [ ] **Street View** (resto di M2): ingresso dello stadio (visto sul satellite: va bene), paletti agli
+      ingressi della Villa, foto della Cola Cola. Il 02/10/2026 Street View non si caricava (pannello nero).
+- [ ] **M3 · mezzi realistici e mongolfiera** (`fase-3-4-m3-mezzi-mongolfiera`, PR #18, in attesa di
+      approvazione dal 02/10/2026):
+      - auto per sezioni (anelli di 15 punti, passaruota, parafanghi), vetri trasparenti, abitacolo col
+        guidatore seduto, ruote per modello; fari con l'alone, stop in frenata, frecce prima della svolta;
+        4 mesh per mezzo invece di più di 20; mappa d'ambiente al tramonto solo per i mezzi;
+      - mongolfiera: giro di 2,7 km in 7 minuti da Botromagno, sempre 30 m sopra tetti e monumenti,
+        vista esterna e dalla cesta, cambio mezzo, pausa, teletrasporto, fine del giro con l'auto;
+      - sul telefono i mezzi sono tessere su una riga (il pannello iniziale si abbassa, «Parti» resta in
+        vista anche in orizzontale); vetrina rifatta: campo lungo sul ponte da sud-ovest (prima la collina
+        della sponda est copriva il ponte), in verticale un campo medio sul mezzo;
+      - misure (`shots/prestazioni-dopo-m3.txt`): draw call da 71 a 56 su PC e da 50 a 35 sul telefono;
+        triangoli al massimo 283 600 su PC (mongolfiera) e 183 200 sul telefono; 337 KB compressi;
+        memoria JS 174 MB su PC (tetto 150, era 179) e 157 sul telefono.
+- [ ] Da sentire dal committente: i **suoni del bosco** e il **soffio del bruciatore** piacciono?
+- [ ] Ritocchi dei mezzi: i fari della Huracán sporgono un poco dal muso.
+- [ ] Sul telefono, nella sosta in panchina, la scheda lunga dei Caduti copre il monumento: accorciarla
+      o renderla richiudibile (vedi anche «schede lunghe» più giù).
 - [ ] **N · cartolina, giro guidato e ritocchi** (`fase-3-4-n-cartolina-giro`).
 - Versione in inglese: non ora.
 
@@ -251,8 +268,8 @@ commerciali e protette: il committente ha scelto musica ambient originale, gener
       `30-teletrasporto`): controllare l'altezza iniziale in `rig.snap`.
 - [ ] In verticale le schede lunghe (Cattedrale, Santa Sofia, circa 330 caratteri) occupano
       molto schermo: accorciarle o renderle scorrevoli.
-- [ ] Vetrina, campo lungo: sui telefoni il mezzo è piccolo. Le pose si tarano in
-      `CONFIG.camera.showroom` con `node vetrina.mjs "[…]" "[…]"`.
+- [x] Vetrina, campo lungo: sui telefoni il mezzo era piccolo. Rifatte nel blocco M3: in verticale un
+      campo medio sul mezzo vicino alla Fontana della Stella (`CONFIG.camera.showroom`, `node vetrina.mjs`).
 - [ ] Prestazioni con la città intera (blocco C, `node prestazioni.mjs`): 543 000 triangoli in
       scena, al massimo 334 000 per fotogramma su PC e 242 000 sul telefono, 69 e 54 draw call.
       Misurare su un telefono di fascia media.

@@ -191,10 +191,183 @@ const onAgain = await page.evaluate(() => window.gravina.ForestSound.on);
 check('l’interruttore «Suoni del bosco» si spegne e si riaccende', off[0] === false && off[1] === 'false' && onAgain);
 await page.keyboard.press('Escape');
 
+// Blocco M2: tre giri a piedi nuovi. Una guida nella pagina sceglie le uscite come farebbe un visitatore:
+// `loop` prende i tratti a piedi non ancora fatti e poi torna al mezzo; `to` va verso un tratto preciso.
+await page.evaluate(() => {
+  window.__guide = (mode, target, seconds) => {
+    const g = window.gravina, d = g.driver, N = g.network;
+    const far = (o) => (o.dir > 0 ? o.edge.b : o.edge.a);
+    /** Distanza a piedi o in auto da ogni nodo ai nodi di partenza (Dijkstra semplice: circa mille nodi). */
+    const dijkstra = (srcs) => {
+      const dist = new Map(srcs.map((n) => [n, 0])), done = new Set();
+      for (;;) {
+        let best = null;
+        for (const [n, v] of dist) if (!done.has(n) && (!best || v < dist.get(best))) best = n;
+        if (!best) return dist;
+        done.add(best);
+        for (const e of best.edges) {
+          const o = e.a === best ? e.b : e.a, v = dist.get(best) + e.length;
+          if (v < (dist.get(o) ?? Infinity)) dist.set(o, v);
+        }
+      }
+    };
+    const goal = target && N.edges.find((e) => e.id === target);
+    const toGoal = goal && dijkstra([goal.a, goal.b]);
+    const visits = new Map(), names = new Set();
+    let last = null, lastEdge = null, foot = false, walked = 0, odo = d.odometer, back = false;
+    for (let t = 0; t < seconds; t += 0.1) {
+      if (d.edge !== lastEdge) { lastEdge = d.edge; visits.set(d.edge, (visits.get(d.edge) ?? 0) + 1); if (d.onFoot) names.add(d.edge.name); }
+      const dec = d.decision;
+      if (dec && dec !== last && dec.options.length > 1) {
+        last = dec;
+        const opts = dec.options;
+        let pick = -1;
+        if (mode === 'to') {
+          const cost = (o) => (o.edge === goal ? 0 : o.edge.length + (toGoal.get(far(o)) ?? Infinity));
+          pick = opts.reduce((b, o, i) => (cost(o) < cost(opts[b]) ? i : b), 0);
+        } else {
+          pick = opts.findIndex((o) => o.edge.walk && !visits.has(o.edge));
+          if (pick < 0 && d.onFoot) pick = opts.findIndex((o) => !o.edge.walk && !o.edge.turn);       // al mezzo
+          if (pick < 0 && d.car) {
+            const toCar = dijkstra([d.car.edge.a, d.car.edge.b]);
+            const cost = (o) => o.edge.length + (toCar.get(far(o)) ?? Infinity) + (visits.get(o.edge) ?? 0) * 50;
+            pick = opts.reduce((b, o, i) => (cost(o) < cost(opts[b]) ? i : b), 0);
+          }
+        }
+        if (pick >= 0) d.choose(pick);
+      }
+      if (mode === 'to' && (d.sitting || (d.edge === goal && d.onFoot && !goal.soste))) break;
+      if (d.onFoot) { foot = true; walked += d.odometer - odo; }
+      odo = d.odometer;
+      if (mode === 'loop' && foot && !d.onFoot && d.speed > 1) { back = true; break; }
+      g.advance(0.1, 1 / 30);
+    }
+    return { back, walked: Math.round(walked), names: [...names], street: d.edge.name, onFoot: d.onFoot, sitting: !!d.sitting, speed: d.speed };
+  };
+});
+const guide = (mode, target, seconds) => page.evaluate(([m, t, s]) => window.__guide(m, t, s), [mode, target, seconds]);
+
+// Vivaio: dalla strada del vivaio alla goccia di Contrada Annunziata, «a piedi», anello V2 e ritorno al mezzo.
+await page.evaluate(() => { const g = window.gravina; g.placeAt(-300, -2185, [-1, 0], 0); g.rig.snap(g.driver); });
+const vivSign = await until(() => page.isVisible('.sign:has-text("a piedi")'), 40);
+if (vivSign) await page.click('.sign:has-text("a piedi")');
+let w = await guide('loop', null, 900);
+check('vivaio: «a piedi» alla goccia, anello V2 e ritorno al mezzo', vivSign && w.back && w.walked > 600 && w.names.includes('Sentiero nel bosco'),
+  `${w.walked} m a piedi su ${w.names.join(', ')} · ${w.street}`);
+
+// Sentiero degli scavi (A): da Via giudice Montea, vicino alla Madonna della Stella.
+await page.evaluate(() => { const g = window.gravina; g.placeAt(-60, 240, [-1, 0.6], 25); g.rig.snap(g.driver); g.driver.decision = null; });
+w = await guide('to', 'v1355', 60);
+const scaviStart = await foot();
+w = await guide('loop', null, 1500);
+check('sentiero degli scavi (A) a piedi, poi di nuovo al mezzo', scaviStart.onFoot && w.back && w.names.includes('Sentiero degli scavi') && w.walked > 500,
+  `${w.walked} m a piedi su ${w.names.join(', ')} · ${w.street}`);
+
+// Villa Comunale: a piedi fino alla panchina davanti al Monumento ai Caduti; la figurina si siede, c'è la
+// scheda, dopo circa 5 s il pulsante «Esci dalla piazzetta · torna al mezzo», che riporta al mezzo.
+await page.evaluate(() => { const g = window.gravina; g.placeAt(330, -95, [-1, -0.3], 0); g.rig.snap(g.driver); g.driver.decision = null; });
+const sostaEdge = await page.evaluate(() => window.gravina.network.edges.find((e) => e.soste)?.id);
+w = await guide('to', sostaEdge, 300);
+const bench = await page.evaluate(() => ({ card: document.getElementById('card').classList.contains('is-visible'), title: document.getElementById('card-title').textContent, btn: !document.getElementById('btn-bench').hidden, car: window.gravina.driver.car?.edge.name }));
+check('Villa: la figurina si siede sulla panchina, con la scheda dei Caduti', w.sitting && bench.card && /Caduti/.test(bench.title) && !bench.btn, bench.title);
+await advance(5.5);
+const benchBtn = await page.isVisible('#btn-bench');
+check('dopo circa 5 s compare «Esci dalla piazzetta · torna al mezzo»', benchBtn && /torna al mezzo/i.test(await page.textContent('#btn-bench')));
+if (benchBtn) await page.click('#btn-bench');
+// la via si legge appena finita la dissolvenza: se il mezzo era su un tratto corto (per esempio un vicolo), dopo
+// pochi secondi è già sulla via dopo
+await page.waitForFunction(() => !window.gravina.driver.sitting, null, { timeout: 15000 }).catch(() => {});
+const backAt = await page.evaluate(() => window.gravina.driver.edge?.name);
+await page.waitForTimeout(600);
+await advance(2);
+f = await foot();
+// (la Villa non ha ingressi a piedi su Corso Vittorio Emanuele: il mezzo aspetta dove si è scesi, qui vicino a Piazza Pellicciari)
+check('il pulsante riporta al mezzo, dove era parcheggiato, e si riparte', !f.onFoot && !f.figure && f.speed > 0.5 && backAt === bench.car && await page.isHidden('#btn-bench'), `${backAt}, poi ${f.street}`);
+
+// Vie cieche reali con la goccia (blocco M2): dall'elenco dei luoghi si arriva in auto e si riparte.
+for (const [name, at] of [['Casino di Meninni', [1572, -536]], ['Monumento alla Cola Cola', [1893, 102]], ['Fiera di San Giorgio', [-53, 948]]]) {
+  await page.keyboard.press('p');
+  await page.click(`.poi >> text=${name}`);
+  // con SwiftShader, a fine giro, costruire i riquadri del luogo può richiedere qualche secondo
+  await page.waitForFunction(() => window.gravina.phase === 'drive', null, { timeout: 20000 }).catch(() => {});
+  await page.waitForTimeout(300);
+  await until(() => page.evaluate((n) => document.getElementById('card-title').textContent === n, name), 4);
+  const a = await page.evaluate(() => { const d = window.gravina.driver; return { phase: window.gravina.phase, odo: d.odometer, onFoot: d.onFoot, e: d.position.x, n: -d.position.z, title: document.getElementById('card-title').textContent }; });
+  await advance(60);
+  const b = await page.evaluate(() => window.gravina.driver.odometer);
+  const dist = Math.hypot(a.e - at[0], a.n - at[1]);
+  check(`dall’elenco si arriva in auto a ${name} e si riparte dalla goccia`, a.phase === 'drive' && !a.onFoot && dist < 120 && b - a.odo > 200 && a.title === name,
+    `a ${dist.toFixed(0)} m, ${(b - a.odo).toFixed(0)} m in 60 s${a.phase === 'drive' && a.title === name ? '' : `, ${a.phase}, scheda «${a.title}»`}`);
+}
+
 await page.reload();
 await page.waitForFunction(() => !document.getElementById('btn-start').disabled, null, { timeout: 120000 });
 const kept = await page.evaluate(() => document.querySelector('#start-picker .vcard.is-selected')?.dataset.id);
 check('alla riapertura resta il mezzo scelto', kept === 'deere', kept);
+
+// Blocco M3: la mongolfiera, quinto mezzo. Decollo da Botromagno, volo, scheda, prima e terza persona,
+// pausa, teletrasporto (sul giro e lontano), cambio mezzo e fine del giro con l'auto che riparte dal decollo.
+const bal = () => page.evaluate(() => {
+  const g = window.gravina, f = g.flight, p = f.position;
+  return { mode: g.mode, phase: g.phase, s: f.s, h: p.y - g.Terrain.heightAt(p.x, -p.z), view: g.rig.view, pace: g.driver.pace, e: p.x, n: -p.z,
+    title: document.getElementById('card-title').textContent, street: g.driver.edge.name, speed: g.driver.speed, btn: !document.getElementById('btn-view').hidden };
+});
+const realUntil = async (test, n) => { for (let k = 0; k < n; k++) { if (await test()) return true; await advance(1); await page.waitForTimeout(120); } return test(); };
+await page.click('#start-picker .vcard[data-id="balloon"]');
+let b = await bal();
+check('nella schermata iniziale si sceglie la mongolfiera, a terra a Botromagno', b.mode === 'balloon' && b.h < 1 && Math.hypot(b.e + 379, b.n - 685) < 2);
+await page.click('#btn-start');
+await page.waitForTimeout(1700);
+await advance(20);
+b = await bal();
+check('decollo: la mongolfiera sale e avanza sul giro', b.phase === 'drive' && b.s > 30 && b.h > 15 && b.btn, `${b.s.toFixed(0)} m del giro, ${b.h.toFixed(0)} m dal suolo`);
+const card1 = await until(async () => /Necropoli|Botromagno/.test((await bal()).title), 120, 1);
+check('passando sopra la necropoli si apre la scheda', card1, (await bal()).title);
+await page.click('#btn-view');
+await advance(0.5);
+b = await bal();
+const eye = await page.evaluate(() => { const g = window.gravina; return g.camera.position.y - g.flight.position.y; });
+check('il pulsante passa alla vista dalla cesta', b.view === 'in' && Math.abs(eye - 1.75) < 0.6 && /Vista esterna/.test(await page.textContent('#btn-view')), `occhi a ${eye.toFixed(2)} m`);
+await page.click('#btn-view');
+await advance(1);
+check('…e torna alla vista esterna', (await bal()).view === 'out');
+await page.keyboard.press('p');
+await advance(3);
+const s0 = (await bal()).s;
+await advance(2);
+b = await bal();
+check('in pausa la mongolfiera resta sospesa', b.phase === 'pause' && Math.abs(b.s - s0) < 1.5);
+await page.click('.poi >> text=Porta San Michele');
+await page.waitForTimeout(900);
+await advance(1);
+b = await bal();
+check('teletrasporto in mongolfiera: al punto del giro più vicino', b.mode === 'balloon' && b.phase === 'drive' && Math.hypot(b.e - 398, b.n + 25) < 120, `a ${Math.hypot(b.e - 398, b.n + 25).toFixed(0)} m`);
+await page.keyboard.press('p');
+await page.click('.poi >> text=Area Quercus');
+await page.waitForTimeout(900);
+await advance(1);
+b = await bal();
+check('i luoghi lontani dal giro si raggiungono con l’ultima auto', b.mode === 'car' && b.phase === 'drive' && /bosco/i.test(b.street) && b.speed > 0, b.street);
+await page.evaluate(() => { const g = window.gravina; g.placeAt(300, 0, [1, 0]); g.rig.snap(g.driver); });
+await page.keyboard.press('p');
+await page.click('#pause-picker .vcard[data-id="balloon"]');
+b = await bal();
+check('dalla pausa la mongolfiera compare in volo sul giro', b.mode === 'balloon' && b.h > 40, `${b.h.toFixed(0)} m dal suolo`);
+await page.click('#pause-picker .vcard[data-id="rs6"]');
+await page.keyboard.press('Escape');
+await advance(2);
+b = await bal();
+check('tornando a un’auto si riparte dalla via più vicina', b.mode === 'car' && b.speed > 1, b.street);
+await page.keyboard.press('p');
+await page.click('#pause-picker .vcard[data-id="balloon"]');
+await page.keyboard.press('Escape');
+await page.evaluate(() => { const g = window.gravina; g.flight.place(g.Volo.L - 80, true); });
+const landed = await realUntil(async () => (await bal()).mode === 'car', 60);
+await page.waitForTimeout(800);
+await advance(3);
+b = await bal();
+const dTake = await page.evaluate(() => { const p = window.gravina.driver.position; return Math.hypot(p.x + 379, -p.z - 685); });
+check('fine del giro: atterra al decollo e si riparte con l’ultima auto', landed && b.mode === 'car' && b.pace === 1.1 && b.speed > 0.5 && dTake < 500, `${b.street}, a ${dTake.toFixed(0)} m dal decollo`);
 
 const errors = logs.filter((l) => /error/i.test(l));
 check('nessun errore in console', errors.length === 0, errors.join(' | '));

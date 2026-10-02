@@ -5,12 +5,14 @@ costruito sulle **vie, gli edifici e il torrente reali**.
 Progetto open source di **Giuseppe Cassano** ([github.com/giuseppecassano5bit](https://github.com/giuseppecassano5bit)).
 
 Appena si apre, il mezzo aspetta accanto al **Ponte Acquedotto**. Scegli con che cosa
-girare: **Fiat Panda 4x4 del 1999**, **Audi RS6 Avant**, **Lamborghini Huracán** o
-**trattore John Deere**. Poi il mezzo percorre da solo le vie reali del centro storico, e a
+girare: **Fiat Panda 4x4 del 1999**, **Audi RS6 Avant**, **Lamborghini Huracán**,
+**trattore John Deere** o **mongolfiera**. Le auto percorrono da sole le vie reali del centro storico, e a
 ogni incrocio reale scegli tu quale via prendere. Nel centro storico alcuni cartelli portano
 **a piedi** su passaggi e scalinate reali: il mezzo si ferma, prosegue una figurina, e il mezzo
 la aspetta al tratto carrabile successivo. La camera gira da sola attorno al mezzo, e puoi
 girarla anche tu trascinando; una radio suona brani ambient originali, generati dal diorama.
+In mongolfiera si decolla da Botromagno per un giro di sette minuti sopra la necropoli, il Ponte
+Acquedotto e il centro storico, con la vista esterna o dalla cesta.
 Puoi fermarti quando vuoi: dal menu di pausa cambi mezzo oppure tocchi un luogo sulla mappa e
 ti teletrasporti lì.
 Tutto sta in **un unico file HTML**: la geometria è procedurale e i dati geografici sono
@@ -93,12 +95,17 @@ solo. Il browser ricorda l'ultimo mezzo scelto.
 
 ### I mezzi
 
+Dal blocco M3 le auto sono **realistiche nello stile**: carrozzeria per sezioni con i passaruota,
+vetri trasparenti con l'abitacolo e il guidatore seduto, ruote con la spalla e i cerchi di ogni
+modello, fari al tramonto, **stop** quando rallentano e **frecce** prima delle svolte.
+
 | Mezzo | Carattere nel diorama |
 |---|---|
-| Fiat Panda 4x4 (1999) | rossa, squadrata, con protezioni in plastica e barre sul tetto; passo tranquillo |
-| Audi RS6 Avant | familiare grigia con passaruota bombati e pinze rosse; brillante |
-| Lamborghini Huracán | arancione, a cuneo, con i fari a Y; la più svelta (sempre a passo da centro storico) |
+| Fiat Panda 4x4 (1999) | rossa, squadrata, con protezioni in plastica, barre sul tetto e cerchi in lamiera; passo tranquillo |
+| Audi RS6 Avant | familiare grigia con parafanghi allargati, cerchi a dieci razze e pinze rosse; brillante |
+| Lamborghini Huracán | arancione, a cuneo, con i fari a Y e le pinze gialle; la più svelta (sempre a passo da centro storico) |
 | Trattore John Deere | verde e giallo, ruote tassellate e sbuffi di fumo; il più lento, e la camera sale un po' |
+| Mongolfiera | pallone a spicchi nei colori del diorama con una fascia blu, cesta di vimini, fiamma e soffio del bruciatore; vola su un **giro fisso** di 2,7 km da Botromagno, sempre almeno 30 m sopra tetti e monumenti, e non segue le vie (un'eccezione come il Ponte Acquedotto). Il pulsante **Vista dalla cesta / Vista esterna** passa dalla prima alla terza persona. Alla fine del giro si riparte con l'ultima auto dalla via più vicina al decollo; i luoghi lontani dal giro (il bosco, il P.I.P., il Castello, il Casino di Meninni) si raggiungono scendendo e prendendo l'auto |
 
 ## Com'è fatto
 
@@ -115,12 +122,15 @@ Il file `index.html` è diviso in sezioni numerate e commentate:
 | 6 | Mondo | terreno, strade, Ponte Acquedotto ad archi, edifici reali con le case a gradoni dei rioni, archi sulle vie, Cattedrale, chiese rupestri, grotte, abitazioni rupestri, alberi |
 | 6e | Città a riquadri | la zolla in riquadri da 240 m (una mesh ciascuno): terreno a 5/15/30 m (7,5 m da vicino lungo le vie difficili), vie ed edifici della città, binari, alberi, fianco della zolla; finestre e marciapiedi disegnati dallo shader; da lontano una versione semplificata nella stessa mesh (livelli di dettaglio, blocco I); la maglia adattata alle vie (`MeshFit`, blocco M1) |
 | 6d | Dettagli | portali delle chiese, portale del Purgatorio, palazzi, Fontana della Stella, scalinate, belvederi, lanterne; dal blocco M1 le rovine e le tombe di Botromagno, lo stadio e la Fiera |
-| 7 | Mezzi | Panda 4x4, RS6, Huracán e trattore, costruiti solo da primitive |
+| 7 | Mezzi | Panda 4x4, RS6, Huracán e trattore per sezioni (`Shop.loft`), con abitacolo, guidatore, luci da uniform e 4 mesh per mezzo; mappa d'ambiente al tramonto solo per i mezzi |
+| 7c | Mongolfiera | pallone a 14 spicchi, cesta, funi, bruciatore con la fiamma, pilota e visitatore (circa 2 400 triangoli) |
 | 7 | Figurina | il visitatore a piedi (`Walker`), circa 200 triangoli in una mesh |
-| 8 | Conducente | movimento automatico, incroci, pausa con frenata, tratti a piedi (sosta all'imbocco, mezzo che aspetta all'uscita) |
-| 9 | Camera | vetrina a due tempi (primo piano e campo lungo sulle arcate), inseguimento che scavalca i tetti nei vicoli, giro automatico attorno al mezzo, camera libera, panoramiche, vista dall'alto in pausa |
+| 8 | Conducente | movimento automatico, incroci, pausa con frenata, tratti a piedi (sosta all'imbocco, mezzo che aspetta all'uscita), sosta in panchina alla Villa |
+| 8b | Volo | il giro della mongolfiera (`Volo`, `Flight`): curva chiusa, quota sopra tetti e monumenti, decollo e atterraggio |
+| 9 | Camera | vetrina a due tempi (primo piano e campo lungo sulle arcate), inseguimento che scavalca i tetti nei vicoli, giro automatico attorno al mezzo, camera libera, panoramiche, vista dall'alto in pausa; in mongolfiera giro largo attorno al pallone e vista dalla cesta |
 | 10–11 | Interfaccia | minimappa vettoriale, mappa della pausa con zoom e trascinamento, luoghi per gruppi, scelta del mezzo, targa, cartelli, schede, teletrasporto |
 | 11b | Radio | sei brani ambient generati con Web Audio, senza file audio |
+| 11c–11d | Suoni | suoni del bosco (uccelli, grilli, cicale, allocco, picchio, cinghiale, lupi lontani) e soffio del bruciatore della mongolfiera, generati con Web Audio |
 | 12–13 | Scena e avvio | cielo al tramonto, luci, ombre agganciate ai texel, qualità adattiva, ciclo principale |
 
 Il documento di progetto completo è in [`docs/DESIGN.md`](docs/DESIGN.md); cosa resta da fare
@@ -238,7 +248,7 @@ posizione sulla rete, e per avere in console l'oggetto `window.gravina`. Esempi:
 gravina.driver.simulate(3600)          // un'ora di guida con scelte casuali: verifica che il mezzo non si blocchi mai
 gravina.advance(5)                     // fa avanzare la simulazione di 5 secondi senza disegnare
 gravina.placeAt(60, 310, [-1, -0.5])   // mette il mezzo sulla via più vicina a (est, nord), diretto verso ovest
-gravina.useVehicle('deere')            // cambia mezzo: panda, rs6, huracan, deere
+gravina.useVehicle('deere')            // cambia mezzo: panda, rs6, huracan, deere, balloon
 gravina.pause(); gravina.goTo('duomo') // pausa e teletrasporto verso un monumento (id di LANDMARKS)
 ```
 
@@ -256,7 +266,7 @@ sotto il terreno o sospese, dischi sfasati, decorative sovrapposte) con `node di
 | 2b | Dati reali: vie e incroci reali, edifici, torrente e cigli, ponte ad archi | ✅ |
 | 2c | Vie libere dagli edifici e archi reali; quattro mezzi a scelta; partenza dal ponte; pausa con cambio mezzo, mappa e teletrasporto; camera che scavalca i tetti; dettagli dei monumenti; versione mobile | ✅ |
 | 3 | Architettura e fedeltà: Cattedrale e Purgatorio sulle fonti, chiese rupestri scavate, rioni a gradoni con scalinate e abitazioni rupestri, altezze per zona, schede di altre cinque chiese, vetrina sulle arcate | ✅ in revisione |
-| 3.4 | Gravina oltre il centro storico: città intera (C), strade per il Bosco e il P.I.P. (F), percorsi a piedi, quote reali del centro storico, camera attorno al mezzo e radio ambient (G), spazio sul telefono (I), centro storico (D), luoghi della città, scuole e chiese (E), il Bosco da vicino (L) e acceleratore su PC; Botromagno, strade, stadio e Fiera (M1); percorsi a piedi, zone pedonali, sottopassi, parchi, Monumento ai Caduti, Cola Cola e suoni del bosco (M2) | ⏳ |
+| 3.4 | Gravina oltre il centro storico: città intera (C), strade per il Bosco e il P.I.P. (F), percorsi a piedi, quote reali del centro storico, camera attorno al mezzo e radio ambient (G), spazio sul telefono (I), centro storico (D), luoghi della città, scuole e chiese (E), il Bosco da vicino (L) e acceleratore su PC; Botromagno, strade, stadio e Fiera (M1); percorsi a piedi, zone pedonali, sottopassi, parchi, Monumento ai Caduti, Cola Cola e suoni del bosco (M2); auto realistiche nello stile e mongolfiera (M3) | ⏳ |
 | 4 | Rifinitura: luci, prove su telefoni reali, restyling | ⏳ |
 
 ## Crediti, licenze e marchi

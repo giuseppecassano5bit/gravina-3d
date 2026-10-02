@@ -7,8 +7,9 @@
  * Viste: partenza (vetrina sul ponte), centro (inseguimento in Piazza Benedetto XIII),
  * scacchi (inseguimento da Piazza Scacchi verso la città moderna), pausa (vista dall'alto),
  * panoramica (camera alta sopra la città), alta (camera 120 m sopra il centro storico, inclinata
- * verso la città: la vista della futura mongolfiera), accelerata (guida con l'acceleratore subito dopo
- * «Parti», mentre i riquadri si costruiscono) e teletrasporto (allo stadio, poi con l'acceleratore).
+ * verso la città), accelerata (guida con l'acceleratore subito dopo «Parti», mentre i riquadri si
+ * costruiscono), teletrasporto (allo stadio, poi con l'acceleratore), bosco a piedi e mongolfiera (blocco
+ * M3: il punto più pesante del giro, vista esterna).
  * I riquadri lontani usano la versione semplificata (livelli di dettaglio, sezione 6e).
  *
  * Uso: node prestazioni.mjs [etichetta]   → tabella in console e shots/prestazioni-<etichetta>.json
@@ -40,6 +41,9 @@ const VIEWS = {
   teletrasporto: { goTo: 'stadio', boost: true },
   // Blocco L: a piedi sui sentieri dell'area Quercus, nel bosco fitto (la vista più pesante del bosco).
   'bosco a piedi': { foot: true },
+  // Blocco M3: la mongolfiera nel punto più pesante del giro (2 250 m, sopra il ciglio ovest verso la città),
+  // vista esterna (cercato ogni 150 m con quattro angoli della camera).
+  mongolfiera: { balloon: 2250, spin: 4.71 },
 };
 
 async function measure(profile) {
@@ -90,6 +94,7 @@ async function measure(profile) {
       if (g.phase === 'pause') g.resume();
       if (!v) return;
       if (v.boost) { g.driver.boosting = true; g.rig.follow?.(); return; }
+      if (v.balloon) { g.useVehicle('balloon'); g.flight.place(v.balloon, true); g.rig.balloon(); g.rig.spin = v.spin; g.rig.pending = true; g.advance(0.5); return; }
       if (v.foot) {
         const d = g.driver, walks = g.network.edges.filter((e) => e.walk && e.dirt);
         const node = walks.flatMap((w) => [w.a, w.b]).find((x) => x.edges.some((e) => !e.walk && !e.turn));

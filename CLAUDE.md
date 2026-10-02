@@ -31,7 +31,7 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
 | `index.html` | tutto il diorama: CSS, HTML e JS in sezioni numerate 0–13 |
 | `index.html`, sezione 3 | la costante `GEO` è **generata**: non modificarla a mano. Il diorama è fatto di tre zolle (città, P.I.P., Bosco) in `GEO.meta.zolle` |
 | `tools/genera_dati.py` | pipeline dei dati reali (Overture Maps, OSM via Overpass, quote Copernicus → `GEO` dentro `index.html`) |
-| `tools/test/` | prove Playwright: `simula`, `interazioni`, `foto`, `prestazioni` (GPU vera: triangoli, draw call, tempi), `difetti` (vie sotto il terreno o sospese, dischi, decorative sovrapposte), più `vista`, `valuta`, `vetrina` per lo sviluppo e `anteprima` per `og-image.jpg` |
+| `tools/test/` | prove Playwright: `simula` (anche il giro della mongolfiera), `interazioni`, `foto`, `prestazioni` (GPU vera: triangoli, draw call, tempi; dal blocco M3 anche la vista «mongolfiera», il punto più pesante del giro), `difetti` (vie sotto il terreno o sospese, dischi, decorative sovrapposte), più `vista`, `valuta`, `vetrina` per lo sviluppo e `anteprima` per `og-image.jpg` |
 | `og-image.jpg`, `sitemap.xml` | anteprima per i social (1200×630) e mappa del sito per Google: file separati, il diorama non li usa |
 | `docs/DESIGN.md` | documento di progetto aggiornato, con le decisioni aperte |
 | `docs/DA_FARE.md` | **resoconto di cosa resta da fare**: leggilo a inizio lavoro |
@@ -81,8 +81,14 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
 - Le vie cieche reali della città (`GEO.deco`) si disegnano ma **non si percorrono**. La
   sterrata reale del Castello Svevo è percorribile: con la strada di servizio e la vicinale
   chiude un anello (flag 8, `CASTLE_BOX` in `genera_dati.py`).
-- I mezzi sono i quattro scelti dal committente: Fiat Panda 4x4 del 1999, Audi RS6 Avant,
-  Lamborghini Huracán, trattore John Deere. Stilizzati e senza loghi.
+- I mezzi sono i **cinque** scelti dal committente: Fiat Panda 4x4 del 1999, Audi RS6 Avant,
+  Lamborghini Huracán, trattore John Deere e, dal blocco M3, la mongolfiera. Le auto sono
+  **realistiche nello stile** (carrozzeria per sezioni, abitacolo col guidatore, luci da uniform,
+  4 mesh per mezzo), sempre low-poly e senza loghi.
+- **Mongolfiera** (blocco M3): è un'eccezione come il Ponte Acquedotto. Vola su un **giro fisso**
+  (`CONFIG.balloon`, sezione 8b) e non segue le vie; resta almeno 30 m sopra tetti, monumenti e
+  terreno e dentro la zolla della città. Alla fine del giro si riparte con l'ultima auto dalla via
+  percorribile più vicina al decollo.
 - Niente sulla carreggiata, nemmeno sui tratti a piedi: `npm run simula` deve dare
   `casesullastrada = 0` e `dettaglisullastrada` vuoto.
 - Il giro continua all'infinito senza vicoli ciechi: `TrackNetwork.validate()` e
