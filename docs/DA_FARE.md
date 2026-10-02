@@ -87,7 +87,8 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N, dettagli e decisioni nel
         dalla piazzetta · torna al mezzo»); panchine e Fontanoni gemelli della Villa;
       - **monumento alla Cola Cola** su Via Bari, nel punto OSM, con la scheda;
       - vasca grande del vivaio (zolle allargate); suoni del bosco senza pioggia, intonati con la radio.
-- [ ] **Resto di M2, da fare all'inizio di M3** (il committente ha chiesto di unire e passare oltre):
+- [ ] **Resto di M2, da fare all'inizio di M3** (il committente ha chiesto di unire e passare oltre; il
+      02/10/2026 fatti i giri a piedi in `interazioni.mjs`, `difetti.mjs` prima e dopo M2 e i gradini):
       - `interazioni.mjs`: giri a piedi nel vivaio (V2), sul sentiero degli scavi (A), nella Villa con la
         sosta in panchina e il pulsante; controllare che la Fiera e il Casino di Meninni si raggiungano;
       - `node difetti.mjs` sulle vie nuove (trincee, sentiero A nel canyon, goccia di Via Bari);
@@ -96,10 +97,17 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N, dettagli e decisioni nel
       - scale vere (gradini) nel sottopassaggio della stazione, oggi rampe;
       - `DESIGN.md`: sezioni su sottopassi, parchi, sosta in panchina, suoni del bosco;
       - suoni del bosco: farli ascoltare al committente; memoria JS su PC 166 MB (tetto 150).
-- [ ] **M3 · mezzi realistici e mongolfiera** (`fase-3-4-m3-mezzi-mongolfiera`, in corso dal
-      02/10/2026, insieme al resto di M2): auto per sezioni con guidatore, stop e frecce senza draw
-      call in più; mongolfiera come quinto mezzo, giro fisso da Botromagno sopra il centro storico,
-      prima e terza persona.
+- [ ] **M3 · mezzi realistici e mongolfiera** (`fase-3-4-m3-mezzi-mongolfiera`, PR #18 in bozza, in corso
+      dal 02/10/2026, insieme al resto di M2). Fatto il 02/10/2026:
+      - auto per sezioni (anelli di 15 punti, passaruota, parafanghi), vetri trasparenti, abitacolo col
+        guidatore seduto, ruote per modello; fari con l'alone, stop in frenata, frecce prima della svolta;
+        4 mesh per mezzo invece di più di 20; mappa d'ambiente al tramonto solo per i mezzi;
+      - mongolfiera: giro di 2,7 km in 7 minuti da Botromagno, sempre 30 m sopra tetti e monumenti,
+        vista esterna e dalla cesta, cambio mezzo, pausa, teletrasporto, fine del giro con l'auto;
+      - prove: `simula` verde (anche il giro); `interazioni.mjs` con i giri a piedi nuovi e la mongolfiera
+        (provati da soli, il giro completo è da lanciare); gradini nel sottopassaggio della stazione.
+      Resta: `npm run interazioni` completo, `node prestazioni.mjs dopo`, vetrina e menu sul telefono
+      con cinque mezzi, screenshot, documenti (anche le sezioni di M2 in DESIGN), PR con la tabella.
 - [ ] **N · cartolina, giro guidato e ritocchi** (`fase-3-4-n-cartolina-giro`).
 - Versione in inglese: non ora.
 
