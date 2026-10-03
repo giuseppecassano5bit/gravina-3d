@@ -364,7 +364,7 @@ licenze), `CLAUDE.md` (nuove regole ed eccezioni).
 
 ### Seconda parte (decisioni del committente del 30/09/2026)
 
-Ordine: **I → D → E → L → M → N** (M diviso in M1, M2, M3 il 01/10/2026; N in N1, N2, N3 il 03/10/2026), un blocco alla volta, ognuno col suo branch e la sua PR.
+Ordine: **I → D → E → L → M → N** (M diviso in M1, M2, M3 il 01/10/2026; N in sei blocchi, N1–N6, il 03/10/2026), un blocco alla volta, ognuno col suo branch e la sua PR.
 Decisioni già prese:
 1. **Area Quercus** = l'ex area ristoro «Marcuccio»; in OSM «Rifugio Bosco Difesa Grande»
    (w477739267), dove oggi finisce la strada del Bosco.
@@ -444,30 +444,53 @@ Il blocco M si divide in tre, ognuno col suo branch e la sua PR.
 - Prove: giro campionato ogni 5 m in `simula.mjs`, decollo, scheda, cambio mezzo e fine del giro
   in `interazioni.mjs`, vista «mongolfiera» nel punto peggiore del giro.
 
-### N1, N2, N3 (al posto del blocco N; decisioni del committente del 03/10/2026)
-Il blocco N si divide in tre, ognuno col suo branch, il suo piano breve e la sua PR. Il tetto del
-peso sale a 450 KB compressi (sezione 3); triangoli e draw call restano quelli di prima.
+### N1–N6 (al posto del blocco N; decisioni del committente del 03/10/2026)
+Il blocco N si divide prima in tre (N1, N2, N3), poi, con le risposte al piano di N1, in sei: ognuno
+col suo branch, il suo piano breve e la sua PR. Il tetto del peso sale a 450 KB compressi (sezione 3);
+triangoli e draw call restano quelli di prima.
 
-#### N1 · Centro storico vero (`fase-3-4-n1-centro-storico`)
+#### N1 · Centro storico vero (`fase-3-4-n1-centro-storico`, PR #19, piano approvato il 03/10/2026)
 - **Salite e discese vere** (scelta del committente fra due proposte): il terreno del centro storico
-  segue le quote reali Copernicus **come guida** (smussate, senza le celle vicine al ciglio, corrette
-  per i tetti e ancorate a ciglio, ponte, scalinate e rioni) invece dell'altopiano quasi piatto;
-  vie del mezzo entro il 18%; canyon, cigli, falesia, gradoni e discesa dei rioni restano a mano.
-- Effetti che fanno sentire la pendenza: camera più bassa in salita e in discesa, case con lo
-  zoccolo a valle e i gradini alle porte, muretti e ringhiere dove la via si stacca dal terreno.
+  segue le quote reali Copernicus **come guida**, senza esagerazione (×1: «fai come ritieni meglio»):
+  percentile basso (via i tetti) dei soli pixel a più di 120 m dal ciglio, smussato, prolungato fino
+  al ciglio. Il ciglio resta alla quota di oggi (rioni compresi) e scende solo dove la guida è più bassa
+  (a sud del Fondovito); ponte e testate invariati. Vie del mezzo entro il 18%; canyon, cigli, falesia,
+  gradoni e discesa dei rioni restano a mano. Prova: vie del mezzo ≤ 2% dall'84% al 36% della lunghezza.
+- Effetti che fanno sentire la pendenza: camera più bassa e più orizzontale in salita e in discesa,
+  case con lo zoccolo a valle, a gradoni sui dislivelli forti e coi gradini alle porte, muretti e
+  ringhiere dove la via si stacca dal terreno.
 - **Strade**: chianche, asfalto e ciottoli disegnati dallo shader secondo la superficie OSM; tombini.
-- **Edifici**: balconi con ringhiere, portoni in legno, davanzali, cornicioni, pluviali, comignoli,
-  vasi di fiori; istanziati e solo nella versione vicina dei riquadri.
-- **Arredo**: le 6 fontanine e le 3 panchine OSM, alberelli e fioriere solo dove le foto li mostrano.
+- **Edifici**: balconi con ringhiere, portoni in legno, davanzali, cornicioni, pluviali, vasi di fiori;
+  istanziati o disegnati dallo shader, solo vicino alla camera.
+- **Arredo**: le 6 fontanine dell'Acquedotto Pugliese e le 3 panchine OSM; alberelli e fioriere dove
+  le foto li mostrano, compresa l'aiuola davanti alla Cattedrale su Piazza Benedetto XIII (committente).
 
-#### N2 · Facciate di chiese e scuole (`fase-3-4-n2-facciate`)
+#### N2 · Fondovito e San Michele delle Grotte (`fase-3-4-n2-fondovito`)
+- Pedonale dove l'auto non passa per i dislivelli (lo decide la chat, sui dati e su Street View),
+  senza vicoli ciechi; la chiesa rupestre di San Michele delle Grotte con l'ossario e tutto il rione
+  resi più veri, dalle foto (eccezione approvata dal committente: Fondovito pedonale anche dove OSM
+  segna `residential`).
+
+#### N3 · Facciate di chiese e scuole (`fase-3-4-n3-facciate`, era N2)
 - Santa Teresa, Santa Sofia, San Nicola, Addolorata (e Santa Lucia, se serve) rifatte sulle foto;
   ritocchi alle chiese già rifatte dove le foto mostrano differenze; chiese della città coi campanili
   se si vedono. Ogni elemento deve vedersi in una foto, altrimenti resta semplice.
 - Scuole più riconoscibili: ingresso coi gradini, finestre a nastro, scale antincendio, palestra,
   cancello; la scritta col nome solo se si vede su Street View, generata dal codice.
 
-#### N3 · Cartolina, giro guidato e ritocchi (`fase-3-4-n3-cartolina-giro`)
+#### N4 · Casino di Meninni e villette (`fase-3-4-n4-meninni-villette`)
+- Il Casino di Meninni com'è (rudere fatiscente e «mistico», FAI): muro di cinta, cancello, pini
+  d'Aleppo davanti, cipressi e cappella di famiglia dietro, atmosfera tetra. Una strada (eccezione
+  chiesta dal committente) dalla SP201 fino all'ingresso e al parcheggio, con la goccia; via la goccia
+  di oggi in mezzo alla SP201.
+- Le villette attorno al Liceo scientifico G. Tarantino, più vere (satellite e Street View).
+
+#### N5 · Capotenda, vigne e uliveti (`fase-3-4-n5-capotenda-vigne`)
+- Il sentiero che dal Padre Eterno scende alle grotte e al torrente (area di Capotenda, Sentiero
+  dell'Acqua e della Pietra), sui sentieri OSM; la vigna di Botromagno vicino al Padre Eterno
+  (indicazione del committente); uliveti e vigne in periferia dove ci sono.
+
+#### N6 · Cartolina, giro guidato e ritocchi (`fase-3-4-n6-cartolina-giro`, era N3)
 - **Cartolina**: immagine ad alta risoluzione con cornice (Gravina in Puglia, luogo, indirizzo del
   sito, attribuzioni OSM e Copernicus in breve), Web Share sul telefono; credito deciso dal committente.
 - **Giro guidato dei monumenti**: il mezzo sceglie le vie, anche i tratti a piedi; «Prossima

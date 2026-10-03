@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 3 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2 e M3 della fase 3.4 uniti; in corso N1 (PR in bozza).
+Stato al 3 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2 e M3 della fase 3.4 uniti; in corso N1 (PR #19 in bozza, piano approvato il 03/10/2026).
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
@@ -8,7 +8,7 @@ del lavoro su due chat in [`PIANO_FASE_3_4.md`](PIANO_FASE_3_4.md).
 
 ### Fase 3.4, seconda parte (decisioni del 30/09/2026)
 
-Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N3, dettagli e decisioni nella sezione 7 del piano.
+Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N3 → N4 → N5 → N6, dettagli e decisioni nella sezione 7 del piano.
 
 - [x] **I · spazio sul telefono** (`fase-3-4-i-prestazioni`, PR #13, unita il 30/09/2026):
       due livelli di dettaglio per riquadro nella stessa mesh (terreno a maglia doppia, vie rade,
@@ -27,7 +27,7 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N3, dettagli 
 - [x] **Peso**: il 30/09/2026 il committente ha alzato il tetto da 280 a **360 KB compressi**
       (≤ 1,2 MB non compressi). Dopo il blocco D restano circa 96 KB per E, L, M e N.
       Il 03/10/2026 lo ha alzato ancora, da 360 a **450 KB compressi**: dopo M3 (337 KB) restano
-      circa 113 KB per N1, N2 e N3. I tetti di triangoli e draw call non cambiano.
+      circa 113 KB per i blocchi N. I tetti di triangoli e draw call non cambiano.
 - [x] **E + L insieme** (`fase-3-4-e-l-luoghi-bosco`, PR #15, unita il 01/10/2026), più
       l'**acceleratore solo su PC** (Shift tenuto premuto, ×1,8; sul telefono no, decisione del
       committente del 30/09/2026): agli incroci il cartello si apre prima e il mezzo torna alla
@@ -117,13 +117,21 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N3, dettagli 
 - [ ] Ritocchi dei mezzi: i fari della Huracán sporgono un poco dal muso.
 - [ ] Sul telefono, nella sosta in panchina, la scheda lunga dei Caduti copre il monumento: accorciarla
       o renderla richiudibile (vedi anche «schede lunghe» più giù).
-- [ ] **N1 · centro storico vero** (`fase-3-4-n1-centro-storico`): salite e discese vere sulle quote
-      reali (vie del mezzo entro il 18%), chianche dallo shader, facciate con balconi e portoni,
-      fontanine, panchine e alberelli dove si vedono.
-- [ ] **N2 · facciate di chiese e scuole** (`fase-3-4-n2-facciate`): Santa Teresa, Santa Sofia,
+- [ ] **N1 · centro storico vero** (`fase-3-4-n1-centro-storico`, PR #19): salite e discese sulle quote
+      reali senza esagerazione (vie del mezzo entro il 18%) con camera, zoccoli, case a gradoni e
+      gradini; chianche dallo shader; balconi, portoni e vasi; fontanine, panchine e alberelli (anche
+      davanti alla Cattedrale, su Piazza Benedetto XIII). Piano approvato il 03/10/2026.
+- [ ] **N2 · Fondovito e San Michele delle Grotte** (`fase-3-4-n2-fondovito`): pedonale dove l'auto non
+      passa per i dislivelli, la chiesa rupestre con l'ossario e tutto il rione più veri (03/10/2026).
+- [ ] **N3 · facciate di chiese e scuole** (`fase-3-4-n3-facciate`, era N2): Santa Teresa, Santa Sofia,
       San Nicola, Addolorata e le chiese della città coi campanili, scuole più riconoscibili, dalle foto.
-- [ ] **N3 · cartolina, giro guidato e ritocchi** (`fase-3-4-n3-cartolina-giro`): cartolina con la
-      cornice, giro guidato dei monumenti, camera dopo il teletrasporto, schede lunghe, memoria JS.
+- [ ] **N4 · Casino di Meninni e villette** (`fase-3-4-n4-meninni-villette`): il Casino com'è (rudere,
+      muro di cinta, cancello, pini e cipressi, cappella), la strada fino all'ingresso e al parcheggio
+      con la goccia (via quella di oggi sulla SP201), le villette attorno al Liceo scientifico Tarantino.
+- [ ] **N5 · Capotenda, vigne e uliveti** (`fase-3-4-n5-capotenda-vigne`): il sentiero che dal Padre
+      Eterno scende alle grotte e al torrente, la vigna di Botromagno, uliveti e vigne in periferia.
+- [ ] **N6 · cartolina, giro guidato e ritocchi** (`fase-3-4-n6-cartolina-giro`, era N3): cartolina con
+      la cornice, giro guidato dei monumenti, camera dopo il teletrasporto, schede lunghe, memoria JS.
 - Versione in inglese: non ora.
 
 ### Fase 3.4, blocco G · percorsi a piedi, quote reali, camera e radio (PR #12, unita il 30/09/2026) ✅
