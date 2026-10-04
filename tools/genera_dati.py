@@ -611,8 +611,11 @@ def merge_chains(edges):
             b2 = e2['b'] if e2['a'] == n else e2['a']
             if a1 == b2:
                 continue                                 # eviterebbe un anello su sé stesso
+            surf = dict(e1.get('surf') or {})
+            for k, v in (e2.get('surf') or {}).items():
+                surf[k] = surf.get(k, 0) + v
             merged = {**e1, 'a': a1, 'b': b2, 'poly': p1 + p2[1:],
-                      'cls': e1['cls'] if length(p1) >= length(p2) else e2['cls']}
+                      'cls': e1['cls'] if length(p1) >= length(p2) else e2['cls'], 'surf': surf}
             edges = [x for x in edges if x is not e1 and x is not e2] + [merged]
             changed = True
             break
@@ -1025,6 +1028,34 @@ def walk_paths(name, parts, edges, pos, host=lambda e: not e['deco'] and not e.g
     return out
 
 
+SUPERFICI = {'sett': 1, 'paving_stones': 1, 'asphalt': 2, 'concrete': 2, 'paved': 2, 'unhewn_cobblestone': 3, 'cobblestone': 3,
+             'ground': 4, 'dirt': 4, 'rock': 4, 'gravel': 4, 'compacted': 4, 'fine_gravel': 4}
+PIAZZA_DUOMO = 385146363     # Piazza Benedetto XIII (area pedonale OSM, sett): sul satellite lastre chiare con file più scure a rombi
+PIAZZA_DUOMO_VIA = 76156682  # la via che la attraversa (paving_stones): stesso disegno a rombi
+ROMBI = 5
+
+
+def superfici():
+    """
+    Blocco N1: superficie OSM delle vie del centro storico (sett, paving_stones, asphalt…) per id della via,
+    più la sagoma di Piazza Benedetto XIII. Query Overpass piccola, in cache (tools/.cache/superfici.json).
+    Codici: 1 lastre (chianche), 2 asfalto, 3 ciottoli, 4 terra, 5 lastre a rombi (Piazza Benedetto XIII).
+    """
+    m = 30
+    bb = (f'{ORIGIN[0] + (Z0[2] - m) / M_LAT:.6f},{ORIGIN[1] + (Z0[0] - m) / M_LON:.6f},'
+          f'{ORIGIN[0] + (Z0[3] + m) / M_LAT:.6f},{ORIGIN[1] + (Z0[1] + m) / M_LON:.6f}')
+    q = (f'[out:json][timeout:120];way["highway"]["surface"]({bb});out tags;'
+         f'(way({PIAZZA_DUOMO});way["landuse"~"grass|flowerbed"]({bb});way["leisure"="garden"]({bb}););out geom tags;')
+    els = overpass_cached('superfici', q)
+    codes = {el['id']: SUPERFICI[el['tags']['surface']] for el in els if el['tags'].get('surface') in SUPERFICI}
+    for w in (PIAZZA_DUOMO, PIAZZA_DUOMO_VIA):
+        if w in codes:
+            codes[w] = ROMBI
+    piazza = next((Polygon([to_local(p['lon'], p['lat']) for p in el['geometry']]) for el in els
+                   if el['id'] == PIAZZA_DUOMO and 'geometry' in el), None)
+    return codes, piazza
+
+
 def build_network(data, buildings, bosco_osm):
     """
     Rete percorribile (2-core del grafo, più le vie cieche del centro storico con la goccia)
@@ -1032,6 +1063,11 @@ def build_network(data, buildings, bosco_osm):
     """
     edges, pos = build_edges(data['segment'], data['connector'])
     edges = [e for e in edges if e['a'] != e['b'] and shapely.contains_xy(CITY_ROADS, *np.array(e['poly']).T).all()]
+    # Blocco N1: superficie OSM (metri per codice: le vie unite da merge_chains tengono la più lunga)
+    codes, _ = superfici()
+    for e in edges:
+        code = next((codes[w] for w in sorted(e['osm']) if w in codes), 0)
+        e['surf'] = {code: length(e['poly'])} if code else {}
     edges, pos = merge_close_nodes(edges, pos)
     # Blocco M2: Villa Comunale e Piazza della Repubblica pedonali (decisione del committente)
     m2 = osm_m2()
@@ -2309,8 +2345,10 @@ def centro_guide(dem_at, east_rim):
     at = lambda e, n: float(T[int(round((n - N[0]) / st)), int(round((e - E[0]) / st))])
     print(f'  guida del centro storico: griglia {G.shape[1]} × {G.shape[0]} ogni {CENTRO_PASSO} m, da {G.min():.1f} a {G.max():.1f} m; '
           f'Cattedrale {at(10, 10):.1f}, Piazza della Repubblica {at(320, 0):.1f}, San Francesco {at(230, 220):.1f}')
+    _, piazza = superfici()
     return {'e0': CENTRO[0], 'n0': CENTRO[2], 'passo': CENTRO_PASSO, 'nx': G.shape[1], 'ny': G.shape[0], 'q': 0.1,
-            'dati': varint(dati), 'tr0': CENTRO[2], 'tr': tr}
+            'dati': varint(dati), 'tr0': CENTRO[2], 'tr': tr,
+            'piazza': flat(piazza.simplify(0.3).exterior.coords[:-1]) if piazza is not None else []}
 
 
 def smooth_line(pts, k=2):
@@ -2386,9 +2424,11 @@ def encode(edges, deco, pos, buildings, city, arches, feats, extra):
                 nodes.append(pos[n])
 
     def flags(e):
+        surf = e.get('surf') or {}
+        code = max(surf, key=surf.get) if surf else 0          # blocco N1: superficie OSM (bit 128, 256, 512)
         return ((1 if e['bridge'] else 0) | (2 if e['foot'] else 0) | (4 if e.get('turn') else 0)
                 | (8 if e['cls'] in ('track', 'path') else 0) | (16 if e.get('urban') else 0) | (32 if e.get('walk') else 0)
-                | (64 if e.get('tunnel') else 0))
+                | (64 if e.get('tunnel') else 0) | (code << 7))
     # Vie, vie decorative ed edifici del centro storico in forma compatta (CODEC), a 0,1 m come prima:
     # index.html li riporta alle righe di sempre in DATA.unpack().
     E = []
