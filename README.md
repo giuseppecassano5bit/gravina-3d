@@ -165,7 +165,12 @@ dallo Sportland al Castello Svevo):
   (`GEO.rioni`, una misura ogni 15 m lungo il ciglio). A 30 m di maglia il canyon è sfocato e
   "sbava" dentro le case, quindi se ne usa meno della metà: il Piaggio scende fino a 17 m, il
   Fondovico circa 12 m. Nel centro storico le vie del mezzo non superano il 18% (blocco D,
-  `CONFIG.road.maxGrade`); a sud l'altopiano del centro si raccorda alle quote reali in 220 m;
+  `CONFIG.road.maxGrade`); a sud l'altopiano del centro si raccorda alle quote reali in 220 m.
+  Dal blocco N1 anche **l'altopiano del centro storico segue le quote vere** (`GEO.centro`): dal DSM
+  grezzo si prende un percentile basso dei soli pixel a più di 120 m dal ciglio (via i tetti e il
+  canyon sfocato), lo si smussa e lo si prolunga piatto fino al ciglio. Senza esagerazione: la
+  Cattedrale resta a quota 0, Piazza della Repubblica sta 4 m più su, San Francesco 10 m; le vie del
+  mezzo in piano (entro il 2%) passano dall'84% al 36% della lunghezza, e nessuna supera il 18%;
 * uso del suolo, binari FAL e RFI e luoghi con nome da OpenStreetMap, letti con l'**Overpass
   API** (monumenti, chiese, stazioni, parchi). Query piccole a parte, ognuna con la sua cache in
   `tools/.cache/`: il Bosco (`bosco.json`), le rovine e gli scavi di Botromagno (`rovine.json`),
@@ -333,6 +338,27 @@ Notizie storiche e posizioni dei monumenti da fonti pubbliche, tra cui:
 * Stadio Stefano Vicino: [Wikipedia, FBC Gravina](https://it.wikipedia.org/wiki/FBC_Gravina) (via Fazzatoia, circa 4 000 posti, intitolato nel 2015 a Stefano Vicino, erba sintetica dal 2015, lavori 2024–2025 con la copertura della tribuna ovest); campo, gradinate, torri faro e muro di cinta dalle sagome OSM (stadio w478401752, campo w927885291, tribune w411149113 e w411146463) e dal satellite, solo come riferimento visivo
 * Stazione FAL: [Wikipedia](https://it.wikipedia.org/wiki/Stazione_di_Gravina_in_Puglia_(FAL)) (aperta nel 1915, linea Bari–Altamura–Potenza delle Ferrovie Appulo Lucane, interscambio con la stazione RFI)
 * Zona artigianale P.I.P.: solo l'etichetta (nessuna scheda)
+* Centro storico vero (blocco N1). **Salite e discese**: quote Copernicus (sopra). **Strade**: la superficie
+  di ogni via da OSM (`surface`: `sett` e `paving_stones` lastre, `asphalt` asfalto, `unhewn_cobblestone`
+  ciottoli), letta con l'Overpass API (`tools/.cache/superfici.json`); Piazza Benedetto XIII dalla sagoma OSM
+  dell'area pedonale (w385146363), il disegno a rombi dal satellite e da Street View (ottobre 2025). **Facciate**
+  (zoccolo, portoni con la cornice, balconi su mensole con la ringhiera e i vasi, pluviali): da Street View in
+  Via Abbrazzo D'Ales, Via San Giovanni Evangelista, Via Vittorio Veneto, Via Donato Cristiani (2025) e vicino a
+  Piazza della Repubblica (maggio 2025), solo come riferimento visivo; balconi, porte e vasi sono distribuiti dal
+  codice, non uno per uno. **Fontanine** dell'Acquedotto Pugliese nei sei punti OSM `amenity=drinking_water`
+  (n3724586269, n9679370615, n11094034285, n11094147078, n11187757150, n11999538354), forma dalla
+  [foto su Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Drinking_fountain_in_Calata_Grotte_San_Michele,_Gravina_in_Puglia,_Italia_Apr_19,_2025_04-49-56_PM.jpg)
+  in Calata Grotte San Michele e da Street View in Piazza della Repubblica: lo stesso modello in tutti e sei.
+  **Belvedere «la porticina»** del Piaggio: tre panchine di marmo senza schienale e un paletto di pietra da OSM
+  (n11094118739–42), la ringhiera sui pilastri da una foto sferica del luglio 2017. **Statua di Benedetto XIII**:
+  sagoma OSM w411137523 (Wikidata Q136345080), piedistallo, gradini e recinto di catene da Street View (ottobre
+  2025), figura stilizzata. **Alberelli davanti alla Cattedrale**: indicazione del committente, aiuola e cinque
+  alberi potati dal satellite e da Street View (ottobre 2025), col lampione a palo. **Piazza della Repubblica**:
+  aiuola rialzata con due ulivi, cubi di pietra, fioriere tonde e lampione a due bracci da Street View (maggio
+  2025); l'aiuola non è in OSM, la posizione viene dal satellite; fioriere grigie lungo Via Libertà. **Via
+  Fontana la Stella**: tre alberi sul lato nord verso il ponte (Street View, ottobre 2025). **Via Vittorio
+  Veneto**: lampioni a palo neri e paletti di pietra agli incroci (Street View, ottobre 2025). In OSM nel centro
+  storico non ci sono alberi né lampioni: ci sono solo quelli visti
 * Geografia generale: [Wikipedia, Gravina in Puglia](https://en.wikipedia.org/wiki/Gravina_in_Puglia)
 
 Dati geografici della città intera (fase 3.4):

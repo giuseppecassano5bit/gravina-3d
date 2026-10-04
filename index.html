@@ -2976,6 +2976,7 @@ const World = {
    */
   roadWalls(network) {
     const stone = new THREE.Color('#c9b48a'), iron = new THREE.Color('#2b2723'), c = new THREE.Color();
+    const junctions = network.nodes.filter((N) => N.edges.length > 2 && Tiles.inZ0(N.e, N.n));
     let meters = 0;
     for (const edge of network.edges) {
       if (edge.bridge || edge.walk || edge.foot || edge.turn) continue;
@@ -2994,10 +2995,10 @@ const World = {
           const oe = -tn * side, on = te * side;                                 // verso il lato
           const we = e + oe * (half + 0.45), wn = n + on * (half + 0.45);        // filo del muro
           const pe = e + oe * (half + 3), pn = n + on * (half + 3);              // il terreno accanto
-          const L = Ravine.locate(pe, pn);
-          const ok = Tiles.inZ0(e, n) && L.t >= 1 && !Buildings.occupied(pe, pn) && !Buildings.occupied(we, wn)
-            && network.conformerClearance(we, wn) > 0.25 && !network.nodes.some((N) => N.edges.length > 2 && Math.hypot(N.e - e, N.n - n) < N.plaza + 4);
-          const dy = ok ? Terrain.sample(pe, pn).y - y : 0;
+          // prima il dislivello (quasi sempre sotto 1 m), poi i controlli che costano
+          let dy = Tiles.inZ0(e, n) ? Terrain.sample(pe, pn).y - y : 0;
+          if (Math.abs(dy) >= 1 && (Ravine.locate(pe, pn).t < 1 || Buildings.occupied(pe, pn) || Buildings.occupied(we, wn)
+            || network.conformerClearance(we, wn) <= 0.25 || junctions.some((N) => Math.hypot(N.e - e, N.n - n) < N.plaza + 4))) dy = 0;
           if (Math.abs(dy) < 1) { flush(); continue; }
           if (run.length && Math.sign(run[0].dy) !== Math.sign(dy)) flush();
           run.push({ e: we, n: wn, y, dy, te, tn, oe, on });
@@ -5978,6 +5979,7 @@ const Details = {
     this.villaComunale();                 // blocco M2: Monumento ai Caduti, panchine e fontane della Villa
     this.robinson();                      // blocco M2: Pineta e Parco Robinson
     this.colaCola();                      // blocco M2: monumento alla Cola Cola, Via Bari
+    this.arredo();                        // blocco N1: fontanine, panchine, alberelli, statua, lampioni del centro storico
     this.stairs();
     this.placeLanterns(landmarks.filter((l) => l.card !== false));
     Buildings.clearWindows(this.keepOut);
@@ -7563,9 +7565,12 @@ const Details = {
     const y = Terrain.heightAt(...f.M), { iron } = this.col;
     // Paletti ogni metro, ma solo fuori dalla carreggiata (al belvedere della Cattedrale la via gira attorno al ciglio).
     const free = (x) => this.net.conformerClearance(e - out[1] * x, n + out[0] * x) > 0.4;
+    // blocco N1: al belvedere «la porticina» del Piaggio la ringhiera sta sui pilastri di pietra (photosphere 2017)
+    const pillars = Math.hypot(e0 + 10, n0 - 157) < 8, pillar = new THREE.Color('#d6c7a4');
     for (let x = -4; x <= 4.01; x += 1) {
       if (!free(x)) continue;
-      f.box(0.07, 1.05, 0.07, iron, x, y, 0);
+      if (pillars && Math.round(x) % 2 === 0) f.box(0.34, 1.15, 0.34, pillar, x, y - 0.05, 0);
+      else f.box(0.07, 1.05, 0.07, iron, x, y, 0);
       if (x < 4 && free(x + 1) && free(x + 0.5)) {
         f.box(1.05, 0.07, 0.09, iron, x + 0.5, y + 1.0, 0);
         f.box(1.05, 0.05, 0.06, iron, x + 0.5, y + 0.5, 0);
@@ -7603,6 +7608,242 @@ const Details = {
         }
       }
     }
+  },
+
+  /**
+   * ARREDO DEL CENTRO STORICO (blocco N1). Posizioni da OSM o dal committente, forme da foto e Street View
+   * (fonti nel README). In OSM nel centro storico non ci sono alberi né lampioni: si mette solo quello che
+   * si vede. Tutto nello strato dei dettagli dei riquadri e fuori dalla carreggiata (e dai tratti a piedi):
+   * dove nel diorama la via passa più vicina che nella realtà, l'oggetto si sposta di quel poco che serve.
+   */
+  arredo() {
+    const C = (h) => new THREE.Color(h), { iron } = this.col;
+    const grey = C('#7d7f7c'), brass = C('#c9a23a'), basin = C('#d9d0bd'), grate = C('#3a3836'), marble = C('#ece6d8');
+    const lawn = C('#7f9a4c'), curb = C('#e3d8bf'), hedge = C('#4f6b35'), bronze = C('#4a3d2e'), stoneC = C('#d6c7a4');
+    const leaves = [C('#5f7f3a'), C('#56753a'), C('#6a8a44')], olive = [C('#95a070'), C('#87935f'), C('#a0a97b')], trunk = C('#6e5b45');
+    /** Il punto libero più vicino a p (entro `max` m): fuori dalle vie di almeno `r`, fuori dalle case e dal canyon. */
+    const spot = (p, r, max = 4) => {
+      for (let d = 0; d <= max; d += 0.4) {
+        for (let k = 0; k < (d ? 20 : 1); k++) {
+          const a = (k / 20) * TAU, e = p[0] + Math.cos(a) * d, n = p[1] + Math.sin(a) * d;
+          if (this.net.conformerClearance(e, n) > r && !Buildings.occupied(e, n) && Ravine.locate(e, n).t >= 1
+            && [0, 1, 2, 3].every((q) => !Buildings.occupied(e + Math.cos(q * 1.571) * r * 0.7, n + Math.sin(q * 1.571) * r * 0.7))) return [e, n];
+        }
+      }
+      return null;
+    };
+    /** Verso la via più vicina (per girare rubinetti e panchine). */
+    const toRoad = (p) => {
+      const c = this.net.closestSample(p[0], p[1]), dx = c.edge.samples[c.i * 3] - p[0], dn = -c.edge.samples[c.i * 3 + 2] - p[1], l = Math.hypot(dx, dn) || 1;
+      return [dx / l, dn / l];
+    };
+    const cyl = (f, r0, r1, h, color, x, y, z, seg = 8) => f.add(new THREE.CylinderGeometry(r0, r1, h, seg), color, x, y + h / 2, z);
+    this.arredoCount = { fontanine: 0, panchine: 0, alberi: 0, lampioni: 0, paletti: 0 };
+
+    // 1. Fontanine dell'Acquedotto Pugliese (6 nodi OSM amenity=drinking_water; forma dalla foto di Commons in
+    //    Calata Grotte San Michele e da Street View in Piazza della Repubblica): colonnina di ghisa grigia con
+    //    cupoletta e pomello, fascia con la scritta, rubinetto d'ottone, pulsante sul fianco, coppa tonda a metà
+    //    altezza, vasca quadra di pietra con la griglia.
+    for (const p0 of [[116, -124], [282, -4], [420, -24], [48, 182], [15, -82], [144, 223]]) {
+      const p = spot(p0, 1.0, 4);
+      if (!p) continue;
+      const tb = this.near(p), f = wallFrame(tb, p, toRoad(p)), y = Terrain.heightAt(...p);
+      f.box(1.15, 0.14, 1.15, basin, 0, y - 0.06, 0);                         // vasca quadra
+      f.box(0.95, 0.03, 0.95, C('#a9a08d'), 0, y + 0.06, 0);                  // fondo
+      f.box(0.42, 0.02, 0.26, grate, 0, y + 0.085, 0.22);                     // griglia
+      cyl(f, 0.13, 0.15, 0.14, grey, 0, y + 0.06, -0.3);                      // zoccolo della colonnina
+      cyl(f, 0.085, 0.095, 1.0, grey, 0, y + 0.2, -0.3);                      // colonna
+      cyl(f, 0.105, 0.105, 0.16, grey.clone().multiplyScalar(0.92), 0, y + 1.02, -0.3);   // fascia con la scritta
+      cyl(f, 0.13, 0.13, 0.04, grey, 0, y + 1.2, -0.3);                       // tesa della cupoletta
+      f.add(new THREE.SphereGeometry(0.1, 8, 4, 0, TAU, 0, Math.PI / 2), grey, 0, y + 1.24, -0.3);
+      f.add(new THREE.SphereGeometry(0.035, 6, 4), grey, 0, y + 1.37, -0.3);  // pomello
+      f.box(0.035, 0.035, 0.16, brass, 0, y + 0.9, -0.16);                    // rubinetto d'ottone
+      f.box(0.03, 0.06, 0.03, brass, 0, y + 0.86, -0.08);
+      cyl(f, 0.03, 0.03, 0.05, iron, 0.11, y + 0.88, -0.3, 6);               // pulsante sul fianco
+      cyl(f, 0.16, 0.09, 0.12, grey, 0, y + 0.42, -0.12, 10);                 // coppa tonda
+      this.arredoCount.fontanine++;
+    }
+
+    // 2. Belvedere «la porticina» del Piaggio: tre panchine di pietra senza schienale e un paletto di pietra
+    //    (OSM n11094118739–42), la ringhiera sui pilastri la fa railing().
+    for (const p0 of [[-7, 152], [-1, 149], [1, 154]]) {
+      const p = spot(p0, 1.1, 3);
+      if (!p) continue;
+      const d = toRoad(p), f = wallFrame(this.near(p), p, [-d[0], -d[1]]), y = Terrain.heightAt(...p);   // seduti verso la gravina
+      f.box(1.6, 0.42, 0.45, marble, 0, y - 0.05, 0);
+      this.arredoCount.panchine++;
+    }
+    const pal = (p, h = 0.75) => {
+      const f = wallFrame(this.near(p), p, [1, 0]), y = Terrain.heightAt(...p);
+      f.box(0.24, h, 0.24, stoneC, 0, y - 0.05, 0);
+      f.add(new THREE.ConeGeometry(0.17, 0.14, 4).rotateY(Math.PI / 4), stoneC, 0, y + h + 0.02, 0);
+      this.arredoCount.paletti++;
+    };
+    const bollard = spot([13, 146], 0.4, 2.5);
+    if (bollard) pal(bollard);
+
+    // 3. Davanti alla Cattedrale (committente; satellite e Street View): sul lato sud di Piazza Benedetto XIII,
+    //    davanti al Vescovado, un'aiuola rettangolare col bordo di siepe e cinque alberelli dalle chiome
+    //    potate che si toccano, e un lampione a palo. Dentro la piazza pedonale (OSM w385146363).
+    {
+      const c = [52.5, -22.5], u = [0.999, 0.05], v = [-u[1], u[0]], L = 18, W = 5.4;
+      const ok = [[-1, -1], [1, -1], [1, 1], [-1, 1], [0, 0]].every(([a, b]) => {
+        const e = c[0] + u[0] * a * L / 2 + v[0] * b * W / 2, n = c[1] + u[1] * a * L / 2 + v[1] * b * W / 2;
+        return this.net.conformerClearance(e, n) > 1 && !Buildings.occupied(e, n);
+      });
+      if (ok) {
+        const tb = this.near(c), f = wallFrame(tb, c, v), y = Terrain.heightAt(...c);
+        f.box(L, 0.3, W, curb, 0, y - 0.1, 0);
+        f.box(L - 0.3, 0.06, W - 0.3, lawn, 0, y + 0.2, 0);
+        for (const s of [-1, 1]) {                                            // bordo di siepe
+          f.box(L - 0.4, 0.55, 0.45, hedge, 0, y + 0.2, s * (W / 2 - 0.4));
+          f.box(0.45, 0.55, W - 1.2, hedge, s * (L / 2 - 0.4), y + 0.2, 0);
+        }
+        for (let k = 0; k < 5; k++) {
+          const x = (k - 2) * 3.5, e = c[0] + u[0] * x, n = c[1] + u[1] * x;
+          f.box(0.3, 2.4, 0.3, trunk, x, y + 0.2, 0);
+          for (const [dx, dy, r] of [[0, 3.3, 1.9], [0.9, 3.0, 1.5], [-0.9, 3.1, 1.5]]) {
+            const g = new THREE.IcosahedronGeometry(r, 0); g.scale(1, 0.75, 0.95);
+            f.add(g, leaves[(k + 3 + Math.round(dx)) % 3], x + dx, y + dy, 0);
+          }
+          this.arredoCount.alberi++;
+        }
+        this.lampPost([c[0] - v[0] * (W / 2 + 0.6), c[1] - v[1] * (W / 2 + 0.6)], 1);
+      }
+    }
+
+    // 4. Statua di Benedetto XIII (OSM w411137523, Street View ottobre 2025): il papa in bronzo, benedicente,
+    //    su un piedistallo di pietra con l'iscrizione, sopra due gradini, nel recinto di catene su paletti di pietra.
+    {
+      const p = spot([41, -3.6], 1.6, 2);
+      if (p) {
+        const tb = this.near(p), f = wallFrame(tb, p, [0.2, -0.98]), y = Terrain.heightAt(...p);   // guarda la piazza
+        f.box(2.8, 0.2, 2.8, stoneC, 0, y - 0.05, 0);
+        f.box(2.2, 0.2, 2.2, stoneC.clone().multiplyScalar(1.04), 0, y + 0.15, 0);
+        f.box(0.95, 1.25, 0.95, C('#cdbd98'), 0, y + 0.35, 0);               // piedistallo
+        f.box(1.1, 0.12, 1.1, stoneC, 0, y + 1.55, 0);                        // cornice
+        f.box(0.55, 0.4, 0.02, C('#8d7c5e'), 0, y + 0.75, 0.48);              // iscrizione
+        const yb = y + 1.67;
+        f.add(new THREE.CylinderGeometry(0.2, 0.36, 1.3, 8), bronze, 0, yb + 0.65, 0);     // veste lunga
+        f.add(new THREE.CylinderGeometry(0.16, 0.31, 0.32, 8), bronze, 0, yb + 1.44, 0);   // mozzetta sulle spalle
+        f.add(new THREE.CylinderGeometry(0.06, 0.07, 0.1, 6), bronze, 0, yb + 1.63, 0);    // collo
+        f.add(new THREE.IcosahedronGeometry(0.13, 1), bronze, 0, yb + 1.78, 0.01);         // testa
+        f.add(new THREE.SphereGeometry(0.1, 8, 3, 0, TAU, 0, Math.PI / 2), bronze, 0, yb + 1.84, -0.01);   // zucchetto
+        f.add(new THREE.BoxGeometry(0.09, 0.4, 0.09).rotateX(-0.75), bronze, 0.22, yb + 1.5, 0.15);       // braccio alzato che benedice
+        f.add(new THREE.BoxGeometry(0.06, 0.13, 0.04), bronze, 0.22, yb + 1.74, 0.31);
+        f.add(new THREE.BoxGeometry(0.08, 0.36, 0.08).rotateX(-0.3), bronze, -0.2, yb + 1.2, 0.12);       // l'altro braccio
+        for (const [a, b] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {         // paletti e catene del recinto
+          f.box(0.2, 0.7, 0.2, stoneC, a * 1.55, y - 0.05, b * 1.55);
+        }
+        for (const s of [-1, 1]) {
+          f.box(3.1, 0.04, 0.04, iron, 0, y + 0.45, s * 1.55);
+          f.box(0.04, 0.04, 3.1, iron, s * 1.55, y + 0.45, 0);
+        }
+      }
+    }
+
+    // 5. Piazza della Repubblica (Street View maggio 2025, dalla fontanina verso ovest-sud-ovest; l'aiuola non è
+    //    in OSM: posizione dal satellite): aiuola rialzata col prato e due ulivi, cubi di pietra, fioriere tonde
+    //    verdi, un lampione a palo a due bracci; lungo Via Libertà una fila di fioriere grigie con gli arbusti.
+    {
+      const c = spot([277, -4], 4.6, 3);
+      if (c) {
+        const tb = this.near(c), f = wallFrame(tb, c, [1, 0]), y = Terrain.heightAt(...c);
+        f.box(7, 0.5, 6, curb, 0, y - 0.1, 0);
+        f.box(6.7, 0.06, 5.7, lawn, 0, y + 0.4, 0);
+        for (const [x, z, sd] of [[-1.4, 1.2, 3], [1.6, -1.1, 8]]) {          // gli ulivi: tronco storto, chioma a ciuffi argentati
+          const r = rng(sd), t1 = new THREE.CylinderGeometry(0.22, 0.34, 2.2, 6); t1.rotateZ(0.16);
+          f.add(t1, trunk, x, y + 1.4, z);
+          for (let k = 0; k < 6; k++) {
+            const a = k * 2.4, d = k ? 1.1 + r() * 0.7 : 0, g = new THREE.IcosahedronGeometry(0.95 + r() * 0.4, 0);
+            g.scale(1, 0.65, 1);
+            f.add(g, olive[k % 3], x + Math.cos(a) * d, y + 3.1 + r() * 0.8 - d * 0.2, z + Math.sin(a) * d);
+          }
+          this.arredoCount.alberi++;
+        }
+        for (const [x, z] of [[4.6, -1.5], [4.6, 0.5], [5.6, 2.4], [3.2, 4.0]]) {   // cubi di pietra
+          const e = c[0] + x, n = c[1] + z;
+          if (this.net.conformerClearance(e, n) > 0.6 && !Buildings.occupied(e, n)) f.box(0.5, 0.5, 0.5, marble, x, Terrain.heightAt(e, n) - 0.02, z);
+        }
+        for (const [x, z] of [[-4.6, -2.8], [-4.4, 3.0]]) {                     // fioriere tonde verdi
+          const e = c[0] + x, n = c[1] + z;
+          if (this.net.conformerClearance(e, n) < 0.9 || Buildings.occupied(e, n)) continue;
+          const yy = Terrain.heightAt(e, n);
+          cyl(f, 0.5, 0.42, 0.55, C('#3f5a43'), x, yy, z, 10);
+          const g = new THREE.IcosahedronGeometry(0.5, 0); g.scale(1, 0.7, 1); f.add(g, leaves[1], x, yy + 0.75, z);
+        }
+        this.lampPost([c[0] + 4.2, c[1] - 3.6], 2);
+      }
+      // fioriere grigie lungo Via Libertà (tratto a piedi), dal lato con più posto
+      const lib = this.net.edges.find((e) => e.name === 'Via Libertà');
+      if (lib) {
+        const S = lib.samples;
+        for (let s = 4; s < Math.min(lib.length, 40); s += 4.5) {
+          const i = Math.round(s / lib.step), k = i * 3, e = S[k], n = -S[k + 2];
+          const k2 = Math.min(lib.count, i + 1) * 3, te = S[k2] - S[k], tn = -(S[k2 + 2] - S[k + 2]), l = Math.hypot(te, tn) || 1;
+          for (const sd of [1, -1]) {
+            const d = lib.width / 2 + 0.75, pe = e - tn / l * d * sd, pn = n + te / l * d * sd;
+            if (this.net.conformerClearance(pe, pn) < 0.45 || Buildings.occupied(pe, pn)) continue;
+            const f = wallFrame(this.near([pe, pn]), [pe, pn], [-tn / l * sd, te / l * sd]), yy = Terrain.heightAt(pe, pn);
+            f.box(0.5, 0.5, 1.1, C('#9a9894'), 0, yy - 0.02, 0);
+            const g = new THREE.IcosahedronGeometry(0.42, 0); g.scale(0.9, 0.75, 1.5); f.add(g, leaves[(i + 1) % 3], 0, yy + 0.75, 0);
+            break;
+          }
+        }
+      }
+    }
+
+    // 6. Via Fontana la Stella, in fondo verso il ponte (Street View ottobre 2025, civico 44): tre alberi
+    //    sul marciapiede nord.
+    for (const p0 of [[102, 338.5], [111, 339], [120, 338.5]]) {
+      const p = spot(p0, 1.4, 2);
+      if (!p) continue;
+      this.tree(this.near(p), p[0], p[1], 6.5, 1.7, trunk, leaves, Math.round(p[0]));
+      this.arredoCount.alberi++;
+    }
+
+    // 7. Via Vittorio Veneto (Street View ottobre 2025): lampioni a palo in ghisa nera, alternati sui due lati
+    //    dove c'è posto, e paletti di pietra agli angoli degli incroci.
+    const vv = this.net.edges.filter((e) => e.name === 'Via Vittorio Veneto');
+    let side = 1;
+    for (const edge of vv) {
+      const S = edge.samples;
+      for (let s = 8; s < edge.length - 6; s += 24) {
+        const i = Math.round(s / edge.step), k = i * 3, e = S[k], n = -S[k + 2];
+        const k2 = Math.min(edge.count, i + 1) * 3, te = S[k2] - S[k], tn = -(S[k2 + 2] - S[k + 2]), l = Math.hypot(te, tn) || 1;
+        for (const sd of [side, -side]) {
+          const d = edge.width / 2 + 0.5, pe = e - tn / l * d * sd, pn = n + te / l * d * sd;
+          if (this.net.conformerClearance(pe, pn) < 0.35 || Buildings.occupied(pe, pn) || Buildings.occupied(pe - tn / l * 0.4 * sd, pn + te / l * 0.4 * sd)) continue;
+          this.lampPost([pe, pn], 1, [tn / l * sd, -te / l * sd]);
+          side = -sd;
+          break;
+        }
+      }
+    }
+    const nodes = new Set(vv.flatMap((e) => [e.a, e.b]).filter((N) => N.edges.length >= 3));
+    for (const N of nodes) {
+      const dirs = N.edges.map((e) => { const h = this.net.headingOut(e, e.a === N ? 1 : -1); return Math.atan2(h.z, h.x); }).sort((a, b) => a - b);
+      dirs.forEach((a, k) => {
+        const b = k + 1 < dirs.length ? dirs[k + 1] : dirs[0] + TAU, m = (a + b) / 2, r = N.plaza + 0.9;
+        const pe = N.e + Math.cos(m) * r, pn = N.n - Math.sin(m) * r;
+        if (this.net.conformerClearance(pe, pn) > 0.3 && !Buildings.occupied(pe, pn) && b - a > 0.6) pal([pe, pn], 0.6);
+      });
+    }
+  },
+
+  /** Lampione a palo in ghisa nera (blocco N1): base, fusto, capitello e uno o due bracci con la lanterna accesa. */
+  lampPost(p, arms = 1, dir = [1, 0]) {
+    if (this.net.conformerClearance(...p) < 0.3 || Buildings.occupied(...p)) return;
+    const { iron } = this.col, tb = this.near(p), f = wallFrame(tb, p, dir), y = Terrain.heightAt(...p), H = 4.3;
+    f.add(new THREE.CylinderGeometry(0.13, 0.17, 0.6, 6), iron, 0, y + 0.3, 0);
+    f.add(new THREE.CylinderGeometry(0.055, 0.075, H - 0.6, 6), iron, 0, y + 0.6 + (H - 0.6) / 2, 0);
+    f.add(new THREE.CylinderGeometry(0.1, 0.06, 0.18, 6), iron, 0, y + H, 0);
+    const t = [-dir[1], dir[0]];
+    for (const s of arms > 1 ? [-1, 1] : [1]) {
+      const a = arms > 1 ? t : dir, ae = a[0] * s, an = a[1] * s;
+      this.lanterns.push({ e: p[0] + ae * 0.6, n: p[1] + an * 0.6, y: y + H - 0.25, ne: -ae, nn: -an });
+    }
+    this.arredoCount.lampioni++;
   },
 
   /** Lanterne istanziate: staffa scura e vetro caldo, due sole draw call. */
