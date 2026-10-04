@@ -2203,6 +2203,116 @@ def rioni_profile(ground_at):
     return {'n0': RIONI_N[0], 'passo': RIONI_N[2], 'd': depth, 'w': width}
 
 
+CENTRO = (-590, 690, -600, 830)   # m: CONFIG.terrain.proc del diorama più la sfumatura (230 m, 220 a sud)
+CENTRO_PASSO = 20                 # m: passo della griglia della guida in GEO.centro
+CENTRO_LONTANO = 120              # m dal ciglio est: più vicino la cella da 30 m del DSM prende dentro il canyon
+CENTRO_NOTO = 150                 # m dal ciglio est: da qui la guida è nota, più vicino si prolunga piatta
+
+
+def _masked_blur(a, known, sigma):
+    """Sfocatura gaussiana dei soli valori noti (sigma in celle): media pesata, i buchi non contano."""
+    w = known & np.isfinite(a)
+    num, den = blur(np.where(w, a, 0.0), sigma), blur(w.astype(float), sigma)
+    return num / np.maximum(den, 1e-9), den
+
+
+def _masked_percentile(a, mask, half, q, least=8):
+    """Percentile q su una finestra (2·half+1)² dei soli pixel della maschera; NaN dove ce ne sono meno di `least`."""
+    from numpy.lib.stride_tricks import sliding_window_view
+    size = 2 * half + 1
+    A = sliding_window_view(np.pad(np.where(mask, a, np.nan), half, constant_values=np.nan), (size, size))
+    cnt = np.isfinite(A).sum(axis=(2, 3))
+    import warnings
+    with warnings.catch_warnings(), np.errstate(all='ignore'):
+        warnings.simplefilter('ignore', RuntimeWarning)               # finestre tutte vuote: diventano NaN
+        out = np.nanpercentile(A.reshape(*A.shape[:2], -1), q, axis=2)
+    return np.where(cnt >= least, out, np.nan)
+
+
+def _rim_frame(rim, E, N):
+    """Distanza con segno dal ciglio est (+ verso la città), punto del ciglio più vicino e normale verso la città."""
+    P = np.asarray(rim, float)
+    best = np.full(E.shape, np.inf)
+    out = {k: np.zeros(E.shape) for k in ('re', 'rn', 'ue', 'un', 'cross')}
+    for (e0, n0), (e1, n1) in zip(P, P[1:]):
+        dx, dn = e1 - e0, n1 - n0
+        L2 = dx * dx + dn * dn
+        if L2 < 1e-9:
+            continue
+        t = np.clip(((E - e0) * dx + (N - n0) * dn) / L2, 0, 1)
+        qe, qn = e0 + dx * t, n0 + dn * t
+        d2 = (E - qe) ** 2 + (N - qn) ** 2
+        k = d2 < best
+        best[k] = d2[k]
+        l = math.sqrt(L2)
+        for key, v in (('re', qe), ('rn', qn), ('ue', np.full(E.shape, dn / l)), ('un', np.full(E.shape, -dx / l)),
+                       ('cross', dx * (N - n0) - dn * (E - e0))):
+            out[key][k] = v[k]
+    # la normale (dn, −dx) del verso sud → nord guarda a est, cioè verso la città (cross < 0 oltre il ciglio)
+    S = np.sqrt(best) * np.where(out['cross'] < 0, 1, -1)
+    return S, out
+
+
+def centro_guide(dem_at, east_rim):
+    """
+    Guida delle quote del centro storico (blocco N1): la quota vera del suolo dal DSM Copernicus grezzo,
+    senza tetti, sulla zona del terreno disegnato a mano. Il diorama la usa per l'altopiano lato città;
+    canyon, cigli, falesia, gradoni e discesa dei rioni restano disegnati a mano.
+    - griglia a 10 m; percentile 20% su 90 m dei soli pixel a più di 120 m dal ciglio est (vicino al
+      ciglio la cella da 30 m prende dentro il canyon: la Cattedrale verrebbe −14 m invece di −0,3);
+    - sfocatura dei soli valori noti (35 m), noti solo oltre 150 m dal ciglio;
+    - verso il ciglio (e oltre) la guida si prolunga piatta lungo la normale al ciglio;
+    - smusso finale (20 m), griglia di GEO a 20 m con quote a 0,1 m;
+    - `tr`: la guida sul ciglio est ogni 10 m di nord (il ciglio est è una funzione del nord).
+    """
+    st = 10
+    E = np.arange(CENTRO[0], CENTRO[1] + 1, st, dtype=float)
+    N = np.arange(CENTRO[2], CENTRO[3] + 1, st, dtype=float)
+    EE, NN = np.meshgrid(E, N)
+    Z = dem_at(EE, NN) - ALT0
+    S, R = _rim_frame(east_rim, EE, NN)
+    P = _masked_percentile(Z, S > CENTRO_LONTANO, 4, 20)
+    B, _ = _masked_blur(P, np.isfinite(P) & (S > CENTRO_NOTO), 3.5)
+    known = (S > CENTRO_NOTO) & np.isfinite(P)
+    # prolungamento piatto: il valore a 160 m dal ciglio, lungo la normale verso la città
+    reach = CENTRO_NOTO + 10
+    te, tn = R['re'] + R['ue'] * reach, R['rn'] + R['un'] * reach
+    x, y = np.clip((te - E[0]) / st, 0, len(E) - 1.001), np.clip((tn - N[0]) / st, 0, len(N) - 1.001)
+    i, j = np.floor(x).astype(int), np.floor(y).astype(int)
+    fx, fy = x - i, y - j
+    Bk = np.where(known, B, np.nan)
+    ext = (Bk[j, i] * (1 - fx) * (1 - fy) + Bk[j, i + 1] * fx * (1 - fy) + Bk[j + 1, i] * (1 - fx) * fy + Bk[j + 1, i + 1] * fx * fy)
+    U = np.where(known, B, ext)
+    # dove anche il punto lungo la normale non è noto (agli angoli), una media dei vicini noti
+    F, _ = _masked_blur(U, np.isfinite(U), 5.0)
+    U = np.where(np.isfinite(U), U, F)
+    T = blur(U, 2.0)
+    k = CENTRO_PASSO // st
+    G = T[::k, ::k]
+    q = np.round(G * 10).astype(int)
+    dati = []
+    for row in q:
+        dati += [int(row[0])] + [int(v) for v in np.diff(row)]
+    # guida sul ciglio est ogni 10 m di nord
+    rim = np.asarray(east_rim, float)
+    ns = np.arange(CENTRO[2], CENTRO[3] + 1, 10.0)
+    tr = []
+    for n in ns:
+        kk = int(np.clip(np.searchsorted(rim[:, 1], n), 1, len(rim) - 1))
+        (e0, n0), (e1, n1) = rim[kk - 1], rim[kk]
+        f = float(np.clip((n - n0) / ((n1 - n0) or 1), 0, 1))
+        e = e0 + f * (e1 - e0)
+        xx, yy = np.clip((e - E[0]) / st, 0, len(E) - 1.001), np.clip((n - N[0]) / st, 0, len(N) - 1.001)
+        ii, jj = int(xx), int(yy)
+        ax, ay = xx - ii, yy - jj
+        tr.append(round(float(T[jj, ii] * (1 - ax) * (1 - ay) + T[jj, ii + 1] * ax * (1 - ay) + T[jj + 1, ii] * (1 - ax) * ay + T[jj + 1, ii + 1] * ax * ay), 1))
+    at = lambda e, n: float(T[int(round((n - N[0]) / st)), int(round((e - E[0]) / st))])
+    print(f'  guida del centro storico: griglia {G.shape[1]} × {G.shape[0]} ogni {CENTRO_PASSO} m, da {G.min():.1f} a {G.max():.1f} m; '
+          f'Cattedrale {at(10, 10):.1f}, Piazza della Repubblica {at(320, 0):.1f}, San Francesco {at(230, 220):.1f}')
+    return {'e0': CENTRO[0], 'n0': CENTRO[2], 'passo': CENTRO_PASSO, 'nx': G.shape[1], 'ny': G.shape[0], 'q': 0.1,
+            'dati': varint(dati), 'tr0': CENTRO[2], 'tr': tr}
+
+
 def smooth_line(pts, k=2):
     """Media mobile su una polilinea (estremi compresi)."""
     return [tuple(np.mean(pts[max(0, i - k):i + k + 1], axis=0)) for i in range(len(pts))] if len(pts) > 2 else pts
@@ -2344,6 +2454,7 @@ def encode(edges, deco, pos, buildings, city, arches, feats, extra):
         'steps': [[nid(nm), flat(g.coords)] for nm, g in feats['steps']],
         'rims': {'east': flat(extra['rims'][0]), 'west': flat(extra['rims'][1])},
         'rioni': extra['rioni'],
+        'centro': extra['centro'],
         'bosco': extra['bosco'],
         'botromagno': extra['botromagno'],
         'sport': extra['sport'],
@@ -2449,7 +2560,7 @@ def main():
     extra = {
         'ground': ground, 'cover': cover, 'rails': build_rails(data), 'pois': city_pois(osm),
         'riverY': river_bed(feats['river'], lambda e, n: at(e, n)), 'rims': rims,
-        'rioni': rioni_profile(at), 'bosco': bosco_features(bosco_osm),
+        'rioni': rioni_profile(at), 'centro': centro_guide(dem_at, rims[0]), 'bosco': bosco_features(bosco_osm),
         'sport': sport, 'm2': luoghi_m2(osm_m2()),
         'botromagno': {'rovine': [flat(r.exterior.coords[:-1]) for r in bot['ruins']],
                        'scavi': flat(bot['scavi'].simplify(0.5).exterior.coords[:-1]) if bot['scavi'] is not None else []},
