@@ -140,8 +140,9 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N3 → N4 →
 - [ ] Dopo N1, da valutare col committente: l'esagerazione ×1,5 delle quote (di riserva); nei vicoli
       stretti la camera resta alta per non finire dietro i tetti, e lì la pendenza si vede soprattutto
       da zoccoli, gradini e gradoni.
-- [ ] **N2 · Fondovito e San Michele delle Grotte** (`fase-3-4-n2-fondovito`): pedonale dove l'auto non
-      passa per i dislivelli, la chiesa rupestre con l'ossario e tutto il rione più veri (03/10/2026).
+- [ ] **N2 · Fondovito e San Michele delle Grotte** (`fase-3-4-n2-fondovito`, in corso dal 05/10/2026):
+      pedonale dove l'auto non passa per i dislivelli, la chiesa rupestre con l'ossario e tutto il rione
+      più veri (03/10/2026).
 - [ ] **N3 · facciate di chiese e scuole** (`fase-3-4-n3-facciate`, era N2): Santa Teresa, Santa Sofia,
       San Nicola, Addolorata e le chiese della città coi campanili, scuole più riconoscibili, dalle foto.
 - [ ] **N4 · Casino di Meninni e villette** (`fase-3-4-n4-meninni-villette`): il Casino com'è (rudere,
