@@ -140,10 +140,15 @@ PEDONALI_NO = {'Corso Vittorio Emanuele'}     # resta carrabile
 # in auto per i dislivelli sono pedonali anche dove OSM segna residential. Su Street View l'auto di Google non è
 # passata sulla Calata Grotte San Michele (solo foto a 360° di utenti); Via Civita resta carrabile.
 PEDONALI_FONDOVITO = {76151641, 385174951}    # Calata Grotte San Michele, tutta
+# Il ponticello in fondo alla terrazza di San Michele delle Grotte (richiesta del committente, 05/10/2026): una
+# passerella di pietra col parapetto che scavalca la testa del canalone e porta al promontorio delle mura (OSM
+# w1512581512). Non è in OSM: punti scelti sul satellite e sulla foto da drone (solo come riferimento) tra la fine
+# della terrazza OSM (w76152588) e l'inizio delle mura. Eccezione scritta in CLAUDE.md.
+PONTICELLO = ('Ponticello di San Michele', [(-59.9, -176.4), (-64.5, -179.8), (-69.3, -183.2), (-73.5, -186.0)])
 # Tratti a piedi ciechi che finiscono in uno slargo reale: restano, e la figurina gira con la goccia (blocco N2,
-# eccezione come le gocce del mezzo). Id OSM della via e punto dove finisce.
+# eccezione come le gocce del mezzo). Punto dove finiscono.
 GOCCE_PIEDI = [
-    (76152588, (-60, -176)),      # terrazza di San Michele delle Grotte, davanti al portico della chiesa
+    (-73.5, -186.0),              # oltre il ponticello di San Michele, sul promontorio delle mura
 ]
 # Raccordi a piedi attraverso un'area pedonale reale, tra due vertici del suo contorno (blocco N2, approvato il
 # 05/10/2026 come le aree pedonali della Villa): nome, punti, superficie (SUPERFICI).
@@ -498,7 +503,7 @@ def teardrop(leaf, direction, r):
     return q, [leaf, P(0.9, -0.85), P(1.9, -0.75), q], [q, P(1.9, 0.75), P(0.9, 0.85), leaf]
 
 
-def add_turnarounds(core, extra, pos, buildings_tree, buildings, prune=True):
+def add_turnarounds(core, extra, pos, buildings_tree, buildings, prune=True, walls=()):
     """
     Aggiunge le vie cieche selezionate. A ogni foglia prova a inserire
     un'inversione a goccia che non tocchi gli edifici; se non c'è spazio,
@@ -532,6 +537,7 @@ def add_turnarounds(core, extra, pos, buildings_tree, buildings, prune=True):
                         if not area.contains(shape_):
                             continue
                         hit = any(buildings[i].buffer(-0.3).intersects(shape_) for i in buildings_tree.query(shape_))
+                        hit = hit or (walk and any(w.intersects(shape_) for w in walls))   # blocco N2: la figurina non gira nelle mura
                         if not hit:
                             placed = (q, right, left)
                             break
@@ -1104,6 +1110,16 @@ def build_network(data, buildings, bosco_osm):
         edges.append({'a': a, 'b': b, 'poly': [pos[a]] + list(pts[1:-1]) + [pos[b]], 'cls': 'footway', 'name': name, 'osm': set(),
                       'bridge': False, 'foot': True, 'deco': False, 'walk': True, 'tunnel': False, 'surf': {code: math.dist(pos[a], pos[b])}})
         print(f'  raccordo a piedi: {name} ({math.dist(pos[a], pos[b]):.0f} m)')
+    # Blocco N2: il ponticello di San Michele, dalla fine della terrazza (nodo OSM) a un nodo nuovo sul promontorio
+    name, pts = PONTICELLO
+    a = min(pos, key=lambda n: math.dist(pos[n], pts[0]))
+    if math.dist(pos[a], pts[0]) > 1.5:
+        sys.exit(f'{name}: la terrazza non finisce dove dovrebbe')
+    b = f'piedi:{name}'
+    pos[b] = pts[-1]
+    edges.append({'a': a, 'b': b, 'poly': [pos[a]] + list(pts[1:]), 'cls': 'footway', 'name': name, 'osm': set(), 'bridge': False,
+                  'foot': True, 'deco': False, 'walk': True, 'tunnel': False, 'surf': {1: length(pts)}})
+    print(f'  {name}: {length(pts):.0f} m a piedi')
     # Vie cieche che portano a un luogo (VIE_CIECHE): si tagliano nel punto d'arrivo, dove andrà la goccia.
     ends = [split_edge(edges, pos, pt, lambda e, w=wid: w in e['osm'] and not e['deco'] and not e.get('walk')) for wid, pt in VIE_CIECHE]
     # Percorsi a piedi senza dati OSM in città (eccezioni approvate: Fiera, Casino di Meninni)
@@ -1128,16 +1144,19 @@ def build_network(data, buildings, bosco_osm):
         extra += [e for e in branch if e not in extra]
     # Blocco N2: tratti a piedi ciechi fino a uno slargo reale (GOCCE_PIEDI), con la goccia della figurina
     wtrees = dead_end_trees(walk, core)
-    for wid, pt in GOCCE_PIEDI:
-        end = min({n for e in walk if wid in e['osm'] for n in (e['a'], e['b'])}, key=lambda n: math.dist(pos[n], pt))
+    for pt in GOCCE_PIEDI:
+        end = min({n for e in walk for n in (e['a'], e['b'])}, key=lambda n: math.dist(pos[n], pt))
         tree = next((t for t in wtrees if any(end in (x['a'], x['b']) for x in t)), [])
         branch = branch_to(tree, core_nodes, end)
-        print(f'  a piedi w{wid} fino a {pos[end][0]:.0f}, {pos[end][1]:.0f}: {sum(length(e["poly"]) for e in branch):.0f} m con la goccia')
+        print(f'  a piedi fino a {pos[end][0]:.0f}, {pos[end][1]:.0f}: {sum(length(e["poly"]) for e in branch):.0f} m con la goccia')
         extra += [e for e in branch if e not in extra]
     bosco_edges, bosco_deco = bosco_road(core, pos, bosco_osm)
     extra += bosco_edges
     tree = STRtree(buildings)
-    net, loops = add_turnarounds(core, extra, pos, tree, buildings)
+    # blocco N2: le mura reali del centro storico (nel diorama muri spessi 1,6 m) per le gocce della figurina
+    walls = [local_geom(shape(i['geom'])).buffer(0.8) for i in data['infrastructure'] if i.get('class') == 'city_wall']
+    walls = [w for w in walls if inside(w.centroid.coords[0], Z0)]
+    net, loops = add_turnarounds(core, extra, pos, tree, buildings, walls=walls)
     # Dove una via carrabile continua solo a piedi, la goccia lascia scegliere: si scende o si torna
     # indietro. Se la goccia non ci sta, la via resta e in fondo si prosegue per forza a piedi.
     drive, more = add_turnarounds([e for e in net if not e.get('walk')], [], pos, tree, buildings, prune=False)
@@ -1518,7 +1537,8 @@ def build_features(data):
 
     areas = []
     for l in data['land_use']:
-        if l.get('class') not in ('pedestrian', 'plaza', 'park', 'grass', 'garden'):
+        # blocco N2: anche i prati incolti (meadow): nel centro storico la macchia del Fondovico (OSM w385177569)
+        if l.get('class') not in ('pedestrian', 'plaza', 'park', 'grass', 'garden', 'meadow'):
             continue
         g = local_geom(shape(l['geom']))
         if g.geom_type == 'Polygon' and inside(g.centroid.coords[0], Z0):
