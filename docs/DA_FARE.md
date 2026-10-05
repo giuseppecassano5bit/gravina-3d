@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 3 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2 e M3 della fase 3.4 uniti; in corso N1 (PR #19 in bozza, piano approvato il 03/10/2026).
+Stato al 5 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2 e M3 della fase 3.4 uniti; N1 finito (PR #19), in attesa del feedback del committente.
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
@@ -117,10 +117,29 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N3 → N4 →
 - [ ] Ritocchi dei mezzi: i fari della Huracán sporgono un poco dal muso.
 - [ ] Sul telefono, nella sosta in panchina, la scheda lunga dei Caduti copre il monumento: accorciarla
       o renderla richiudibile (vedi anche «schede lunghe» più giù).
-- [ ] **N1 · centro storico vero** (`fase-3-4-n1-centro-storico`, PR #19): salite e discese sulle quote
-      reali senza esagerazione (vie del mezzo entro il 18%) con camera, zoccoli, case a gradoni e
-      gradini; chianche dallo shader; balconi, portoni e vasi; fontanine, panchine e alberelli (anche
-      davanti alla Cattedrale, su Piazza Benedetto XIII). Piano approvato il 03/10/2026.
+- [ ] **N1 · centro storico vero** (`fase-3-4-n1-centro-storico`, PR #19, finito il 05/10/2026, in attesa
+      del feedback; piano approvato il 03/10/2026):
+      - **salite e discese** sulle quote reali senza esagerazione (`GEO.centro`, `Guida`): vie del mezzo
+        entro il 2% dall'84% al 36% della lunghezza, nessuna oltre il 18% (limitatore sulle quote degli
+        incroci); Cattedrale 0, Piazza della Repubblica +4,3, San Francesco +10; canyon, cigli e gradoni
+        a mano (a sud del Fondovito il ciglio scende fino a −15 m e i gradoni con lui);
+      - effetti: camera a 30° in pendenza; case con lo zoccolo in conci, marcapiano, cornicione e
+        pluviali dallo shader; gradoni anche fuori dai rioni; finestre in file orizzontali e 899 porte coi
+        gradini; 247 m di muretti e ringhiere dove la via si stacca dal terreno;
+      - **strade** secondo la superficie OSM (lastre, asfalto, ciottoli), Piazza Benedetto XIII a rombi,
+        tombini radi;
+      - **facciate**: cornici, davanzali, persiane a stecche, portoni a riquadri con le lunette (shader),
+        2 287 balconi con ringhiera e 3 834 vasi istanziati, solo entro 180 m (metà sul telefono);
+      - **arredo**: 6 fontanine dell'Acquedotto Pugliese, panchine e paletto della «porticina», aiuola con
+        cinque alberelli davanti al Vescovado, statua di Benedetto XIII (non c'era), Piazza della
+        Repubblica (aiuola con due ulivi, cubi, fioriere, lampione a due bracci), alberi in Via Fontana la
+        Stella, lampioni e paletti in Via Vittorio Veneto;
+      - misure: 356 KB compressi (+19), triangoli al massimo 323 700 su PC («alta») e 217 900 sul telefono
+        («centro»), draw call 59 e 38, «Pronto» 1,24 e 1,22 s, memoria JS 174 e 156 MB (invariata);
+        `difetti.mjs`: nessun difetto nuovo («galleggia» da 20 a 12).
+- [ ] Dopo N1, da valutare col committente: l'esagerazione ×1,5 delle quote (di riserva); nei vicoli
+      stretti la camera resta alta per non finire dietro i tetti, e lì la pendenza si vede soprattutto
+      da zoccoli, gradini e gradoni.
 - [ ] **N2 · Fondovito e San Michele delle Grotte** (`fase-3-4-n2-fondovito`): pedonale dove l'auto non
       passa per i dislivelli, la chiesa rupestre con l'ossario e tutto il rione più veri (03/10/2026).
 - [ ] **N3 · facciate di chiese e scuole** (`fase-3-4-n3-facciate`, era N2): Santa Teresa, Santa Sofia,
