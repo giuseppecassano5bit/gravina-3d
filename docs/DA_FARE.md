@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 5 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2 e M3 della fase 3.4 uniti; N1 finito (PR #19), in attesa del feedback del committente.
+Stato al 5 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3 e N1 della fase 3.4 uniti; prossimo N2 (Fondovito e San Michele delle Grotte, prompt `riferimenti/PROMPT_BLOCCHI_N2_N6.md`).
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
@@ -117,8 +117,8 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N3 → N4 →
 - [ ] Ritocchi dei mezzi: i fari della Huracán sporgono un poco dal muso.
 - [ ] Sul telefono, nella sosta in panchina, la scheda lunga dei Caduti copre il monumento: accorciarla
       o renderla richiudibile (vedi anche «schede lunghe» più giù).
-- [ ] **N1 · centro storico vero** (`fase-3-4-n1-centro-storico`, PR #19, finito il 05/10/2026, in attesa
-      del feedback; piano approvato il 03/10/2026):
+- [x] **N1 · centro storico vero** (`fase-3-4-n1-centro-storico`, PR #19, unita il 05/10/2026 con
+      l'approvazione del committente; piano approvato il 03/10/2026):
       - **salite e discese** sulle quote reali senza esagerazione (`GEO.centro`, `Guida`): vie del mezzo
         entro il 2% dall'84% al 36% della lunghezza, nessuna oltre il 18% (limitatore sulle quote degli
         incroci); Cattedrale 0, Piazza della Repubblica +4,3, San Francesco +10; canyon, cigli e gradoni
