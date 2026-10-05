@@ -300,6 +300,22 @@ Nel bosco la nebbia si avvicina (foschia) e la targa dice «Bosco Difesa Grande�
   `rioneDrop` allunga larghezza e dissolvenza quando il rione scende di più (11 e 7,5 volte la
   profondità), così le vie restano entro le pendenze di prima: massimo 19% vicino alla testata del
   ponte. Restano disegnati a mano: linee dei cigli, fondo, falesia, gradoni e sponda di Botromagno.
+* **Salite e discese vere** (blocco N1, `GEO.centro`, `Guida` nella sezione 4). L'altopiano lato città
+  segue le quote Copernicus: la pipeline prende il DSM grezzo su una griglia a 10 m attorno al terreno
+  disegnato a mano, il percentile 20% su 90 m dei soli pixel a più di 120 m dal ciglio est (vicino al
+  ciglio la cella da 30 m prende dentro il canyon: con i pixel a più di 25 m la Cattedrale veniva −13,8 m,
+  con 120 m −0,3), la sfocatura dei soli valori noti (35 m, noti oltre 150 m dal ciglio), il prolungamento
+  **piatto lungo la normale** fino al ciglio, lo smusso finale (20 m); in GEO una griglia a 20 m con le quote a
+  0,1 m (circa 3 KB compressi) e la guida sul ciglio ogni 10 m di nord. Vicino al ciglio una discesa morbida
+  porta alla quota del ciglio di prima, rioni compresi, o alla guida se è più bassa (a sud del Fondovito: lì
+  il ciglio scende fino a −15 m, e i gradoni scendono con lui). Senza esagerazione (×1, scelta del
+  committente; ×1,5 di riserva in `CONFIG.terrain.relief`). Quote nei punti noti: Cattedrale −0,4,
+  Purgatorio +0,5, Piazza della Repubblica +4,3, Porta San Michele +4,9, San Francesco +10, Pellicciari −0,1.
+  Vie del mezzo nel centro storico (14,1 km) per pendenza, prima → dopo: entro il 2% dall'84% al 36%,
+  2–4% dal 6 al 31%, 4–6% dal 3,5 al 17%, 6–9% dal 2,8 al 7%, 9–13% dall'1,5 al 4,6%, 13–18% dall'1,9 al 4,2%,
+  oltre il 18% niente. Per restarci c'è un **limitatore sulle quote degli incroci** (`#limitNodes`): sul grafo
+  delle vie del mezzo, se la salita media tra due incroci supera l'85% del 18%, le due quote si avvicinano
+  (le testate del ponte restano ferme); poi il terreno si adatta alle vie.
 * Il canyon e i rioni sono disegnati a mano solo dentro `CONFIG.terrain.proc` (est −360…460,
   nord −380…600); fuori ci sono le quote reali Copernicus, con il letto del torrente inciso nella
   valle (`Ravine.bed`). Tra i due, una sfumatura di 110 m (`Terrain.procWeight`), di 220 m a sud
@@ -327,6 +343,8 @@ Nel bosco la nebbia si avvicina (foschia) e la targa dice «Bosco Difesa Grande�
 
 | Elemento | Resa |
 |---|---|
+| Case del centro storico (blocco N1) | Prisma sulla sagoma senza la faccia di sotto; nei muri la quota del suolo per vertice (`SURF.OLD`): lo shader disegna lo **zoccolo** in conci squadrati che segue la strada, con la cimasa, il **marcapiano** ai piani (contati dal tetto), il **cornicione** con l'ombra e qualche **pluviale** all'angolo, a costo zero in triangoli. Le case con più di 2,5 m di dislivello scendono **a gradoni** nel verso della pendenza, come nei rioni. Le file delle finestre sono orizzontali; la porta sta alla quota della strada davanti alla sua colonna, coi **gradini** (alzate uguali, pedate da 30 cm) se la soglia è più alta e c'è posto fuori dalla carreggiata, altrimenti è una finestra; sotto un piano terra molto rialzato, una porta a filo strada. |
+| Finestre, portoni e balconi (blocco N1) | Il pannello di ogni finestra si allarga per la **cornice di pietra** e il **davanzale**; lo shader (`SURF.WIN`) ci disegna le persiane a stecche a due ante (o i vetri scuri col telaio), i **portoni** in legno a riquadri con la battuta e, su un portone su tre circa, la **lunetta** ad arco (fuori dall'arco il pannello sparisce). Circa una finestra alta su otto è una porta-finestra col **balcone**: lastra di pietra su due mensole e **ringhiera** di ferro con le sbarre, il corrimano e una fascia di riccioli disegnati dallo shader con l'alpha test; ogni tanto un balcone lungo su due finestre, con più vasi. **Vasi** di terracotta coi fiori anche accanto a qualche porta. Tre InstancedMesh (lastre, ringhiere, vasi), solo entro 180 m dalla camera (`CONFIG.buildings.near`, celle da 60 m) e sul telefono la metà; mai sotto i 3,4 m sopra la carreggiata. |
 | Case | Sagoma reale estrusa. Nei rioni Piaggio e Fondovico: 1–2 piani, **a gradoni** (la sagoma è tagliata in strisce di circa 3,5 m parallele al ciglio, ognuna alta quanto serve sopra il suo terreno; i tetti fanno da terrazza e sui salti si aprono porte e finestre). Nel centro storico: 2–3 piani (3,3 m per piano), toni di tufo e calce. Nei quartieri moderni: 3–5 piani e intonaci chiari. |
 | Tetti | Terrazze piane con torrini, cisterne e comignoli; i piccoli corpi rettangolari hanno spesso un **tetto a capanna in coppi**. Le falde sono **ritagliate sulla sagoma reale** (divise lungo il colmo e triangolate): nessun tetto sporge sulla strada. |
 | Archi | Volume di tufo con volta a tutto sesto sopra la carreggiata, ghiera in pietra chiara e finestrella sulle due fronti. |
@@ -349,6 +367,9 @@ Nel bosco la nebbia si avvicina (foschia) e la targa dice «Bosco Difesa Grande�
 | Scuole (blocco E) | 16 scuole sull'edificio reale (OSM o Overture): muri ocra o mattone con le finestre dello shader, tetto grigio chiaro; all'ingresso pensilina e due pennoni con le bandiere (Italia, Europa), un campo da gioco in resina coi canestri sul lato più libero e la recinzione verde attorno, col cancello. Solo da vicino. |
 | Chiese della città (blocco E) | Pietra col tetto a capanna, portale con timpano e oculo sul lato della via e croce in cima; senza foto verificate niente campanili. |
 | Casino di Meninni e case rosa (blocco E) | Il Casino in pietra col tetto in coppi, i pini d'Aleppo nel giardino verso la città e i cipressi dietro (FAI); le case rosa tra Via Guardialto e Via Guardialto Piccolo in intonaco rosa. |
+| Strade del centro storico (blocco N1) | Secondo la superficie OSM (`edge.surface`, bit 128–512 dei flag): **lastre** squadrate (chianche) a file di traverso sfalsate coi giunti per `sett` e `paving_stones`, **asfalto**, **ciottoli** per `unhewn_cobblestone`, terra battuta; Piazza Benedetto XIII (strada e area pedonale OSM) a **lastre chiare in diagonale con le file più scure a rombi**, come sul satellite. Tutto dallo shader, anche nella versione lontana dei riquadri; qualche **tombino** a metà via, niente canaletta centrale. |
+| Muretti e ringhiere (blocco N1) | Dove una via del mezzo corre più di 1 m sotto il terreno accanto, un muro di contenimento in conci (fino a 2,2 m); dove corre più di 1 m sopra, un muretto basso con la ringhiera di ferro. Fuori dalle case, dal canyon e dagli incroci: circa 250 m. |
+| Arredo del centro storico (blocco N1) | Le **6 fontanine dell'Acquedotto Pugliese** nei punti OSM (colonnina di ghisa con cupoletta e pomello, fascia della scritta, rubinetto d'ottone, pulsante, coppa tonda, vasca quadra di pietra con la griglia); al belvedere «la porticina» del Piaggio tre **panchine di marmo** e un **paletto** di pietra, la ringhiera sui pilastri; davanti alla Cattedrale, sul lato sud di Piazza Benedetto XIII, l'**aiuola con cinque alberelli** potati e il bordo di siepe, col lampione; la **statua di Benedetto XIII** benedicente sul piedistallo, coi gradini e il recinto di catene; in **Piazza della Repubblica** l'aiuola rialzata con due ulivi, i cubi di pietra, le fioriere tonde e il lampione a due bracci, e lungo Via Libertà le fioriere grigie; tre alberi in fondo a Via Fontana la Stella; in Via Vittorio Veneto i **lampioni a palo** neri e i **paletti** di pietra agli incroci. Dove nel diorama la via passa più vicina che nella realtà, l'oggetto si sposta di quel poco che serve. |
 | Regola | Nessun dettaglio sulla carreggiata: la prova `npm run simula` controlla che nessun vertice di portali, campanile, scalinate, lanterne e parapetti stia sopra una via tra 0,3 e 3,2 m d'altezza (`dettaglisullastrada` vuoto). Nei vicoli i dettagli sporgono al massimo 0,3 m. |
 | Mura | I tratti reali di mura urbane diventano muri di tufo. |
 | Alberi | Pini e lecci nei giardini reali (Villa Comunale), ulivi verso Botromagno, macchia nel canyon. |
@@ -530,6 +551,10 @@ riquadri). A Via Spinazzola i binari passano su un viadotto con le pile.
   prato, a ovest, verso il centro storico (in verticale più da lontano, perché ci stia tutto sopra il
   pannello). In pausa la vista dall'alto è più larga.
 * **Inseguimento dall'alto** (18 m sopra il mezzo, 12 m dietro; un po' più alto per il trattore): si vede la strada tra i tetti, come in un plastico.
+* **In salita e in discesa** (blocco N1): se la pendenza media dei prossimi 25 m supera il 4%
+  (`driver.gradeAhead`), la camera scende verso 30° d'inclinazione (`CONFIG.camera.slopeElev`) e si
+  allontana del 15%, e il giro automatico preferisce tre quarti e fianco (`auto.slopeShots`), da dove la
+  pendenza si vede. Nei vicoli stretti resta il sollevamento sopra i tetti, che lì vince.
 * **Tetti**: se un tetto si mette tra la camera e il mezzo, o la camera finisce a ridosso di un tetto, la camera sale (fino a 22 m in più) e si avvicina in pianta. Usa una griglia dei tetti (celle da 10 m) con la quota di ogni edificio e arco.
 * **Giro automatico** (blocco G, `CONFIG.camera.auto`): mentre il mezzo avanza la camera passa
   piano da un'inquadratura all'altra attorno al mezzo: dietro, tre quarti a sinistra, fianco destro,

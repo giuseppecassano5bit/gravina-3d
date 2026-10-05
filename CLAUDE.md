@@ -64,10 +64,11 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
   vie reali. Il mezzo si ferma all'imbocco e aspetta al tratto carrabile d'uscita (eccezione: ci
   compare, fuori dall'inquadratura). Le scalinate che nei dati finiscono nel vuoto restano
   decorative: non si inventano raccordi.
-- Nel centro storico le quote Copernicus fanno solo da **guida** (`GEO.rioni`, discesa dei rioni):
-  canyon, cigli, falesia e gradoni restano disegnati a mano, e le vie non devono diventare più
-  ripide di prima: le vie del mezzo stanno entro il 18% (`CONFIG.road.maxGrade`, blocco D; dal
-  blocco E in tutta la città).
+- Nel centro storico le quote Copernicus fanno solo da **guida**: per la discesa dei rioni
+  (`GEO.rioni`) e, dal blocco N1, per l'altopiano (`GEO.centro`, `Guida` nella sezione 4, senza
+  esagerazione: `CONFIG.terrain.relief` = 1). Canyon, cigli, falesia e gradoni restano disegnati a
+  mano; le vie del mezzo stanno entro il 18% (`CONFIG.road.maxGrade`, blocco D; dal blocco E in tutta
+  la città; dal blocco N1 c'è anche il limitatore sulle quote degli incroci, `#limitNodes`).
 - **Musica**: solo brani originali generati dal codice (sezione 11b). Niente canzoni o campioni di
   terzi, anche se richiesti: sono protetti e pesano più dell'intero diorama.
 - **Eccezioni approvate dal committente il 01/10/2026 (blocco M2)**: i percorsi a piedi dentro la

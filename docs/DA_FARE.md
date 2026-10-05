@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 2 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1 e M2 della fase 3.4 uniti, M3 in attesa di approvazione (PR #18).
+Stato al 5 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3 e N1 della fase 3.4 uniti; prossimo N2 (Fondovito e San Michele delle Grotte, prompt `riferimenti/PROMPT_BLOCCHI_N2_N6.md`).
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
@@ -8,7 +8,7 @@ del lavoro su due chat in [`PIANO_FASE_3_4.md`](PIANO_FASE_3_4.md).
 
 ### Fase 3.4, seconda parte (decisioni del 30/09/2026)
 
-Ordine: I → D → E → L → M1 → M2 → M3 → N, dettagli e decisioni nella sezione 7 del piano.
+Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N3 → N4 → N5 → N6, dettagli e decisioni nella sezione 7 del piano.
 
 - [x] **I · spazio sul telefono** (`fase-3-4-i-prestazioni`, PR #13, unita il 30/09/2026):
       due livelli di dettaglio per riquadro nella stessa mesh (terreno a maglia doppia, vie rade,
@@ -26,6 +26,8 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N, dettagli e decisioni nel
       città. 264 KB compressi (+9), telefono 175 300 triangoli, PC 246 000, draw call invariate.
 - [x] **Peso**: il 30/09/2026 il committente ha alzato il tetto da 280 a **360 KB compressi**
       (≤ 1,2 MB non compressi). Dopo il blocco D restano circa 96 KB per E, L, M e N.
+      Il 03/10/2026 lo ha alzato ancora, da 360 a **450 KB compressi**: dopo M3 (337 KB) restano
+      circa 113 KB per i blocchi N. I tetti di triangoli e draw call non cambiano.
 - [x] **E + L insieme** (`fase-3-4-e-l-luoghi-bosco`, PR #15, unita il 01/10/2026), più
       l'**acceleratore solo su PC** (Shift tenuto premuto, ×1,8; sul telefono no, decisione del
       committente del 30/09/2026): agli incroci il cartello si apre prima e il mezzo torna alla
@@ -99,8 +101,8 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N, dettagli e decisioni nel
       - `DESIGN.md`: sottopassi, Pineta e Parco Robinson, Villa e sosta in panchina, Cola Cola, suoni del bosco.
 - [ ] **Street View** (resto di M2): ingresso dello stadio (visto sul satellite: va bene), paletti agli
       ingressi della Villa, foto della Cola Cola. Il 02/10/2026 Street View non si caricava (pannello nero).
-- [ ] **M3 · mezzi realistici e mongolfiera** (`fase-3-4-m3-mezzi-mongolfiera`, PR #18, in attesa di
-      approvazione dal 02/10/2026):
+- [x] **M3 · mezzi realistici e mongolfiera** (`fase-3-4-m3-mezzi-mongolfiera`, PR #18, unita il
+      03/10/2026; approvati anche i suoni del bosco e il soffio del bruciatore):
       - auto per sezioni (anelli di 15 punti, passaruota, parafanghi), vetri trasparenti, abitacolo col
         guidatore seduto, ruote per modello; fari con l'alone, stop in frenata, frecce prima della svolta;
         4 mesh per mezzo invece di più di 20; mappa d'ambiente al tramonto solo per i mezzi;
@@ -112,11 +114,43 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N, dettagli e decisioni nel
       - misure (`shots/prestazioni-dopo-m3.txt`): draw call da 71 a 56 su PC e da 50 a 35 sul telefono;
         triangoli al massimo 283 600 su PC (mongolfiera) e 183 200 sul telefono; 337 KB compressi;
         memoria JS 174 MB su PC (tetto 150, era 179) e 157 sul telefono.
-- [ ] Da sentire dal committente: i **suoni del bosco** e il **soffio del bruciatore** piacciono?
 - [ ] Ritocchi dei mezzi: i fari della Huracán sporgono un poco dal muso.
 - [ ] Sul telefono, nella sosta in panchina, la scheda lunga dei Caduti copre il monumento: accorciarla
       o renderla richiudibile (vedi anche «schede lunghe» più giù).
-- [ ] **N · cartolina, giro guidato e ritocchi** (`fase-3-4-n-cartolina-giro`).
+- [x] **N1 · centro storico vero** (`fase-3-4-n1-centro-storico`, PR #19, unita il 05/10/2026 con
+      l'approvazione del committente; piano approvato il 03/10/2026):
+      - **salite e discese** sulle quote reali senza esagerazione (`GEO.centro`, `Guida`): vie del mezzo
+        entro il 2% dall'84% al 36% della lunghezza, nessuna oltre il 18% (limitatore sulle quote degli
+        incroci); Cattedrale 0, Piazza della Repubblica +4,3, San Francesco +10; canyon, cigli e gradoni
+        a mano (a sud del Fondovito il ciglio scende fino a −15 m e i gradoni con lui);
+      - effetti: camera a 30° in pendenza; case con lo zoccolo in conci, marcapiano, cornicione e
+        pluviali dallo shader; gradoni anche fuori dai rioni; finestre in file orizzontali e 899 porte coi
+        gradini; 247 m di muretti e ringhiere dove la via si stacca dal terreno;
+      - **strade** secondo la superficie OSM (lastre, asfalto, ciottoli), Piazza Benedetto XIII a rombi,
+        tombini radi;
+      - **facciate**: cornici, davanzali, persiane a stecche, portoni a riquadri con le lunette (shader),
+        2 287 balconi con ringhiera e 3 834 vasi istanziati, solo entro 180 m (metà sul telefono);
+      - **arredo**: 6 fontanine dell'Acquedotto Pugliese, panchine e paletto della «porticina», aiuola con
+        cinque alberelli davanti al Vescovado, statua di Benedetto XIII (non c'era), Piazza della
+        Repubblica (aiuola con due ulivi, cubi, fioriere, lampione a due bracci), alberi in Via Fontana la
+        Stella, lampioni e paletti in Via Vittorio Veneto;
+      - misure: 356 KB compressi (+19), triangoli al massimo 323 700 su PC («alta») e 217 900 sul telefono
+        («centro»), draw call 59 e 38, «Pronto» 1,24 e 1,22 s, memoria JS 174 e 156 MB (invariata);
+        `difetti.mjs`: nessun difetto nuovo («galleggia» da 20 a 12).
+- [ ] Dopo N1, da valutare col committente: l'esagerazione ×1,5 delle quote (di riserva); nei vicoli
+      stretti la camera resta alta per non finire dietro i tetti, e lì la pendenza si vede soprattutto
+      da zoccoli, gradini e gradoni.
+- [ ] **N2 · Fondovito e San Michele delle Grotte** (`fase-3-4-n2-fondovito`): pedonale dove l'auto non
+      passa per i dislivelli, la chiesa rupestre con l'ossario e tutto il rione più veri (03/10/2026).
+- [ ] **N3 · facciate di chiese e scuole** (`fase-3-4-n3-facciate`, era N2): Santa Teresa, Santa Sofia,
+      San Nicola, Addolorata e le chiese della città coi campanili, scuole più riconoscibili, dalle foto.
+- [ ] **N4 · Casino di Meninni e villette** (`fase-3-4-n4-meninni-villette`): il Casino com'è (rudere,
+      muro di cinta, cancello, pini e cipressi, cappella), la strada fino all'ingresso e al parcheggio
+      con la goccia (via quella di oggi sulla SP201), le villette attorno al Liceo scientifico Tarantino.
+- [ ] **N5 · Capotenda, vigne e uliveti** (`fase-3-4-n5-capotenda-vigne`): il sentiero che dal Padre
+      Eterno scende alle grotte e al torrente, la vigna di Botromagno, uliveti e vigne in periferia.
+- [ ] **N6 · cartolina, giro guidato e ritocchi** (`fase-3-4-n6-cartolina-giro`, era N3): cartolina con
+      la cornice, giro guidato dei monumenti, camera dopo il teletrasporto, schede lunghe, memoria JS.
 - Versione in inglese: non ora.
 
 ### Fase 3.4, blocco G · percorsi a piedi, quote reali, camera e radio (PR #12, unita il 30/09/2026) ✅
