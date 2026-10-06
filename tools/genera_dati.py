@@ -157,6 +157,8 @@ RACCORDI_PIEDI = [
     # (OSM w469108906, surface=concrete); Via Marconi tocca la stessa area nel vertice (103.2, -115.5)
     ('Piazza Giuseppe Pellicciari', [(89.3, -126.6), (103.2, -115.5)], 2),
 ]
+# Blocco N2: vie cieche del centro storico che si disegnano (decorative, non percorribili) perché portano a un luogo
+DECO_Z0 = {1384781495}                        # Via Giacomo Leopardi, fino al cancello di Hortus (Street View, ottobre 2025)
 SOTTOPASSO_PIEDI = {1288069909}               # sottopassaggio pedonale della stazione (OSM level=-1, tra due scalinate)
 # Percorso del ponte: pedonale nella realtà, percorribile nel diorama.
 BRIDGE_ROUTE_NAME = 'Via giudice Montea'
@@ -1174,7 +1176,7 @@ def build_network(data, buildings, bosco_osm):
     net = merge_chains(net)
     # Decorative: tutto ciò che resta fuori dalla rete, nella città moderna (il centro storico resta com'era).
     deco = [e for e in edges if id(e) not in used and not e['foot'] and not e['bridge'] and not e.get('tunnel') and not e.get('walk')
-            and not inside(midpoint(e['poly']), Z0)]
+            and (not inside(midpoint(e['poly']), Z0) or e['osm'] & DECO_Z0)]
     deco = merge_chains(deco) + bosco_deco
     for e in net + deco:                              # geometria più leggera
         if not e.get('turn'):
