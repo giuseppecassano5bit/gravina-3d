@@ -8053,6 +8053,9 @@ const Details = {
       if (!p.bridge) uT = p.u;
     });
     const lift = CONFIG.city.roadLift, half = (u) => (u < uT - 1 ? 2.2 : u > uT + 2.5 ? 1.25 : lerp(2.2, 1.25, (u - uT + 1) / 3.5));
+    // libero dalle altre vie (la Calata San Giovanni Battista che si innesta, la Calata al cancello, la goccia in fondo)
+    const own = new Set(parts.map((p) => p.ed)), far = span.a === T ? span.b : span.a, uEnd = P[P.length - 1].u;
+    const clear = (e, n, m) => { const c = net.closestSample(e, n, (x) => x.bridge || own.has(x) || (x.turn && far.edges.includes(x) && m > 1)); return !c || c.d - c.edge.width / 2 > m; };
     const at = (p, o, y) => [p.e + p.oe * o, y, -(p.n + p.on * o)];
     const stone = C('#ddd0b0'), cap = C('#ece3cc'), kerb = C('#cdbf9c'), lamp = C('#3c3833'), iron = C('#2b2723');
     const brown = C('#6b3a22'), pale = C('#e7dfcb'), dark = C('#3d3127'), floor = C('#8c7a60');
@@ -8095,6 +8098,8 @@ const Details = {
         if (A.u < from || B.u > to + 0.01) continue;
         const tb = this.near([A.e, A.n]), s = side;
         const iA = s * oIn(A.u), iB = s * oIn(B.u), oA = s * oOut(A.u), oB = s * oOut(B.u);
+        const mo = (iA + oA) / 2;
+        if ([0, 0.5, 1].some((k) => !clear(lerp(A.e + A.oe * mo, B.e + B.oe * mo, k), lerp(A.n + A.on * mo, B.n + B.on * mo, k), 0.45))) continue;
         const tA = A.y + h, tB = B.y + h;
         const bot = (p, o) => { const g = Terrain.heightAt(p.e + p.oe * o, p.n + p.on * o) - 0.4, a = soffit(p.u); return Math.min(p.y - 0.3, a > -Infinity ? Math.max(a, g) : g); };
         const bA = bot(A, oA), bB = bot(B, oB), out = [A.oe * s, 0, -A.on * s];
@@ -8113,9 +8118,9 @@ const Details = {
         }
       }
     };
-    wall(1, 1.4, st[st.length - 1].u, half, (u) => half(u) + (u > uT + 2.5 ? 0.38 : 0.45), 1.0, true);
+    wall(1, 1.4, uEnd - 0.6, half, (u) => half(u) + (u > uT + 2.5 ? 0.38 : 0.45), 1.0, true);
     wall(-1, 3, uT - 3.6, () => 2.1, () => 2.35, 0.28, false);                       // cordolo verso il prato
-    wall(-1, uT + 3.6, st[st.length - 1].u, () => 1.25, () => 1.63, 1.0, false);      // ponticello, lato verso il portico
+    wall(-1, uT + 3.6, uEnd - 2.8, () => 1.25, () => 1.63, 1.0, false);               // ponticello, lato verso il portico (la goccia gira di qua)
     // l'intradosso dell'arco del ponticello
     for (let i = 0; i + 1 < st.length; i++) {
       const A = st[i], B = st[i + 1], sa = soffit(A.u), sb = soffit(B.u);
@@ -8126,16 +8131,27 @@ const Details = {
 
     // 3. il cancello in fondo alla Calata: due pilastri e le ante aperte, il cartello marrone
     {
-      const a = P[0], b = P[Math.min(3, P.length - 1)], d = [b.e - a.e, b.n - a.n], l = Math.hypot(...d) || 1;
-      const f = wallFrame(this.near(SM.gate), [a.e, a.n], [d[0] / l, d[1] / l]), y = a.y;
+      // il cancello sta di traverso tra la Calata che arriva e la terrazza che parte (sulla bisettrice)
+      const a = P[0], b = P[Math.min(3, P.length - 1)], cal = G.edges.find((x) => !own.has(x) && x.walk);
+      const out = [b.e - a.e, b.n - a.n].map((v) => v / (Math.hypot(b.e - a.e, b.n - a.n) || 1));
+      let inn = out;
+      if (cal) { const S = cal.samples, k = (cal.a === G ? Math.min(3, cal.count) : cal.count - Math.min(3, cal.count)) * 3, l = Math.hypot(a.e - S[k], a.n + S[k + 2]) || 1; inn = [(a.e - S[k]) / l, (a.n + S[k + 2]) / l]; }
+      const dn = [out[0] + inn[0], out[1] + inn[1]], dl = Math.hypot(...dn) || 1, d = [dn[0] / dl, dn[1] / dl], t = [-d[1], d[0]];
+      const f = wallFrame(this.near(SM.gate), [a.e, a.n], d), y = a.y;
+      const free = (x, m) => clear(a.e + t[0] * x, a.n + t[1] * x, m);
       for (const s of [-1, 1]) {
-        f.box(0.46, 2.2, 0.46, pale, s * 1.75, y - 0.1, 0);
-        f.box(0.58, 0.14, 0.58, cap, s * 1.75, y + 2.1, 0);
-        f.add(new THREE.BoxGeometry(0.04, 1.6, 1.3).rotateY(s * 0.35), iron, s * 1.62, y + 0.95, 0.72);
+        let x = 1.75;
+        while (x < 3.2 && !free(s * x, 0.35)) x += 0.15;
+        if (x >= 3.2) continue;
+        f.box(0.46, 2.2, 0.46, pale, s * x, y - 0.1, 0);
+        f.box(0.58, 0.14, 0.58, cap, s * x, y + 2.1, 0);
+        if (free(s * (x - 0.2), 0.3) && free(s * (x - 0.3) + 0.0, 0.3)) f.add(new THREE.BoxGeometry(0.04, 1.6, 1.3).rotateY(s * 0.35), iron, s * (x - 0.13), y + 0.95, 0.72);
       }
-      f.box(0.06, 1.35, 0.06, iron, 2.45, y, 0.2); f.box(0.06, 1.35, 0.06, iron, 3.3, y, 0.2);
-      f.box(0.98, 0.66, 0.05, brown, 2.88, y + 1.1, 0.24);
-      f.box(0.82, 0.3, 0.052, C('#e9dfc8'), 2.88, y + 1.2, 0.245);
+      if (free(2.9, 0.6)) {
+        f.box(0.06, 1.35, 0.06, iron, 2.45, y, 0.2); f.box(0.06, 1.35, 0.06, iron, 3.3, y, 0.2);
+        f.box(0.98, 0.66, 0.05, brown, 2.88, y + 1.1, 0.24);
+        f.box(0.82, 0.3, 0.052, C('#e9dfc8'), 2.88, y + 1.2, 0.245);
+      }
     }
 
     // 4. cipressi sotto il parapetto, verso la gravina; qualche leccio nel canalone

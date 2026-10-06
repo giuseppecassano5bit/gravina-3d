@@ -83,7 +83,9 @@ const until = async (test, seconds, dt = 0.25) => {
   return test();
 };
 await page.keyboard.press('Escape');
-await page.evaluate(() => { const g = window.gravina; g.placeAt(60, -40, [-1, 0]); g.rig.snap(g.driver); });
+// (dal blocco N2 la Calata Grotte San Michele è pedonale: si parte da Via Marconi verso nord, dove il passaggio
+// pedonale sale alla Calata e da lì al vicolo carrabile)
+await page.evaluate(() => { const g = window.gravina; g.placeAt(103, -100, [0, 1]); g.rig.snap(g.driver); });
 const sign = await until(() => page.isVisible('.sign:has-text("a piedi")'), 20);
 check('agli incroci c’è il cartello «a piedi»', sign);
 if (sign) await page.click('.sign:has-text("a piedi")');
@@ -213,10 +215,11 @@ await page.evaluate(() => {
     };
     const goal = target && N.edges.find((e) => e.id === target);
     const toGoal = goal && dijkstra([goal.a, goal.b]);
-    const visits = new Map(), names = new Set();
+    const visits = new Map(), names = new Set(), cards = new Set(), card = document.getElementById('card');
     let last = null, lastEdge = null, foot = false, walked = 0, odo = d.odometer, back = false;
     for (let t = 0; t < seconds; t += 0.1) {
       if (d.edge !== lastEdge) { lastEdge = d.edge; visits.set(d.edge, (visits.get(d.edge) ?? 0) + 1); if (d.onFoot) names.add(d.edge.name); }
+      if (card.classList.contains('is-visible')) cards.add(document.getElementById('card-title').textContent);   // blocco N2: schede apparse
       const dec = d.decision;
       if (dec && dec !== last && dec.options.length > 1) {
         last = dec;
@@ -242,7 +245,7 @@ await page.evaluate(() => {
       if (mode === 'loop' && foot && !d.onFoot && d.speed > 1) { back = true; break; }
       g.advance(0.1, 1 / 30);
     }
-    return { back, walked: Math.round(walked), names: [...names], street: d.edge.name, onFoot: d.onFoot, sitting: !!d.sitting, speed: d.speed };
+    return { back, walked: Math.round(walked), names: [...names], cards: [...cards], street: d.edge.name, onFoot: d.onFoot, sitting: !!d.sitting, speed: d.speed };
   };
 });
 const guide = (mode, target, seconds) => page.evaluate(([m, t, s]) => window.__guide(m, t, s), [mode, target, seconds]);
@@ -257,7 +260,12 @@ check('vivaio: «a piedi» alla goccia, anello V2 e ritorno al mezzo', vivSign &
 
 // Sentiero degli scavi (A): da Via giudice Montea, vicino alla Madonna della Stella.
 await page.evaluate(() => { const g = window.gravina; g.placeAt(-60, 240, [-1, 0.6], 25); g.rig.snap(g.driver); g.driver.decision = null; });
-w = await guide('to', 'v1355', 60);
+// il tratto del sentiero più vicino a [−172, 402] (gli id dei tratti cambiano quando si rigenera GEO)
+const nearEdge = (name, at) => page.evaluate(([nm, p]) => {
+  const mid = (e) => { const k = Math.floor(e.count / 2) * 3; return Math.hypot(e.samples[k] - p[0], -e.samples[k + 2] - p[1]); };
+  return window.gravina.network.edges.filter((e) => e.name === nm && !e.turn).sort((x, y) => mid(x) - mid(y))[0]?.id;
+}, [name, at]);
+w = await guide('to', await nearEdge('Sentiero degli scavi', [-172, 402]), 60);
 const scaviStart = await foot();
 w = await guide('loop', null, 1500);
 check('sentiero degli scavi (A) a piedi, poi di nuovo al mezzo', scaviStart.onFoot && w.back && w.names.includes('Sentiero degli scavi') && w.walked > 500,
@@ -283,6 +291,26 @@ await advance(2);
 f = await foot();
 // (la Villa non ha ingressi a piedi su Corso Vittorio Emanuele: il mezzo aspetta dove si è scesi, qui vicino a Piazza Pellicciari)
 check('il pulsante riporta al mezzo, dove era parcheggiato, e si riparte', !f.onFoot && !f.figure && f.speed > 0.5 && backAt === bench.car && await page.isHidden('#btn-bench'), `${backAt}, poi ${f.street}`);
+
+// Blocco N2: dal vicolo sopra Via Marconi giù per la Calata Grotte San Michele, tutta a piedi, fino alla terrazza: al
+// portico si apre la scheda di San Michele delle Grotte, il ponticello porta alla goccia della figurina sul promontorio.
+// Poi su per la Calata San Giovanni Battista e i Gradoni fino a Piazza Pellicciari, dove il mezzo aspetta.
+const fv = await page.evaluate(() => {
+  const N = window.gravina.network.edges;
+  return { ponte: N.find((e) => e.span)?.id, goccia: N.find((e) => e.walk && e.turn && Math.hypot(e.a.e + 73.5, e.a.n + 186) < 3)?.id,
+    raccordo: N.find((e) => e.walk && e.name === 'Piazza Giuseppe Pellicciari')?.id };
+});
+await page.evaluate(() => { const g = window.gravina; g.placeAt(117, -16, [0.25, -1], 0); g.rig.snap(g.driver); g.driver.decision = null; });
+w = await guide('to', fv.ponte, 400);
+const smCar = await page.evaluate(() => window.gravina.driver.car?.edge.name);
+check('Fondovito: giù per la Calata a piedi fino al ponticello, con la scheda di San Michele delle Grotte',
+  w.onFoot && w.names.includes('Calata Grotte San Michele') && w.cards.includes('San Michele delle Grotte'), `${w.names.join(', ')} · schede ${w.cards.join(', ')} · il mezzo su ${smCar}`);
+w = await guide('to', fv.goccia, 120);
+check('oltre il ponticello la figurina gira nella goccia sul promontorio', w.onFoot && !!fv.goccia, `${w.street}`);
+w = await guide('to', fv.raccordo, 600);
+check('poi su per la Calata San Giovanni Battista e i Gradoni', w.onFoot && w.names.includes('Gradoni San Giovanni Battista') && w.names.includes('Calata San Giovanni Battista'), w.names.join(', '));
+w = await guide('loop', null, 200);
+check('a Piazza Pellicciari il mezzo aspetta e si riparte', w.back && !w.onFoot && w.speed > 0.5, w.street);
 
 // Vie cieche reali con la goccia (blocco M2): dall'elenco dei luoghi si arriva in auto e si riparte.
 for (const [name, at] of [['Casino di Meninni', [1572, -536]], ['Monumento alla Cola Cola', [1893, 102]], ['Fiera di San Giorgio', [-53, 948]]]) {
