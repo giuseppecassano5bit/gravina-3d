@@ -156,11 +156,12 @@ await page.keyboard.down('Shift');
 let top = 0;                                                     // la velocità più alta in 5 s (tra un incrocio e l'altro)
 for (let k = 0; k < 25; k++) { await advance(0.2); top = Math.max(top, (await drv()).v); }
 check('con Shift tenuto il mezzo accelera', top > calm.cruise * 1.4, `crociera ${calm.cruise.toFixed(1)} m/s, con Shift fino a ${top.toFixed(1)} m/s`);
-let opened = null, t = 0;
-for (; t < 40 && !opened; t += 0.1) { const x = await drv(); if (x.open) opened = x; else await advance(0.1); }
+// il cartello si guarda quando la scelta si apre (dopo l'incrocio il prossimo può non essere ancora aperto)
+let opened = null, t = 0, signShown = false;
+for (; t < 40 && !opened; t += 0.1) { const x = await drv(); if (x.open) { opened = x; signShown = await page.isVisible('.sign'); } else await advance(0.1); }
 let told = 0;
 if (opened) { const e0 = opened.edge; for (; told < 20 && (await drv()).edge === e0; told += 0.1) await advance(0.1); }
-check('all’incrocio il cartello si apre prima e c’è tempo per scegliere', !!opened && opened.rem > 45 && told > 3.5 && await page.isVisible('.sign'),
+check('all’incrocio il cartello si apre prima e c’è tempo per scegliere', !!opened && opened.rem > 45 && told > 3.5 && signShown,
   opened ? `cartello a ${opened.rem.toFixed(0)} m, ${told.toFixed(1)} s per scegliere` : 'nessun incrocio');
 await page.keyboard.up('Shift');
 await advance(4);

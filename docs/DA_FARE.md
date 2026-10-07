@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 7 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3 e N1 della fase 3.4 uniti; N2 (Fondovito e San Michele delle Grotte) fatto, in attesa del feedback nella PR #20; poi N2b (prompt `riferimenti/PROMPT_BLOCCHI_N2_N6_SEGUITO.md`).
+Stato al 7 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3 e N1 della fase 3.4 uniti; N2 (Fondovito e San Michele delle Grotte) unito il 07/10/2026 (PR #20, approvazione anticipata del committente); prossimo N2b (prompt `riferimenti/PROMPT_BLOCCHI_N2_N6_SEGUITO.md`).
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
@@ -140,8 +140,8 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N3 → N4 →
 - [ ] Dopo N1, da valutare col committente: l'esagerazione ×1,5 delle quote (di riserva); nei vicoli
       stretti la camera resta alta per non finire dietro i tetti, e lì la pendenza si vede soprattutto
       da zoccoli, gradini e gradoni.
-- [ ] **N2 · Fondovito, San Michele delle Grotte e Hortus** (`fase-3-4-n2-fondovito`, PR #20, piano approvato il
-      05/10/2026; fatto, in attesa del feedback):
+- [x] **N2 · Fondovito, San Michele delle Grotte e Hortus** (`fase-3-4-n2-fondovito`, PR #20, piano approvato il
+      05/10/2026; unita il 07/10/2026 con l'approvazione anticipata del committente):
       - **a piedi**: Calata Grotte San Michele tutta pedonale (via le due gocce del mezzo), Gradoni San Giovanni Battista
         col raccordo di 18 m nell'area pedonale di Piazza Pellicciari, terrazza di San Michele e **ponticello** (non in
         OSM: satellite e foto da drone) con la goccia della figurina sul promontorio delle mura. Mezzo da 89,43 a 89,13 km,
@@ -159,7 +159,7 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N3 → N4 →
         cartello, giardino a terrazze; solo l'etichetta);
       - misure: 370 KB compressi (+14), triangoli al massimo 327 600 su PC («alta») e 217 900 sul telefono («centro»,
         invariato), draw call 59 e 38, «Pronto» 1,24 e 1,23 s, memoria JS invariata (oscilla tra 157 e 186 MB);
-        `difetti.mjs` uguale a N1, `simula` e `interazioni` verdi.
+        `difetti.mjs` uguale a N1, `simula` e `interazioni` verdi (59 controlli).
 - [ ] Da N2, se il committente vuole: dentro la chiesa (la figurina che sale nella prima navata: la camera finirebbe
       nella roccia, per ora si vede dal portico); case del rione con scale esterne e archi (sm-05, sm-12: in N2b coi
       livelli veri); i sentieri a tornanti coi muri bianchi nella macchia (non in OSM, solo da guardare).
