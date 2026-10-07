@@ -91,6 +91,14 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
     del 2019 in fondo alla terrazza, sopra la testa del canalone; si percorre a piedi, in piano, e sotto scende
     il filo d'acqua (`Cascata`, richiesta del committente);
   - Via Giacomo Leopardi, cieca, si disegna (decorativa, `DECO_Z0`) perché porta al cancello di Hortus.
+- **Eccezione di Santa Lucia (blocco N2b, piano approvato dal committente il 07/10/2026)**: il footway OSM w1195336380
+  («Calata S. Lucia» su Google, 60 m da Via Michelangelo Calderoni alla chiesa) si percorre a piedi e finisce con la
+  **goccia della figurina** nello slargo davanti alla chiesa (`GOCCE_PIEDI`), come il ponticello di San Michele. L'anello con
+  w1512581502 («Via Santa Lucia») non si fa: tra la fine del sentiero e la via ci sono 9 m senza collegamento in OSM.
+- **Ruderi e piani del centro storico (blocco N2b)**: i `building=ruins` OSM del centro storico sono ruderi (`KIND['rudere']`,
+  muri crollati a pezzi, senza tetto; nel cono di vista dalla ringhiera della Cattedrale verso il ponte restano bassi, così il ponte
+  si vede) e i piani delle case vengono dalla tabella `LIVELLI` di `genera_dati.py` (rilevati su Street View, con via e data;
+  «almeno N» dove la cima non si vede); dove non c'è una riga vale la regola di `Buildings.height`.
 - Le vie cieche reali della città (`GEO.deco`) si disegnano ma **non si percorrono**. La
   sterrata reale del Castello Svevo è percorribile: con la strada di servizio e la vicinale
   chiude un anello (flag 8, `CASTLE_BOX` in `genera_dati.py`).
