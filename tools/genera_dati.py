@@ -149,6 +149,7 @@ PONTICELLO = ('Ponticello di San Michele', [(-59.9, -176.4), (-64.5, -179.8), (-
 # eccezione come le gocce del mezzo). Punto dove finiscono.
 GOCCE_PIEDI = [
     (-73.5, -186.0),              # oltre il ponticello di San Michele, sul promontorio delle mura
+    (-4.5, 107.6),                # blocco N2b: il footway OSM w1195336380 («Calata S. Lucia») finisce davanti alla chiesa di Santa Lucia
 ]
 # Raccordi a piedi attraverso un'area pedonale reale, tra due vertici del suo contorno (blocco N2, approvato il
 # 05/10/2026 come le aree pedonali della Villa): nome, punti, superficie (SUPERFICI).
@@ -2097,9 +2098,23 @@ def ruderi(old, elements):
 
 # Piani verificati: (fonte, [(id OSM o None, est, nord, piani), ...]). Il punto (est, nord) sta dentro la sagoma
 # dell'edificio (serve dove Overture non ha l'id OSM); l'id, se c'è, controlla che sia lo stesso edificio.
-# Piani contati come livelli (piano terra compreso). Le righe si aggiungono man mano che si guardano le vie.
+# Piani contati come livelli (piano terra compreso); un numero negativo vuol dire «almeno» (la cima della facciata
+# esce dall'inquadratura). Le righe si aggiungono man mano che si guardano le vie.
 LIVELLI = [
     # @@LIVELLI-INIZIO@@
+    ('Street View, Via San Giovanni Evangelista 11 e 16, Via Donato Cristiani 8, Via Santa Sofia 19 e 45 (apr–ott 2025)', [
+        (None, 74.5, 291.7, 3),
+        (None, 86.4, 262.8, -3),
+        (None, 69.7, 208.0, -3),
+        (None, 33.8, 203.7, -3),
+        (411142139, 44.4, 191.5, 3),
+        (411147101, 57.8, 184.0, -3),
+        (None, 116.4, 173.4, -3),
+        (None, 143.0, 181.9, -3),
+        (None, 174.4, 243.8, -3),
+        (None, 142.4, 269.3, 3),
+        (None, 154.5, 293.0, 2),
+    ]),
     ('Street View, Via Michelangelo Calderoni 24–28 (ott 2025) e foto a 360° «Chiesa Rupestre di San Basilio» (lug 2022)', [
         (411149194, 34.8, 97.1, 3),
         (411139348, 28.4, 88.6, 2),
@@ -2114,6 +2129,56 @@ LIVELLI = [
         (411139231, 91.7, 71.8, 3),
         (411139681, 128.7, 54.3, 3),
         (None, 167.6, 91.8, 4),
+    ]),
+    ("Street View, Via Civita 16, Piazza Benedetto XIII 13, Via Abbrazzo D'Ales 22 e 23, Via Matteotti 3 e 15 (mag–ott 2025; Via D'Ales 23: ago 2012)", [
+        (411147393, 122.9, 45.0, -3),
+        (411140001, 123.7, 30.5, -3),
+        (385177560, 2.7, -38.1, 3),
+        (385177548, 0.4, -29.8, -3),
+        (385174937, -5.6, -23.3, -3),
+        (385174945, 60.7, 4.0, 3),
+        (385174946, 76.5, 1.9, 3),
+        (385225790, 187.2, -27.0, -3),
+        (385225787, 162.2, -20.8, -3),
+        (385225788, 170.5, -20.6, -3),
+        (385225786, 198.7, -3.6, 4),
+        (385225782, 163.9, -3.6, -3),
+        (385225781, 148.3, 25.3, -3),
+        (None, 189.3, 85.5, -3),
+    ]),
+    ('Street View, Piazza Giuseppe Pellicciari 20 (ott 2025)', [
+        (385177554, 80.1, -89.1, 4),
+        (385225811, 103.4, -101.1, -3),
+        (385177553, 84.9, -114.6, 3),
+    ]),
+    ('Street View, Via Nunzio Ingannamorte 3 e 14, Via Matteotti 18, Via Angelo Raffaele Corrado 3 e 25 (mag–ott 2025)', [
+        (385225774, 181.4, -49.0, -3),
+        (385225796, 199.4, -56.2, 3),
+        (None, 236.9, -7.3, -4),
+        (385177578, 230.5, -41.7, -3),
+        (385177576, 213.9, -31.9, -3),
+        (385402905, 203.5, -35.3, -4),
+        (385225772, 194.9, -49.3, -3),
+        (385225791, 185.6, -39.8, -3),
+        (385402898, 193.6, 27.4, -3),
+        (385402883, 205.5, 31.3, -3),
+        (385402887, 205.2, 21.4, -3),
+        (385402901, 196.0, 15.8, -3),
+        (385225776, 218.9, 8.9, 3),
+        (385225777, 223.8, 9.5, 3),
+        (385225775, 214.3, 8.4, 3),
+    ]),
+    ('Street View, Via Fontana la Stella 31, Via Vittorio Veneto 18, Via Giacomo Lupi 24 (2008), Via San Nicola 16, Via Pasquale Cassese 6 (ott 2025)', [
+        (385402870, 268.9, 32.1, 2),
+        (385402881, 235.3, 31.0, -3),
+        (385402869, 258.6, 33.5, -3),
+        (385402864, 285.3, 37.7, -4),
+        (385402853, 277.6, 49.4, -3),
+        (None, 302.9, 87.1, -4),
+        (411148511, 306.3, 119.3, 4),
+        (None, 178.2, 167.7, -3),
+        (411148009, 273.9, 201.7, -3),
+        (None, 214.9, 317.2, -5),
     ]),
     # @@LIVELLI-FINE@@
 ]
@@ -2134,7 +2199,9 @@ def livelli(old):
                 sys.exit(f'LIVELLI: in ({e}, {n}) c\'è w{b.get("osm")} invece di w{osm} [{fonte}]')
             if b['kind'] != KIND['house']:
                 sys.exit(f'LIVELLI: in ({e}, {n}) l\'edificio non è una casa (tipo {b["kind"]}) [{fonte}]')
-            b['height'] = round(piani * FLOOR_H + 0.6, 1)
+            # piani negativi = «almeno»: la cima non si vede in foto; l'altezza si codifica come 100 m + il minimo
+            # e il diorama prende il più alto tra il minimo e la regola (Buildings.height)
+            b['height'] = round(abs(piani) * FLOOR_H + 0.6, 1) + (100 if piani < 0 else 0)
             done += 1
     print(f'  piani verificati: {done} case di {len(old)} edifici del centro storico')
 
