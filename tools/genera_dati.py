@@ -1191,7 +1191,7 @@ def build_network(data, buildings, bosco_osm):
 # ─────────────────────────────────────────────────────────────────────────────
 # 3. Edifici
 # ─────────────────────────────────────────────────────────────────────────────
-KIND = {'house': 0, 'church': 1, 'cathedral': 2, 'shed': 3, 'apartments': 4, 'public': 5, 'rurale': 6}
+KIND = {'house': 0, 'church': 1, 'cathedral': 2, 'shed': 3, 'apartments': 4, 'public': 5, 'rurale': 6, 'rudere': 7}
 
 
 def building_kind(cls):
@@ -2063,6 +2063,83 @@ def versante(old, bot):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Blocco N2b · ruderi urbani e piani veri delle case del centro storico
+#   Fino a N2b i `building=ruins` OSM sul lato della città restavano case di 1–5 piani, e i piani li decideva il
+#   diorama a caso. Ora i ruderi sono un tipo a sé (KIND['rudere']: muri crollati, senza tetto; `height` è l'altezza
+#   dei muri più alti rimasti in piedi) e i piani delle case vengono da una tabella con la fonte, rilevata su
+#   Street View (solo come riferimento visivo: la sagoma resta quella di OSM e Overture). Dove non c'è una riga
+#   resta la regola di Buildings.height in index.html.
+# ─────────────────────────────────────────────────────────────────────────────
+RUDERI_ALTEZZA = 4.5           # m: i muri più alti rimasti in piedi (due piani al massimo, come nella foto a 360° «Chiesa Rupestre di San Basilio», lug 2022)
+RUDERI_BASSI = 0.6             # m: nel cono di vista dalla ringhiera della Cattedrale verso il ponte i ruderi sono bassi
+VISTA_PONTE = ((-27.4, 19.0), (-24.0, 297.0), 12.0)   # belvedere OSM n3348673132, testata del ponte, mezzo angolo in gradi
+FLOOR_H = 3.3                  # m per piano (CONFIG.buildings.floorHeight), più 0,6 m di parapetto: come reliable_height()
+
+
+def ruderi(old, elements):
+    """Gli edifici del centro storico che OSM segna `building=ruins` (id nel record_id di Overture) diventano ruderi."""
+    ids = {el['id'] for el in elements if el.get('type') == 'way' and (el.get('tags') or {}).get('building') == 'ruins'}
+    (e0, n0), (e1, n1), half = VISTA_PONTE
+    az = math.atan2(e1 - e0, n1 - n0)
+    cono = Polygon([(e0, n0)] + [(e0 + math.sin(az + s * math.radians(half)) * 160, n0 + math.cos(az + s * math.radians(half)) * 160) for s in (-1, 1)])
+    count = low = 0
+    for b in old:
+        if b.get('osm') not in ids:
+            continue
+        b['kind'] = KIND['rudere']
+        b['name'] = None
+        bassi = cono.intersects(b['poly'])
+        b['height'] = RUDERI_BASSI if bassi else RUDERI_ALTEZZA
+        count += 1
+        low += bassi
+    print(f'  ruderi urbani: {count} (di cui {low} bassi nel cono di vista verso il ponte)')
+
+
+# Piani verificati: (fonte, [(id OSM o None, est, nord, piani), ...]). Il punto (est, nord) sta dentro la sagoma
+# dell'edificio (serve dove Overture non ha l'id OSM); l'id, se c'è, controlla che sia lo stesso edificio.
+# Piani contati come livelli (piano terra compreso). Le righe si aggiungono man mano che si guardano le vie.
+LIVELLI = [
+    # @@LIVELLI-INIZIO@@
+    ('Street View, Via Michelangelo Calderoni 24–28 (ott 2025) e foto a 360° «Chiesa Rupestre di San Basilio» (lug 2022)', [
+        (411149194, 34.8, 97.1, 3),
+        (411139348, 28.4, 88.6, 2),
+        (411139299, 40.1, 76.3, 2),
+        (411146635, 45.4, 82.6, 1),
+        (411139933, 60.2, 61.7, 3),
+    ]),
+    ('Street View, Via Michelangelo Calderoni 4–16 e 36 (ott 2025)', [
+        (None, 68.3, 106.7, 4),
+        (None, 19.5, 122.3, 3),
+        (None, 108.3, 96.5, 3),
+        (411139231, 91.7, 71.8, 3),
+        (411139681, 128.7, 54.3, 3),
+        (None, 167.6, 91.8, 4),
+    ]),
+    # @@LIVELLI-FINE@@
+]
+
+
+def livelli(old):
+    """Altezza delle case dai piani verificati (LIVELLI): 3,3 m per piano più 0,6 m di parapetto."""
+    tree = STRtree([b['poly'] for b in old])
+    done = 0
+    for fonte, righe in LIVELLI:
+        for osm, e, n, piani in righe:
+            p = Point(e, n)
+            hit = [i for i in tree.query(p) if old[i]['poly'].contains(p)]
+            if not hit:
+                sys.exit(f'LIVELLI: nessun edificio in ({e}, {n}) [{fonte}]')
+            b = old[hit[0]]
+            if osm and b.get('osm') != osm:
+                sys.exit(f'LIVELLI: in ({e}, {n}) c\'è w{b.get("osm")} invece di w{osm} [{fonte}]')
+            if b['kind'] != KIND['house']:
+                sys.exit(f'LIVELLI: in ({e}, {n}) l\'edificio non è una casa (tipo {b["kind"]}) [{fonte}]')
+            b['height'] = round(piani * FLOOR_H + 0.6, 1)
+            done += 1
+    print(f'  piani verificati: {done} case di {len(old)} edifici del centro storico')
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Blocco M1 · stadio «Stefano Vicino» e Fiera di San Giorgio
 #   Le tribune OSM (building=grandstand) diventavano palazzine con le finestre: restano come sagome
 #   (tipo «tribuna», per la camera e gli alberi) ma il diorama disegna campo, gradinate, tribuna
@@ -2655,12 +2732,15 @@ def main():
     feats = build_features(data)
     at, ground, light, _, _ = ground_model(dem_at, buildings)
     rims = extend_rims(feats['river'], at)
-    buildings, bot = botromagno(overpass_cached('rovine', ROVINE_OVERPASS), feats['river'], rims[1], buildings)
+    rovine = overpass_cached('rovine', ROVINE_OVERPASS)
+    buildings, bot = botromagno(rovine, feats['river'], rims[1], buildings)
     cover = land_cover(data, buildings, bosco_osm, bot['rock'])
     old = [b for b in buildings if inside(b['poly'].centroid.coords[0], Z0)]
     city = city_buildings([b for b in buildings if not inside(b['poly'].centroid.coords[0], Z0)], cover)
     print(f'  edifici: {len(old)} nel centro storico, {len(city)} nella città')
     versante(old, bot)
+    ruderi(old, rovine)
+    livelli(old)
     city, sport = stadio_fiera(overpass_cached('stadio_fiera', STADIO_FIERA_OVERPASS), city)
     name_places(old, city)
     extra = {
