@@ -79,6 +79,18 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
   al parcheggio dello stadio, Via Guardialto fino al Casino di Meninni, Via Bari fino alla Cola Cola.
 - **Sottopassi** (blocco M2): dove OSM segna una galleria sotto i binari la via scende in trincea
   (`Sottopassi`, rampe entro il 18%) e i binari, se serve, salgono di poco; il terreno si ritaglia.
+- **Eccezioni del Fondovito (blocco N2, piano approvato dal committente il 05/10/2026)**:
+  - le vie che nella realtà non si fanno in auto per i dislivelli sono **pedonali anche dove OSM segna
+    `residential`** (`PEDONALI_FONDOVITO`: la Calata Grotte San Michele), come Villa e Piazza della Repubblica;
+    regole: nessun vicolo cieco per il mezzo, il mezzo aspetta all'uscita (blocco G);
+  - un tratto a piedi può finire con la **goccia della figurina in uno slargo reale** (`GOCCE_PIEDI`), come le
+    gocce del mezzo: oggi sul promontorio oltre il ponticello di San Michele;
+  - il **raccordo di 18 m attraverso l'area pedonale di Piazza Pellicciari** (OSM w469108906, `RACCORDI_PIEDI`)
+    dai Gradoni San Giovanni Battista a Via Marconi, come le aree pedonali della Villa;
+  - il **ponticello di San Michele** (`PONTICELLO`) non è in OSM: si vede sul satellite e nella foto da drone
+    del 2019 in fondo alla terrazza, sopra la testa del canalone; si percorre a piedi, in piano, e sotto scende
+    il filo d'acqua (`Cascata`, richiesta del committente);
+  - Via Giacomo Leopardi, cieca, si disegna (decorativa, `DECO_Z0`) perché porta al cancello di Hortus.
 - Le vie cieche reali della città (`GEO.deco`) si disegnano ma **non si percorrono**. La
   sterrata reale del Castello Svevo è percorribile: con la strada di servizio e la vicinale
   chiude un anello (flag 8, `CASTLE_BOX` in `genera_dati.py`).
