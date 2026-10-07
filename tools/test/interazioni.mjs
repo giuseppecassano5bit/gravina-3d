@@ -313,6 +313,35 @@ check('poi su per la Calata San Giovanni Battista e i Gradoni', w.onFoot && w.na
 w = await guide('loop', null, 200);
 check('a Piazza Pellicciari il mezzo aspetta e si riparte', w.back && !w.onFoot && w.speed > 0.5, w.street);
 
+// Blocco N2b: da Via Calderoni a piedi per il passaggio fino alla chiesa di Santa Lucia (OSM w1195336380): si apre la
+// scheda, davanti alla chiesa la figurina gira nella goccia, poi si torna al mezzo.
+const sl = await page.evaluate(() => {
+  const N = window.gravina.network.edges, end = (e) => Math.hypot(e.b.e + 4.5, e.b.n - 107.6) < 3 || Math.hypot(e.a.e + 4.5, e.a.n - 107.6) < 3;
+  return { passo: N.find((e) => e.walk && !e.turn && end(e))?.id, goccia: N.find((e) => e.walk && e.turn && end(e))?.id };
+});
+await page.evaluate(() => { const g = window.gravina; g.placeAt(110, 74, [-1, 0.1], 0); g.rig.snap(g.driver); g.driver.decision = null; });
+w = await guide('to', sl.passo, 200);
+check('Santa Lucia: da Via Calderoni la figurina scende a piedi sul passaggio', !!sl.passo && w.onFoot && w.street === 'Passaggio pedonale', w.street);
+w = await guide('to', sl.goccia, 200);
+check('davanti alla chiesa la figurina gira nella goccia, con la scheda di Santa Lucia', !!sl.goccia && w.onFoot && w.cards.includes('Santa Lucia'), `${w.street} · schede ${w.cards.join(', ')}`);
+w = await guide('loop', null, 300);
+check('poi si torna per il passaggio e si ritrova il mezzo', w.back && !w.onFoot && w.speed > 0.5, w.street);
+
+// Blocco N2b: dalla ringhiera della Cattedrale (belvedere OSM n3348673132) il ponte si vede. Prima del blocco una casa a
+// tre piani (in OSM un rudere) lo nascondeva a 16 m: tre raggi dall'occhio (1,6 m) all'impalcato, nessun ostacolo.
+const vistaPonte = await page.evaluate(() => {
+  const g = window.gravina, T = g.THREE, meshes = [];
+  g.scene.traverse((o) => { if (o.isMesh && o.name.startsWith('riquadro')) meshes.push(o); });
+  const deck = new T.Box3().setFromObject(g.scene.getObjectByName('ponte-acquedotto')).max.y - 0.3, eye = new T.Vector3(-26.9, g.Terrain.heightAt(-26.9, 19) + 1.6, -19);
+  let hits = 0;
+  for (const dx of [-12, 0, 12]) {
+    const to = new T.Vector3(-24 + dx, deck, -297), dir = to.clone().sub(eye), dist = dir.length();
+    hits += new T.Raycaster(eye, dir.normalize(), 0.1, dist - 4).intersectObjects(meshes, false).length;
+  }
+  return { hits, deck: +deck.toFixed(1), tiles: meshes.length };
+});
+check('dalla ringhiera della Cattedrale il ponte si vede (nessuna casa sulla linea d’occhio)', vistaPonte.tiles > 20 && vistaPonte.hits === 0, `${vistaPonte.hits} ostacoli, impalcato a ${vistaPonte.deck} m, ${vistaPonte.tiles} riquadri`);
+
 // Vie cieche reali con la goccia (blocco M2): dall'elenco dei luoghi si arriva in auto e si riparte.
 for (const [name, at] of [['Casino di Meninni', [1572, -536]], ['Monumento alla Cola Cola', [1893, 102]], ['Fiera di San Giorgio', [-53, 948]]]) {
   await page.keyboard.press('p');
