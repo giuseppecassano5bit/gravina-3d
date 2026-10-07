@@ -1225,6 +1225,15 @@ def reliable_height(b):
     return b['height'] if src and src.get('dataset') == 'OpenStreetMap' else None
 
 
+def osm_id(b):
+    """Id della way OpenStreetMap da cui viene un edificio di Overture (il record_id dice «w411140601@1»), o None."""
+    for s in b.get('sources') or []:
+        r = s.get('record_id') or ''
+        if r.startswith('w') and r[1:].split('@')[0].isdigit():
+            return int(r[1:].split('@')[0])
+    return None
+
+
 def build_buildings(raw):
     area = CITY_ZONE
     out = []
@@ -1233,6 +1242,7 @@ def build_buildings(raw):
             continue
         g = local_geom(shape(b['geom'])).intersection(area)
         polys = [g] if g.geom_type == 'Polygon' else [p for p in getattr(g, 'geoms', []) if p.geom_type == 'Polygon']
+        osm = osm_id(b)
         for p in polys:
             if p.is_empty:
                 continue
@@ -1242,7 +1252,7 @@ def build_buildings(raw):
                 continue
             out.append({'poly': p, 'kind': building_kind(b.get('class')), 'cls': b.get('class'),
                         'name': (b.get('names') or {}).get('primary'), 'height': reliable_height(b),
-                        'level': b.get('level') or 0})
+                        'level': b.get('level') or 0, 'osm': osm})
     print(f'  edifici: {len(out)}')
     return out
 

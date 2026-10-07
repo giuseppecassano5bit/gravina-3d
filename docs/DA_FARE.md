@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 7 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3 e N1 della fase 3.4 uniti; N2 (Fondovito e San Michele delle Grotte) unito il 07/10/2026 (PR #20, approvazione anticipata del committente); prossimo N2b (prompt `riferimenti/PROMPT_BLOCCHI_N2_N6_SEGUITO.md`).
+Stato al 7 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3 e N1 della fase 3.4 uniti; N2 (Fondovito e San Michele delle Grotte) unito il 07/10/2026 (PR #20, approvazione anticipata del committente); N2b (livelli veri delle case, belvedere della Cattedrale, Santa Lucia) in corso dal 07/10/2026 (prompt `riferimenti/PROMPT_BLOCCHI_N2b_N6.md`).
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
@@ -165,6 +165,10 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N3 → N4 →
       livelli veri); i sentieri a tornanti coi muri bianchi nella macchia (non in OSM, solo da guardare).
 - [ ] Domande aperte di N2 (in attesa di risposta): la sagoma w411139697 è la chiesa di San Bartolomeo? San Demetrio
       (nessun edificio nei dati, Google a [−44, −180]) va aggiunta?
+- [ ] **N2b · livelli veri delle case, belvedere della Cattedrale e Santa Lucia** (`fase-3-4-n2b-livelli`, iniziato il
+      07/10/2026): ruderi OSM come ruderi, piani delle case dalle fonti (Street View, vista 3D di Google, DSM come
+      conferma) in una tabella della pipeline, il ponte visibile dalla ringhiera della Cattedrale, il sentiero a piedi
+      per Santa Lucia (OSM w1195336380). Piano in attesa di risposta del committente.
 - [ ] **N3 · facciate di chiese e scuole** (`fase-3-4-n3-facciate`, era N2): Santa Teresa, Santa Sofia,
       San Nicola, Addolorata e le chiese della città coi campanili, scuole più riconoscibili, dalle foto.
 - [ ] **N4 · Casino di Meninni e villette** (`fase-3-4-n4-meninni-villette`): il Casino com'è (rudere,
