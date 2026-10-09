@@ -186,7 +186,7 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N3 → N4 →
       (sm-05, sm-12); l'anello di Santa Lucia con «Via Santa Lucia» (w1512581502) se si trova un collegamento; le vie
       w1512581499–501 («Via Piaggio»), in Overture ma vie cieche del centro storico, non disegnate; la posizione della scheda
       «Santa Lucia» ([15, 109]) accanto alla chiesa OSM ([3,9; 123,4]).
-- [ ] **N3 · facciate di chiese e scuole** (`fase-3-4-n3-facciate`, era N2; **in corso dal 09/10/2026**, piano breve in attesa della risposta del committente): Santa Teresa, Santa Sofia,
+- [ ] **N3 · facciate di chiese e scuole** (`fase-3-4-n3-facciate`, era N2; **in corso dal 09/10/2026**, piano presentato nella PR #22 e approvato dal committente il 09/10/2026, foto mancanti da cercare su Street View e Google Earth): Santa Teresa, Santa Sofia,
       San Nicola, Addolorata e le chiese della città coi campanili, scuole più riconoscibili, dalle foto.
 - [ ] **N4 · Casino di Meninni e villette** (`fase-3-4-n4-meninni-villette`): il Casino com'è (rudere,
       muro di cinta, cancello, pini e cipressi, cappella), la strada fino all'ingresso e al parcheggio
