@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 7 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3 e N1 della fase 3.4 uniti; N2 (Fondovito e San Michele delle Grotte) unito il 07/10/2026 (PR #20, approvazione anticipata del committente); prossimo N2b (prompt `riferimenti/PROMPT_BLOCCHI_N2_N6_SEGUITO.md`).
+Stato al 7 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3 e N1 della fase 3.4 uniti; N2 (Fondovito e San Michele delle Grotte) unito il 07/10/2026 (PR #20, approvazione anticipata del committente); N2b (livelli veri delle case, belvedere della Cattedrale, Santa Lucia) finito il 07/10/2026, in attesa del feedback (PR #21; prompt `riferimenti/PROMPT_BLOCCHI_N2b_N6.md`).
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
@@ -165,6 +165,27 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N3 → N4 →
       livelli veri); i sentieri a tornanti coi muri bianchi nella macchia (non in OSM, solo da guardare).
 - [ ] Domande aperte di N2 (in attesa di risposta): la sagoma w411139697 è la chiesa di San Bartolomeo? San Demetrio
       (nessun edificio nei dati, Google a [−44, −180]) va aggiunta?
+- [x] **N2b · livelli veri delle case, belvedere della Cattedrale e Santa Lucia** (`fase-3-4-n2b-livelli`, PR #21, piano
+      approvato il 07/10/2026; in attesa del feedback del committente):
+      - **ruderi**: i 28 `building=ruins` OSM del centro storico (17 nel Piaggio, 7 nel Fondovico, 4 altrove) sono ruderi
+        urbani (`KIND['rudere']`, `Buildings.ruin`): muri di tufo crollati a pezzi, senza tetto, con le brecce; quelli nel cono
+        di 12° dalla ringhiera verso il ponte restano a 0,6 m;
+      - **la ringhiera della Cattedrale**: prima una casa a tre piani (un rudere in OSM) copriva il ponte a 16 m; ora si vede
+        (prova di tre raggi in `interazioni.mjs`, controllo negativo sul diorama di prima: 3 raggi su 3 bloccati);
+      - **piani veri**: tabella `LIVELLI` in `genera_dati.py` con 81 case rilevate su Street View (punto nella sagoma, id OSM,
+        piani, via e data; «almeno N» dove la cima non si vede, 49 case su 81). Rispetto alla regola di prima: 39 più alte,
+        39 uguali, 3 più basse; il Piaggio da 1 piano a 3–4 (Via Calderoni, San Basilio). Il Fondovico non ha Street View
+        (solo foto a 360° di notte o interne) e resta con la regola;
+      - **Santa Lucia a piedi**: footway OSM w1195336380 da Via Calderoni alla chiesa, goccia della figurina davanti alla porta,
+        scheda lungo il passaggio (`interazioni.mjs`: giù a piedi, scheda, goccia, ritorno al mezzo);
+      - misure: 371 KB compressi (+1), triangoli al massimo 334 700 su PC («alta») e 225 800 sul telefono («centro»), draw
+        call 59 e 38, «Pronto» 1,31 e 1,24 s, memoria JS 187 e 159 MB; `difetti.mjs` come prima, `simula` verde, `interazioni`
+        63 controlli verdi.
+- [ ] Da N2b, se il committente vuole: i piani delle altre ~280 case (98 oltre il centro, il Fondovico dalle foto a 360°
+      di giorno, il resto del centro) con altre uscite su Street View; le scale esterne e gli archi delle case del Fondovico
+      (sm-05, sm-12); l'anello di Santa Lucia con «Via Santa Lucia» (w1512581502) se si trova un collegamento; le vie
+      w1512581499–501 («Via Piaggio»), in Overture ma vie cieche del centro storico, non disegnate; la posizione della scheda
+      «Santa Lucia» ([15, 109]) accanto alla chiesa OSM ([3,9; 123,4]).
 - [ ] **N3 · facciate di chiese e scuole** (`fase-3-4-n3-facciate`, era N2): Santa Teresa, Santa Sofia,
       San Nicola, Addolorata e le chiese della città coi campanili, scuole più riconoscibili, dalle foto.
 - [ ] **N4 · Casino di Meninni e villette** (`fase-3-4-n4-meninni-villette`): il Casino com'è (rudere,
