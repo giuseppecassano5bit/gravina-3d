@@ -3489,7 +3489,8 @@ const Buildings = {
       }
 
       const old = this.isOld(ce, cn), rural = kind === 6;   // blocco M1: il versante di Botromagno, uno o due piani coi coppi
-      const wall = kind === 1 ? stone : rural ? facadesNew[[0, 1, 3][Math.floor(seed * 3)]] : (old ? facadesOld : facadesNew)[Math.floor(seed * 7) % (old ? 7 : 6)];
+      const wall = kind === 1 ? stone : SCUOLE[name]?.muro ? new THREE.Color(SCUOLE[name].muro)   // blocco N3: San Giovanni Bosco è rosa
+        : rural ? facadesNew[[0, 1, 3][Math.floor(seed * 3)]] : (old ? facadesOld : facadesNew)[Math.floor(seed * 7) % (old ? 7 : 6)];
       const rect = Plane.orientedRect(outer);
       // Rioni sul pendio: la casa scende a gradoni, a strisce parallele al ciglio, ognuna
       // alta `height` sopra il suo terreno; i tetti piani fanno da terrazza a quelle sotto.
@@ -4579,7 +4580,7 @@ const Scenery = {
  * ═══════════════════════════════════════════════════════════════════════ */
 
 /** Tipi di superficie disegnati dallo shader della città (attributo aInfo.x). */
-const SURF = { PLAIN: 0, STREET: 1, ROAD: 2, DIRT: 3, FACADE: 4, SHED: 5, RAIL: 6, SKIRT: 7, OLD: 8, PAVE: 9, ASPH: 10, COBBLE: 11, EARTH: 12, ROMBI: 13, WIN: 14, CONCI: 15 };
+const SURF = { PLAIN: 0, STREET: 1, ROAD: 2, DIRT: 3, FACADE: 4, SHED: 5, RAIL: 6, SKIRT: 7, OLD: 8, PAVE: 9, ASPH: 10, COBBLE: 11, EARTH: 12, ROMBI: 13, WIN: 14, CONCI: 15, SCUOLA: 16 };
 /** Blocco N1: tipo di superficie dello shader per il codice OSM delle vie del centro storico (edge.surface). */
 const PAVING = [SURF.PAVE, SURF.PAVE, SURF.ASPH, SURF.COBBLE, SURF.EARTH, SURF.ROMBI];
 
@@ -4601,7 +4602,9 @@ const PAVING = [SURF.PAVE, SURF.PAVE, SURF.ASPH, SURF.COBBLE, SURF.EARTH, SURF.R
  *    (1 porta, 2 ad arco, 4 persiane aperte, 8 porta-finestra del balcone, più 16 × il seme): cornice e
  *    davanzale di pietra, persiane a stecche, portoni a riquadri; fuori dall'arco il pannello sparisce;
  *  - conci di pietra delle facciate delle chiese (15, blocco N3): a = metri lungo il muro, b = altezza e c = larghezza
- *    del concio; file sfalsate coi giunti, i conci alti più di 0,45 m sono a bugnato (giunti larghi e scuri).
+ *    del concio; file sfalsate coi giunti, i conci alti più di 0,45 m sono a bugnato (giunti larghi e scuri);
+ *  - scuole (16, blocco N3): come le facciate (4), ma c = metri lungo il perimetro + 3100 × il codice delle finestre a
+ *    nastro (bit: 1 montanti verdi, 2 a gruppi di tre luci, 4 tapparelle mezze abbassate), coi davanzali chiari.
  * Oltre una certa distanza i motivi si sfumano nel colore medio (niente sfarfallio).
  */
 function cityMaterial() {
@@ -4726,6 +4729,22 @@ function cityMaterial() {
           float rr = length(vec2(along - a0, lat));
           if (rr < 0.34) c = mix(c, rr > 0.29 ? ${v3('#3b3835')} : ${v3('#5a5651')} * (0.9 + 0.2 * step(0.5, fract((along - a0) * 6.0))), fade);   // tombino
         }
+      } else if (cityKind > 15.5) {
+        // Scuole (blocco N3): finestre a nastro per piano (3,4 m), vetri coi montanti ogni 1,25 m e il davanzale chiaro.
+        float k = floor(vInfo.w / 3100.0 + 0.0005), x = vInfo.w - k * 3100.0, h = vWPos.y - vInfo.y, below = vInfo.z - vWPos.y;
+        float green = mod(k, 2.0), groups = mod(floor(k / 2.0), 2.0), shut = mod(floor(k / 4.0), 2.0);
+        float fy = h / 3.4, fr = fract(fy), px = x / 1.25, fx = fract(px);
+        float lod = 1.0 - smoothstep(0.3, 0.7, max(fwidth(px), fwidth(fy)));
+        float pier = groups * step(2.5, mod(floor(px), 4.0));
+        if (below > 0.8 && h > 0.5) {
+          float band = step(0.33, fr) * step(fr, 0.72) * (1.0 - pier), sill = step(0.29, fr) * step(fr, 0.33) * (1.0 - pier);
+          float mull = 1.0 - step(0.05, fx) * step(fx, 0.95) * step(0.36, fr) * step(fr, 0.69);
+          vec3 glass = ${v3('#4d5b68')} * (0.85 + 0.3 * cityHash(vec2(floor(px), floor(fy))));
+          if (shut > 0.5 && fr > 0.58) glass = ${v3('#cbc8be')} * (1.0 - 0.12 * step(0.5, fract((fr - 0.58) * 40.0)));   // tapparelle
+          c = mix(c, mix(glass, green > 0.5 ? ${v3('#4f7f4b')} : ${v3('#3a3d41')}, mull), band * lod);
+          c = mix(c, c * 1.12 + 0.03, sill * lod);
+        }
+        c = mix(c * 0.92, c, lod);
       } else if (cityKind > 14.5) {
         // Conci squadrati delle facciate delle chiese (blocco N3): file sfalsate coi giunti, un po' di varietà per concio;
         // i conci alti (bugnato) hanno i giunti più larghi e più scuri.
@@ -5649,16 +5668,19 @@ const Tiles = {
       ground = [keep.map((i) => ground[0][i])];
     }
     // Blocco E: scuole in mattoni e intonaco ocra, il Casino di Meninni in pietra con il tetto a padiglione, le case rosa.
-    const church = kind === 1, pav = kind === 10, shed = kind === 6 || pav, canopy = kind === 3, school = kind === 8, villa = kind === 9;
-    const wall = b.facade?.muro ? (b.facade._muro ??= new THREE.Color(b.facade.muro))
+    // blocco N3: le scuole della tabella SCUOLE col loro colore e le finestre a nastro; quelle al piano terra di un palazzo
+    // (Street View) restano palazzi, con l'etichetta
+    const sc = kind === 8 ? SCUOLE[b.name] : null;
+    const church = kind === 1, pav = kind === 10, shed = kind === 6 || pav, canopy = kind === 3, school = kind === 8 && !sc?.palazzo, villa = kind === 9;
+    const wall = b.facade?.muro ? (b.facade._muro ??= new THREE.Color(b.facade.muro)) : sc?.muro ? (sc._muro ??= new THREE.Color(sc.muro))
       : pav ? (pal.pav ??= new THREE.Color('#d9cbaa')) : church || villa ? pal.stone : shed ? pal.shed : canopy ? pal.canopy : school ? pal.school[Math.floor(seed * 2)]
       : b.name === 'Case rosa' ? pal.rosa : pal.walls[Math.floor(seed * 6) % 6];
     const roof = shed ? pal.shedRoof : church ? pal.stone : school ? pal.schoolRoof : pal.roofs[Math.floor(seed * 11) % 4];
-    const surf = church || canopy ? SURF.PLAIN : shed ? SURF.SHED : b.height >= 6 ? SURF.FACADE : SURF.PLAIN;
+    const surf = church || canopy ? SURF.PLAIN : shed ? SURF.SHED : school && sc?.finestre !== undefined ? SURF.SCUOLA : b.height >= 6 ? SURF.FACADE : SURF.PLAIN;
     const c = new THREE.Color();
     rings.forEach((ring, r) => {
       const ccw = Plane.signedArea(ring) > 0;
-      let u = Math.floor(seed * 31) * 3100 + r * 310;            // metri lungo il perimetro: campate da 3,1 m
+      let u = (surf === SURF.SCUOLA ? sc.finestre : Math.floor(seed * 31)) * 3100 + r * 310;   // metri lungo il perimetro: campate da 3,1 m
       for (let i = 0; i < ring.length; i++) {
         const P = ring[i], Q = ring[(i + 1) % ring.length], gp = ground[r][i], gq = ground[r][(i + 1) % ring.length];
         const len = Math.hypot(Q[0] - P[0], Q[1] - P[1]);
@@ -6377,6 +6399,29 @@ const FACCIATE = {
   },
 };
 
+/**
+ * SCUOLE (blocco N3): una riga per le scuole viste su Street View (fonti nel README). muro: il colore; finestre: il codice
+ * delle finestre a nastro dello shader (bit: 1 montanti verdi, 2 a gruppi di tre luci, 4 tapparelle; senza il campo le
+ * finestre delle palazzine); recinto: 'sbarre' (alta, grigia), 'muro' (muretto con la ringhiera), 'azzurro', se no la
+ * recinzione verde; scale: scale antincendio di acciaio a zig-zag (-1 a sinistra, 1 a destra della fronte); tettoia:
+ * 'curva' sull'ingresso; vecchia: nel centro storico (edificio «pubblico» nei dati); palazzo: la scuola sta al piano terra
+ * di un palazzo di abitazioni, resta solo l'etichetta (niente campo, pennoni e recinzione).
+ */
+const SCUOLE = {
+  'Liceo scientifico G. Tarantino': { muro: '#e2ded5', finestre: 2, recinto: 'sbarre' },                  // SV mag 2022
+  'ITT Bachelet · IPSIA G. Galilei': { muro: '#d6d4cf', finestre: 0, scale: [-1, 1] },                    // SV apr 2025
+  'Scuola media Don E. Montemurro': { muro: '#ece7d9', finestre: 3, recinto: 'muro' },                    // SV mag 2025
+  'Scuola primaria Don Saverio Valerio': { muro: '#c8794c', finestre: 2, tettoia: 'curva', scale: [-1] },  // SV ott 2025
+  'Scuola secondaria N. Ingannamorte': { muro: '#ddd6c6', finestre: 4, recinto: 'muro' },                 // SV mag 2025
+  'Circolo didattico Savio-Fiore': { muro: '#ede6d5', recinto: 'azzurro' },                               // SV ott 2025, da lontano
+  'Scuola primaria Michele Soranno': { muro: '#b65c40' },                                                  // SV ott 2025, da lontano
+  'Scuola secondaria Benedetto XIII': { vecchia: true },                                                   // SV mag 2025
+  'Circolo didattico San Giovanni Bosco': { vecchia: true, muro: '#e3b5a7' },                              // SV mag 2025, intonaco rosa
+  'Liceo linguistico G. Tarantino': { palazzo: true },                                                     // SV mag 2022, Via Mameli
+  'Edificio scolastico S.G. Bosco': { palazzo: true },                                                     // SV ott 2025, Via Guardialto
+  "Scuola dell'infanzia Alla Fine dell'Arcobaleno": { palazzo: true },                                     // Via Vespucci
+};
+
 const Details = {
   build(network, landmarks, tops) {
     this.net = network;
@@ -6416,6 +6461,12 @@ const Details = {
         for (const s of [-1, 1]) f.add(new THREE.LatheGeometry([[0, 0], [0.3, 0], [0.22, 0.2], [0.38, 0.55], [0.2, 0.9], [0.26, 1.0], [0, 1.1]].map(([a, b]) => new THREE.Vector2(a, b)), 6), this.col.light, s * (front.len / 2 - 0.5), top, 0.1);
       }
       this.keepOut.push({ M: f.M, n: f.n, half: purgatorio ? 3.4 : big ? 2.6 : 2.2, top: f.ground + (purgatorio ? 9.6 : big ? 10.5 : 8.5) });
+    });
+
+    // Blocco N3: Benedetto XIII e San Giovanni Bosco (edifici «pubblici» nei dati del centro storico) sono scuole
+    GEO.buildings.forEach(([kind, nameIdx, , rings]) => {
+      const name = DATA.name(nameIdx);
+      if (kind === 5 && SCUOLE[name]?.vecchia) this.school({ rings: [DATA.pairs(rings[0])], name });
     });
 
     // Chiesa del Gesù (nei dati è una casa): facciata bianca con il timpano e tre oculi (foto su Commons)
@@ -6793,18 +6844,33 @@ const Details = {
     return lo.slice(0, -1).concat(up.slice(0, -1));
   },
 
-  /** SCUOLA: pennoni con le bandiere e pensilina all'ingresso, cortile col campo da gioco, recinzione verde. */
+  /**
+   * SCUOLA: ingresso coi gradini, pensilina (o la tettoia curva) e pennoni con le bandiere, cortile col campo da gioco,
+   * recinzione; dalla tabella SCUOLE (blocco N3) le scale antincendio e il tipo di recinzione. Le scuole al piano terra
+   * di un palazzo (Street View) hanno solo l'etichetta.
+   */
   school(b) {
+    const sc = SCUOLE[b.name] ?? {};
+    if (sc.palazzo) return;
     const ring = b.rings[0], front = this.frontEdge(ring, 6);
     if (!front) return;
     const tb = this.near(front.M), f = this.frame(front, tb), y = f.ground;
     const concrete = new THREE.Color('#d8d3c8'), green = new THREE.Color('#3e5c48'), white = new THREE.Color('#f2efe8');
     const flags = [['#2e8b4a', '#f4f1ea', '#c8363a'], ['#1d4f9c', '#1d4f9c', '#1d4f9c']];   // Italia, Europa
-    f.box(1.9, 2.5, 0.08, this.col.door, 0, y, 0.05);                                   // ingresso
     const onWall = (x, z) => { const t = [-front.n[1], front.n[0]]; return [front.M[0] + t[0] * x + front.n[0] * z, front.M[1] + t[1] * x + front.n[1] * z]; };
+    // ingresso vetrato e, dove c'è posto fuori dalla via, due gradini (blocco N3)
+    const steps = front.clear > 1.6 && [-1.3, 1.3].every((x) => this.free(...onWall(x, 1.0), 0.3)) ? 0.34 : 0;
+    f.box(1.9, 2.5, 0.08, new THREE.Color('#2f3438'), 0, y + steps, 0.05);
+    for (const s of [-1, 1]) f.box(0.12, 2.6, 0.14, this.col.iron, s * 1.0, y + steps, 0.08);
+    if (steps) for (let k = 0; k < 2; k++) f.box(2.8, 0.17 * (k + 1) + 0.3, 1.0 - k * 0.32, concrete, 0, y - 0.3, (1.0 - k * 0.32) / 2 + 0.02);
+    for (const side of sc.scale ?? []) this._scalaAntincendio(f, side * (front.len / 2 - 2.6), y, b.top ?? y + 7.6, onWall);
     const pw = Math.min(5, front.len - 1);
     if (front.clear > 2.4 && [[-pw / 2, 1.7], [pw / 2, 1.7]].every(([x, z]) => this.free(...onWall(x, z), 0.3))) {
-      f.box(pw, 0.22, 1.6, concrete, 0, y + 3, 0.8);                                  // pensilina
+      if (sc.tettoia === 'curva') {                                                     // tettoia curva sull'ingresso (Valerio)
+        const arc = new THREE.Shape();
+        arc.absarc(0, 0, 1.9, 0.25, Math.PI - 0.25, false); arc.absarc(0, 0, 1.75, Math.PI - 0.25, 0.25, true);
+        f.add(new THREE.ExtrudeGeometry(arc, { depth: 1.8, bevelEnabled: false, curveSegments: 8 }), new THREE.Color('#5d7d8c'), 0, y + 1.7 + steps, 0.0);
+      } else f.box(pw, 0.22, 1.6, concrete, 0, y + 3 + steps, 0.8);                    // pensilina
       flags.forEach((cols, k) => {
         const x = (k ? 1 : -1) * Math.min(front.len / 2 - 0.6, 4.2), z = Math.min(2.2, front.clear - 0.9);
         if (!this.free(...onWall(x, z), 0.4) || !this.free(...onWall(x + 1.4, z), 0.4)) return;
@@ -6843,7 +6909,30 @@ const Details = {
     const h = this.hull(lot), cx = h.reduce((a, p) => a + p[0], 0) / h.length, cn = h.reduce((a, p) => a + p[1], 0) / h.length;
     const out = h.map(([e, n]) => { const d = Math.hypot(e - cx, n - cn) || 1; return [e + ((e - cx) / d) * 3, n + ((n - cn) / d) * 3]; });
     const gate = [front.M[0] + front.n[0] * 3, front.M[1] + front.n[1] * 3];
-    out.forEach((A, i) => this.fence(tb, A, out[(i + 1) % out.length], 1.7, green, { gate }));
+    const R = sc.recinto, iron = this.col.iron;
+    out.forEach((A, i) => {
+      const B = out[(i + 1) % out.length];
+      if (R === 'muro') {                                                                // muretto con la ringhiera (Montemurro, Ingannamorte)
+        this.fence(tb, A, B, 1.1, new THREE.Color('#cfc6b4'), { gate });
+        this.fence(tb, A, B, 2.0, iron, { gate, rail: true, thin: true, step: 1.25 });
+      } else if (R === 'sbarre') this.fence(tb, A, B, 2.3, new THREE.Color('#8e9195'), { gate });   // cancellata alta (Liceo Tarantino)
+      else this.fence(tb, A, B, R === 'azzurro' ? 1.5 : 1.7, R === 'azzurro' ? new THREE.Color('#86b4d2') : green, { gate });
+    });
+  },
+
+  /** Scala antincendio di acciaio a zig-zag sulla fronte di una scuola: rampe tra i piani, pianerottoli, ringhiera e montanti. */
+  _scalaAntincendio(f, x0, y, top, onWall) {
+    if (![-1.8, 0, 1.8].every((dx) => this.free(...onWall(x0 + dx, 1.4), 0.3))) return;
+    const steel = new THREE.Color('#9aa0a4'), H = 3.4, floors = Math.max(1, Math.floor((top - y - 1) / H));
+    for (const dx of [-1.8, 1.8]) for (const z of [0.25, 1.35]) f.box(0.1, floors * H + 1.1, 0.1, steel, x0 + dx, y, z);   // montanti
+    for (let k = 1; k <= floors; k++) {
+      const yl = y + k * H, dir = k % 2 ? 1 : -1;
+      f.box(3.8, 0.1, 1.2, steel, x0, yl, 0.8);                                         // pianerottolo
+      f.box(3.8, 0.05, 0.05, steel, x0, yl + 1.05, 1.4);                                // ringhiera
+      const L = Math.hypot(3.2, H), ang = Math.atan2(H, 3.2) * dir;
+      f.box(L, 0.08, 1.0, steel, x0, yl - H / 2 - 0.04, 0.8, ang);                    // rampa
+      f.box(L, 0.05, 0.05, steel, x0, yl - H / 2 + 0.95, 1.35, ang);                  // corrimano
+    }
   },
 
   /** CHIESA DELLA CITTÀ: portale con l'oculo sul lato che guarda la via e la croce in cima alla facciata. */
