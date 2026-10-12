@@ -1875,10 +1875,37 @@ SCHOOLS = [
 CHURCHES = [
     ('Chiesa Gesù Buon Pastore', (1055, -176)),                 # OSM w328013129 (edificio senza nome)
     ('SS. Crocifisso e San Sebastiano', (442, -571)),           # OSM r6148330 e Overture
-    ('Santuario Madonna delle Grazie', (658, 826)),             # Overture, Via Madonna della Grazia
-    ('Santi Pietro e Paolo', (1080, 1140)),                     # Overture (Via Luigi Longo), edificio OSM w411139942
+    # Blocco N3: il punto di Overture (658, 826) cadeva su un altro edificio (OSM r6148494); la chiesa è OSM w411139821
+    # su Via Madonna della Grazia (satellite, Street View maggio 2025: la facciata con l'aquila accanto al convento)
+    ('Santuario Madonna delle Grazie', (525, 907)),
+    # Blocco N3: il punto di Overture (1080, 1140, Via Luigi Longo) cadeva sulla pensilina w411146608 (74 m²): il nome va
+    # sulla chiesa grande col tetto a cono, OSM w411139942 (Street View, aprile 2025)
+    ('Santi Pietro e Paolo', (1056, 1142)),
+    ('Chiesa Dello Spirito Santo', (1734, 151)),                # blocco N3: OSM w1152762610 (building=yes), era una casa
 ]
 MENINNI = ('Casino di Meninni', (1572, -536))                   # sul Guardialto, sopra la SP201 (Via Guardialto)
+
+# Blocco N3: chiese la cui navata vera in OSM è l'area del luogo di culto (senza `building`) accanto alla sagoma
+# dell'edificio. San Nicola: la sagoma w411139790 è solo la parte a nord; la navata è l'area w385174930 («Chiesa San
+# Nicola»), e la facciata del 1704 guarda la piazzetta in fondo a Via Cassese (Street View, ottobre 2025). Senza
+# l'unione nel diorama c'era un corridoio vuoto al posto della navata.
+CHIESE_AREE = {411139790: 385174930}
+CHIESE_AREE_OVERPASS = '[out:json][timeout:60];(way(385174930););out tags geom;'
+
+
+def chiese_aree(buildings):
+    """Unisce alle sagome delle chiese l'area OSM del luogo di culto che ne è la navata (CHIESE_AREE)."""
+    aree = {el['id']: Polygon([to_local(g['lon'], g['lat']) for g in el['geometry']]).buffer(0)
+            for el in overpass_cached('chiese_aree', CHIESE_AREE_OVERPASS) if el.get('type') == 'way' and el.get('geometry')}
+    for b in buildings:
+        area = aree.get(CHIESE_AREE.get(b.get('osm')))
+        if area is None:
+            continue
+        u = b['poly'].union(area.buffer(0.05)).buffer(-0.05)
+        if u.geom_type == 'Polygon':
+            b['poly'] = u.simplify(0.3, preserve_topology=True)
+            print(f"  chiesa w{b['osm']} unita all'area del luogo di culto: {b['poly'].area:.0f} m²")
+    return buildings
 CASE_ROSA = 'Case rosa'
 # Tra Via Guardialto (SP201) e Via Guardialto Piccolo, dove si separano (indicazione del committente)
 CASE_ROSA_ZONE = [(1142, -177), (1301, -295), (1470, -500), (1360, -250), (1323, -193), (1146, -155)]
@@ -2809,6 +2836,7 @@ def main():
         # la relazione OSM building=castle (r6148325) arriva da Overture come un edificio anonimo con la stessa sagoma
         buildings = [b for b in buildings if b['poly'].intersection(castle).area < 0.3 * b['poly'].area]
         buildings.append({'poly': castle, 'kind': CITY_KIND['castle'], 'cls': 'castle', 'name': 'Castello Svevo', 'height': 8.0, 'level': 0})
+    buildings = chiese_aree(buildings)          # blocco N3: la navata di San Nicola
     # Blocco L: edifici reali attorno all'area Quercus e al vivaio (al posto della capanna generica)
     bosco_osm = overpass_bosco()
     buildings += bosco_buildings(bosco_osm)
