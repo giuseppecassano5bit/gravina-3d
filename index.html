@@ -3458,7 +3458,10 @@ const Buildings = {
       for (const [e, n] of outer) { const g = Terrain.heightAt(e, n); gMin = Math.min(gMin, g); gMax = Math.max(gMax, g); }
       const base = gMin - 0.8;
       const height = this.height(kind, h, area, ce, cn, seed, name);
-      const top = gMax + height;
+      // blocco N3: le chiese con la facciata rifatta dalle foto hanno i muri alti come nella foto, sopra la strada
+      const facade = kind === 1 ? FACCIATE.of(outer, name) : null;
+      const top = facade ? FACCIATE.street(facade) + facade.alto : gMax + height;
+      if (facade) facade.top = top;
       tops.set(name ?? `#${index}`, { top, at: [ce, cn] });
 
       // Chiese rupestri: niente blocco estruso, ma il fronte scavato nella roccia.
@@ -3495,7 +3498,7 @@ const Buildings = {
       const steep = kind === 0 && !holes.length && rect.fill > 0.7;
       const strips = steep && gMax - gMin > 1.2 && this.inRioni(ce, cn) ? this.stepStrips(outer, ce, cn, height)
         : steep && gMax - gMin > 2.5 ? this.stepStrips(outer, ce, cn, height, this.downhill(outer, outer.map(([e, n]) => Terrain.heightAt(e, n))), gMax - gMin) : null;
-      const tiled = !strips && ((kind === 1 && !holes.length) || (rural && !holes.length) || (kind === 0 && !holes.length && rect.fill > 0.86 && area < 280 && seed < (old ? 0.3 : 0.15)));
+      const tiled = !strips && ((kind === 1 && !holes.length && facade?.tetto !== 'piano') || (rural && !holes.length) || (kind === 0 && !holes.length && rect.fill > 0.86 && area < 280 && seed < (old ? 0.3 : 0.15)));
       const roof = tiled ? roofTiles[Math.floor(seed * 13) % 4] : roofFlat[Math.floor(seed * 11) % 4];
       const rise = tiled ? Math.min(rural ? 2.4 : 4.5, rect.hw * (kind === 1 ? 0.7 : rural ? 0.45 : 0.55)) : 0;
       /** Quota del tetto nel punto (e, n): con i gradoni dipende dalla striscia. */
@@ -3520,10 +3523,10 @@ const Buildings = {
         }
       }
       if (name === 'Chiesa San Francesco') this.sanFrancescoTower(tb, outer);   // il campanile vero, niente vela
-      else if (kind === 1) this.bellGable(tb, rect, top + rise, stone, outer);
+      else if (kind === 1 && !facade) this.bellGable(tb, rect, top + rise, stone, outer);   // blocco N3: la vela vera la disegna Details.facciata
 
       // Dettagli sui tetti piani: torrini delle scale, cisterne, comignoli.
-      if (!tiled && kind !== 3 && area > 45) {
+      if (!tiled && kind !== 3 && area > 45 && !facade) {
         const count = area > 300 ? 3 : 1 + (seed > 0.5 ? 1 : 0);
         for (let k = 0; k < count; k++) {
           const a = (rnd() - 0.5) * rect.hl * 1.2, b = (rnd() - 0.5) * rect.hw * 1.2;
@@ -4576,7 +4579,7 @@ const Scenery = {
  * ═══════════════════════════════════════════════════════════════════════ */
 
 /** Tipi di superficie disegnati dallo shader della città (attributo aInfo.x). */
-const SURF = { PLAIN: 0, STREET: 1, ROAD: 2, DIRT: 3, FACADE: 4, SHED: 5, RAIL: 6, SKIRT: 7, OLD: 8, PAVE: 9, ASPH: 10, COBBLE: 11, EARTH: 12, ROMBI: 13, WIN: 14 };
+const SURF = { PLAIN: 0, STREET: 1, ROAD: 2, DIRT: 3, FACADE: 4, SHED: 5, RAIL: 6, SKIRT: 7, OLD: 8, PAVE: 9, ASPH: 10, COBBLE: 11, EARTH: 12, ROMBI: 13, WIN: 14, CONCI: 15 };
 /** Blocco N1: tipo di superficie dello shader per il codice OSM delle vie del centro storico (edge.surface). */
 const PAVING = [SURF.PAVE, SURF.PAVE, SURF.ASPH, SURF.COBBLE, SURF.EARTH, SURF.ROMBI];
 
@@ -4596,7 +4599,9 @@ const PAVING = [SURF.PAVE, SURF.PAVE, SURF.ASPH, SURF.COBBLE, SURF.EARTH, SURF.R
  *    larghezza (negativa: piazze e dischi, il disegno segue le coordinate del mondo), c = metri percorsi;
  *  - finestre e porte del centro storico (14, blocco N1): a, b = metri dal centro dell'apertura, c = codice
  *    (1 porta, 2 ad arco, 4 persiane aperte, 8 porta-finestra del balcone, più 16 × il seme): cornice e
- *    davanzale di pietra, persiane a stecche, portoni a riquadri; fuori dall'arco il pannello sparisce.
+ *    davanzale di pietra, persiane a stecche, portoni a riquadri; fuori dall'arco il pannello sparisce;
+ *  - conci di pietra delle facciate delle chiese (15, blocco N3): a = metri lungo il muro, b = altezza e c = larghezza
+ *    del concio; file sfalsate coi giunti, i conci alti più di 0,45 m sono a bugnato (giunti larghi e scuri).
  * Oltre una certa distanza i motivi si sfumano nel colore medio (niente sfarfallio).
  */
 function cityMaterial() {
@@ -4721,6 +4726,16 @@ function cityMaterial() {
           float rr = length(vec2(along - a0, lat));
           if (rr < 0.34) c = mix(c, rr > 0.29 ? ${v3('#3b3835')} : ${v3('#5a5651')} * (0.9 + 0.2 * step(0.5, fract((along - a0) * 6.0))), fade);   // tombino
         }
+      } else if (cityKind > 14.5) {
+        // Conci squadrati delle facciate delle chiese (blocco N3): file sfalsate coi giunti, un po' di varietà per concio;
+        // i conci alti (bugnato) hanno i giunti più larghi e più scuri.
+        float x = vInfo.y, bh = vInfo.z, bw = vInfo.w, rus = step(0.45, bh);
+        float row = floor(vWPos.y / bh), off = mod(row, 2.0) * 0.5, u = x / bw + off;
+        float bx = fract(u), by = fract(vWPos.y / bh), jw = (0.022 + 0.03 * rus) / bw, jh = (0.022 + 0.03 * rus) / bh;
+        float joint = 1.0 - step(jw, bx) * step(bx, 1.0 - jw) * step(jh, by) * step(by, 1.0 - jh);
+        float lod = 1.0 - smoothstep(0.2, 0.5, max(fwidth(u), fwidth(vWPos.y / bh)));
+        vec3 block = c * (0.93 + 0.1 * cityHash(vec2(floor(u), row)));
+        c = mix(c, mix(block, c * (0.85 - 0.17 * rus), joint), lod);
       } else if (cityKind > 13.5) {
         // Finestre e porte del centro storico (blocco N1): cornice di pietra, davanzale, persiane o portone.
         float x = vInfo.y, y = vInfo.z, code = vInfo.w, seed = floor(code / 16.0) / 64.0;
@@ -6142,6 +6157,83 @@ const HORTUS = {
   trees: [[-41, -231], [-35, -228], [-30, -235], [-38, -240], [-33, -242.5]],
 };
 
+/**
+ * FACCIATE DELLE CHIESE (blocco N3): una riga per ogni chiesa rifatta dalle foto (Street View e Wikimedia Commons,
+ * fonti nel README); ogni elemento si vede in una foto. Misure in metri: x lungo la facciata verso la destra di chi la
+ * guarda (0 al centro), y sopra la strada davanti al centro della facciata, z verso l'esterno (0 = filo del muro).
+ *  - dentro: un punto dentro la sagoma (centro storico: gli indici di GEO cambiano a ogni rigenerazione), oppure
+ *    nome: il nome dell'edificio (città);
+ *  - a, b: i capi della facciata sul muro (vertici OSM), a sinistra e a destra di chi la guarda;
+ *  - alto: quota dei muri della chiesa sopra la strada; tetto: 'capanna' (il frontone sta sulla facciata) o 'piano';
+ *  - colore: la pietra o l'intonaco della facciata; soglia: quota della porta (in cima ai gradini);
+ *  - gli altri campi sono gli elementi della foto (lesene [x, larghezza], portale, oculi [x, y, raggio, anelli,
+ *    grata], finestre, gradini, vela, stemma, cornicione, attico…), disegnati da Details.facciata.
+ * Le parti a rilievo stanno nello strato dei dettagli dei riquadri (solo da vicino); il colore della facciata, il
+ * frontone e il campanile a vela nello strato degli edifici (si vedono anche da lontano).
+ */
+const FACCIATE = {
+  list: [
+    {
+      // SANTA SOFIA (OSM w411139346): su Via Santa Sofia, verso nord-ovest (Street View, aprile 2025, «25 Via Santa
+      // Sofia»; foto su Commons). Facciata a capanna di pietra chiara con le lesene, il grande oculo a anelli, il
+      // portale col frontone curvo e il cartiglio, il portone di legno, due oculi con la grata, i gradini con la
+      // balaustra, il campanile a vela a due luci dietro a destra, il pluviale.
+      id: 'santasofia', dentro: [125, 252], a: [119.5, 259.7], b: [113.7, 251.9], alto: 10.6, tetto: 'capanna',
+      colore: '#ece2cb', conci: [0.62, 0.32], soglia: 0.64,
+      lesene: [[-4.45, 0.8], [-2.05, 0.6], [2.05, 0.6], [4.45, 0.8]],
+      portale: { w: 1.8, h: 3.9, tipo: 'cartiglio' },
+      oculi: [[0, 7.9, 0.6, 3, false], [-3.25, 4.5, 0.55, 1, true], [3.25, 4.5, 0.48, 1, true]],
+      gradini: { n: 4, w: 3.1, fondo: 1.5, balaustra: true },
+      vela: { x: 2.7, z: -1.8, w: 3.0, h: 4.4, luci: 2 },
+      pluviale: 4.75,
+    },
+    {
+      // SANTA TERESA (OSM w411139621): su Via Vittorio Veneto, verso ovest-nord-ovest (Street View, ottobre 2025,
+      // «28 Via Vittorio Veneto»). Facciata stretta e alta senza timpano: lesene d'angolo, portone di legno con la
+      // cornice, lo stemma, la finestra con la grata, il cornicione con due dadi, l'attico con due finestrelle, tre
+      // gradini larghi col pianerottolo.
+      id: 'santateresa', dentro: [256, 165], a: [255.6, 170.6], b: [252.7, 164.9], alto: 12.4, tetto: 'piano',
+      colore: '#ddd6c4', soglia: 0.72,
+      lesene: [[-2.85, 0.7], [2.85, 0.7]],
+      portale: { w: 1.7, h: 2.7, tipo: 'cornice', legno: '#727064' },
+      stemma: [0, 4.3],
+      finestre: [[0, 5.35, 1.3, 1.2, 'grata']],
+      cornicione: { y: 8.6, dadi: [-0.95, 0.95] },
+      attico: { finestre: [[-1.25, 10.7, 0.75, 0.5], [1.25, 10.7, 0.75, 0.5]] },
+      gradini: { n: 3, w: 5.6, fondo: 1.7 },
+    },
+  ],
+
+  /** La riga della chiesa: per nome (città) o per il punto dentro la sagoma (centro storico). */
+  of(outer, name) {
+    return this.list.find((S) => (S.nome ? S.nome === name : S.dentro && Plane.contains(outer, S.dentro[0], S.dentro[1]))) ?? null;
+  },
+
+  /** Assi della facciata: punto medio M, normale verso l'esterno n, direzione t (verso destra), larghezza w. */
+  axes(S) {
+    const w = Math.hypot(S.b[0] - S.a[0], S.b[1] - S.a[1]), t = [(S.b[0] - S.a[0]) / w, (S.b[1] - S.a[1]) / w];
+    return { M: [(S.a[0] + S.b[0]) / 2, (S.a[1] + S.b[1]) / 2], n: [t[1], -t[0]], t, w };
+  },
+
+  /** Quota della strada davanti al centro della facciata. */
+  street(S) {
+    const { M, n } = this.axes(S);
+    return Terrain.heightAt(M[0] + n[0] * 1.5, M[1] + n[1] * 1.5);
+  },
+
+  /**
+   * Il tetto a capanna sulla facciata (come Buildings.gableOnFootprint): quota della falda in x, dalla sagoma e
+   * dalla quota dei muri. Restituisce null se la chiesa ha il tetto piano.
+   */
+  gable(S, outer, top) {
+    if (S.tetto !== 'capanna') return null;
+    const { M, t } = this.axes(S), r = Plane.orientedRect(outer), rise = Math.min(4.5, r.hw * 0.7);
+    const across = (x) => (M[0] + t[0] * x - r.c[0]) * r.v[0] + (M[1] + t[1] * x - r.c[1]) * r.v[1];
+    const tv = t[0] * r.v[0] + t[1] * r.v[1];
+    return { rise, at: (x) => top + rise * Math.max(0, 1 - Math.abs(across(x)) / r.hw), apex: Math.abs(tv) > 0.2 ? -across(0) / tv : null };
+  },
+};
+
 const Details = {
   build(network, landmarks, tops) {
     this.net = network;
@@ -6160,6 +6252,8 @@ const Details = {
       const name = DATA.name(nameIdx);
       if (kind !== 1 || Buildings.rockChurches.has(index)) return;   // le chiese rupestri hanno il fronte scavato
       const outer = DATA.pairs(rings[0]);
+      const facade = FACCIATE.of(outer, name);                       // blocco N3: facciata rifatta dalle foto
+      if (facade) { this.facciata(facade, outer); return; }
       const purgatorio = name === 'Santa Maria del Suffragio', sanFrancesco = name === 'Chiesa San Francesco';
       // Il Purgatorio si apre sul lato corto a sud, su Piazza Notar Domenico, dove i dati segnano la chiesa;
       // San Francesco sul Larghetto, a ovest-nord-ovest (blocco D, Street View).
@@ -7598,6 +7692,160 @@ const Details = {
       f.add(new THREE.CylinderGeometry(r, r, 0.06, 12).rotateX(Math.PI / 2), hole, x, yy, 0.1);
     }
     this.keepOut.push({ M: f.M, n: f.n, half: w / 2 + 0.2, top: top + 1 });
+  },
+
+  /**
+   * FACCIATA DI UNA CHIESA (blocco N3), dalla riga S della tabella FACCIATE: nello strato degli edifici la pelle del
+   * colore della pietra, il frontone con la cornice inclinata e il campanile a vela (si vedono anche da lontano); nello
+   * strato dei dettagli lesene, cornicione, attico, portale, oculi, finestre, stemma, gradini e pluviale.
+   */
+  facciata(S, outer) {
+    const { M, n, t, w } = FACCIATE.axes(S), etb = Tiles.builderAt(M[0], M[1], 'edifici');
+    const f = this.frame({ M, n }, this.near(M)), fe = this.frame({ M, n }, etb);
+    const y = f.ground, top = S.top ?? y + S.alto, s0 = y + (S.soglia ?? 0);
+    const wall = new THREE.Color(S.colore), light = wall.clone().lerp(this.col.bone, 0.45);
+    const roof = FACCIATE.gable(S, outer, top), at = (x) => (roof ? roof.at(x) : top);
+    // pelle della facciata e frontone: un poligono 6 cm davanti al muro; con `conci` lo shader ci disegna i conci
+    const W = ([x, yy]) => [M[0] + t[0] * x + n[0] * 0.06, yy, -(M[1] + t[1] * x + n[1] * 0.06)];
+    const info = (x) => (S.conci ? [SURF.CONCI, x, S.conci[1], S.conci[0]] : [0, 0, 0, 0]);
+    const skin = (pts) => {
+      const P = pts.filter((p, i) => Math.hypot(p[0] - pts[(i + pts.length - 1) % pts.length][0], p[1] - pts[(i + pts.length - 1) % pts.length][1]) > 0.01);
+      for (let k = 1; k < P.length - 1; k++) etb.tri(W(P[0]), W(P[k]), W(P[k + 1]), wall, [...info(P[0][0]), ...info(P[k][0]), ...info(P[k + 1][0])], [n[0], 0, -n[1]]);
+    };
+    const xa = -w / 2, xb = w / 2;
+    skin([[xa - 0.02, y - 0.8], [xb + 0.02, y - 0.8], [xb + 0.02, top], [xa - 0.02, top]]);
+    if (roof) {
+      const x0 = clamp(roof.apex ?? 0, xa + 0.5, xb - 0.5);
+      skin([[xa, top - 0.01], [xb, top - 0.01], [xb, at(xb)], [x0, at(x0)], [xa, at(xa)]]);
+      for (const [p, q] of [[xa, x0], [x0, xb]]) {                               // cornice inclinata del frontone
+        const L = Math.hypot(q - p, at(q) - at(p)), ang = Math.atan2(at(q) - at(p), q - p);
+        fe.box(L + 0.42, 0.34, 0.34, light, (p + q) / 2, (at(p) + at(q)) / 2 - 0.17, 0.17, ang);
+      }
+      for (const x of [xa + 0.35, xb - 0.35]) fe.add(new THREE.IcosahedronGeometry(0.24, 0), light, x, at(x) + 0.42, 0.12);   // pomi agli angoli
+    }
+    // lesene, fino alla cornice inclinata o al cornicione
+    const capY = (x) => (S.cornicione ? y + S.cornicione.y : at(x) - 0.15);
+    const pier = wall.clone().lerp(this.col.bone, 0.22);
+    for (const [x, lw] of S.lesene ?? []) {
+      f.box(lw, capY(x) - y + 0.3, 0.13, pier, x, y - 0.3, 0.16);
+      f.box(lw + 0.16, 0.3, 0.24, light, x, capY(x) - 0.3, 0.21);               // capitello
+    }
+    if (S.cornicione) {                                                           // cornicione con l'ombra e i dadi
+      const cy = y + S.cornicione.y;
+      f.box(w + 0.1, 0.18, 0.26, light, 0, cy - 0.18, 0.2);
+      f.box(w + 0.34, 0.4, 0.46, light, 0, cy, 0.24);
+      for (const x of S.cornicione.dadi ?? []) f.box(0.62, 0.55, 0.5, wall, x, cy + 0.4, 0.2);
+    }
+    for (const [x, wy, ww, wh] of S.attico?.finestre ?? []) this._finestra(f, x, y + wy, ww, wh, light, false);
+    if (S.portale) this._portale(f, S.portale, s0, light);
+    for (const [x, oy, r, rings, grate] of S.oculi ?? []) this._oculo(f, x, y + oy, r, rings, grate, light);
+    for (const [x, wy, ww, wh, kind] of S.finestre ?? []) this._finestra(f, x, y + wy, ww, wh, light, kind === 'grata');
+    if (S.stemma) this._stemma(f, S.stemma[0], y + S.stemma[1], light);
+    if (S.gradini) this._gradini(f, S.gradini, y, s0, light);
+    if (S.pluviale) {
+      const copper = new THREE.Color('#8b5a3c');
+      f.box(0.13, at(S.pluviale) - y - 0.2, 0.13, copper, S.pluviale, y, 0.2);
+      f.box(0.3, 0.3, 0.3, copper, S.pluviale, at(S.pluviale) - 0.55, 0.22);
+    }
+    if (S.vela) this._vela(fe, S.vela, at(S.vela.x), light);
+    this.keepOut.push({ M, n, half: w / 2 + 0.3, top: top + (roof?.rise ?? 0) + 1 });
+  },
+
+  /** Portale: portone di legno a due ante, stipiti e architrave; col cartiglio sotto il frontone curvo, o con la cornice. */
+  _portale(f, P, s0, light) {
+    const { door } = this.col, pw = P.w, ph = P.h, seam = door.clone().multiplyScalar(0.6);
+    f.box(pw, ph, 0.1, P.legno ? new THREE.Color(P.legno) : door, 0, s0, 0.06);
+    f.box(0.05, ph - 0.05, 0.04, seam, 0, s0, 0.12);                              // battuta tra le ante
+    for (const s of [-1, 1]) f.box(0.36, ph + 0.3, 0.2, light, s * (pw / 2 + 0.18), s0, 0.1);   // stipiti
+    if (P.tipo === 'cartiglio') {
+      // mensole con le volute in cima agli stipiti, trabeazione spezzata, frontone curvo con il cartiglio barocco
+      for (const s of [-1, 1]) f.box(0.36, 0.8, 0.34, light, s * (pw / 2 + 0.3), s0 + ph - 0.5, 0.17);
+      f.box(pw + 1.3, 0.38, 0.32, light, 0, s0 + ph + 0.3, 0.16);
+      const c = pw + 1.1, sag = 0.85, R = (c * c / 4 + sag * sag) / (2 * sag), a = Math.asin(c / 2 / R);
+      const arc = new THREE.Shape();
+      arc.absarc(0, 0, R, Math.PI / 2 - a, Math.PI / 2 + a, false);
+      arc.absarc(0, 0, R - 0.26, Math.PI / 2 + a, Math.PI / 2 - a, true);
+      f.add(new THREE.ExtrudeGeometry(arc, { depth: 0.3, bevelEnabled: false, curveSegments: 8 }), light, 0, s0 + ph + 0.68 - (R - sag), 0);
+      const sh = new THREE.Shape();
+      sh.moveTo(-0.42, 0); sh.quadraticCurveTo(-0.56, 0.42, -0.2, 0.6); sh.quadraticCurveTo(0, 0.74, 0.2, 0.6);
+      sh.quadraticCurveTo(0.56, 0.42, 0.42, 0); sh.quadraticCurveTo(0, -0.14, -0.42, 0);
+      f.add(new THREE.ExtrudeGeometry(sh, { depth: 0.12, bevelEnabled: false, curveSegments: 3 }), light, 0, s0 + ph + 0.74, 0.06);
+      for (const s of [-1, 1]) f.add(new THREE.TorusGeometry(0.16, 0.06, 3, 6, Math.PI * 1.4).rotateZ(s > 0 ? -0.6 : Math.PI - 0.8), light, s * 0.68, s0 + ph + 0.98, 0.12);
+    } else {
+      f.box(pw + 0.9, 0.3, 0.26, light, 0, s0 + ph, 0.13);                       // architrave con la cornice
+      f.box(pw + 1.2, 0.16, 0.36, light, 0, s0 + ph + 0.3, 0.18);
+    }
+  },
+
+  /** Oculo: strombatura a anelli (profilo ruotato), vetro scuro e, se c'è, la grata di ferro. */
+  _oculo(f, x, yy, r, rings, grate, light) {
+    const R0 = r + 0.15 * rings, P = [[R0 + 0.06, 0.1]];
+    let z = 0.1;
+    for (let k = 0; k < rings; k++) {
+      const R = R0 - 0.15 * k;
+      z = 0.17 + 0.07 * (rings - 1 - k);
+      P.push([R, z], [R - 0.15, z]);
+    }
+    P.push([r, 0.08]);
+    const seg = rings > 1 ? 16 : 12;
+    f.add(new THREE.LatheGeometry(P.map(([a, b]) => new THREE.Vector2(a, b)), seg).rotateX(Math.PI / 2), light, x, yy, 0);
+    f.add(new THREE.CircleGeometry(r, seg), grate ? new THREE.Color('#22272c') : new THREE.Color('#2c3c50'), x, yy, 0.085);
+    if (!grate) return;
+    for (const d of [-0.5, 0, 0.5]) {
+      const L = 2 * Math.sqrt(r * r - (d * r) ** 2);
+      f.box(0.05, L, 0.04, this.col.iron, x + d * r, yy - L / 2, 0.11);
+      f.box(L, 0.05, 0.04, this.col.iron, x, yy + d * r - 0.025, 0.11);
+    }
+  },
+
+  /** Finestra rettangolare: vetro scuro, cornice di pietra col davanzale e, se c'è, la grata di ferro. */
+  _finestra(f, x, y0, w, h, light, grate) {
+    f.box(w, h, 0.06, new THREE.Color('#2a2c30'), x, y0, 0.08);
+    f.box(w + 0.44, 0.2, 0.2, light, x, y0 + h, 0.1);
+    f.box(w + 0.5, 0.16, 0.26, light, x, y0 - 0.16, 0.13);
+    for (const s of [-1, 1]) f.box(0.22, h, 0.18, light, x + s * (w / 2 + 0.11), y0, 0.09);
+    if (!grate) return;
+    for (let k = 1; k < 5; k++) f.box(0.04, h, 0.04, this.col.iron, x - w / 2 + (k * w) / 5, y0, 0.12);
+    for (let k = 1; k < 3; k++) f.box(w, 0.04, 0.04, this.col.iron, x, y0 + (k * h) / 3, 0.12);
+  },
+
+  /** Stemma di pietra: scudo a punta con la corona. */
+  _stemma(f, x, y0, light) {
+    const sh = new THREE.Shape();
+    sh.moveTo(-0.22, 0.5); sh.lineTo(0.22, 0.5); sh.lineTo(0.22, 0.18); sh.quadraticCurveTo(0.22, 0, 0, -0.06); sh.quadraticCurveTo(-0.22, 0, -0.22, 0.18); sh.closePath();
+    f.add(new THREE.ExtrudeGeometry(sh, { depth: 0.1, bevelEnabled: false, curveSegments: 3 }), light, x, y0, 0.06);
+    f.box(0.36, 0.12, 0.12, light, x, y0 + 0.52, 0.1);
+  },
+
+  /** Gradini davanti alla porta, fino alla soglia, con il pianerottolo; con `balaustra` i parapetti e i pilastrini. */
+  _gradini(f, G, y, s0, light) {
+    const rise = s0 - y, n = G.n, rh = rise / n, step = this.col.stone.clone().lerp(this.col.bone, 0.3);
+    for (let k = 0; k < n; k++) {
+      const d = G.fondo - k * 0.32;
+      f.box(G.w, (k + 1) * rh + 0.35, d, step, 0, y - 0.35, d / 2 + 0.02);
+    }
+    if (!G.balaustra) return;
+    for (const s of [-1, 1]) {
+      f.box(0.3, rise + 0.9, G.fondo, light, s * (G.w / 2 + 0.15), y - 0.2, G.fondo / 2 + 0.02);
+      f.box(0.42, rise + 1.2, 0.42, light, s * (G.w / 2 + 0.15), y - 0.2, G.fondo);
+    }
+  },
+
+  /** Campanile a vela dietro la facciata: muro con le luci ad arco e le campane, cuspide e pomo. */
+  _vela(fe, V, y0, light) {
+    const H = V.h, sh = new THREE.Shape(), L = V.luci ?? 1, ow = Math.min(0.8, (V.w - 0.5) / L - 0.3);
+    sh.moveTo(-V.w / 2, 0); sh.lineTo(V.w / 2, 0); sh.lineTo(V.w / 2, H); sh.lineTo(0, H + 0.9); sh.lineTo(-V.w / 2, H); sh.closePath();
+    const bells = [];
+    for (let k = 0; k < L; k++) {
+      const cx = -V.w / 2 + ((k + 0.5) * V.w) / L, h0 = H - 2.1, h1 = H - 0.55 - ow / 2;
+      const p = new THREE.Path();
+      p.moveTo(cx - ow / 2, h0); p.lineTo(cx + ow / 2, h0); p.lineTo(cx + ow / 2, h1); p.absarc(cx, h1, ow / 2, 0, Math.PI, false); p.lineTo(cx - ow / 2, h0);
+      sh.holes.push(p);
+      bells.push([cx, h0 + 0.55]);
+    }
+    fe.add(new THREE.ExtrudeGeometry(sh, { depth: 0.55, bevelEnabled: false, curveSegments: 4 }), light, V.x, y0 - 0.6, V.z - 0.27);
+    for (const [cx, by] of bells) fe.add(new THREE.ConeGeometry(0.26, 0.45, 6), new THREE.Color('#6b5434'), V.x + cx, y0 - 0.6 + by, V.z);
+    fe.add(new THREE.IcosahedronGeometry(0.2, 0), light, V.x, y0 - 0.6 + H + 1.05, V.z);
   },
 
   /**
