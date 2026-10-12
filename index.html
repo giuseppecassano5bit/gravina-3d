@@ -4991,6 +4991,9 @@ const Tiles = {
       b.ground = b.rings.map((ring) => ring.map(([e, n]) => { const g = Terrain.heightAt(e, n); gMin = Math.min(gMin, g); gMax = Math.max(gMax, g); return g; }));
       b.base = gMin - 0.6;
       b.top = gMax + b.height;
+      // blocco N3: le chiese con la facciata rifatta dalle foto hanno i muri alti come nella foto, sopra la strada
+      b.facade = b.kind === 1 ? FACCIATE.of(outer, b.name) : null;
+      if (b.facade) b.top = b.facade.top = FACCIATE.street(b.facade) + b.facade.alto;
       b.seed = hash2(index, 1231);
       b.index = index;
       t.buildings.push(b);
@@ -5647,7 +5650,8 @@ const Tiles = {
     }
     // Blocco E: scuole in mattoni e intonaco ocra, il Casino di Meninni in pietra con il tetto a padiglione, le case rosa.
     const church = kind === 1, pav = kind === 10, shed = kind === 6 || pav, canopy = kind === 3, school = kind === 8, villa = kind === 9;
-    const wall = pav ? (pal.pav ??= new THREE.Color('#d9cbaa')) : church || villa ? pal.stone : shed ? pal.shed : canopy ? pal.canopy : school ? pal.school[Math.floor(seed * 2)]
+    const wall = b.facade?.muro ? (b.facade._muro ??= new THREE.Color(b.facade.muro))
+      : pav ? (pal.pav ??= new THREE.Color('#d9cbaa')) : church || villa ? pal.stone : shed ? pal.shed : canopy ? pal.canopy : school ? pal.school[Math.floor(seed * 2)]
       : b.name === 'Case rosa' ? pal.rosa : pal.walls[Math.floor(seed * 6) % 6];
     const roof = shed ? pal.shedRoof : church ? pal.stone : school ? pal.schoolRoof : pal.roofs[Math.floor(seed * 11) % 4];
     const surf = church || canopy ? SURF.PLAIN : shed ? SURF.SHED : b.height >= 6 ? SURF.FACADE : SURF.PLAIN;
@@ -5669,14 +5673,14 @@ const Tiles = {
         tb.quad([P[0], base, -P[1]], [Q[0], base, -Q[1]], [Q[0], top, -Q[1]], [P[0], top, -P[1]], c, info, [ox, 0, -on]);
       }
     });
-    if ((church || villa) && rings.length === 1) {
+    if ((church || villa) && rings.length === 1 && b.facade?.tetto !== 'piano') {
       const rect = Plane.orientedRect(rings[0]);
-      Buildings.gableOnFootprint(tb, rings[0], rect, top, Math.min(villa ? 2.6 : 4.5, rect.hw * 0.7), pal.tiles[Math.floor(seed * 4) % 4], wall);
+      Buildings.gableOnFootprint(tb, rings[0], rect, top, b.facade?.falda ?? Math.min(villa ? 2.6 : 4.5, rect.hw * 0.7), pal.tiles[Math.floor(seed * 4) % 4], wall);
       return;
     }
     const tris = THREE.ShapeUtils.triangulateShape(rings[0].map(([e, n]) => new THREE.Vector2(e, n)), rings.slice(1).map((h) => h.map(([e, n]) => new THREE.Vector2(e, n))));
     const all = rings.flat();
-    c.copy(roof).multiplyScalar(0.97 + seed * 0.05);
+    c.copy(b.facade?.tetto === 'piano' ? pal.roofs[1] : roof).multiplyScalar(0.97 + seed * 0.05);
     for (const [i, j, k] of tris) tb.tri([all[i][0], top, -all[i][1]], [all[j][0], top, -all[j][1]], [all[k][0], top, -all[k][1]], c, null, [0, 1, 0]);
     // Torrini delle scale sulle palazzine (non sul profilo leggero)
     if (!far && !this.light && surf === SURF.FACADE && b.height > 9 && Math.abs(Plane.signedArea(rings[0])) > 120 && seed > 0.35) {
@@ -6251,6 +6255,91 @@ const FACCIATE = {
       gradini: { n: 3, w: 1.9, fondo: 1.15, x: 3.0 },
       ringhiera: [[-0.6, 1.7, 2.2]],
     },
+    // ── Città ──
+    {
+      // SANTUARIO MADONNA DELLE GRAZIE (OSM w411139821), su Via Madonna della Grazia, verso sud-sud-ovest (foto su Commons;
+      // Street View maggio 2025, «32 Via Madonna della Grazia»). In basso la fascia a bugnato col portale (lesene,
+      // trabeazione con la targa, timpano con la lunetta dipinta), le porte laterali coi medaglioni; poi il fregio, le
+      // tre torri a bugnato coi merli e gli stemmi, la cornice; in alto la grande aquila ad ali spiegate col rosone nel
+      // petto, il coronamento con la mitra, gli scudi e i pinnacoli; dietro a sinistra il campanile con la cella, la
+      // balaustra, il cupolino e la croce.
+      id: 'grazie', nome: 'Santuario Madonna delle Grazie', a: [481.5, 898.5], b: [496.8, 888.5], alto: 11.6, tetto: 'piano',
+      muro: '#e2d6bb', colore: '#e4d8bd', bugnato: { h: 4.7, conci: [0.95, 0.5] }, soglia: 0.3,
+      portale: { w: 2.0, h: 3.6, tipo: 'timpano', legno: '#6b5236', lunetta: '#c98f86' },
+      porte: [[-6.3, 1.1, 2.4, 0.15], [6.3, 1.1, 2.4, 0.15]],
+      oculi: [[-6.3, 3.75, 0.5, 1, false, 1, true], [6.3, 3.75, 0.5, 1, false, 1, true]],
+      fasce: [[4.7, 0.6]],
+      cornicione: { y: 11.0 },
+      gradini: { n: 2, w: 4.2, fondo: 0.9 },
+      speciale: 'grazie',
+    },
+    {
+      // GESÙ BUON PASTORE (OSM w328013129), su Via Guardialto, verso nord-est (Street View, ottobre 2025, «83 Via
+      // Guardialto»): chiesa moderna col tetto piano e il cornicione, le lesene chiare con le finestre strette e alte tra
+      // l'una e l'altra, il portale vetrato al centro, due gradini, il muretto con la cancellata verde e il cancello.
+      id: 'buonpastore', nome: 'Chiesa Gesù Buon Pastore', a: [1086.5, -170.0], b: [1076.1, -159.2], alto: 9.0, tetto: 'piano',
+      muro: '#e6dbc4', colore: '#e8ddc7', soglia: 0.34,
+      portale: { w: 2.8, h: 3.4, tipo: 'vetro' },
+      cornicione: { y: 8.5 },
+      gradini: { n: 2, w: 5.2, fondo: 1.0 },
+      recinto: { z: 7.2, colore: '#3e6a4a', muro: 0.6, varco: 2.2 },
+      speciale: 'buonpastore',
+    },
+    {
+      // SANTI PIETRO E PAOLO (OSM w411139942; nome spostato dalla pipeline), su Via Falcone e Borsellino (Street View,
+      // aprile 2025): chiesa moderna coi muri di pietra chiara a corsi, l'ingresso vetrato alto e stretto e il grande tetto
+      // a otto falde (satellite) con la lanterna e la croce in cima.
+      id: 'pietropaolo', nome: 'Santi Pietro e Paolo', a: [1074.8, 1138.5], b: [1081.0, 1148.1], alto: 7.0, tetto: 'piano',
+      muro: '#e4dac6', colore: '#e6dcc8', conci: [1.6, 0.45], soglia: 0.17,
+      portale: { w: 1.3, h: 4.6, tipo: 'vetro' },
+      gradini: { n: 1, w: 3.0, fondo: 0.8 },
+      speciale: 'pietropaolo', tenda: { c: [1063, 1146], r: 11.5, h: 12.0 },
+    },
+    {
+      // SPIRITO SANTO (OSM w1152762610; chiesa dalla pipeline, prima era una casa), tra Via Tiziano e Via Bari (Street View,
+      // ottobre 2025): volumi bianchi col tetto piano, l'ingresso vetrato e la grande parete curva color ruggine a vela,
+      // alta verso nord-ovest accanto all'ingresso (foto di fianco e ombra sul satellite), con l'alta croce su un palo.
+      id: 'spiritosanto', nome: 'Chiesa Dello Spirito Santo', a: [1721.8, 165.0], b: [1716.8, 159.2], alto: 8.0, tetto: 'piano',
+      muro: '#efede6', colore: '#f1efe8', soglia: 0.2,
+      portale: { w: 3.0, h: 3.2, tipo: 'vetro' },
+      speciale: 'spiritosanto', vela: { arco: [[1713, 165], [1725.5, 150.5], [1741, 138]], h: [18.5, 11.0, 6.5] },
+    },
+    {
+      // MATER ECCLESIAE E SAN MATTEO (OSM w411139947), su Via Ciro Menotti (Street View, ottobre 2025, «15 Via Ciro
+      // Menotti»): muro di grandi conci squadrati color sabbia con le finestre strette a lamelle; dietro il campanile
+      // quadrato bianco con la cella aperta e la croce e il tamburo curvo rivestito di conci.
+      id: 'matteo', nome: 'Parrocchia Mater Ecclesiae e San Matteo', a: [575.56, 347.5], b: [575.04, 337.7], alto: 8.5,
+      tetto: 'piano', muro: '#d8c69f', colore: '#d9c7a1', conci: [1.0, 0.5],
+      finestre: [[-2.6, 1.6, 0.55, 2.7, 'lamelle'], [1.4, 1.6, 0.55, 2.7, 'lamelle']],
+      speciale: 'matteo', torre: { c: [580.5, 344], lato: 2.8, h: 7.0 }, tamburo: { c: [587, 328], r: 9.6, h: 2.8 },
+    },
+    {
+      // SS. CROCIFISSO E SAN SEBASTIANO (OSM r6148330), su Via San Sebastiano, verso ovest-sud-ovest (Street View, ottobre
+      // 2025, «148 Via S. Sebastiano»): il lungo fronte del convento, imbiancato, a due piani con le finestre in file
+      // regolari, la fascia e il cornicione; il portale ad arco della chiesa, la croce di pietra sul piedistallo davanti e
+      // il muretto con la ringhiera lungo la via. Il campanile non si vede: non c'è.
+      id: 'crocifisso', nome: 'SS. Crocifisso e San Sebastiano', a: [409.4, -550.7], b: [422.2, -602.1], alto: 10.6, tetto: 'piano',
+      muro: '#ece9e0', colore: '#eeebe2', soglia: 0.17,
+      portale: { w: 1.6, h: 2.6, tipo: 'arco', legno: '#6a5038', x: 1.5 },
+      filari: [[6.3, 1.0, 1.45, 4.4, -24.5, 24.5, [1.5]], [2.3, 0.75, 0.95, 4.4, -24.5, 24.5, [1.5]]],
+      fasce: [[5.0, 0.28]],
+      cornicione: { y: 10.2 },
+      gradini: { n: 1, w: 2.6, fondo: 0.7, x: 1.5 },
+      croci: [[-3.2, 4.0, 2.4]],
+      recinto: { z: 7.6, colore: '#2b2723', muro: 0.9, varco: 2.0, varcoX: 1.5 },
+    },
+    {
+      // SAN DOMENICO (OSM r6148327, la chiesa col convento attorno al chiostro), su Piazza Cavour e Via Chieli, verso ovest
+      // (foto di un utente su Google Maps, ottobre 2024; satellite): facciata a capanna di conci color ocra con la croce
+      // in cima, il rosone, il portale con la lunetta, tre finestrelle; a sinistra, sull'ala del convento, il campanile a
+      // vela a due luci con la croce. Nel diorama Via Chieli passa a 30 cm dalla facciata: niente gradini.
+      id: 'sandomenico', nome: 'San Domenico', a: [529.0, -80.6], b: [526.8, -90.8], avanti: 0.4, alto: 11.2, tetto: 'piano',
+      muro: '#d6bf93', colore: '#d6bc8e', conci: [0.9, 0.45], frontone: { h: 3.4 }, navata: 36, croceCima: true, soglia: 0,
+      portale: { w: 1.6, h: 3.0, tipo: 'arco', legno: '#6d4f33' },
+      rosone: [0, 8.6, 1.05, 16],
+      finestre: [[-3.6, 4.4, 0.6, 0.9], [-3.6, 7.4, 0.6, 1.0], [3.6, 7.4, 0.6, 1.0]],
+      vela: { x: -7.6, z: -1.2, w: 3.2, h: 4.6, luci: 2, croce: true },
+    },
   ],
 
   /** La riga della chiesa: per nome (città) o per il punto dentro la sagoma (centro storico). */
@@ -6276,6 +6365,10 @@ const FACCIATE = {
    * dalla quota dei muri. Restituisce null se la chiesa ha il tetto piano.
    */
   gable(S, outer, top) {
+    if (S.frontone?.h) {                                    // frontone libero sopra un tetto piano: triangolo sulla facciata
+      const hw = this.axes(S).w / 2;
+      return { rise: S.frontone.h, at: (x) => top + S.frontone.h * Math.max(0, 1 - Math.abs(x) / hw), apex: 0 };
+    }
     if (S.tetto !== 'capanna') return null;
     const { M, t } = this.axes(S), r = Plane.orientedRect(outer), rise = S.falda ?? Math.min(4.5, r.hw * 0.7);
     const across = (x) => (M[0] + t[0] * x - r.c[0]) * r.v[0] + (M[1] + t[1] * x - r.c[1]) * r.v[1];
@@ -6755,6 +6848,7 @@ const Details = {
 
   /** CHIESA DELLA CITTÀ: portale con l'oculo sul lato che guarda la via e la croce in cima alla facciata. */
   cityChurch(b) {
+    if (b.facade) { this.facciata(b.facade, b.rings[0]); return; }   // blocco N3: facciata rifatta dalle foto
     const front = this.frontEdge(b.rings[0], 6);
     if (!front || front.clear < 0.6) return;
     const tb = this.near(front.M), f = this.frame(front, tb), big = Math.abs(Plane.signedArea(b.rings[0])) > 500;
@@ -7763,7 +7857,14 @@ const Details = {
       for (let k = 1; k < P.length - 1; k++) etb.tri(W(P[0]), W(P[k]), W(P[k + 1]), wall, [...info(P[0][0]), ...info(P[k][0]), ...info(P[k + 1][0])], [n[0], 0, -n[1]]);
     };
     const xa = -w / 2, xb = w / 2;
-    skin([[xa - 0.02, y - 0.8], [xb + 0.02, y - 0.8], [xb + 0.02, top], [xa - 0.02, top]]);
+    if (S.bugnato) {                                                              // fascia bassa a bugnato, poi la pietra liscia
+      const keep = S.conci, yb = y + S.bugnato.h;
+      S.conci = S.bugnato.conci;
+      skin([[xa - 0.02, y - 0.8], [xb + 0.02, y - 0.8], [xb + 0.02, yb], [xa - 0.02, yb]]);
+      S.conci = keep;
+      skin([[xa - 0.02, yb], [xb + 0.02, yb], [xb + 0.02, top], [xa - 0.02, top]]);
+    } else skin([[xa - 0.02, y - 0.8], [xb + 0.02, y - 0.8], [xb + 0.02, top], [xa - 0.02, top]]);
+    this._skin = skin;
     // con la facciata davanti al muro, i due risvolti ai capi (niente fessure di fianco)
     if (S.avanti) for (const x of [xa, xb]) fe.box(0.08, top - y + 0.8, S.avanti + 0.06, wall, x, y - 0.8, (0.06 - S.avanti) / 2);
     if (roof && S.frontone !== false) {
@@ -7774,6 +7875,18 @@ const Details = {
         fe.box(L + 0.42, 0.34, 0.34, light, (p + q) / 2, (at(p) + at(q)) / 2 - 0.17, 0.17, ang);
       }
       if (S.pomi) for (const x of [xa + 0.35, xb - 0.35]) fe.add(new THREE.IcosahedronGeometry(0.24, 0), light, x, at(x) + 0.42, 0.12);   // pomi agli angoli
+      if (S.croceCima) {
+        fe.box(0.14, 1.6, 0.14, this.col.iron, x0, at(x0) + 0.1, 0.12);
+        fe.box(0.8, 0.14, 0.14, this.col.iron, x0, at(x0) + 1.15, 0.12);
+      }
+      if (S.navata) {                                                             // tetto a capanna della navata dietro il frontone
+        const tiles = new THREE.Color(PALETTE.roofTiles[1]), L = S.navata, h = S.frontone.h;
+        for (const s of [-1, 1]) {
+          const P = [[s * (w / 2 + 0.1), top - 0.05, 0], [0, top + h - 0.25, 0], [0, top + h - 0.25, -L], [s * (w / 2 + 0.1), top - 0.05, -L]];
+          const Wp = ([x, yy, z]) => [M[0] + t[0] * x + n[0] * z, yy, -(M[1] + t[1] * x + n[1] * z)];
+          etb.quad(Wp(P[0]), Wp(P[1]), Wp(P[2]), Wp(P[3]), tiles, null, [0, 1, 0]);
+        }
+      }
     }
     // lesene, fino alla cornice inclinata o al cornicione
     const capY = (x) => (S.cornicione ? y + S.cornicione.y : at(x) - 0.15);
@@ -7801,11 +7914,19 @@ const Details = {
     if (S.rosone) this._rosone(f, S.rosone[0], y + S.rosone[1], S.rosone[2], S.rosone[3], light);
     if (S.secondo) this._secondo(f, fe, S.secondo, top, y, wall, light, pier);
     for (const [x, wy, ww, wh] of S.attico?.finestre ?? []) this._finestra(f, x, y + wy, ww, wh, light, false);
-    for (const fy of S.fasce ?? []) f.box(w - 0.1, 0.22, 0.2, light, 0, y + fy, 0.1);   // fasce marcapiano
+    for (const fy of S.fasce ?? []) {                                               // fasce marcapiano e fregi
+      const [yy, hh] = Array.isArray(fy) ? fy : [fy, 0.22];
+      f.box(w - 0.1, hh, 0.2, light, 0, y + yy, 0.1);
+    }
+    for (const [fy, fw, fh, step, x0, x1, skip = []] of S.filari ?? []) {          // file regolari di finestre
+      for (let x = x0; x <= x1 + 0.01; x += step) if (!skip.some((k) => Math.abs(k - x) < step / 2)) this._finestra(f, x, y + fy, fw, fh, light, false);
+    }
+    for (const [x, z, h] of S.croci ?? []) this._croce(f, x, y, z, h, light);
+    if (S.recinto) this._recinto(f, M, n, w, S.recinto, light);
     if (S.arcate) this._arcate(f, S.arcate, w, y, wall, light);
     if (S.portale) this._portale(f, S.portale, s0, light, S.portale.x ?? 0);
-    for (const [x, oy, r, rings, grate, sy] of S.oculi ?? []) this._oculo(f, x, y + oy, r, rings, grate, light, sy);
-    for (const [x, wy, ww, wh, kind] of S.finestre ?? []) this._finestra(f, x, y + wy, ww, wh, light, kind === 'grata');
+    for (const [x, oy, r, rings, grate, sy, full] of S.oculi ?? []) this._oculo(f, x, y + oy, r, rings, grate, light, sy, full);
+    for (const [x, wy, ww, wh, kind] of S.finestre ?? []) this._finestra(f, x, y + wy, ww, wh, light, kind === 'grata', kind === 'lamelle');
     if (S.stemma) this._stemma(f, S.stemma[0], y + S.stemma[1], light);
     if (S.gradini) this._gradini(f, S.gradini, y, s0, light, S.gradini.x ?? 0);
     for (const [x0, x1, z] of S.ringhiera ?? []) this._ringhiera(f, M, n, x0, x1, z);
@@ -7814,8 +7935,166 @@ const Details = {
       f.box(0.13, at(S.pluviale) - y - 0.2, 0.13, copper, S.pluviale, y, 0.2);
       f.box(0.3, 0.3, 0.3, copper, S.pluviale, at(S.pluviale) - 0.55, 0.22);
     }
-    if (S.vela) this._vela(fe, S.vela, at(S.vela.x), light);
+    if (S.vela && !S.speciale) this._vela(fe, S.vela, at(S.vela.x), light);
+    if (S.speciale) this['_' + S.speciale](f, fe, S, { M, n, t, w, y, top, wall, light, pier });
     this.keepOut.push({ M, n, half: w / 2 + 0.3, top: Math.max(top + (roof?.rise ?? 0), y + (S.secondo?.y1 ?? 0)) + 1 });
+  },
+
+  /** Croce di pietra su un piedistallo a gradoni, davanti alla facciata (z metri dal muro). */
+  _croce(f, x, y, z, h, light) {
+    f.box(1.0, 0.35, 1.0, light, x, y - 0.1, z);
+    f.box(0.62, 0.7, 0.62, light, x, y + 0.25, z);
+    f.box(0.18, h, 0.18, light, x, y + 0.95, z);
+    f.box(0.95, 0.18, 0.18, light, x, y + 0.95 + h * 0.7, z);
+  },
+
+  /** Muretto con la cancellata lungo la via, a z metri dalla facciata, col varco del cancello davanti al portale. */
+  _recinto(f, M, n, w, R, light) {
+    const t = [-n[1], n[0]], iron = new THREE.Color(R.colore), gx = R.varcoX ?? 0;
+    for (let x = -w / 2 - 0.5; x < w / 2 + 0.5 - 0.01; x += 1.2) {
+      const xm = x + 0.6;
+      if (Math.abs(xm - gx) < R.varco) continue;
+      const p = [M[0] + t[0] * xm + n[0] * R.z, M[1] + t[1] * xm + n[1] * R.z];
+      if (!this.free(p[0], p[1], 0.45)) continue;
+      const yy = Terrain.heightAt(p[0], p[1]);
+      f.box(1.22, R.muro + 0.3, 0.32, light, xm, yy - 0.3, R.z);                 // muretto
+      f.box(1.22, 0.06, 0.06, iron, xm, yy + R.muro + 0.95, R.z);               // corrimano
+      for (const dx of [-0.45, -0.15, 0.15, 0.45]) f.box(0.04, 0.95, 0.04, iron, xm + dx, yy + R.muro, R.z);
+    }
+  },
+
+  /**
+   * MADONNA DELLE GRAZIE, il resto della facciata (foto su Commons, Street View): le tre torri a bugnato coi merli e gli
+   * stemmi; sopra la cornice il coronamento coi fianchi inclinati, la grande aquila ad ali spiegate col rosone nel petto,
+   * la cornice in cima con la mitra, gli scudi e i pinnacoli; il campanile dietro a sinistra.
+   */
+  _grazie(f, fe, S, { M, n, t, w, y, top, wall, light }) {
+    const etb = Tiles.builderAt(M[0], M[1], 'edifici'), eagle = new THREE.Color('#b2a285');
+    // torri a bugnato in rilievo coi merli: davanti lo shader disegna i conci (strato degli edifici)
+    const W = (x, yy, z) => [M[0] + t[0] * x + n[0] * z, yy, -(M[1] + t[1] * x + n[1] * z)], out = [n[0], 0, -n[1]];
+    for (const [x, tw, y0, y1] of [[0, 4.4, 5.3, 10.6], [-6.1, 2.8, 5.8, 10.0], [6.1, 2.8, 5.8, 10.0]]) {
+      const info = (xx) => [SURF.CONCI, xx, 0.5, 0.9];
+      etb.quad(W(x - tw / 2, y + y0, 0.22), W(x + tw / 2, y + y0, 0.22), W(x + tw / 2, y + y1, 0.22), W(x - tw / 2, y + y1, 0.22), wall,
+        [...info(x - tw / 2), ...info(x + tw / 2), ...info(x + tw / 2), ...info(x - tw / 2)], out);
+      for (const s of [-1, 1]) fe.box(0.02, y1 - y0, 0.18, wall, x + s * (tw / 2 - 0.01), y + y0, 0.13);
+      fe.box(tw, 0.02, 0.18, wall, x, y + y0 - 0.02, 0.13);
+      fe.box(tw + 0.2, 0.25, 0.3, light, x, y + y1, 0.15);
+      for (let k = 0; k < Math.round(tw / 0.62); k++) f.box(0.36, 0.42, 0.3, light, x - tw / 2 + 0.31 + k * (tw - 0.3) / (Math.round(tw / 0.62) - 1 || 1), y + y1 + 0.25, 0.15);
+      this._stemma(f, x, y + (y0 + y1) / 2 - 0.3, light, x ? 1.4 : 2.0);
+    }
+    // coronamento: fianchi inclinati dalla cornice (top) alla cornice in cima, con le volute in basso
+    const yc = y + 19.4, hw = 5.6;
+    this._skin([[-w / 2, top], [w / 2, top], [hw, yc], [-hw, yc]]);
+    for (const s of [-1, 1]) {
+      const L = Math.hypot(w / 2 - hw, yc - top), ang = Math.atan2(yc - top, -s * (w / 2 - hw));
+      fe.box(L + 0.3, 0.32, 0.4, light, s * (w / 2 + hw) / 2, (top + yc) / 2 - 0.16, 0.12, ang);
+      fe.add(new THREE.TorusGeometry(0.42, 0.14, 4, 8), light, s * (w / 2 - 0.45), top + 0.55, 0.2);
+      this._pinnacolo(fe, s * (w / 2 - 0.3), top + 0.05, 0.2, light);
+    }
+    fe.box(2 * hw + 0.6, 0.45, 0.5, light, 0, yc, 0.15);                         // cornice in cima
+    // aquila: ali spiegate (rilievo), petto attorno al rosone, collo e testa col becco verso sinistra
+    const yr = y + 15.0;
+    for (const s of [-1, 1]) {
+      const P = [[0.9, 1.5], [2.4, 2.9], [4.4, 3.2], [6.2, 2.4], [7.3, -1.7], [6.5, -1.25], [5.9, -1.75], [5.1, -1.2], [4.4, -1.55], [3.6, -0.95], [2.8, -1.2], [1.8, -0.5], [1.2, -0.2]];
+      const g = new THREE.ExtrudeGeometry(new THREE.Shape(P.map(([a, b]) => new THREE.Vector2(s * a, b))), { depth: 0.16, bevelEnabled: false });
+      f.add(g, eagle, 0, yr, 0.07);
+      for (const k of [2.2, 3.4, 4.6, 5.8]) f.box(0.07, 2.4, 0.05, eagle.clone().multiplyScalar(0.86), s * k, yr - 1.0, 0.25, s * 0.35);   // penne
+    }
+    const body = new THREE.Shape(); body.absellipse(0, 0, 2.0, 2.3, 0, Math.PI * 2, false);
+    const hole = new THREE.Path(); hole.absarc(0, 0, 1.6, 0, Math.PI * 2, true); body.holes.push(hole);
+    f.add(new THREE.ExtrudeGeometry(body, { depth: 0.16, bevelEnabled: false, curveSegments: 12 }), eagle, 0, yr, 0.07);
+    const head = new THREE.Shape([[-0.55, 1.9], [0.55, 1.9], [0.5, 3.3], [0.2, 3.9], [-0.35, 3.95], [-1.1, 3.55], [-0.45, 3.4], [-0.45, 2.6]].map(([a, b]) => new THREE.Vector2(a, b)));
+    f.add(new THREE.ExtrudeGeometry(head, { depth: 0.3, bevelEnabled: false }), eagle, 0, yr, 0.07);
+    this._rosone(f, 0, yr, 1.25, 16, light);
+    f.box(1.3, 0.35, 0.4, light, 0, yr + 4.2, 0.15);                              // baldacchino sopra la testa
+    // mitra al centro, scudi e pinnacoli sulla cornice in cima
+    const mitre = new THREE.Shape([[-0.6, 0], [0.6, 0], [0.62, 1.0], [0, 1.7], [-0.62, 1.0]].map(([a, b]) => new THREE.Vector2(a, b)));
+    fe.add(new THREE.ExtrudeGeometry(mitre, { depth: 0.5, bevelEnabled: false }), light, 0, yc + 0.45, -0.1);
+    for (const s of [-1, 1]) {
+      this._stemma(fe, s * 2.7, yc + 0.5, light, 1.8);
+      this._pinnacolo(fe, s * (hw - 0.1), yc + 0.45, 0.15, light);
+      fe.box(1.6, 0.3, 0.45, light, s * (hw - 1.3), yc + 0.75, 0.15, s * 0.42);   // timpani spezzati agli angoli
+    }
+    // campanile dietro a sinistra: fusto, balaustra, cella con gli archi, cornice, cupolino e croce (strato degli edifici)
+    const cx = -w / 2 + 1.7, cz = -3.4, L = 3.0, y0 = top - 0.3, c1 = y + 16.4, c2 = y + 19.8;
+    fe.box(L, c1 - y0, L, wall, cx, y0, cz);
+    fe.box(L + 0.3, 0.3, L + 0.3, light, cx, c1, cz);
+    for (const s of [-1, 1]) fe.box(0.55, c2 - c1 - 0.3, L, wall, cx + s * (L / 2 - 0.27), c1 + 0.3, cz);   // pilastri della cella
+    fe.box(L, 0.55, L, wall, cx, c2 - 0.55, cz);
+    fe.add(new THREE.ConeGeometry(0.4, 0.7, 6), new THREE.Color('#6b5434'), cx, c1 + 1.6, cz);   // campana
+    fe.box(L + 0.4, 0.35, L + 0.4, light, cx, c2, cz);
+    for (const s of [-1, 1]) for (const r of [-1, 1]) this._pinnacolo(fe, cx + s * (L / 2), c2 + 0.35, cz + r * (L / 2), light);
+    fe.add(new THREE.CylinderGeometry(0.8, 1.15, 1.4, 8), wall, cx, c2 + 1.05, cz);
+    fe.add(new THREE.ConeGeometry(0.9, 1.0, 8), light, cx, c2 + 2.25, cz);
+    fe.box(0.1, 1.5, 0.1, this.col.iron, cx, c2 + 2.6, cz);
+    fe.box(0.7, 0.1, 0.1, this.col.iron, cx, c2 + 3.6, cz);
+  },
+
+  /** GESÙ BUON PASTORE: le lesene chiare e le finestre strette e alte tra l'una e l'altra (Street View). */
+  _buonpastore(f, fe, S, { w, y, light }) {
+    const n = 10, bay = (w - 1.0) / n, glass = new THREE.Color('#33373b');
+    const pTop = S.soglia + S.portale.h + 0.5;
+    for (let k = 0; k <= n; k++) {                                                // lesene (sopra il portale quella al centro)
+      const x = -w / 2 + 0.5 + k * bay, y0 = Math.abs(x) < S.portale.w / 2 ? pTop : -0.3;
+      f.box(0.6, S.cornicione.y - y0, 0.2, light, x, y + y0, 0.12);
+    }
+    for (let k = 0; k < n; k++) {
+      const x = -w / 2 + 0.5 + (k + 0.5) * bay;
+      if (Math.abs(x) < S.portale.w / 2 + 0.3) { f.box(bay - 0.75, 3.4, 0.06, glass, x, y + 4.3, 0.08); continue; }   // sopra il portale
+      f.box(bay - 0.8, 5.6, 0.06, glass, x, y + 2.0, 0.08);
+      f.box(bay - 0.6, 0.12, 0.2, light, x, y + 1.88, 0.1);
+    }
+  },
+
+  /** SANTI PIETRO E PAOLO: il grande tetto a otto falde (satellite) con la lanterna e la croce in cima. */
+  _pietropaolo(f, fe, S, { top }) {
+    const T = S.tenda, tb = Tiles.builderAt(T.c[0], T.c[1], 'edifici'), slate = new THREE.Color('#8b8e92'), y0 = top - 0.2;
+    const prof = [[T.r, 0], [T.r * 0.52, T.h * 0.42], [T.r * 0.16, T.h * 0.86], [0, T.h]].map(([a, b]) => new THREE.Vector2(a, b));
+    tb.addGeometry(new THREE.LatheGeometry(prof, 8).rotateY(Math.PI / 8).translate(T.c[0], y0, -T.c[1]), slate);
+    tb.addGeometry(new THREE.CylinderGeometry(T.r + 0.05, T.r + 0.05, 0.6, 8, 1, true).rotateY(Math.PI / 8).translate(T.c[0], y0 + 0.1, -T.c[1]), new THREE.Color('#e4dac6'));
+    const yt = y0 + T.h - 1.0, lan = new THREE.Color('#dcd6ca');
+    tb.addGeometry(new THREE.CylinderGeometry(0.75, 0.9, 1.6, 8).translate(T.c[0], yt + 0.8, -T.c[1]), lan);
+    tb.addGeometry(new THREE.ConeGeometry(0.85, 0.7, 8).translate(T.c[0], yt + 1.95, -T.c[1]), slate);
+    tb.addGeometry(new THREE.BoxGeometry(0.12, 2.4, 0.12).translate(T.c[0], yt + 3.4, -T.c[1]), this.col.iron);
+    tb.addGeometry(new THREE.BoxGeometry(1.1, 0.12, 0.12).translate(T.c[0], yt + 4.0, -T.c[1]), this.col.iron);
+  },
+
+  /** SPIRITO SANTO: la parete curva color ruggine a vela, alta verso nord-ovest, e l'alta croce sul palo (Street View, satellite). */
+  _spiritosanto(f, fe, S, { y }) {
+    const V = S.vela, [A, B, C] = V.arco, rust = new THREE.Color('#a4552f'), tb = Tiles.builderAt(B[0], B[1], 'edifici');
+    const P = (u) => [(1 - u) * (1 - u) * A[0] + 2 * u * (1 - u) * B[0] + u * u * C[0], (1 - u) * (1 - u) * A[1] + 2 * u * (1 - u) * B[1] + u * u * C[1]];
+    const H = (u) => (u < 0.5 ? lerp(V.h[0], V.h[1], u * 2) : lerp(V.h[1], V.h[2], u * 2 - 1));
+    const N = 12, th = 0.35;
+    for (let k = 0; k < N; k++) {
+      const p = P(k / N), q = P((k + 1) / N), d = [q[0] - p[0], q[1] - p[1]], l = Math.hypot(...d), nn = [d[1] / l, -d[0] / l];
+      const gp = Terrain.heightAt(...p) - 0.5, gq = Terrain.heightAt(...q) - 0.5, hp = y + H(k / N), hq = y + H((k + 1) / N);
+      for (const s of [-1, 1]) {
+        const a = [p[0] + nn[0] * th * s, p[1] + nn[1] * th * s], b = [q[0] + nn[0] * th * s, q[1] + nn[1] * th * s];
+        tb.quad([a[0], gp, -a[1]], [b[0], gq, -b[1]], [b[0], hq, -b[1]], [a[0], hp, -a[1]], rust, null, [nn[0] * s, 0, -nn[1] * s]);
+      }
+      const a0 = [p[0] - nn[0] * th, p[1] - nn[1] * th], a1 = [p[0] + nn[0] * th, p[1] + nn[1] * th], b0 = [q[0] - nn[0] * th, q[1] - nn[1] * th], b1 = [q[0] + nn[0] * th, q[1] + nn[1] * th];
+      tb.quad([a0[0], hp, -a0[1]], [a1[0], hp, -a1[1]], [b1[0], hq, -b1[1]], [b0[0], hq, -b0[1]], rust.clone().multiplyScalar(1.08), null, [0, 1, 0]);
+      if (k === 0) tb.quad([a0[0], gp, -a0[1]], [a1[0], gp, -a1[1]], [a1[0], hp, -a1[1]], [a0[0], hp, -a0[1]], rust, null, [-d[0], 0, d[1]]);
+      if (k === N - 1) tb.quad([b0[0], gq, -b0[1]], [b1[0], gq, -b1[1]], [b1[0], hq, -b1[1]], [b0[0], hq, -b0[1]], rust, null, [d[0], 0, -d[1]]);
+    }
+    const c = P(1), dir = [C[0] - B[0], C[1] - B[1]], l = Math.hypot(...dir), cx = c[0] + (dir[0] / l) * 2.2, cn = c[1] + (dir[1] / l) * 2.2, g = Terrain.heightAt(cx, cn);
+    tb.addGeometry(new THREE.BoxGeometry(0.28, 22, 0.28).translate(cx, g + 11, -cn), this.col.iron);   // la croce sul palo
+    tb.addGeometry(new THREE.BoxGeometry(2.6, 0.26, 0.26).translate(cx, g + 19.2, -cn), this.col.iron);
+  },
+
+  /** MATER ECCLESIAE E SAN MATTEO: il campanile quadrato bianco con la cella aperta e la croce, il tamburo curvo di conci. */
+  _matteo(f, fe, S, { y, top, wall, light }) {
+    const T = S.torre, tb = Tiles.builderAt(T.c[0], T.c[1], 'edifici'), white = new THREE.Color('#efede6'), L = T.lato, y0 = top - 0.3;
+    const box = (sx, sy, sz, c, x, yy, z) => tb.addGeometry(new THREE.BoxGeometry(sx, sy, sz).translate(x, yy + sy / 2, -z), c);
+    box(L, T.h - 2.4, L, white, T.c[0], y0, T.c[1]);
+    for (const [dx, dz] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) box(0.5, 1.9, 0.5, white, T.c[0] + dx * (L / 2 - 0.25), y0 + T.h - 2.4, T.c[1] + dz * (L / 2 - 0.25));
+    box(L + 0.2, 0.5, L + 0.2, white, T.c[0], y0 + T.h - 0.5, T.c[1]);
+    tb.addGeometry(new THREE.ConeGeometry(0.32, 0.6, 6).translate(T.c[0], y0 + T.h - 1.3, -T.c[1]), new THREE.Color('#6b5434'));
+    box(0.12, 1.6, 0.12, this.col.iron, T.c[0], y0 + T.h, T.c[1]);
+    box(0.8, 0.12, 0.12, this.col.iron, T.c[0], y0 + T.h + 1.0, T.c[1]);
+    const D = S.tamburo, ring = new THREE.Color(S.muro);
+    tb.addGeometry(new THREE.CylinderGeometry(D.r, D.r, D.h, 18, 1, true).translate(D.c[0], top + D.h / 2 - 0.1, -D.c[1]), ring);
+    tb.addGeometry(new THREE.CylinderGeometry(D.r + 0.25, D.r + 0.25, 0.4, 18, 1, true).translate(D.c[0], top + D.h, -D.c[1]), light);
   },
 
   /** Pinnacolo di pietra a vaso (profilo ruotato) sulla cornice. */
@@ -7873,7 +8152,31 @@ const Details = {
       for (const s of [-1, 1]) for (let k = 0; k < rows; k++) f.box(pw / 2 - 0.22, ph / rows - 0.2, 0.04, panel, s * pw / 4, s0 + 0.1 + (k * (ph - 0.1)) / rows, 0.12);
     }
     for (const s of [-1, 1]) f.box(0.36, ph + 0.3, 0.2, light, s * (pw / 2 + 0.18), s0, 0.1);   // stipiti
-    if (P.tipo === 'spezzato') {
+    if (P.tipo === 'timpano') {
+      // lesene, trabeazione con la targa e timpano triangolare con la lunetta dipinta (Madonna delle Grazie)
+      for (const s of [-1, 1]) f.box(0.5, ph + 0.5, 0.26, light, s * (pw / 2 + 0.45), s0 - 0.2, 0.13);
+      f.box(pw + 1.7, 0.75, 0.3, light, 0, s0 + ph + 0.3, 0.15);
+      f.box(pw + 0.6, 0.45, 0.06, light.clone().multiplyScalar(1.05), 0, s0 + ph + 0.45, 0.32);   // targa
+      const tri = new THREE.Shape([new THREE.Vector2(-pw / 2 - 0.9, 0), new THREE.Vector2(pw / 2 + 0.9, 0), new THREE.Vector2(0, 1.25)]);
+      tri.holes.push(new THREE.Path([new THREE.Vector2(-pw / 2 - 0.45, 0.18), new THREE.Vector2(0, 0.98), new THREE.Vector2(pw / 2 + 0.45, 0.18)]));
+      f.add(new THREE.ExtrudeGeometry(tri, { depth: 0.3, bevelEnabled: false }), light, 0, s0 + ph + 1.05, 0.02);
+      f.add(new THREE.ShapeGeometry(new THREE.Shape([new THREE.Vector2(-pw / 2 - 0.45, 0.18), new THREE.Vector2(pw / 2 + 0.45, 0.18), new THREE.Vector2(0, 0.98)])),
+        new THREE.Color(P.lunetta ?? '#c98f86'), 0, s0 + ph + 1.05, 0.12);
+    } else if (P.tipo === 'vetro') {
+      // portale vetrato moderno: telaio scuro coi montanti e la fascia sopra
+      const frame = new THREE.Color('#3b3d40');
+      for (const s of [-1, 1]) f.box(0.12, ph, 0.16, frame, s * (pw / 2 + 0.06), s0, 0.12);
+      for (const x of [-pw / 4, pw / 4]) f.box(0.06, ph, 0.14, frame, x, s0, 0.12);
+      f.box(pw + 0.24, 0.16, 0.16, frame, 0, s0 + ph, 0.12);
+      f.box(pw + 0.6, 0.24, 0.5, light, 0, s0 + ph + 0.25, 0.25);
+    } else if (P.tipo === 'arco') {
+      // portale ad arco: ghiera di pietra a tutto sesto sopra la porta, chiave e cornicetta
+      const ring = new THREE.Shape();
+      ring.absarc(0, 0, pw / 2 + 0.36, 0, Math.PI, false); ring.absarc(0, 0, pw / 2, Math.PI, 0, true);
+      f.add(new THREE.ExtrudeGeometry(ring, { depth: 0.22, bevelEnabled: false, curveSegments: 7 }), light, 0, s0 + ph, 0.0);
+      f.add(new THREE.CircleGeometry(pw / 2, 7, 0, Math.PI), wood.clone().multiplyScalar(0.8), 0, s0 + ph, 0.1);
+      f.box(0.3, 0.42, 0.3, light, 0, s0 + ph + pw / 2 + 0.1, 0.15);
+    } else if (P.tipo === 'spezzato') {
       // mensole in cima agli stipiti, trabeazione e timpano triangolare spezzato (due falde con il vuoto al centro)
       for (const s of [-1, 1]) f.box(0.34, 0.7, 0.32, light, s * (pw / 2 + 0.3), s0 + ph - 0.35, 0.16);
       f.box(pw + 1.2, 0.36, 0.3, light, 0, s0 + ph + 0.3, 0.15);
@@ -7899,7 +8202,7 @@ const Details = {
   },
 
   /** Oculo: strombatura a anelli (profilo ruotato), vetro scuro e, se c'è, la grata di ferro. */
-  _oculo(f, x, yy, r, rings, grate, light, sy = 1) {
+  _oculo(f, x, yy, r, rings, grate, light, sy = 1, full = false) {
     const R0 = r + 0.15 * rings, P = [[R0 + 0.06, 0.1]];
     let z = 0.1;
     for (let k = 0; k < rings; k++) {
@@ -7910,7 +8213,7 @@ const Details = {
     P.push([r, 0.08]);
     const seg = rings > 1 ? 16 : 12;
     f.add(new THREE.LatheGeometry(P.map(([a, b]) => new THREE.Vector2(a, b)), seg).rotateX(Math.PI / 2).scale(1, sy, 1), light, x, yy, 0);
-    f.add(new THREE.CircleGeometry(r, seg).scale(1, sy, 1), grate ? new THREE.Color('#22272c') : new THREE.Color('#2c3c50'), x, yy, 0.085);
+    f.add(new THREE.CircleGeometry(r, seg).scale(1, sy, 1), full ? light : grate ? new THREE.Color('#22272c') : new THREE.Color('#2c3c50'), x, yy, full ? 0.14 : 0.085);
     if (!grate) return;
     for (const d of [-0.5, 0, 0.5]) {
       const L = 2 * Math.sqrt(r * r - (d * r) ** 2);
@@ -7920,8 +8223,9 @@ const Details = {
   },
 
   /** Finestra rettangolare: vetro scuro, cornice di pietra col davanzale e, se c'è, la grata di ferro. */
-  _finestra(f, x, y0, w, h, light, grate) {
+  _finestra(f, x, y0, w, h, light, grate, louver = false) {
     f.box(w, h, 0.06, new THREE.Color('#2a2c30'), x, y0, 0.08);
+    if (louver) for (let k = 1; k < h / 0.22; k++) f.box(w, 0.05, 0.08, new THREE.Color('#8a8a86'), x, y0 + k * 0.22, 0.11, -0.3);
     f.box(w + 0.44, 0.2, 0.2, light, x, y0 + h, 0.1);
     f.box(w + 0.5, 0.16, 0.26, light, x, y0 - 0.16, 0.13);
     for (const s of [-1, 1]) f.box(0.22, h, 0.18, light, x + s * (w / 2 + 0.11), y0, 0.09);
@@ -7931,11 +8235,12 @@ const Details = {
   },
 
   /** Stemma di pietra: scudo a punta con la corona. */
-  _stemma(f, x, y0, light) {
+  _stemma(f, x, y0, light, k = 1) {
     const sh = new THREE.Shape();
-    sh.moveTo(-0.22, 0.5); sh.lineTo(0.22, 0.5); sh.lineTo(0.22, 0.18); sh.quadraticCurveTo(0.22, 0, 0, -0.06); sh.quadraticCurveTo(-0.22, 0, -0.22, 0.18); sh.closePath();
-    f.add(new THREE.ExtrudeGeometry(sh, { depth: 0.1, bevelEnabled: false, curveSegments: 3 }), light, x, y0, 0.06);
-    f.box(0.36, 0.12, 0.12, light, x, y0 + 0.52, 0.1);
+    sh.moveTo(-0.22 * k, 0.5 * k); sh.lineTo(0.22 * k, 0.5 * k); sh.lineTo(0.22 * k, 0.18 * k); sh.quadraticCurveTo(0.22 * k, 0, 0, -0.06 * k);
+    sh.quadraticCurveTo(-0.22 * k, 0, -0.22 * k, 0.18 * k); sh.closePath();
+    f.add(new THREE.ExtrudeGeometry(sh, { depth: 0.1, bevelEnabled: false, curveSegments: 3 }), light, x, y0, 0.06 + 0.1 * (k - 1));
+    f.box(0.36 * k, 0.12 * k, 0.12, light, x, y0 + 0.52 * k, 0.1 + 0.1 * (k - 1));
   },
 
   /** Lo stesso sistema della facciata spostato di x0 lungo il muro. */
