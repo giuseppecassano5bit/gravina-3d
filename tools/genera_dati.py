@@ -1890,6 +1890,9 @@ MENINNI = ('Casino di Meninni', (1572, -536))                   # sul Guardialto
 # Nicola»), e la facciata del 1704 guarda la piazzetta in fondo a Via Cassese (Street View, ottobre 2025). Senza
 # l'unione nel diorama c'era un corridoio vuoto al posto della navata.
 CHIESE_AREE = {411139790: 385174930}
+# Blocco N3: chiese OSM (amenity=place_of_worship, building=yes) che Overture dà come case: l'Addolorata in Via Borgo
+# (Google la chiama «Chiesa dell'Annunziata»; facciata nelle foto di utenti su Google Maps, 2018 e 2022)
+CHIESE_OSM = {411138843}
 CHIESE_AREE_OVERPASS = '[out:json][timeout:60];(way(385174930););out tags geom;'
 
 
@@ -2320,6 +2323,9 @@ def name_places(old, city):
         if b:
             b['name'], b['kind'] = name, CITY_KIND['church']
             b['height'] = 12.0
+    for b in every:
+        if b.get('osm') in CHIESE_OSM:
+            b['kind'] = KIND['church']
     b = pick(MENINNI[1])
     if b:
         b['name'], b['kind'], b['height'] = MENINNI[0], CITY_KIND['villa'], 9.5
