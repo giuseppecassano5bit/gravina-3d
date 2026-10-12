@@ -369,6 +369,34 @@ Notizie storiche e posizioni dei monumenti da fonti pubbliche, tra cui:
   Fontana la Stella**: tre alberi sul lato nord verso il ponte (Street View, ottobre 2025). **Via Vittorio
   Veneto**: lampioni a palo neri e paletti di pietra agli incroci (Street View, ottobre 2025). In OSM nel centro
   storico non ci sono alberi né lampioni: ci sono solo quelli visti
+* Facciate delle chiese (blocco N3, tabella `FACCIATE` in `index.html`), solo come riferimento visivo: posizioni e sagome
+  restano quelle di OSM e Overture, ogni elemento si vede in una foto, nessuna scritta coi nomi. **Santa Sofia**: foto su
+  Wikimedia Commons di [Lucrezia Gennaro](https://commons.wikimedia.org/wiki/File:Santa_Sofia_1.jpg) e
+  [Asia](https://commons.wikimedia.org/wiki/File:Chiesa_di_Santa_Sofia_(Gravina_in_Puglia).jpg) (CC BY-SA 4.0) e Street View
+  (aprile 2025, «25 Via Santa Sofia»: la facciata guarda Via Santa Sofia, verso nord-ovest). **Santa Teresa**: Street View
+  (ottobre 2025, «28 Via Vittorio Veneto»). **San Nicola**: Street View (ottobre 2025, «17 Via Pasquale Cassese») e una foto
+  di un utente su Google Maps (luglio 2025); la navata è l'area OSM del luogo di culto w385174930, che la pipeline unisce
+  alla sagoma w411139790 (`CHIESE_AREE`). **Addolorata** (per Google «Chiesa dell'Annunziata», stessa sagoma OSM
+  w411138843, che la pipeline fa chiesa con `CHIESE_OSM`): due foto di utenti su Google Maps (agosto 2018 e agosto 2022).
+  **Santa Lucia**: la cappella imbiancata davanti alla roccia nella [foto di Arditogi](https://commons.wikimedia.org/wiki/File:Chiesa_di_Santa_Lucia,_Gravina_in_Puglia,_Puglia.jpg)
+  (CC BY-SA 3.0); le due nicchie della [foto di Giusysysy](https://commons.wikimedia.org/wiki/File:Gravina_in_Puglia_-_Chiesa_di_Santa_Lucia_-_esterno.JPG)
+  (CC BY-SA 4.0) sono nella parete di roccia dietro, non la fronte. **Madonna delle Grazie**: [foto di Davidebuono su
+  Commons](https://commons.wikimedia.org/wiki/File:Facciata_Madonna_delle_Grazie.jpg) (CC BY-SA 4.0) e Street View (maggio 2025,
+  «32 Via Madonna della Grazia»); la chiesa è OSM w411139821 (satellite): il punto di Overture «Santuario Parrocchia Madonna
+  delle Grazie» cadeva sull'edificio r6148494. Da Street View anche **Gesù Buon Pastore** (ottobre 2025, «83 Via Guardialto»),
+  **Santi Pietro e Paolo** (aprile 2025, Via Falcone e Borsellino; il tetto a otto falde dal satellite; il nome era su una
+  pensilina, w411146608), **Spirito Santo** (ottobre 2025, «20 Via Tiziano» e Via Bari; la vela, alta verso nord-ovest, anche
+  dall'ombra sul satellite), **Mater Ecclesiae e San Matteo** (ottobre 2025, «15 Via Ciro Menotti»), **SS. Crocifisso e San
+  Sebastiano** (ottobre 2025, «148 Via S. Sebastiano»). **San Domenico**: una foto di un utente su Google Maps (ottobre 2024)
+  e il satellite (la chiesa è il corpo a sud del chiostro, la facciata su Piazza Cavour). Campanili solo dove si vedono.
+* Scuole (blocco N3, tabella `SCUOLE` in `index.html`), da Street View: Liceo scientifico Tarantino (maggio 2022), ITT
+  Bachelet · IPSIA Galilei (aprile 2025, le due scale antincendio), Montemurro (maggio 2025, «56 Via Tripoli»), Don Saverio
+  Valerio (ottobre 2025, «23 Via Sandro Pertini»), Ingannamorte (maggio 2025, «5 Via Carlo Rosselli»), Savio-Fiore (ottobre
+  2025, «16 Via Fratelli Cervi»), Benedetto XIII (maggio 2025, «9 Via Libertà»), San Giovanni Bosco (maggio 2025, «14 Via
+  Giuseppe Lopriore», intonaco rosa), Soranno (ottobre 2025, da lontano). Il Liceo linguistico («16 Via Goffredo Mameli»,
+  maggio 2022) e S. G. Bosco 2 («16 Via Guardialto», ottobre 2025) su Street View sono palazzi di abitazioni, come
+  l'Arcobaleno: solo l'etichetta. Padre Pio, Giovanni Paolo II, Tommaso Fiore e Santomasi: nessuna foto utile (siepi,
+  cassonetti, altri palazzi), restano con le regole comuni.
 * Geografia generale: [Wikipedia, Gravina in Puglia](https://en.wikipedia.org/wiki/Gravina_in_Puglia)
 
 Dati geografici della città intera (fase 3.4):
