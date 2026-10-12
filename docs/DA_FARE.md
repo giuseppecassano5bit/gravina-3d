@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 9 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2 e N2b della fase 3.4 uniti (N2 il 07/10/2026, PR #20; N2b il 09/10/2026, PR #21, con l'approvazione del committente); **N3 (facciate di chiese e scuole) in corso** (`fase-3-4-n3-facciate`, prompt `riferimenti/PROMPT_BLOCCHI_N3_N6.md`).
+Stato al 13 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2 e N2b della fase 3.4 uniti (N2 il 07/10/2026, PR #20; N2b il 09/10/2026, PR #21, con l'approvazione del committente); **N3 (facciate di chiese e scuole) finito, in attesa del feedback** (`fase-3-4-n3-facciate`, PR #22, prompt `riferimenti/PROMPT_BLOCCHI_N3_SEGUITO.md`); poi N4, N5, N6.
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
@@ -48,8 +48,8 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N3 → N4 →
 - [x] Area Quercus: maneggio e giochi non ci sono (committente, 01/10/2026), tolti nel blocco M1;
       i tavoli restano.
 - [ ] Da verificare con il committente: il nome della strada del bosco
-      (in OSM non ce l'ha: nel diorama «Strada nel bosco»); la chiesa di Santi Pietro e Paolo
-      (nome da Overture).
+      (in OSM non ce l'ha: nel diorama «Strada nel bosco»). La chiesa di Santi Pietro e Paolo: il nome ora è sulla chiesa a
+      cono (blocco N3, risposta del committente).
 - [ ] **Prestazioni**: se dopo i blocchi M e N il diorama resta pesante, il committente pensa a
       un'impostazione che carichi il mondo solo attorno alla visuale; in città non si riduce niente,
       al massimo in periferia dove dall'auto non si vede (01/10/2026).
@@ -186,8 +186,24 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N3 → N4 →
       (sm-05, sm-12); l'anello di Santa Lucia con «Via Santa Lucia» (w1512581502) se si trova un collegamento; le vie
       w1512581499–501 («Via Piaggio»), in Overture ma vie cieche del centro storico, non disegnate; la posizione della scheda
       «Santa Lucia» ([15, 109]) accanto alla chiesa OSM ([3,9; 123,4]).
-- [ ] **N3 · facciate di chiese e scuole** (`fase-3-4-n3-facciate`, era N2; **in corso dal 09/10/2026**, piano presentato nella PR #22 e approvato dal committente il 09/10/2026, foto mancanti da cercare su Street View e Google Earth): Santa Teresa, Santa Sofia,
-      San Nicola, Addolorata e le chiese della città coi campanili, scuole più riconoscibili, dalle foto.
+- [x] **N3 · facciate di chiese e scuole** (`fase-3-4-n3-facciate`, PR #22, piano approvato il 09/10/2026; lavoro del
+      12–13/10/2026, **in attesa del feedback del committente**):
+      - un costruttore (`Details.facciata`) e una tabella (`FACCIATE`): Santa Sofia (su Via Santa Sofia, non sul vicolo),
+        Santa Teresa, **San Nicola** a due ordini sulla piazzetta (la navata era un corridoio vuoto: in pipeline è l'area OSM
+        del luogo di culto), Addolorata (chiesa e non più casa), **Santa Lucia** (la cappella imbiancata davanti alla roccia
+        della foto di Arditogi: le nicchie sono nella roccia dietro), Madonna delle Grazie con l'aquila (sulla chiesa vera:
+        il nome era su un altro edificio), Gesù Buon Pastore, Santi Pietro e Paolo col tetto a otto falde (il nome era su una
+        pensilina), Spirito Santo con la vela (prima era una casa), Mater Ecclesiae col campanile e il tamburo, il convento
+        del Crocifisso, **San Domenico** (trovato: foto di un utente su Google Maps);
+      - conci e bugnato dallo shader (`SURF.CONCI`), finestre a nastro delle scuole (`SURF.SCUOLA`), tabella `SCUOLE` con colori,
+        recinzioni, scale antincendio, tettoia; Benedetto XIII e San Giovanni Bosco scuole; tre scuole in un palazzo: etichetta;
+      - misure: 388 KB compressi (+17), triangoli al massimo 341 200 su PC («alta», +6 400) e 230 700 sul telefono («centro»,
+        +4 900: più dei 3 000 stimati, sotto il tetto di 250 000), draw call invariate, «Pronto» 1,25 e 1,30 s.
+- [ ] Da N3, se il committente vuole: la palestra del Bachelet (il volume cieco grigio della foto; non l'ho modellato), le
+      scuole senza foto utile (Padre Pio, Giovanni Paolo II, Tommaso Fiore, Santomasi: servono foto), la torre e il tamburo di
+      Mater Ecclesiae più fedeli (solo da Street View sul fianco), il convento della Madonna delle Grazie con le finestre, la
+      statua della Madonna davanti a San Domenico; sul telefono i dettagli più fini delle facciate solo da molto vicino, se
+      servono triangoli.
 - [ ] **N4 · Casino di Meninni e villette** (`fase-3-4-n4-meninni-villette`): il Casino com'è (rudere,
       muro di cinta, cancello, pini e cipressi, cappella), la strada fino all'ingresso e al parcheggio
       con la goccia (via quella di oggi sulla SP201), le villette attorno al Liceo scientifico Tarantino.
@@ -327,8 +343,8 @@ commerciali e protette: il committente ha scelto musica ambient originale, gener
       quelle con le fonti nel README.
 - [x] **Abitazioni rupestri**: restano 20 sui gradoni (né dati né fonti le collocano una per una);
       nel blocco D le grotte fitte delle Sette Camere, dove la posizione c'è (OSM e foto).
-- [ ] **Altre chiese** (Santa Teresa, Santa Sofia, San Nicola, Addolorata): portale generico,
-      perché su Street View i vicoli stretti non mostrano bene le facciate. Servono foto.
+- [x] **Altre chiese** (Santa Teresa, Santa Sofia, San Nicola, Addolorata): rifatte nel blocco N3 dalle foto (Street View,
+      Commons, foto di utenti su Google Maps).
 
 **Terreno e percorso**
 - [x] Le scalinate reali avevano pochi gradini perché le quote erano stilizzate: con le quote

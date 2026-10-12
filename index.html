@@ -7997,7 +7997,7 @@ const Details = {
     }
     for (const [x, pw, ph, sg] of S.porte ?? []) {                                // porte laterali con la cornice e i gradini
       const p0 = y + sg;
-      this._portale(f, { w: pw, h: ph, tipo: 'cornice', legno: S.portale?.legno, riquadri: S.portale?.riquadri }, p0, light, x);
+      this._portale(f, { w: pw, h: ph, tipo: 'cornice', legno: S.portale?.legno }, p0, light, x);
       if (sg > 0.05) this._gradini(f, { n: Math.max(1, Math.round(sg / 0.17)), w: pw + 1.0, fondo: 0.35 + 0.3 * Math.round(sg / 0.17) }, y, p0, light, x);
     }
     if (S.rosone) this._rosone(f, S.rosone[0], y + S.rosone[1], S.rosone[2], S.rosone[3], light);
@@ -8008,7 +8008,7 @@ const Details = {
       f.box(w - 0.1, hh, 0.2, light, 0, y + yy, 0.1);
     }
     for (const [fy, fw, fh, step, x0, x1, skip = []] of S.filari ?? []) {          // file regolari di finestre
-      for (let x = x0; x <= x1 + 0.01; x += step) if (!skip.some((k) => Math.abs(k - x) < step / 2)) this._finestra(f, x, y + fy, fw, fh, light, false);
+      for (let x = x0; x <= x1 + 0.01; x += step) if (!skip.some((k) => Math.abs(k - x) < step / 2)) this._finestra(f, x, y + fy, fw, fh, light, false, false, true);
     }
     for (const [x, z, h] of S.croci ?? []) this._croce(f, x, y, z, h, light);
     if (S.recinto) this._recinto(f, M, n, w, S.recinto, light);
@@ -8048,7 +8048,7 @@ const Details = {
       const yy = Terrain.heightAt(p[0], p[1]);
       f.box(1.22, R.muro + 0.3, 0.32, light, xm, yy - 0.3, R.z);                 // muretto
       f.box(1.22, 0.06, 0.06, iron, xm, yy + R.muro + 0.95, R.z);               // corrimano
-      for (const dx of [-0.45, -0.15, 0.15, 0.45]) f.box(0.04, 0.95, 0.04, iron, xm + dx, yy + R.muro, R.z);
+      for (const dx of [-0.3, 0.3]) f.box(0.04, 0.95, 0.04, iron, xm + dx, yy + R.muro, R.z);
     }
   },
 
@@ -8189,14 +8189,14 @@ const Details = {
   /** Pinnacolo di pietra a vaso (profilo ruotato) sulla cornice. */
   _pinnacolo(fe, x, y0, z, light) {
     const P = [[0, 0], [0.26, 0], [0.26, 0.12], [0.16, 0.2], [0.24, 0.48], [0.12, 0.72], [0.16, 0.8], [0, 0.95]];
-    fe.add(new THREE.LatheGeometry(P.map(([a, b]) => new THREE.Vector2(a, b)), 6), light, x, y0, z);
+    fe.add(new THREE.LatheGeometry(P.map(([a, b]) => new THREE.Vector2(a, b)), 4).rotateY(Math.PI / 4), light, x, y0, z);
   },
 
   /** Rosone leggero: ghiera di pietra (profilo ruotato), vetro scuro, raggi e mozzo. */
   _rosone(f, x, yy, r, rays, light) {
     const P = [[r + 0.42, 0.1], [r + 0.42, 0.3], [r + 0.16, 0.3], [r + 0.16, 0.2], [r, 0.2], [r, 0.08]];
-    f.add(new THREE.LatheGeometry(P.map(([a, b]) => new THREE.Vector2(a, b)), 16).rotateX(Math.PI / 2), light, x, yy, 0);
-    f.add(new THREE.CircleGeometry(r, 16), new THREE.Color('#2c3a4c'), x, yy, 0.085);
+    f.add(new THREE.LatheGeometry(P.map(([a, b]) => new THREE.Vector2(a, b)), 12).rotateX(Math.PI / 2), light, x, yy, 0);
+    f.add(new THREE.CircleGeometry(r, 12), new THREE.Color('#2c3a4c'), x, yy, 0.085);
     for (let k = 0; k < rays / 2; k++) f.box(0.12, r * 2, 0.1, light, x, yy - r, 0.14, (k * Math.PI * 2) / rays);
     f.add(new THREE.CylinderGeometry(r * 0.26, r * 0.26, 0.2, 8).rotateX(Math.PI / 2), light, x, yy, 0.16);
   },
@@ -8300,11 +8300,11 @@ const Details = {
       P.push([R, z], [R - 0.15, z]);
     }
     P.push([r, 0.08]);
-    const seg = rings > 1 ? 16 : 12;
+    const seg = rings > 1 ? 12 : r < 0.35 ? 8 : 10;
     f.add(new THREE.LatheGeometry(P.map(([a, b]) => new THREE.Vector2(a, b)), seg).rotateX(Math.PI / 2).scale(1, sy, 1), light, x, yy, 0);
     f.add(new THREE.CircleGeometry(r, seg).scale(1, sy, 1), full ? light : grate ? new THREE.Color('#22272c') : new THREE.Color('#2c3c50'), x, yy, full ? 0.14 : 0.085);
     if (!grate) return;
-    for (const d of [-0.5, 0, 0.5]) {
+    for (const d of [-0.34, 0.34]) {
       const L = 2 * Math.sqrt(r * r - (d * r) ** 2);
       f.box(0.05, L, 0.04, this.col.iron, x + d * r, yy - L / 2, 0.11);
       f.box(L, 0.05, 0.04, this.col.iron, x, yy + d * r - 0.025, 0.11);
@@ -8312,15 +8312,20 @@ const Details = {
   },
 
   /** Finestra rettangolare: vetro scuro, cornice di pietra col davanzale e, se c'è, la grata di ferro. */
-  _finestra(f, x, y0, w, h, light, grate, louver = false) {
+  _finestra(f, x, y0, w, h, light, grate, louver = false, plain = false) {
     f.box(w, h, 0.06, new THREE.Color('#2a2c30'), x, y0, 0.08);
+    if (plain) {                                                                  // finestra di una fila lunga: vetro, architrave e davanzale
+      f.box(w + 0.3, 0.18, 0.18, light, x, y0 + h, 0.09);
+      f.box(w + 0.36, 0.14, 0.24, light, x, y0 - 0.14, 0.12);
+      return;
+    }
     if (louver) for (let k = 1; k < h / 0.22; k++) f.box(w, 0.05, 0.08, new THREE.Color('#8a8a86'), x, y0 + k * 0.22, 0.11, -0.3);
     f.box(w + 0.44, 0.2, 0.2, light, x, y0 + h, 0.1);
     f.box(w + 0.5, 0.16, 0.26, light, x, y0 - 0.16, 0.13);
     for (const s of [-1, 1]) f.box(0.22, h, 0.18, light, x + s * (w / 2 + 0.11), y0, 0.09);
     if (!grate) return;
-    for (let k = 1; k < 5; k++) f.box(0.04, h, 0.04, this.col.iron, x - w / 2 + (k * w) / 5, y0, 0.12);
-    for (let k = 1; k < 3; k++) f.box(w, 0.04, 0.04, this.col.iron, x, y0 + (k * h) / 3, 0.12);
+    for (let k = 1; k < 4; k++) f.box(0.04, h, 0.04, this.col.iron, x - w / 2 + (k * w) / 4, y0, 0.12);
+    f.box(w, 0.04, 0.04, this.col.iron, x, y0 + h / 2, 0.12);
   },
 
   /** Stemma di pietra: scudo a punta con la corona. */
@@ -8376,10 +8381,9 @@ const Details = {
     for (let k = 0; k < n; k++) {
       const x = -w / 2 + 0.2 + (k + 0.5) * bay, yi = y + A.imposta;
       f.box(A.w, A.imposta, 0.02, shade, x, y, 0.07);                             // fondo dell'arcata
-      f.add(new THREE.CircleGeometry(r, 8, 0, Math.PI), shade, x, yi, 0.075);
       const ring = new THREE.Shape();
       ring.absarc(0, 0, r + 0.16, 0, Math.PI, false); ring.absarc(0, 0, r, Math.PI, 0, true);
-      f.add(new THREE.ExtrudeGeometry(ring, { depth: 0.16, bevelEnabled: false, curveSegments: 6 }), light, x, yi, 0.0);
+      f.add(new THREE.ExtrudeGeometry(ring, { depth: 0.16, bevelEnabled: false, curveSegments: 4 }), light, x, yi, 0.0);
       for (const s of [-1, 1]) f.box(0.16, A.imposta, 0.16, light, x + s * (r + 0.08), y, 0.08);   // pilastrini
     }
   },
@@ -13060,6 +13064,7 @@ async function main() {
     document.body.append(debugEl);
     window.gravina = {
       THREE, CONFIG, scene, camera, renderer, network, driver, rig, Terrain, Ravine, Relief, Guida, Tiles, TileBuilder, MeshFit, Botromagno, Stadio, Sottopassi, Buildings, Details, Scenery, DATA, GEO, Plane, problems, landmarks,
+      FACCIATE, SCUOLE,
       /** Costruisce subito tutti i riquadri della città (prove). */
       buildAll() { for (const t of Tiles.list) Tiles.build(t, areas); cityDone = false; buildCity(); },
       get phase() { return phase; },
