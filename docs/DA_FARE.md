@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 13 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2 e N2b della fase 3.4 uniti (N2 il 07/10/2026, PR #20; N2b il 09/10/2026, PR #21, con l'approvazione del committente); **N3 (facciate di chiese e scuole) finito, in attesa del feedback** (`fase-3-4-n3-facciate`, PR #22, prompt `riferimenti/PROMPT_BLOCCHI_N3_SEGUITO.md`); poi N4, N5, N6.
+Stato al 13 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2, N2b e N3 della fase 3.4 uniti (N2 il 07/10/2026, PR #20; N2b il 09/10/2026, PR #21; N3 il 13/10/2026, PR #22, con l'approvazione anticipata del committente); **N4 (Casino di Meninni e villette) in corso** (`fase-3-4-n4-meninni-villette`, prompt `riferimenti/PROMPT_BLOCCHI_N4_N6.md`); poi N5, N6.
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
@@ -187,7 +187,7 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N3 → N4 →
       w1512581499–501 («Via Piaggio»), in Overture ma vie cieche del centro storico, non disegnate; la posizione della scheda
       «Santa Lucia» ([15, 109]) accanto alla chiesa OSM ([3,9; 123,4]).
 - [x] **N3 · facciate di chiese e scuole** (`fase-3-4-n3-facciate`, PR #22, piano approvato il 09/10/2026; lavoro del
-      12–13/10/2026, **in attesa del feedback del committente**):
+      12–13/10/2026, unita su `main` il 13/10/2026 con l'approvazione anticipata; screenshot ancora da vedere):
       - un costruttore (`Details.facciata`) e una tabella (`FACCIATE`): Santa Sofia (su Via Santa Sofia, non sul vicolo),
         Santa Teresa, **San Nicola** a due ordini sulla piazzetta (la navata era un corridoio vuoto: in pipeline è l'area OSM
         del luogo di culto), Addolorata (chiesa e non più casa), **Santa Lucia** (la cappella imbiancata davanti alla roccia
@@ -204,7 +204,7 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N3 → N4 →
       Mater Ecclesiae più fedeli (solo da Street View sul fianco), il convento della Madonna delle Grazie con le finestre, la
       statua della Madonna davanti a San Domenico; sul telefono i dettagli più fini delle facciate solo da molto vicino, se
       servono triangoli.
-- [ ] **N4 · Casino di Meninni e villette** (`fase-3-4-n4-meninni-villette`): il Casino com'è (rudere,
+- [ ] **N4 · Casino di Meninni e villette** (`fase-3-4-n4-meninni-villette`, **in corso**: piano breve in attesa di risposta): il Casino com'è (rudere,
       muro di cinta, cancello, pini e cipressi, cappella), la strada fino all'ingresso e al parcheggio
       con la goccia (via quella di oggi sulla SP201), le villette attorno al Liceo scientifico Tarantino.
 - [ ] **N5 · Capotenda, vigne e uliveti** (`fase-3-4-n5-capotenda-vigne`): il sentiero che dal Padre
