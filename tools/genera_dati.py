@@ -1688,6 +1688,10 @@ ULIVETI = [
     (6, [(563, 1797), (602, 1800), (596, 1710), (560, 1710)], 90, 'accanto al Castello Svevo, lungo la carrareccia a sud'),
     (7, [(-188, -1010), (-149, -995), (-92, -1028), (-107, -1112), (-122, -1133), (-197, -1040)], -58,
      'Contrada Cozzarolo, il recinto murato a ovest'),
+    # richiesta del committente del 14/10/2026: gli ulivi della Madonna della Stella stanno dall'altra parte della strada, tra
+    # Contrada Botromagno e Via Madonna della Stella (satellite: uliveto a filari a sud della contrada, a ovest del fossato)
+    (8, [(-503, 150), (-389, 255), (-362, 243), (-344, 162), (-329, 0), (-551, 0), (-551, 108)], 43,
+     'tra Contrada Botromagno e Via Madonna della Stella, a ovest del fossato'),
 ]
 ULIVETI_PASSO = 7.0
 ULIVETI_BORDO = 5.0
