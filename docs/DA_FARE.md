@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 15 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2, N2b, N3, N4 (Casino di Meninni) e N4b (villette) della fase 3.4 uniti (N2 il 07/10/2026, PR #20; N2b il 09/10/2026, PR #21; N3 il 13/10/2026, PR #22; N4 il 14/10/2026, PR #23, con l'approvazione anticipata del committente perché il contesto della chat si saturava); N4b (villette del Liceo Tarantino) unito il 14/10/2026 (PR #24, con l'approvazione anticipata del committente perché il contesto della chat si saturava); N5 (Capotenda e vigna di Botromagno) unito il 14/10/2026 (PR #25, approvato dal committente); N5b (uliveti, Casino Scacchi, Sportland) unito il 14/10/2026 (PR #26, approvato dal committente); **N5c (Hortus a piedi) FATTO** (branch `fase-3-4-n5c-hortus`, PR #27 in bozza, prove verdi), poi N6, N7 e N8 (richieste nuove del committente del 14/10/2026).
+Stato al 15 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2, N2b, N3, N4 (Casino di Meninni), N4b (villette), N5 (Capotenda), N5b (uliveti, Casino Scacchi, Sportland) e N5c (Hortus a piedi) uniti su main (N5c il 15/10/2026, PR #27); **N6 (mezzi nuovi) in corso** (branch `fase-3-4-n6-mezzi`; Audi RS Q8, Fiat Panda 2013, Ferrari Monza SP2, John Deere 8R coi contropesi; prompt `riferimenti/PROMPT_BLOCCHI_N5b_N8_SEGUITO.md`), poi N7 e N8.
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
@@ -275,8 +275,7 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N2b → N3 �
 - [ ] Da N5b, ritocchi possibili: dove guarda davvero la facciata del Casino Scacchi (scelta: sud-est), la sagoma vera del corpo alto
       (OSM è stretta e lunga), il manufatto tondo di Sportland (w411140007), il colore dello sterrato di via Guardialto Alto.
 - [x] **N5c · Hortus a piedi** (`fase-3-4-n5c-hortus`, PR #27 in bozza, 15/10/2026): Via Giacomo Leopardi pedonale fino al cancello di Hortus (OSM w1384781495) e anello nel giardino a terrazze (53 m, terra battuta). Cancello aperto per l'accesso pedonale, panchina panoramica in legno e ferro sulla terrazza alta affacciata sul Fondovico e la rupe di San Michele con sosta (`action: 'stand'`), apertura automatica della scheda e comparsa del pulsante «Riprendi il percorso» che al clic fa rialzare la figurina completando l'anello e tornando all'auto su Via San Vito Vecchio. Scheda descrittiva verificata e inclusione in «Piazze e giardini». Prove verdi: `simula` (20,14 km simulati, carreggiate e dettagli liberi), `interazioni` (77 controlli), `difetti` invariato; foglio prima/dopo `riferimenti/foto_n5c/n5c-prima-dopo.jpg`.
-- [ ] **N6 · mezzi nuovi** (`fase-3-4-n6-mezzi`): Audi RS Q8, Fiat Panda del 2013, Ferrari Monza SP2, John Deere 8R coi
-      contropesi (al posto di RS6 Avant, Panda 4x4 del 1999, Huracán e trattore di oggi); modelli da confermare nel piano.
+- [ ] **N6 · mezzi nuovi** (`fase-3-4-n6-mezzi`, **in corso**): Audi RS Q8, Fiat Panda del 2013, Ferrari Monza SP2, John Deere 8R coi contropesi (al posto di RS6 Avant, Panda 4x4 del 1999, Huracán e trattore di prima).
 - [ ] **N7 · cinema, teatri e luoghi della cultura** (`fase-3-4-n7-cultura`): Cinema Mastrogiacomo, Cinema Centrone, Teatro
       Vida e gli altri luoghi culturali, con facciate dalle foto e schede coi fatti verificati.
 - [ ] **N8 · cartolina, giro guidato e ritocchi** (`fase-3-4-n8-cartolina-giro`, era N6): cartolina con
