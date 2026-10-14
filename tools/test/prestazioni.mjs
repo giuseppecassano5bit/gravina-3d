@@ -43,6 +43,8 @@ const VIEWS = {
   'bosco a piedi': { foot: true },
   // Blocco N4: camera di guida sullo sterrato del Casino di Meninni, verso il rudere, i pini, il muro di cinta e i corvi.
   meninni: { at: [1437, -468], heading: [1, 0.1] },
+  // Blocco N4b: camera di guida su Via Ungaretti verso Piazza Digiesi, tra le villette (balconi, giardinetti, piazzette).
+  villette: { at: [688, -458], heading: [-0.35, 1] },
   // Blocco M3: la mongolfiera nel punto più pesante del giro (2 250 m, sopra il ciglio ovest verso la città),
   // vista esterna (cercato ogni 150 m con quattro angoli della camera). Resta l'ultima: dopo si è in volo.
   mongolfiera: { balloon: 2250, spin: 4.71 },

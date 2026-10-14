@@ -106,6 +106,10 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
   muri crollati a pezzi, senza tetto; nel cono di vista dalla ringhiera della Cattedrale verso il ponte restano bassi, così il ponte
   si vede) e i piani delle case vengono dalla tabella `LIVELLI` di `genera_dati.py` (rilevati su Street View, con via e data;
   «almeno N» dove la cima non si vede); dove non c'è una riga vale la regola di `Buildings.height`.
+- **Villette del Liceo Tarantino (blocco N4b, piano approvato dal committente il 14/10/2026)**: tutto il triangolo Via Montale – Via
+  Quasimodo – Via Bertocchi (in OSM «Bertocchi» è un refuso di Betocchi: nel diorama resta il nome OSM, segnalato nel README) è di tipo
+  «villetta» (`CITY_KIND` 13, oggetto `Villette` in sezione 6d); i livelli stanno nelle righe della città di `LIVELLI` (3 m per piano
+  più il parapetto, contati sul lato alto, niente «almeno»), unità e tetti (coppi, pannelli, attico) nella tabella `VILLETTE`.
 - **Facciate di chiese e scuole (blocco N3)**: tabelle `FACCIATE` e `SCUOLE` (sezione 6d), un solo costruttore
   (`Details.facciata`); solo gli elementi visti in una foto (fonti nel README), nessuna scritta coi nomi, campanili solo dove
   si vedono. In pipeline: la navata di San Nicola è l'area OSM del luogo di culto (`CHIESE_AREE`), l'Addolorata è una chiesa

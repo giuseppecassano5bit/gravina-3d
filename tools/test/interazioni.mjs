@@ -355,6 +355,19 @@ const vistaPonte = await page.evaluate(() => {
 });
 check('dalla ringhiera della Cattedrale il ponte si vede (nessuna casa sulla linea d’occhio)', vistaPonte.tiles > 20 && vistaPonte.hits === 0, `${vistaPonte.hits} ostacoli, impalcato a ${vistaPonte.deck} m, ${vistaPonte.tiles} riquadri`);
 
+// Blocco N4b: le villette del triangolo Via Montale – Via Quasimodo – Via Bertocchi (tipo 13 della città) coi livelli da Street
+// View (da 3 a 5: 3 m per piano più 1 m di parapetto), le unità della schiera, i coppi, i balconi e i giardinetti (preparati dopo
+// «Parti», col primo riquadro che li tocca: a questo punto della prova i riquadri della città sono tutti costruiti).
+const villette = await page.evaluate(() => {
+  const g = window.gravina, V = g.DATA.city().filter((b) => b.kind === 13), units = V.flatMap((b) => b.vil?.units ?? []).filter(Boolean);
+  const built = g.Tiles.list.filter((t) => t.e0 < 830 && t.e1 > 520 && t.n0 < -320 && t.n1 > -540).every((t) => t.built);
+  return { n: V.length, hMin: Math.min(...V.map((b) => b.height)), hMax: Math.max(...V.map((b) => b.height)), units: units.length,
+    coppi: units.filter((u) => u.coppi).length, built, ...g.Villette.count };
+});
+check('le villette del Liceo Tarantino: livelli da Street View, unità, coppi, balconi e giardinetti', villette.n === 16 && villette.hMin >= 10 && villette.hMax <= 16
+  && villette.units >= 50 && villette.coppi >= 8 && villette.built && villette.balconi > 100 && villette.giardini > 50,
+  `${villette.n} sagome, ${villette.hMin}–${villette.hMax} m, ${villette.units} unità (${villette.coppi} coi coppi), ${villette.balconi} balconi, ${villette.giardini} giardinetti`);
+
 // Vie cieche reali con la goccia (blocco M2): dall'elenco dei luoghi si arriva in auto e si riparte.
 // Blocco N4: il Casino di Meninni si raggiunge con lo sterrato nuovo, fino allo spiazzo davanti al cancello (circa 140 m dal Casino).
 for (const [name, at] of [['Casino di Meninni', [1451, -463]], ['Monumento alla Cola Cola', [1893, 102]], ['Fiera di San Giorgio', [-53, 948]]]) {

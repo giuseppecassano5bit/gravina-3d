@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 14 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2, N2b, N3 e N4 (Casino di Meninni) della fase 3.4 uniti (N2 il 07/10/2026, PR #20; N2b il 09/10/2026, PR #21; N3 il 13/10/2026, PR #22; N4 il 14/10/2026, PR #23, con l'approvazione anticipata del committente perché il contesto della chat si saturava); **prossimo: il resto di N4, le villette** (prompt `riferimenti/PROMPT_BLOCCHI_N4b_N6.md`), poi N5, N6.
+Stato al 14 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2, N2b, N3, N4 (Casino di Meninni) e N4b (villette) della fase 3.4 uniti (N2 il 07/10/2026, PR #20; N2b il 09/10/2026, PR #21; N3 il 13/10/2026, PR #22; N4 il 14/10/2026, PR #23, con l'approvazione anticipata del committente perché il contesto della chat si saturava); N4b (villette del Liceo Tarantino) unito il 14/10/2026 (PR #24, con l'approvazione anticipata del committente perché il contesto della chat si saturava); **prossimo: N5** (prompt `riferimenti/PROMPT_BLOCCHI_N5_N6.md`), poi N6.
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
@@ -222,9 +222,20 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N3 → N4 →
         341 200, telefono «centro» 230 700), vista «meninni» 67 100 su PC e 43 300 sul telefono, draw call al massimo 59 e 38;
         «Pronto» 1,45 s su PC e 1,42 sul telefono (erano 1,25 e 1,30: da rimisurare; se resta così, costruire il Casino
         dopo «Parti»); memoria JS 187 e 181 MB (oscilla).
-- [ ] **Resto di N4 · villette del triangolo Via Quasimodo – Via Montale – Via Carlo Betocchi** (blocco nuovo, prompt
-      `riferimenti/PROMPT_BLOCCHI_N4b_N6.md`, piano già approvato il 14/10/2026): piani da Street View nella tabella `LIVELLI`
-      estesa alla città, tipo «villetta», tetti in coppi dove il satellite li mostra, giardinetti, recinzioni, piazzette.
+- [x] **N4b · villette del triangolo Via Quasimodo – Via Montale – Via Carlo Betocchi** (`fase-3-4-n4b-villette`, PR #24,
+      unita il 14/10/2026 con l'approvazione anticipata del committente; prompt `riferimenti/PROMPT_BLOCCHI_N4b_N6.md`, piano già approvato il 14/10/2026):
+      - 16 sagome col centro nel triangolo diventano «villette» (tipo 13 della città); **livelli contati su Street View** (maggio e
+        ottobre 2025, 13 punti di ripresa) nella tabella `LIVELLI` estesa alla città: da 3 a 5 livelli (prima da 2 a 6), sul lato alto;
+      - **unità** della schiera (tabella `VILLETTE`, satellite del 14/10/2026: 8 m in Via Palazzeschi, 6 m sotto Piazza Digiesi), ognuna col
+        suo intonaco, il tetto alla sua quota e i suoi piani; shader `SURF.VILLETTA` (zoccolo, persiane o tapparelle, porte-finestre,
+        garage, pluviali, parapetto) e `SURF.RINGHIERA`; circa 250 balconi; terrazze col parapetto vero, torrini, pannelli, un attico;
+        **coppi** col colmo di traverso su 730, 746, 745, 723 e sul capo sud-ovest di 865;
+      - **giardinetti** (prato, muretto con la ringhiera, cancello tra i pilastri, siepe, palme e alberelli: circa 115) e le quattro
+        **piazzette** OSM con cedri, pini, siepi e panchine;
+      - Casino di Meninni e villette preparati dopo «Parti» (`Tiles.later`): «Pronto» 1,36 s su PC e 1,29 sul telefono (erano 1,45 e 1,42);
+      - nel README il refuso di OSM («Via Carlo Bertocchi», il poeta è Carlo Betocchi): nel diorama resta il nome OSM.
+- [ ] Villette, ritocchi possibili: i piani unità per unità dove la schiera mescola villette e palazzine (oggi una riga per sagoma più
+      le eccezioni della tabella `VILLETTE`), la trama dei coppi (oggi tinta unita, come i tetti del centro storico).
 - [ ] Casino di Meninni, ritocchi possibili: il muro di cinta a est e a sud (il satellite non lo mostra), i muretti a secco e i
       pali col filo spinato dello spiazzo (Street View), una foschia leggera vicino al rudere se il committente la vuole.
 - [ ] **N5 · Capotenda, vigne e uliveti** (`fase-3-4-n5-capotenda-vigne`): il sentiero che dal Padre

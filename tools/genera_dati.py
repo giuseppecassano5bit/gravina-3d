@@ -1878,7 +1878,7 @@ def city_height(b, dense, industrial):
 
 
 CITY_KIND = {'house': 0, 'church': 1, 'shed': 3, 'apartments': 4, 'public': 5, 'industry': 6, 'castle': 7, 'school': 8, 'villa': 9, 'padiglione': 10, 'tribuna': 11,
-             'rudere': 12}
+             'rudere': 12, 'villetta': 13}
 
 
 def city_buildings(buildings, cover):
@@ -1954,6 +1954,77 @@ def meninni_ruderi(city):
             city.append({'poly': geo[wid].simplify(0.3), 'kind': CITY_KIND['rudere'], 'cls': 'abandoned', 'name': None, 'height': h,
                          'level': 0, 'osm': wid})
             print(f'  rudere sul muro di cinta del Casino di Meninni: w{wid} ({geo[wid].area:.0f} m²)')
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Blocco N4b · villette del Liceo Tarantino (piano approvato dal committente il 14/10/2026: «tutto il triangolo formato
+#   da Via Quasimodo, Via Montale e Via Carlo Betocchi»). Gli edifici col centro nel triangolo diventano «villette»
+#   (CITY_KIND['villetta']): schiere di villette e palazzine di 3–5 livelli (Street View, maggio e ottobre 2025), divise
+#   dal diorama in unità larghe `unita` metri lungo il lato lungo, coi tetti in coppi dove il satellite li mostra
+#   (Google, visto il 14/10/2026: solo come riferimento visivo) e gli altri piani col parapetto. Le tettoie restano tettoie.
+#   I piani stanno nella tabella LIVELLI (righe della città); qui le unità diverse e i tetti.
+#   Vertici del triangolo sulle vie OSM: Via Eugenio Montale w107709045, Via Salvatore Quasimodo w1384775301, Via Carlo
+#   Bertocchi w1384781475 (il poeta è Carlo Betocchi: in OSM il nome ha un refuso, nel diorama resta quello di OSM).
+# ─────────────────────────────────────────────────────────────────────────────
+VILLETTE_TRI = [(554.2, -346.8), (674.0, -348.9), (741.2, -351.0), (749.7, -352.8), (756.3, -355.3), (787.7, -385.4), (794.5, -392.0),
+                (804.4, -403.5), (805.5, -407.6), (804.4, -410.6), (801.9, -413.4), (736.9, -457.8), (708.8, -477.0), (659.2, -509.7),
+                (638.6, -484.1), (619.0, -459.9), (598.1, -434.0), (576.7, -405.4), (565.4, -390.3), (539.8, -356.1)]
+VILLETTA_PIANO, VILLETTA_PARAPETTO = 3.0, 1.0      # m per piano e parapetto delle terrazze (altezza = piani × 3 + 1)
+# Unità e tetti: (id OSM, punto nella sagoma, larghezza delle unità in m, [(est, nord, piani o None, tetto), …], fonte).
+# Il punto sceglie l'unità che lo contiene; `piani` (se c'è) vale per quell'unità invece della riga di LIVELLI;
+# tetto: 'coppi' (a falde col colmo di traverso), 'pannelli' (terrazza coi pannelli solari), 'attico' (corpo arretrato).
+VILLETTE = [
+    (411141192, (632.3, -366.0), 8.0, [(662, -369, None, 'pannelli')],
+     'Via Eugenio Montale e Via A. Palazzeschi: nove villette a schiera larghe 8–9 m, terrazze piane, pannelli sull\'ultima a est'),
+    (411149110, (646.3, -434.1), 6.0, [(627, -435, 4, None), (633, -434, None, 'coppi'), (639, -434, None, 'coppi'),
+                                       (645, -434, None, 'coppi'), (650, -434, None, 'coppi'), (656, -434, None, 'coppi'),
+                                       (665, -440, 4, None)],
+     'Piazza Domenico Digiesi e Piazza Concordia: villette coi tetti in coppi rossi, palazzine di 4 livelli ai capi'),
+    (411149180, (731.5, -373.1), 8.0, [(721, -367, None, 'coppi'), (730, -368, None, 'coppi'), (752, -375, 4, None)],
+     'Via Eugenio Montale e Piazza della Solidarietà: due villette coi coppi a ovest, palazzina di 4 livelli a est'),
+    (411148086, (691.4, -367.1), 12.0, [(691.4, -367.1, None, 'coppi')], 'Via Eugenio Montale: tetto a padiglione in coppi'),
+    (411142683, (665.0, -484.0), 8.0, [(657, -484, None, 'coppi'), (664, -480, None, 'coppi')],
+     'Via Salvatore Quasimodo e Via Cesare Pavese: coppi nella parte centrale, terrazze ai capi'),
+    (411142787, (772.5, -410.8), 9.0, [(754, -420, None, 'coppi')], 'Via C. Rebora: coppi sul capo sud-ovest'),
+    (411148126, (604.2, -405.4), 9.0, [(610, -400, None, 'pannelli'), (603, -409, None, 'pannelli')],
+     'Via Vincenzo Cardarelli: terrazze coi pannelli solari'),
+    (411144730, (668.2, -447.4), 10.0, [(668, -450, None, 'pannelli'), (668.2, -447.4, None, 'attico')],
+     'Via Giuseppe Ungaretti: attico arretrato e pannelli solari'),
+]
+VILLETTE_PIAZZE = (831718825, 831718823, 831718822, 831718824)   # Piazza Concordia, della Solidarietà, Domenico Digiesi, Cooperazione
+VILLETTE_OVERPASS = '[out:json][timeout:60];way(id:831718825,831718823,831718822,831718824);out tags geom;'
+
+
+def villette(city):
+    """Blocco N4b: gli edifici col centro nel triangolo delle villette diventano villette (le tettoie no)."""
+    tri, n = Polygon(VILLETTE_TRI), 0
+    for b in city:
+        if b['kind'] in (CITY_KIND['house'], CITY_KIND['apartments']) and not b['name'] and tri.contains(b['poly'].centroid):
+            b['kind'] = CITY_KIND['villetta']
+            n += 1
+    print(f'  villette del triangolo Via Montale – Via Quasimodo – Via Bertocchi: {n} edifici')
+
+
+def villette_dati(city):
+    """GEO.villette: unità e tetti delle villette (indice in GEO.city) e le quattro piazzette OSM del triangolo."""
+    case = []
+    for osm, pt, unita, unita_diverse, fonte in VILLETTE:
+        p = Point(pt)
+        k = next((i for i, b in enumerate(city) if b['poly'].contains(p)), None)
+        if k is None or city[k].get('osm') != osm or city[k]['kind'] != CITY_KIND['villetta']:
+            sys.exit(f'VILLETTE: in {pt} non c\'è la villetta w{osm} [{fonte}]')
+        righe = []
+        for e, nn, piani, tetto in unita_diverse:
+            if not city[k]['poly'].contains(Point(e, nn)):
+                sys.exit(f'VILLETTE: il punto ({e}, {nn}) è fuori dalla sagoma w{osm} [{fonte}]')
+            code = {None: 0, 'coppi': 1, 'pannelli': 2, 'attico': 4}[tetto]
+            righe.append([e, nn, round(piani * VILLETTA_PIANO + VILLETTA_PARAPETTO, 1) if piani else 0, code])
+        case.append([k, unita, righe])
+    els = overpass_cached('villette', VILLETTE_OVERPASS)
+    piazze = [flat([to_local(g['lon'], g['lat']) for g in el['geometry']][:-1]) for el in els
+              if el.get('type') == 'way' and el['id'] in VILLETTE_PIAZZE and el.get('geometry')]
+    print(f'  villette: {len(case)} con le unità o i tetti dalla tabella, {len(piazze)} piazzette')
+    return {'case': case, 'piazze': piazze}
 
 # Blocco N3: chiese la cui navata vera in OSM è l'area del luogo di culto (senza `building`) accanto alla sagoma
 # dell'edificio. San Nicola: la sagoma w411139790 è solo la parte a nord; la navata è l'area w385174930 («Chiesa San
@@ -2302,29 +2373,67 @@ LIVELLI = [
         (None, 214.9, 317.2, -5),
     ]),
     # @@LIVELLI-FINE@@
+    # Blocco N4b: le villette del triangolo Via Montale – Via Quasimodo – Via Bertocchi (edifici della città). I livelli si
+    # contano sul lato più alto della sagoma (in città il tetto sta a gMax + altezza, Tiles.placeBuildings): sul lato basso
+    # si vede un livello in più, come nelle foto. Niente «almeno» per la città.
+    ('Street View, Via Eugenio Montale 1–42 e «56 Via Tripoli» (ott 2025), Via A. Palazzeschi (mag 2025)', [
+        (411141192, 632.3, -366.0, 3),     # nove villette a schiera: piano rialzato e due piani (quattro livelli su Via Palazzeschi)
+        (411147880, 567.9, -370.2, 4),
+        (411148086, 691.4, -367.1, 4),
+        (411149180, 731.5, -373.1, 3),     # villette su Via Montale, quattro livelli su Piazza della Solidarietà
+    ]),
+    ('Street View, Piazza della Solidarietà e Via A. Palazzeschi 14–22 (mag 2025), Via Vincenzo Cardarelli 7 (mag 2025)', [
+        (411146000, 765.6, -388.6, 3),
+        (411148126, 604.2, -405.4, 4),
+    ]),
+    ('Street View, Via C. Rebora 12 (mag 2025), Via Salvatore Quasimodo 8–46 (ott 2025)', [
+        (411142787, 772.5, -410.8, 3),     # quattro livelli su Via Quasimodo, più in basso
+        (411148772, 739.0, -433.8, 3),
+        (411142683, 665.0, -484.0, 4),
+    ]),
+    ('Street View, Via Giuseppe Ungaretti 1–6 e Via Gozzano 5–21 (mag e ott 2025), Via Umberto Saba 11 (mag 2025)', [
+        (411149050, 714.2, -455.0, 4),
+        (411148556, 692.5, -404.8, 4),
+        (411144730, 668.2, -447.4, 4),
+    ]),
+    ('Street View, Piazza Domenico Digiesi 17, Piazza Concordia 13, Via Cesare Pavese 2, Via Vincenzo Cardarelli 18 (mag 2025)', [
+        (411149110, 646.3, -434.1, 3),     # villette coi balconi verdi; ai capi palazzine di 4 livelli (VILLETTE)
+        (411140288, 690.1, -466.6, 3),
+        (411146069, 614.0, -442.1, 5),
+        (411148728, 620.2, -434.2, 4),
+    ]),
 ]
 
 
-def livelli(old):
-    """Altezza delle case dai piani verificati (LIVELLI): 3,3 m per piano più 0,6 m di parapetto."""
-    tree = STRtree([b['poly'] for b in old])
-    done = 0
+def livelli(old, city):
+    """Altezza delle case dai piani verificati (LIVELLI): 3,3 m per piano più 0,6 m di parapetto; per le villette della
+    città (blocco N4b) 3 m per piano più il parapetto della terrazza."""
+    every = old + city
+    tree = STRtree([b['poly'] for b in every])
+    done, in_city = collections.Counter(), {id(b) for b in city}
     for fonte, righe in LIVELLI:
         for osm, e, n, piani in righe:
             p = Point(e, n)
-            hit = [i for i in tree.query(p) if old[i]['poly'].contains(p)]
+            hit = [i for i in tree.query(p) if every[i]['poly'].contains(p)]
             if not hit:
                 sys.exit(f'LIVELLI: nessun edificio in ({e}, {n}) [{fonte}]')
-            b = old[hit[0]]
+            b = every[hit[0]]
             if osm and b.get('osm') != osm:
                 sys.exit(f'LIVELLI: in ({e}, {n}) c\'è w{b.get("osm")} invece di w{osm} [{fonte}]')
+            if id(b) in in_city:
+                if b['kind'] not in (CITY_KIND['house'], CITY_KIND['apartments'], CITY_KIND['villetta']) or piani <= 0:
+                    sys.exit(f'LIVELLI: in ({e}, {n}) l\'edificio della città non è una casa (tipo {b["kind"]}) o i piani sono «almeno» [{fonte}]')
+                villa = b['kind'] == CITY_KIND['villetta']
+                b['height'] = round(piani * (VILLETTA_PIANO if villa else FLOOR_H) + (VILLETTA_PARAPETTO if villa else 0.6), 1)
+                done['città'] += 1
+                continue
             if b['kind'] != KIND['house']:
                 sys.exit(f'LIVELLI: in ({e}, {n}) l\'edificio non è una casa (tipo {b["kind"]}) [{fonte}]')
             # piani negativi = «almeno»: la cima non si vede in foto; l'altezza si codifica come 100 m + il minimo
             # e il diorama prende il più alto tra il minimo e la regola (Buildings.height)
             b['height'] = round(abs(piani) * FLOOR_H + 0.6, 1) + (100 if piani < 0 else 0)
-            done += 1
-    print(f'  piani verificati: {done} case di {len(old)} edifici del centro storico')
+            done['centro'] += 1
+    print(f'  piani verificati: {done["centro"]} case di {len(old)} edifici del centro storico, {done["città"]} edifici della città')
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -2834,6 +2943,7 @@ def encode(edges, deco, pos, buildings, city, arches, feats, extra):
         'sport': extra['sport'],
         'm2': extra['m2'],
         'meninni': extra['meninni'],
+        'villette': extra['villette'],
     }
     lines = ['const GEO = {']
     for k, v in geo.items():
@@ -2933,7 +3043,8 @@ def main():
     print(f'  edifici: {len(old)} nel centro storico, {len(city)} nella città')
     versante(old, bot)
     ruderi(old, rovine)
-    livelli(old)
+    villette(city)                              # blocco N4b: prima dei piani, che per le villette sono da 3 m
+    livelli(old, city)
     city, sport = stadio_fiera(overpass_cached('stadio_fiera', STADIO_FIERA_OVERPASS), city)
     name_places(old, city)
     meninni_ruderi(city)
@@ -2943,6 +3054,7 @@ def main():
         'rioni': rioni_profile(at), 'centro': centro_guide(dem_at, rims[0]), 'bosco': bosco_features(bosco_osm),
         'sport': sport, 'm2': luoghi_m2(osm_m2()),
         'meninni': {'muro': [flat(m) for m in MURO_MENINNI], 'cancello': list(CANCELLO_MENINNI)},
+        'villette': villette_dati(city),
         'botromagno': {'rovine': [flat(r.exterior.coords[:-1]) for r in bot['ruins']],
                        'scavi': flat(bot['scavi'].simplify(0.5).exterior.coords[:-1]) if bot['scavi'] is not None else []},
     }
