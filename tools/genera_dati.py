@@ -150,6 +150,7 @@ PONTICELLO = ('Ponticello di San Michele', [(-59.9, -176.4), (-64.5, -179.8), (-
 GOCCE_PIEDI = [
     (-73.5, -186.0),              # oltre il ponticello di San Michele, sul promontorio delle mura
     (-4.5, 107.6),                # blocco N2b: il footway OSM w1195336380 («Calata S. Lucia») finisce davanti alla chiesa di Santa Lucia
+    (1590, -572),                 # blocco N4: il giardino del Casino di Meninni finisce nella radura dietro il Casino (GIARDINO_MENINNI)
 ]
 # Raccordi a piedi attraverso un'area pedonale reale, tra due vertici del suo contorno (blocco N2, approvato il
 # 05/10/2026 come le aree pedonali della Villa): nome, punti, superficie (SUPERFICI).
@@ -506,11 +507,12 @@ def teardrop(leaf, direction, r):
     return q, [leaf, P(0.9, -0.85), P(1.9, -0.75), q], [q, P(1.9, 0.75), P(0.9, 0.85), leaf]
 
 
-def add_turnarounds(core, extra, pos, buildings_tree, buildings, prune=True, walls=()):
+def add_turnarounds(core, extra, pos, buildings_tree, buildings, prune=True, walls=(), ostacoli=()):
     """
     Aggiunge le vie cieche selezionate. A ogni foglia prova a inserire
     un'inversione a goccia che non tocchi gli edifici; se non c'è spazio,
     pota l'ultimo tratto e riprova sulla nuova foglia (con prune=False la lascia com'è).
+    `walls` vale solo per le gocce della figurina, `ostacoli` per tutte (blocco N4: il muro di cinta del Casino di Meninni).
     """
     edges = core + extra
     loops = 0
@@ -541,6 +543,7 @@ def add_turnarounds(core, extra, pos, buildings_tree, buildings, prune=True, wal
                             continue
                         hit = any(buildings[i].buffer(-0.3).intersects(shape_) for i in buildings_tree.query(shape_))
                         hit = hit or (walk and any(w.intersects(shape_) for w in walls))   # blocco N2: la figurina non gira nelle mura
+                        hit = hit or any(w.intersects(shape_) for w in ostacoli)
                         if not hit:
                             placed = (q, right, left)
                             break
@@ -959,9 +962,32 @@ luoghi_m2.detto = False
 # 01/10/2026, come la strada del Bosco): id OSM della via, punto dove finisce, perché.
 VIE_CIECHE = [
     (946720266, (-140, 1044)),      # strada della Fiera fino al parcheggio dello stadio (w1340515588): la goccia resta fuori dalla recinzione
-    (1068971736, (1520, -612)),     # Via Guardialto (SP201) fino al Casino di Meninni
     (28355376, (1912, 126)),        # Via Bari fino al monumento alla Cola Cola (OSM w411137509)
 ]
+# Blocco N4 (piano approvato dal committente il 14/10/2026, eccezione scritta in CLAUDE.md): la strada del Casino di
+# Meninni. Non è in OSM: uno sterrato di circa 20 m che lascia la SP201 (Via Guardialto, OSM w1068971736) ed entra nello
+# spiazzo di terra battuta davanti al cancello, dove si parcheggia (Street View ottobre 2025 da [1432, -462] e
+# [1448, -489], solo come riferimento). Finisce con la goccia del mezzo, girata verso nord-est lungo lo spiazzo e lontana
+# dal muro di cinta; la goccia di prima, in mezzo alla SP201 a [1520, -612], non c'è più e oltre l'incrocio la SP201 torna
+# decorativa. Superficie: terra (SUPERFICI).
+STRADA_MENINNI = ('Ingresso del Casino di Meninni', [(1434, -468), (1444, -467), (1451, -463)], 4)
+# Il giardino a piedi (sostituisce il percorso del blocco M2, attaccato alla SP201 in due punti): dal fondo dello
+# sterrato, il cancello, su per i pini d'Aleppo fino a una decina di metri dal fronte nord-ovest del Casino, poi in curva
+# larga attorno al lato sud-ovest (a 5–7 m dalle torrette d'angolo) e dietro, fino alla goccia della figurina nella radura
+# dello spazio piano dei cipressi (FAI; radura sul satellite). Niente svolte strette.
+GIARDINO_MENINNI = ('Giardino del Casino di Meninni', [(1451, -463), (1467, -474), (1484, -486), (1500, -495), (1516, -503),
+                                                      (1532, -511), (1545.5, -519.7), (1551.4, -528.0), (1550.6, -535.0),
+                                                      (1548.7, -541.0), (1554.6, -550.0), (1562.9, -558.6), (1571.0, -561.9),
+                                                      (1578.7, -565.6), (1590, -572)])
+# Muro di cinta del Casino (satellite e Street View di ottobre 2025, indicativo come il ponticello di San Michele): lungo
+# la SP201 a circa 15 m dall'asse, poi su a nord-est fino all'angolo nord, giù a sud-est fino ai due corpi bassi
+# (OSM w411137117, w411137478) e oltre, dove il satellite lo mostra tra la pineta e l'uliveto. A sud non si vede.
+MURO_MENINNI = [
+    [(1540, -620), (1486.5, -533.7), (1462, -487), (1494, -397), (1572, -473)],
+    [(1606, -494), (1614, -499)],
+    [(1628, -503), (1656, -517), (1687, -541), (1716, -572)],
+]
+CANCELLO_MENINNI = (1467, -474)       # tra due pilastri, sul muro nord-ovest (Street View: «un pilastro, forse il varco»)
 # Percorsi a piedi senza dati OSM (eccezioni approvate dal committente il 01/10/2026): si disegnano solo
 # perché chiudono un anello con vie reali. Punti scelti sul satellite (solo come riferimento) tra gli
 # edifici reali. Ogni percorso è un elenco di tratti: un estremo in comune tra due tratti è un incrocio,
@@ -973,10 +999,6 @@ PERCORSI = [
         [(-80, 1039), (-75, 1022)], [(-75, 1022), (-67, 1037)],
         [(-75, 1022), (-84, 1010), (-88, 992), (-84, 978), (-70, 969)],
         [(-70, 969), (-45, 968), (-20, 963), (-19, 945), (-22, 930)], [(-22, 930), (-45, 929), (-70, 934), (-70, 969)]]),
-    # Casino di Meninni: da Via Guardialto su per il giardino dei pini, attorno al Casino e giù di nuovo.
-    ('Giardino del Casino di Meninni', 'city', [
-        [(1462, -520), (1490, -514), (1520, -517), (1546, -526), (1552, -521), (1572, -506), (1586, -509), (1600, -527),
-         (1596, -545), (1572, -566), (1553, -562), (1540, -552), (1518, -560), (1496, -575)]]),
     # Base Scout Gravina 1: dalla strada del vivaio su per il prato fino alla base, attorno, e giù per
     # l'area pic-nic (coordinate reali, zona del vivaio a scala reale).
     ('Sentiero della Base Scout', 'vivaio', [
@@ -1125,6 +1147,23 @@ def build_network(data, buildings, bosco_osm):
     print(f'  {name}: {length(pts):.0f} m a piedi')
     # Vie cieche che portano a un luogo (VIE_CIECHE): si tagliano nel punto d'arrivo, dove andrà la goccia.
     ends = [split_edge(edges, pos, pt, lambda e, w=wid: w in e['osm'] and not e['deco'] and not e.get('walk')) for wid, pt in VIE_CIECHE]
+    # Blocco N4: lo sterrato del Casino di Meninni lascia la SP201 in un incrocio nuovo e finisce nello spiazzo, da dove
+    # il giardino si fa a piedi (GIARDINO_MENINNI, con la goccia della figurina in GOCCE_PIEDI).
+    sname, pts, code = STRADA_MENINNI
+    a = split_edge(edges, pos, pts[0], lambda e: 1068971736 in e['osm'] and not e['deco'] and not e.get('walk'))
+    b = f'piedi:{sname}'
+    pos[b] = pts[-1]
+    edges.append({'a': a, 'b': b, 'poly': [pos[a]] + list(pts[1:]), 'cls': 'track', 'name': sname, 'osm': set(), 'bridge': False,
+                  'foot': False, 'deco': False, 'walk': False, 'tunnel': False, 'surf': {code: length(pts)}})
+    ends.append(b)
+    gname, gpts = GIARDINO_MENINNI
+    if math.dist(gpts[0], pts[-1]) > 0.1:
+        sys.exit(f'{gname}: non parte dal fondo di {sname}')
+    c = f'piedi:{gname}'
+    pos[c] = gpts[-1]
+    edges.append({'a': b, 'b': c, 'poly': list(gpts), 'cls': 'path', 'name': gname, 'osm': set(), 'bridge': False,
+                  'foot': True, 'deco': False, 'walk': True, 'tunnel': False, 'surf': {code: length(gpts)}})
+    print(f'  {sname}: {length(pts):.0f} m di sterrato; {gname}: {length(gpts):.0f} m a piedi')
     # Percorsi a piedi senza dati OSM in città (eccezioni approvate: Fiera, Casino di Meninni)
     for name, where, parts in PERCORSI:
         if where == 'city':
@@ -1140,17 +1179,23 @@ def build_network(data, buildings, bosco_osm):
     trees = dead_end_trees(drivable, core)
     extra = [e for t in trees
              if any(x['name'] in KEEP_DEAD_ENDS for x in t) and all(inside(midpoint(x['poly']), Z0) for x in t) for e in t]
-    for (wid, _), end in zip(VIE_CIECHE, ends):
+    for nome, end in zip([f'w{wid}' for wid, _ in VIE_CIECHE] + [sname], ends):
         tree = next((t for t in trees if any(end in (x['a'], x['b']) for x in t)), [])
         branch = branch_to(tree, core_nodes, end) if end not in core_nodes else []
-        print(f'  via cieca w{wid} fino a {pos[end][0]:.0f}, {pos[end][1]:.0f}: {sum(length(e["poly"]) for e in branch):.0f} m in più')
+        print(f'  via cieca {nome} fino a {pos[end][0]:.0f}, {pos[end][1]:.0f}: {sum(length(e["poly"]) for e in branch):.0f} m in più')
         extra += [e for e in branch if e not in extra]
     # Blocco N2: tratti a piedi ciechi fino a uno slargo reale (GOCCE_PIEDI), con la goccia della figurina
     wtrees = dead_end_trees(walk, core)
+    # Blocco N4: il giardino del Casino di Meninni parte dal fondo di una via cieca percorribile, non dal nucleo
+    ancore = core + [e for e in extra if not e.get('walk')]
+    wtrees2, nodi2 = dead_end_trees(walk, ancore), {n for e in ancore for n in (e['a'], e['b'])}
     for pt in GOCCE_PIEDI:
         end = min({n for e in walk for n in (e['a'], e['b'])}, key=lambda n: math.dist(pos[n], pt))
         tree = next((t for t in wtrees if any(end in (x['a'], x['b']) for x in t)), [])
         branch = branch_to(tree, core_nodes, end)
+        if not branch:
+            tree = next((t for t in wtrees2 if any(end in (x['a'], x['b']) for x in t)), [])
+            branch = branch_to(tree, nodi2, end)
         print(f'  a piedi fino a {pos[end][0]:.0f}, {pos[end][1]:.0f}: {sum(length(e["poly"]) for e in branch):.0f} m con la goccia')
         extra += [e for e in branch if e not in extra]
     bosco_edges, bosco_deco = bosco_road(core, pos, bosco_osm)
@@ -1159,10 +1204,11 @@ def build_network(data, buildings, bosco_osm):
     # blocco N2: le mura reali del centro storico (nel diorama muri spessi 1,6 m) per le gocce della figurina
     walls = [local_geom(shape(i['geom'])).buffer(0.8) for i in data['infrastructure'] if i.get('class') == 'city_wall']
     walls = [w for w in walls if inside(w.centroid.coords[0], Z0)]
-    net, loops = add_turnarounds(core, extra, pos, tree, buildings, walls=walls)
+    muro = [LineString(m).buffer(1.0) for m in MURO_MENINNI]       # blocco N4: niente gocce nel muro di cinta
+    net, loops = add_turnarounds(core, extra, pos, tree, buildings, walls=walls, ostacoli=muro)
     # Dove una via carrabile continua solo a piedi, la goccia lascia scegliere: si scende o si torna
     # indietro. Se la goccia non ci sta, la via resta e in fondo si prosegue per forza a piedi.
-    drive, more = add_turnarounds([e for e in net if not e.get('walk')], [], pos, tree, buildings, prune=False)
+    drive, more = add_turnarounds([e for e in net if not e.get('walk')], [], pos, tree, buildings, prune=False, ostacoli=muro)
     net = two_core(drive + [e for e in net if e.get('walk')])
     net = largest_component(net)
     loops += more
@@ -1831,7 +1877,8 @@ def city_height(b, dense, industrial):
     return floors * 3.3 + 0.6
 
 
-CITY_KIND = {'house': 0, 'church': 1, 'shed': 3, 'apartments': 4, 'public': 5, 'industry': 6, 'castle': 7, 'school': 8, 'villa': 9, 'padiglione': 10, 'tribuna': 11}
+CITY_KIND = {'house': 0, 'church': 1, 'shed': 3, 'apartments': 4, 'public': 5, 'industry': 6, 'castle': 7, 'school': 8, 'villa': 9, 'padiglione': 10, 'tribuna': 11,
+             'rudere': 12}
 
 
 def city_buildings(buildings, cover):
@@ -1884,6 +1931,29 @@ CHURCHES = [
     ('Chiesa Dello Spirito Santo', (1734, 151)),                # blocco N3: OSM w1152762610 (building=yes), era una casa
 ]
 MENINNI = ('Casino di Meninni', (1572, -536))                   # sul Guardialto, sopra la SP201 (Via Guardialto)
+# Blocco N4: il Casino (OSM w411138340, abandoned:building=yes) è un rudere senza tetto di due piani (Street View di ottobre
+# 2025: finestre vuote da cui si vede il cielo; satellite: i muri delle stanze dentro); muri alti circa 10 m. Anche i due
+# corpi bassi sul muro di cinta (w411137117, w411137478, abandoned:building=yes) sono senza tetto sul satellite: ruderi bassi.
+MENINNI_ALTO = 10.5
+MENINNI_OSM = 411138340
+MENINNI_CORPI = {411137117: 3.6, 411137478: 3.2}       # non sono in Overture (in OSM hanno solo abandoned:building): da Overpass
+MENINNI_OVERPASS = '[out:json][timeout:60];way(id:411138340,411137117,411137478);out tags geom;'
+
+
+def meninni_ruderi(city):
+    """Blocco N4: il Casino di Meninni sulla sagoma OSM e i due corpi bassi abbandonati sul muro di cinta, come ruderi."""
+    els = overpass_cached('meninni', MENINNI_OVERPASS)
+    geo = {el['id']: Polygon([to_local(g['lon'], g['lat']) for g in el['geometry']]).buffer(0)
+           for el in els if el.get('type') == 'way' and el.get('geometry')}
+    b = next((x for x in city if x['name'] == MENINNI[0]), None)
+    if b is not None and MENINNI_OSM in geo:
+        print(f'  Casino di Meninni: sagoma OSM w{MENINNI_OSM} ({geo[MENINNI_OSM].area:.0f} m², Overture {b["poly"].area:.0f} m²)')
+        b['poly'] = geo[MENINNI_OSM].simplify(0.3)
+    for wid, h in MENINNI_CORPI.items():
+        if wid in geo:
+            city.append({'poly': geo[wid].simplify(0.3), 'kind': CITY_KIND['rudere'], 'cls': 'abandoned', 'name': None, 'height': h,
+                         'level': 0, 'osm': wid})
+            print(f'  rudere sul muro di cinta del Casino di Meninni: w{wid} ({geo[wid].area:.0f} m²)')
 
 # Blocco N3: chiese la cui navata vera in OSM è l'area del luogo di culto (senza `building`) accanto alla sagoma
 # dell'edificio. San Nicola: la sagoma w411139790 è solo la parte a nord; la navata è l'area w385174930 («Chiesa San
@@ -2328,7 +2398,7 @@ def name_places(old, city):
             b['kind'] = KIND['church']
     b = pick(MENINNI[1])
     if b:
-        b['name'], b['kind'], b['height'] = MENINNI[0], CITY_KIND['villa'], 9.5
+        b['name'], b['kind'], b['height'] = MENINNI[0], CITY_KIND['rudere'], MENINNI_ALTO
     zone = Polygon(CASE_ROSA_ZONE)
     rosa = [b for b in city if b['kind'] != CITY_KIND['school'] and b['poly'].area > 300 and zone.contains(b['poly'].centroid) and not b['name']]
     for b in rosa:
@@ -2763,6 +2833,7 @@ def encode(edges, deco, pos, buildings, city, arches, feats, extra):
         'botromagno': extra['botromagno'],
         'sport': extra['sport'],
         'm2': extra['m2'],
+        'meninni': extra['meninni'],
     }
     lines = ['const GEO = {']
     for k, v in geo.items():
@@ -2865,11 +2936,13 @@ def main():
     livelli(old)
     city, sport = stadio_fiera(overpass_cached('stadio_fiera', STADIO_FIERA_OVERPASS), city)
     name_places(old, city)
+    meninni_ruderi(city)
     extra = {
         'ground': ground, 'cover': cover, 'rails': build_rails(data), 'pois': city_pois(osm),
         'riverY': river_bed(feats['river'], lambda e, n: at(e, n)), 'rims': rims,
         'rioni': rioni_profile(at), 'centro': centro_guide(dem_at, rims[0]), 'bosco': bosco_features(bosco_osm),
         'sport': sport, 'm2': luoghi_m2(osm_m2()),
+        'meninni': {'muro': [flat(m) for m in MURO_MENINNI], 'cancello': list(CANCELLO_MENINNI)},
         'botromagno': {'rovine': [flat(r.exterior.coords[:-1]) for r in bot['ruins']],
                        'scavi': flat(bot['scavi'].simplify(0.5).exterior.coords[:-1]) if bot['scavi'] is not None else []},
     }
