@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 14 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2, N2b, N3, N4 (Casino di Meninni) e N4b (villette) della fase 3.4 uniti (N2 il 07/10/2026, PR #20; N2b il 09/10/2026, PR #21; N3 il 13/10/2026, PR #22; N4 il 14/10/2026, PR #23, con l'approvazione anticipata del committente perché il contesto della chat si saturava); N4b (villette del Liceo Tarantino) unito il 14/10/2026 (PR #24, con l'approvazione anticipata del committente perché il contesto della chat si saturava); **prossimo: N5** (prompt `riferimenti/PROMPT_BLOCCHI_N5_N6.md`), poi N6.
+Stato al 14 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2, N2b, N3, N4 (Casino di Meninni) e N4b (villette) della fase 3.4 uniti (N2 il 07/10/2026, PR #20; N2b il 09/10/2026, PR #21; N3 il 13/10/2026, PR #22; N4 il 14/10/2026, PR #23, con l'approvazione anticipata del committente perché il contesto della chat si saturava); N4b (villette del Liceo Tarantino) unito il 14/10/2026 (PR #24, con l'approvazione anticipata del committente perché il contesto della chat si saturava); N5 (Capotenda e vigna di Botromagno) unito il 14/10/2026 (PR #25, approvato dal committente); **prossimo: N5b** (prompt `riferimenti/PROMPT_BLOCCHI_N5b_N8.md`), poi N5c, N6, N7 e N8 (richieste nuove del committente del 14/10/2026).
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
@@ -8,7 +8,7 @@ del lavoro su due chat in [`PIANO_FASE_3_4.md`](PIANO_FASE_3_4.md).
 
 ### Fase 3.4, seconda parte (decisioni del 30/09/2026)
 
-Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N3 → N4 → N5 → N6, dettagli e decisioni nella sezione 7 del piano.
+Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N2b → N3 → N4 → N4b → N5 → N5b → N5c → N6 → N7 → N8, dettagli e decisioni nella sezione 7 del piano.
 
 - [x] **I · spazio sul telefono** (`fase-3-4-i-prestazioni`, PR #13, unita il 30/09/2026):
       due livelli di dettaglio per riquadro nella stessa mesh (terreno a maglia doppia, vie rade,
@@ -238,10 +238,36 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N3 → N4 →
       le eccezioni della tabella `VILLETTE`), la trama dei coppi (oggi tinta unita, come i tetti del centro storico).
 - [ ] Casino di Meninni, ritocchi possibili: il muro di cinta a est e a sud (il satellite non lo mostra), i muretti a secco e i
       pali col filo spinato dello spiazzo (Street View), una foschia leggera vicino al rudere se il committente la vuole.
-- [ ] **N5 · Capotenda, vigne e uliveti** (`fase-3-4-n5-capotenda-vigne`): il sentiero che dal Padre
-      Eterno scende alle grotte e al torrente, la vigna di Botromagno, uliveti e vigne in periferia.
-- [ ] **N6 · cartolina, giro guidato e ritocchi** (`fase-3-4-n6-cartolina-giro`, era N3): cartolina con
-      la cornice, giro guidato dei monumenti, camera dopo il teletrasporto, schede lunghe, memoria JS.
+- [x] **N5 · Capotenda e vigna di Botromagno** (`fase-3-4-n5-capotenda-vigne`, PR #25; piano approvato il 14/10/2026, unita il
+      14/10/2026 con l'approvazione del committente):
+      - **a piedi**: carrarecce e sentieri OSM di Capotenda (9 vie, «Sentiero di Capotenda»), tre anelli col sentiero degli scavi; il
+        **guado** (eccezione approvata, `GUADO`): la figurina passa su 8 sassi sopra l'acqua e gira con la goccia sul greto dell'altra
+        sponda; il mezzo prende 393 m in più di Via Madonna della Stella, con la goccia all'imbocco della carrareccia. Rete da 1 549 a
+        1 569 tratti, da 94,28 a 96,77 km, gocce da 13 a 14; a piedi da 97 a 114 tratti, da 5,59 a 7,70 km;
+      - **la gola** incisa tra il belvedere e il guado (`GOLA`, `Gola`): letto 7,5 m più giù, pareti di calcare chiaro a strati entro
+        18 m, sette laghetti nel letto (posizioni indicative), cengia per i sentieri vicini, maglia vicina a 7,5 m;
+      - **Capotenda** (`Capotenda` in sezione 6d, dopo «Parti»): passerella di legno a zig-zag col corrimano (è il sentiero OSM, satellite
+        a zoom 20), bancata delle cave di salnitro con le bocche e due grate, grotta del Padre Eterno nella parete, muretti a secco e la
+        rovina, cespugli sulle pareti; scheda «Capotenda» (testo approvato) e luogo nell'elenco («La gravina e il paesaggio»);
+      - **vigna di Botromagno**: classe `vigna` (16) dell'uso del suolo, 18 200 m², filari a spalliera nord-sud ogni 2,5 m da vicino;
+      - misure (`shots/prestazioni-dopo-n5.txt`): 420 KB compressi (+9 invece dei 4 stimati), triangoli PC «alta» 342 100, telefono
+        «centro» 232 300, vista «capotenda» 26 500 / 22 500, draw call invariate, «Pronto» 1,35 s; `interazioni` 70 controlli verdi.
+- [x] **Peso** (decisione del committente del 14/10/2026, dopo N5): «se sforiamo non succede nulla, dobbiamo far venire il lavoro fatto
+      bene». Il tetto di 450 KB compressi resta un riferimento, non un vincolo: prima viene la qualità; si dice comunque quanto pesa ogni
+      blocco.
+- [ ] Capotenda, ritocchi possibili: il belvedere «Patre Eterno» su Via Madonna della Stella (oggi niente), la casetta bianca sul pianoro
+      (satellite), le canne attorno al laghetto grande (tolte per il peso), la posizione vera delle cave e dei laghetti con altre foto.
+- [ ] **N5b · uliveti, Casino Scacchi e Sportland** (`fase-3-4-n5b-uliveti-scacchi`, richieste del 14/10/2026): sei uliveti a
+      filari (Meninni est, OSM w1152762647, Contrada Salsa, Terrasanta, Castello, Cozzarolo); il Casino Scacchi coi terrazzamenti e
+      gli alberi, senza strada; Sportland costruito bene e la SP201 percorribile fin davanti, dall'esterno.
+- [ ] **N5c · Hortus a piedi** (`fase-3-4-n5c-hortus`): Via Leopardi e un percorso nel giardino, con la sosta su una panchina e
+      il pulsante «Riprendi il percorso».
+- [ ] **N6 · mezzi nuovi** (`fase-3-4-n6-mezzi`): Audi RS Q8, Fiat Panda del 2013, Ferrari Monza SP2, John Deere 8R coi
+      contropesi (al posto di RS6 Avant, Panda 4x4 del 1999, Huracán e trattore di oggi); modelli da confermare nel piano.
+- [ ] **N7 · cinema, teatri e luoghi della cultura** (`fase-3-4-n7-cultura`): Cinema Mastrogiacomo, Cinema Centrone, Teatro
+      Vida e gli altri luoghi culturali, con facciate dalle foto e schede coi fatti verificati.
+- [ ] **N8 · cartolina, giro guidato e ritocchi** (`fase-3-4-n8-cartolina-giro`, era N6): cartolina con
+      la cornice, giro guidato dei monumenti (anche coi luoghi nuovi), camera dopo il teletrasporto, schede lunghe, memoria JS.
 - Versione in inglese: non ora.
 
 ### Fase 3.4, blocco G · percorsi a piedi, quote reali, camera e radio (PR #12, unita il 30/09/2026) ✅

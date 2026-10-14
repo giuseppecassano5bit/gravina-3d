@@ -106,6 +106,12 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
   muri crollati a pezzi, senza tetto; nel cono di vista dalla ringhiera della Cattedrale verso il ponte restano bassi, così il ponte
   si vede) e i piani delle case vengono dalla tabella `LIVELLI` di `genera_dati.py` (rilevati su Street View, con via e data;
   «almeno N» dove la cima non si vede); dove non c'è una riga vale la regola di `Buildings.height`.
+- **Guado di Capotenda (blocco N5, piano approvato dal committente il 14/10/2026)**: i sentieri e le carrarecce OSM di Capotenda
+  (`WALK_OSM`) si percorrono a piedi fino al guado, e la figurina passa sui sassi (OSM w578916734–35, `ford=stepping_stones`, più i
+  primi 9 m di w578916733) fino alla **goccia della figurina** sul greto dell'altra sponda (`GOCCE_PIEDI`), come il ponticello di San
+  Michele: il tratto esce dalla zolla in Overture e i suoi punti OSM sono nella costante `GUADO`. Nel terreno la gola stretta tra il
+  belvedere e il guado (`GOLA` e `Gola`, sezione 4) è incisa a mano sulle quote reali (non alza mai il terreno; vicino ai sentieri
+  lascia la cengia); la vigna di Botromagno è la classe `vigna` (16) dell'uso del suolo.
 - **Villette del Liceo Tarantino (blocco N4b, piano approvato dal committente il 14/10/2026)**: tutto il triangolo Via Montale – Via
   Quasimodo – Via Bertocchi (in OSM «Bertocchi» è un refuso di Betocchi: nel diorama resta il nome OSM, segnalato nel README) è di tipo
   «villetta» (`CITY_KIND` 13, oggetto `Villette` in sezione 6d); i livelli stanno nelle righe della città di `LIVELLI` (3 m per piano

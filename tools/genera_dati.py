@@ -130,6 +130,11 @@ WALK_OSM = {
     902676524,                                                       # E · Via Pietro Ianora (service, basolato)
     1288069906, 1288069907, 1288069908, 1288069909, 1288069910,      # F · scale e sottopassaggio della stazione
     1195312391, 1195312392, 1195312390, 1195312393, 1195312394,      # vialetti della Villa Comunale
+    # blocco N5 (piano approvato dal committente il 14/10/2026): Capotenda, carrarecce e sentieri fino al guado
+    682777028, 682777027,                                            # carrareccia da Via Madonna della Stella
+    682777029, 682777031,                                            # sentiero che attraversa Capotenda; lungo la gola, dal belvedere
+    578916724, 578916725, 578916726,                                 # carrarecce attorno alla vigna di Botromagno
+    578916727, 578916728,                                            # giù verso il torrente, poi lungo il torrente fino al guado
 }
 # Villa Comunale e Piazza della Repubblica pedonali (decisione del committente del 01/10/2026, anche se OSM
 # segna residential): Viale Orsini e Via Libertà, più le vie della rete dentro le due aree OSM.
@@ -145,10 +150,16 @@ PEDONALI_FONDOVITO = {76151641, 385174951}    # Calata Grotte San Michele, tutta
 # w1512581512). Non è in OSM: punti scelti sul satellite e sulla foto da drone (solo come riferimento) tra la fine
 # della terrazza OSM (w76152588) e l'inizio delle mura. Eccezione scritta in CLAUDE.md.
 PONTICELLO = ('Ponticello di San Michele', [(-59.9, -176.4), (-64.5, -179.8), (-69.3, -183.2), (-73.5, -186.0)])
+# Il guado di Capotenda (blocco N5, eccezione approvata dal committente il 14/10/2026, come il ponticello): i sassi
+# piatti sul torrente (OSM w578916734, w578916735 con ford=stepping_stones) e i primi 9 m di w578916733 sull'altra
+# sponda. Il segmento Overture che li contiene esce dalla zolla e la pipeline lo scarterebbe intero: qui i punti OSM,
+# dal nodo db9552 (fine di w578916728) al greto, dove la figurina gira con la goccia (GOCCE_PIEDI).
+GUADO = ('Guado di Capotenda', [(-575.3, 1284.6), (-565.8, 1286.4), (-556.9, 1288.0), (-554.2, 1291.0), (-550.5, 1294.2)])
 # Tratti a piedi ciechi che finiscono in uno slargo reale: restano, e la figurina gira con la goccia (blocco N2,
 # eccezione come le gocce del mezzo). Punto dove finiscono.
 GOCCE_PIEDI = [
     (-73.5, -186.0),              # oltre il ponticello di San Michele, sul promontorio delle mura
+    (-550.5, 1294.2),             # blocco N5: oltre il guado di Capotenda, sul greto dell'altra sponda (GUADO)
     (-4.5, 107.6),                # blocco N2b: il footway OSM w1195336380 («Calata S. Lucia») finisce davanti alla chiesa di Santa Lucia
     (1590, -572),                 # blocco N4: il giardino del Casino di Meninni finisce nella radura dietro il Casino (GIARDINO_MENINNI)
 ]
@@ -917,7 +928,11 @@ WALK_NOMI = {578892844: 'Sentiero degli scavi', 682777030: 'Sentiero degli scavi
              1288066842: 'Parco Robinson', 1288066846: 'Parco Robinson', 1288069906: 'Scale della stazione',
              1288069907: 'Scale della stazione', 1288069908: 'Scale della stazione', 1288069910: 'Scale della stazione',
              1288069909: 'Sottopassaggio della stazione', 1195312391: 'Villa Comunale', 1195312392: 'Villa Comunale',
-             1195312390: 'Villa Comunale', 1195312393: 'Villa Comunale', 1195312394: 'Villa Comunale'}
+             1195312390: 'Villa Comunale', 1195312393: 'Villa Comunale', 1195312394: 'Villa Comunale',
+             # blocco N5: in OSM non hanno nome
+             682777028: 'Sentiero di Capotenda', 682777027: 'Sentiero di Capotenda', 682777029: 'Sentiero di Capotenda',
+             682777031: 'Sentiero di Capotenda', 578916724: 'Sentiero di Capotenda', 578916725: 'Sentiero di Capotenda',
+             578916726: 'Sentiero di Capotenda', 578916727: 'Sentiero di Capotenda', 578916728: 'Sentiero di Capotenda'}
 
 
 def luoghi_m2(elements):
@@ -1144,6 +1159,17 @@ def build_network(data, buildings, bosco_osm):
     pos[b] = pts[-1]
     edges.append({'a': a, 'b': b, 'poly': [pos[a]] + list(pts[1:]), 'cls': 'footway', 'name': name, 'osm': set(), 'bridge': False,
                   'foot': True, 'deco': False, 'walk': True, 'tunnel': False, 'surf': {1: length(pts)}})
+    print(f'  {name}: {length(pts):.0f} m a piedi')
+    # Blocco N5: il guado di Capotenda, dal nodo db9552 in fondo al sentiero lungo il torrente al greto dell'altra sponda
+    name, pts = GUADO
+    a = min(pos, key=lambda n: math.dist(pos[n], pts[0]))
+    if math.dist(pos[a], pts[0]) > 1.5:
+        sys.exit(f'{name}: il sentiero lungo il torrente non finisce dove dovrebbe')
+    b = f'piedi:{name}'
+    pos[b] = pts[-1]
+    edges.append({'a': a, 'b': b, 'poly': [pos[a]] + list(pts[1:]), 'cls': 'path', 'name': name, 'osm': {578916734, 578916735},
+                  'bridge': False, 'foot': True, 'deco': False, 'walk': True, 'tunnel': False,
+                  'surf': {4: length(pts)}})
     print(f'  {name}: {length(pts):.0f} m a piedi')
     # Vie cieche che portano a un luogo (VIE_CIECHE): si tagliano nel punto d'arrivo, dove andrà la goccia.
     ends = [split_edge(edges, pos, pt, lambda e, w=wid: w in e['osm'] and not e['deco'] and not e.get('walk')) for wid, pt in VIE_CIECHE]
@@ -1629,7 +1655,14 @@ def build_features(data):
 DEM_STEP = 30             # m: passo della griglia delle quote in GEO
 COVER_STEP = 15           # m: passo della griglia dell'uso del suolo in GEO
 COVER = {'campagna': 0, 'citta': 1, 'parco': 2, 'bosco': 3, 'campo': 4, 'uliveto': 5, 'industria': 6,
-         'cimitero': 7, 'sport': 8, 'piazza': 9, 'macchia': 10, 'cava': 11, 'querce': 12, 'bruciato': 13, 'fitto': 14, 'roccia': 15}
+         'cimitero': 7, 'sport': 8, 'piazza': 9, 'macchia': 10, 'cava': 11, 'querce': 12, 'bruciato': 13, 'fitto': 14, 'roccia': 15,
+         'vigna': 16}
+# Blocco N5: la vigna di Botromagno (indicazione del committente del 03/10/2026: «a Botromagno vicino a Padre Eterno c'è la
+# vigna di Botromagno»; piano approvato il 14/10/2026). Sul satellite a zoom 20 filari nord-sud a spalliera, ogni 2,4 m. Il
+# contorno viene dagli elementi OSM: Via Madonna della Stella a sud-ovest, le carrarecce w578916725–726 a est (i vertici qui
+# sotto sono loro punti), il bordo della zolla a ovest e nord 1 078 (dove finiscono i filari). Si tolgono le carreggiate.
+VIGNA = [(-764, 891), (-835, 958), (-835, 1078), (-668, 1078), (-678.1, 1045.2), (-696.6, 1016.7), (-714.5, 997.7), (-729.1, 946.2)]
+VIGNA_BORDI = {'Via Madonna della Stella': 8, 578916725: 6, 578916726: 6}     # metri tolti attorno alle vie
 OVERPASS_URL = 'https://overpass-api.de/api/interpreter'
 OVERPASS_BBOX = '40.79,16.39,40.85,16.46'
 OVERPASS_QUERY = f"""[out:json][timeout:160];
@@ -1793,7 +1826,23 @@ def raster(polys, E, N):
     return m
 
 
-def land_cover(data, buildings, bosco_osm, rock=None):
+def vigna_botromagno(segments):
+    """Blocco N5: il poligono della vigna di Botromagno (VIGNA meno le carreggiate di VIGNA_BORDI)."""
+    lines = []
+    for sg in segments:
+        if sg.get('subtype') != 'road':
+            continue
+        ids = {w for w, _, _ in osm_ways(sg)}
+        m = VIGNA_BORDI.get((sg.get('names') or {}).get('primary')) or max((VIGNA_BORDI.get(w, 0) for w in ids), default=0)
+        if m:
+            lines.append(LineString([to_local(*p) for p in sg['geom']['coordinates']]).buffer(m))
+    poly = Polygon(VIGNA).difference(shapely.union_all(lines))
+    poly = max(getattr(poly, 'geoms', [poly]), key=lambda g: g.area).simplify(0.5)
+    print(f'  vigna di Botromagno: {poly.area:.0f} m²')
+    return poly
+
+
+def land_cover(data, buildings, bosco_osm, rock=None, vigna=None):
     """
     Uso del suolo su una griglia di COVER_STEP m (centri delle celle): colori del terreno e alberi nella città moderna.
     `rock`: la roccia di Botromagno (blocco M1), lungo il ciglio ovest e negli scavi.
@@ -1823,6 +1872,8 @@ def land_cover(data, buildings, bosco_osm, rock=None):
             m = dense                                    # la città è dove ci sono le case, non tutto il poligono "residenziale"
         grid[m] = COVER[kind]
     bosco_cover(grid, E, N, bosco_osm)
+    if vigna is not None:
+        grid[raster([vigna], E, N)] = COVER['vigna']   # blocco N5: la vigna di Botromagno
     # Blocco M2: la Pineta Parco Robinson (OSM w473031981, «parco con giochi, panchine, pini») è una pineta;
     # prato senza alberi attorno ai giochi e al busto al centro dei vialetti.
     m2 = osm_m2()
@@ -2944,6 +2995,7 @@ def encode(edges, deco, pos, buildings, city, arches, feats, extra):
         'm2': extra['m2'],
         'meninni': extra['meninni'],
         'villette': extra['villette'],
+        'capotenda': extra['capotenda'],
     }
     lines = ['const GEO = {']
     for k, v in geo.items():
@@ -3037,7 +3089,8 @@ def main():
     rims = extend_rims(feats['river'], at)
     rovine = overpass_cached('rovine', ROVINE_OVERPASS)
     buildings, bot = botromagno(rovine, feats['river'], rims[1], buildings)
-    cover = land_cover(data, buildings, bosco_osm, bot['rock'])
+    vigna = vigna_botromagno(data['segment'])
+    cover = land_cover(data, buildings, bosco_osm, bot['rock'], vigna)
     old = [b for b in buildings if inside(b['poly'].centroid.coords[0], Z0)]
     city = city_buildings([b for b in buildings if not inside(b['poly'].centroid.coords[0], Z0)], cover)
     print(f'  edifici: {len(old)} nel centro storico, {len(city)} nella città')
@@ -3055,6 +3108,7 @@ def main():
         'sport': sport, 'm2': luoghi_m2(osm_m2()),
         'meninni': {'muro': [flat(m) for m in MURO_MENINNI], 'cancello': list(CANCELLO_MENINNI)},
         'villette': villette_dati(city),
+        'capotenda': {'vigna': flat(vigna.exterior.coords[:-1])},
         'botromagno': {'rovine': [flat(r.exterior.coords[:-1]) for r in bot['ruins']],
                        'scavi': flat(bot['scavi'].simplify(0.5).exterior.coords[:-1]) if bot['scavi'] is not None else []},
     }

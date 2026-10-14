@@ -328,6 +328,14 @@ Nel bosco la nebbia si avvicina (foschia) e la targa dice «Bosco Difesa Grande�
   confermano la discesa ma vicino al ciglio «sbavano» nel canyon. Lungo la terrazza il raccordo del terreno coi sentieri è
   corto (2,5 m invece di 9), e sotto il ponticello il terreno non si appiana. Vie del mezzo, Piazzetta e Via San Vito
   Vecchio restano fuori; abitazioni rupestri invariate (21).
+* **La gola di Capotenda** (blocco N5, `GOLA` e `Gola` nella sezione 4). A nord-ovest, tra il belvedere del Padre Eterno e il
+  guado, il DSM a 30 m faceva della gravina una valle larga 250 m e profonda 20; la gola vera è stretta, tra rocce chiare a strati,
+  con le pozze nel letto. Lungo il torrente, tra 2 610 e 3 482 m da sud (`Ravine.bed` dà ora anche `s`), il letto scende di 7,5 m e
+  le pareti salgono a tre salti entro 18 m dal torrente; ai capi sfuma (al guado il sentiero arriva all'acqua). Il fondo si allarga
+  nei sette laghetti (posizioni indicative, `GOLA.laghi`) e il nastro del torrente lì segue il letto ogni 3 m e si allarga; al guado
+  un'acqua bassa di 4,6 m attorno ai sassi. Vicino ai sentieri a piedi la gola non scava (cengia di 4–10 m, `Gola.path`), e lì il
+  raccordo del terreno coi sentieri è corto (2,5 m). Pareti in calcare chiaro a strati di 2,2 m (`GOLA.pal`), letto chiaro con ciuffi
+  verdi; i riquadri della gola hanno da vicino la maglia di 7,5 m (da lontano resta quella di prima). Non alza mai il terreno.
 * Il canyon e i rioni sono disegnati a mano solo dentro `CONFIG.terrain.proc` (est −360…460,
   nord −380…600); fuori ci sono le quote reali Copernicus, con il letto del torrente inciso nella
   valle (`Ravine.bed`). Tra i due, una sfumatura di 110 m (`Terrain.procWeight`), di 220 m a sud
@@ -527,6 +535,15 @@ riga intera.
   w411139356, dove finisce con la **goccia della figurina** (`GOCCE_PIEDI`, punto [−4,5; 107,6]); la scheda «Santa Lucia» si
   apre lungo il passaggio. Rete: da 1 544 a 1 548 tratti, da 94,44 a 94,52 km; a piedi da 92 a 95 tratti, da 5,61 a 5,68 km;
   gocce da 11 a 12 (contati dalla pipeline).
+* **Capotenda a piedi** (blocco N5): da Via Madonna della Stella, che il mezzo ora percorre per 393 m in più fino alla goccia
+  all'imbocco della carrareccia (la goccia di prima a [−495, 605] non c'è più), si scende a piedi per le carrarecce e i sentieri OSM
+  (`WALK_OSM`, «Sentiero di Capotenda»: tre anelli col sentiero degli scavi) fino al **guado**: la figurina passa sui sassi, sopra
+  l'acqua (i campioni del tratto `edge.wet` salgono alla cima dei sassi, con un raccordo di 1,6 m sulle sponde; lì non c'è il nastro
+  del sentiero né il raccordo del terreno), e gira con la goccia sul greto dell'altra sponda. Lungo la bancata del pianoro il sentiero
+  è la passerella di legno a zig-zag col corrimano (satellite a zoom 20); accanto la bancata delle cave di salnitro con le bocche e le
+  grate, la grotta del Padre Eterno nella parete della gola, muretti a secco e la rovina; scheda «Capotenda» sul sentiero del
+  pianoro. A nord-ovest i filari della vigna di Botromagno (classe `vigna`, siepi a spalliera ogni 2,5 m, solo da vicino). Rete: da
+  1 549 a 1 569 tratti, da 94,28 a 96,77 km, gocce da 13 a 14; a piedi da 97 a 114 tratti, da 5,59 a 7,70 km.
 * **Sosta in panchina** (blocco M2, `Soste`, sezione 7b del codice): nella piazzetta del Monumento ai
   Caduti la figurina si siede sulla panchina reale (OSM) più vicina al percorso e guarda il
   monumento; la scheda resta aperta e dopo circa 5 s compare il pulsante **Esci dalla piazzetta ·
