@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 13 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2, N2b e N3 della fase 3.4 uniti (N2 il 07/10/2026, PR #20; N2b il 09/10/2026, PR #21; N3 il 13/10/2026, PR #22, con l'approvazione anticipata del committente); **N4 (Casino di Meninni e villette) in corso** (`fase-3-4-n4-meninni-villette`, PR #23, piano approvato il 14/10/2026, prompt `riferimenti/PROMPT_BLOCCHI_N4_SEGUITO.md`); poi N5, N6.
+Stato al 14 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2, N2b, N3 e N4 (Casino di Meninni) della fase 3.4 uniti (N2 il 07/10/2026, PR #20; N2b il 09/10/2026, PR #21; N3 il 13/10/2026, PR #22; N4 il 14/10/2026, PR #23, con l'approvazione anticipata del committente perché il contesto della chat si saturava); **prossimo: il resto di N4, le villette** (prompt `riferimenti/PROMPT_BLOCCHI_N4b_N6.md`), poi N5, N6.
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
@@ -204,9 +204,29 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N3 → N4 →
       Mater Ecclesiae più fedeli (solo da Street View sul fianco), il convento della Madonna delle Grazie con le finestre, la
       statua della Madonna davanti a San Domenico; sul telefono i dettagli più fini delle facciate solo da molto vicino, se
       servono triangoli.
-- [ ] **N4 · Casino di Meninni e villette** (`fase-3-4-n4-meninni-villette`, PR #23, **in corso**: piano approvato il 14/10/2026, sì a corvi e vento, villette in tutto il triangolo Via Quasimodo – Via Montale – Via Carlo Betocchi): il Casino com'è (rudere,
-      muro di cinta, cancello, pini e cipressi, cappella), la strada fino all'ingresso e al parcheggio
-      con la goccia (via quella di oggi sulla SP201), le villette attorno al Liceo scientifico Tarantino.
+- [x] **N4 · Casino di Meninni** (`fase-3-4-n4-meninni-villette`, PR #23, piano approvato il 14/10/2026, unita il 14/10/2026):
+      - **rete**: lo sterrato «Ingresso del Casino di Meninni» (18 m, non in OSM) lascia la SP201 e finisce con la goccia nello
+        spiazzo davanti al cancello; via la goccia in mezzo alla SP201 (oltre l'incrocio è decorativa); il giardino a piedi dal
+        cancello attorno al Casino fino alla goccia della figurina nella radura dietro (sostituisce il percorso del blocco M2).
+        Rete da 1 548 a 1 549 tratti, da 94,52 a 94,28 km, da 12 a 13 gocce; a piedi da 95 a 97 tratti, da 5,68 a 5,59 km;
+      - **il rudere** com'è (Street View, satellite, FAI): due piani senza tetto, finestre vuote con le cornici e il timpanetto,
+        lesene, cornicione crollato a tratti, quattro torrette tonde con la cupoletta, stanze scoperchiate, corpo più alto al
+        centro, scala coi muretti a L; terreno spianato in locale; i due corpi bassi sul muro da OSM come ruderi;
+      - **attorno**: muro di cinta di conci bianchi a gradoni coi blocchi mancanti, cancello aperto, pini d'Aleppo fitti,
+        cipressi, albero secco, rovi, cappella di famiglia (nessuna foto: semplice), suolo scuro dentro il recinto;
+      - **corvi** (una draw call, solo vicino) e **vento** con l'ululato e i gracchi, con l'interruttore dei suoni del bosco;
+      - scheda («rudere senza tetto», «tanto fatiscente quanto mistico», FAI), teletrasporto sullo sterrato (`via` del luogo);
+      - prove: `interazioni.mjs` arriva sullo sterrato e fa il giardino a piedi fino alla goccia e ritorno; vista «meninni» in
+        `prestazioni.mjs`; `difetti.mjs` come dopo N2b (sotto 31, galleggia 12, spezzate 58);
+      - misure (`shots/prestazioni-dopo-n4.txt`): 400 KB compressi (+12), triangoli invariati nelle viste di oggi (PC «alta»
+        341 200, telefono «centro» 230 700), vista «meninni» 67 100 su PC e 43 300 sul telefono, draw call al massimo 59 e 38;
+        «Pronto» 1,45 s su PC e 1,42 sul telefono (erano 1,25 e 1,30: da rimisurare; se resta così, costruire il Casino
+        dopo «Parti»); memoria JS 187 e 181 MB (oscilla).
+- [ ] **Resto di N4 · villette del triangolo Via Quasimodo – Via Montale – Via Carlo Betocchi** (blocco nuovo, prompt
+      `riferimenti/PROMPT_BLOCCHI_N4b_N6.md`, piano già approvato il 14/10/2026): piani da Street View nella tabella `LIVELLI`
+      estesa alla città, tipo «villetta», tetti in coppi dove il satellite li mostra, giardinetti, recinzioni, piazzette.
+- [ ] Casino di Meninni, ritocchi possibili: il muro di cinta a est e a sud (il satellite non lo mostra), i muretti a secco e i
+      pali col filo spinato dello spiazzo (Street View), una foschia leggera vicino al rudere se il committente la vuole.
 - [ ] **N5 · Capotenda, vigne e uliveti** (`fase-3-4-n5-capotenda-vigne`): il sentiero che dal Padre
       Eterno scende alle grotte e al torrente, la vigna di Botromagno, uliveti e vigne in periferia.
 - [ ] **N6 · cartolina, giro guidato e ritocchi** (`fase-3-4-n6-cartolina-giro`, era N3): cartolina con
