@@ -45,6 +45,8 @@ const VIEWS = {
   meninni: { at: [1437, -468], heading: [1, 0.1] },
   // Blocco N4b: camera di guida su Via Ungaretti verso Piazza Digiesi, tra le villette (balconi, giardinetti, piazzette).
   villette: { at: [688, -458], heading: [-0.35, 1] },
+  // Blocco N5: camera di guida su Via Madonna della Stella verso la goccia, con la vigna, la gola e la passerella di Capotenda.
+  capotenda: { at: [-705, 830], heading: [-0.69, 0.73] },
   // Blocco M3: la mongolfiera nel punto più pesante del giro (2 250 m, sopra il ciglio ovest verso la città),
   // vista esterna (cercato ogni 150 m con quattro angoli della camera). Resta l'ultima: dopo si è in volo.
   mongolfiera: { balloon: 2250, spin: 4.71 },

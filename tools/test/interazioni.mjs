@@ -340,6 +340,31 @@ check('Casino di Meninni: dallo spiazzo a piedi per il cancello e il giardino fi
 w = await guide('loop', null, 400);
 check('poi si torna al mezzo nello spiazzo e si riparte', w.back && !w.onFoot && w.speed > 0.5, w.street);
 
+// Blocco N5: dall'elenco dei luoghi a Capotenda (su Via Madonna della Stella, verso la goccia), poi a piedi sul sentiero del
+// pianoro (la scheda), giù fino al guado: sui sassi sopra l'acqua e alla goccia della figurina sull'altra sponda; poi al mezzo.
+await page.keyboard.press('p');
+await page.click('.poi >> text=Capotenda');
+await page.waitForFunction(() => window.gravina.phase === 'drive', null, { timeout: 20000 }).catch(() => {});
+const cp = await page.evaluate(() => { const d = window.gravina.driver; return { phase: window.gravina.phase, e: d.position.x, n: -d.position.z, street: d.edge.name }; });
+check('dall’elenco si arriva a Capotenda su Via Madonna della Stella', cp.phase === 'drive' && cp.street === 'Via Madonna della Stella' && Math.hypot(cp.e + 737, cp.n - 862) < 60,
+  `${cp.street} a [${cp.e.toFixed(0)}, ${cp.n.toFixed(0)}]`);
+const gu = await page.evaluate(() => {
+  const g = window.gravina, N = g.network.edges, end = (e) => Math.hypot(e.b.e + 550.5, e.b.n - 1294.2) < 3 || Math.hypot(e.a.e + 550.5, e.a.n - 1294.2) < 3;
+  const passo = N.find((e) => e.wet), water = g.Ravine.bed(...g.GOLA.guado).y + 0.35;
+  const S = passo?.samples, sopra = !!passo && [...passo.wet].every((k, i) => !k || S[i * 3 + 1] > water + 0.1);
+  return { passo: passo?.id, goccia: N.find((e) => e.walk && e.turn && end(e))?.id, sopra, sassi: g.Capotenda.count.sassi };
+});
+const cw1 = await guide('to', await nearEdge('Sentiero di Capotenda', [-660, 880]), 400);
+const cw2 = await guide('to', gu.goccia, 600);
+check('Capotenda: a piedi sul sentiero del pianoro, con la scheda', cw1.onFoot && [...cw1.cards, ...cw2.cards].includes('Capotenda'), `${cw1.street} · schede ${[...cw1.cards, ...cw2.cards].join(', ')}`);
+check('giù fino al guado: sui sassi sopra l’acqua e alla goccia della figurina sull’altra sponda', !!gu.goccia && cw2.onFoot && cw2.names.includes('Guado di Capotenda') && gu.sopra && gu.sassi >= 6,
+  `${cw2.names.join(', ')} · ${gu.sassi} sassi${gu.sopra ? '' : ', il sentiero va sott’acqua'}`);
+const carEdge = await page.evaluate(() => window.gravina.driver.car?.edge.id);
+const cw3 = await guide('to', carEdge, 600);             // si ferma appena la figurina arriva sulla via del mezzo
+await advance(6);
+const cafter = await foot();
+check('poi si risale per i sentieri e si ritrova il mezzo', cw3.onFoot && !cafter.onFoot && cafter.speed > 0.5, `${cafter.street}, ${cafter.speed.toFixed(1)} m/s`);
+
 // Blocco N2b: dalla ringhiera della Cattedrale (belvedere OSM n3348673132) il ponte si vede. Prima del blocco una casa a
 // tre piani (in OSM un rudere) lo nascondeva a 16 m: tre raggi dall'occhio (1,6 m) all'impalcato, nessun ostacolo.
 const vistaPonte = await page.evaluate(() => {
