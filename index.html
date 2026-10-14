@@ -1144,6 +1144,12 @@ const Plane = {
     for (const p of pts) { e += p[0]; n += p[1]; }
     return [e / pts.length, n / pts.length];
   },
+  /**
+   * Blocco N5b: coppie [e, n] scritte a mano con numeri interi → numeri non interi (spostati di un micron). V8 tiene gli
+   * array di interi in un formato diverso da quelli coi decimali dei dati, e Plane.contains, chiamata con tutti e due,
+   * diventava quattro volte più lenta per tutti (finestre, tetti: «Pronto» +150 ms).
+   */
+  dbl(pts) { return pts.map(([e, n]) => [e + 1e-6, n + 1e-6]); },
   contains(pts, e, n) {
     let inside = false;
     for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
@@ -1782,7 +1788,7 @@ const START = { back: 12, fallback: { at: [40, -12], heading: [1, 0] } };
  * Blocco N5b (richiesta del committente del 14/10/2026): il prato tra Via Madonna della Stella, Via Fontana la Stella e il ciglio
  * della gravina, dove sul satellite non ci sono alberi (gli ulivi stanno dall'altra parte della strada: uliveto n. 8 di GEO.uliveti).
  */
-const PRATO_STELLA = [[-375, 520], [-361, 456], [-313, 336], [-277, 252], [-274, 222], [-121, 243], [-110, 340], [-157, 456], [-165, 520]];
+const PRATO_STELLA = Plane.dbl([[-375, 520], [-361, 456], [-313, 336], [-277, 252], [-274, 222], [-121, 243], [-110, 340], [-157, 456], [-165, 520]]);
 
 /** Complesso rupestre delle Sette Camere (OSM n6365472958): lì le grotte della parete di fronte sono fitte. */
 const SETTE_CAMERE = DATA.locate('Complesso rupestre delle Sette Camere') ?? [-190, -134];
@@ -5693,13 +5699,13 @@ const Tiles = {
 
   /**
    * Blocco N5b: tra i due cigli della gravina (Ravine.locate) dove l'uso del suolo è campagna, campo o macchia: roccia.
-   * Ravine.locate scorre tutte le polilinee: si chiede solo vicino al torrente (Ravine.bed) e si tiene in una cache a celle di 6 m.
+   * Ravine.locate scorre tutte le polilinee: si chiede solo vicino al torrente (Ravine.bed) e si tiene in una cache a celle di 12 m.
    */
   _banks(e, n) {
     if (Ravine.bed(e, n).d > 120) return false;
     const code = Relief.coverAt(e, n);
     if (code !== COVER.CAMPAGNA && code !== COVER.CAMPO && code !== COVER.MACCHIA) return false;
-    const k = Math.round(e / 6) * 8191 + Math.round(n / 6), cache = (this._bankCache ??= new Map());
+    const k = Math.round(e / 12) * 8191 + Math.round(n / 12), cache = (this._bankCache ??= new Map());
     let v = cache.get(k);
     if (v === undefined) cache.set(k, (v = Ravine.locate(e, n).t < 1));
     return v;
@@ -7270,7 +7276,7 @@ const Scacchi = {
     [[1205, -650], [1240, -670], [1262, -700]], [[1200, -680], [1228, -700], [1248, -730]],
     [[1185, -695], [1210, -720], [1230, -748]], [[1168, -705], [1190, -735], [1208, -762]],
   ],
-  MACCHIA: [[1250, -600], [1290, -640], [1300, -720], [1270, -700], [1250, -650]],
+  MACCHIA: Plane.dbl([[1250, -600], [1290, -640], [1300, -720], [1270, -700], [1250, -650]]),
   count: { conci: 0, terrazze: 0, alberi: 0 },
   init() {
     const G = GEO.scacchi;
@@ -7480,7 +7486,7 @@ const Sportland = {
   BB: [1390, 1640, -920, -720],
   /** Cancello (tra i pilastri, verso il bivio della SP201) e piazzale sterrato: indicativi, da Street View e satellite. */
   GATE: [1597, -749], GATE_DIR: [0.98, -0.2],
-  PIAZZALE: [[1590, -744], [1606, -751], [1613, -768], [1586, -795], [1577, -822], [1549, -836], [1527, -816], [1540, -790], [1572, -777]],
+  PIAZZALE: Plane.dbl([[1590, -744], [1606, -751], [1613, -768], [1586, -795], [1577, -822], [1549, -836], [1527, -816], [1540, -790], [1572, -777]]),
   count: { campi: 0, pali: 0 },
   init() {
     const G = GEO.sportland;
