@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 14 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2, N2b, N3, N4 (Casino di Meninni) e N4b (villette) della fase 3.4 uniti (N2 il 07/10/2026, PR #20; N2b il 09/10/2026, PR #21; N3 il 13/10/2026, PR #22; N4 il 14/10/2026, PR #23, con l'approvazione anticipata del committente perché il contesto della chat si saturava); N4b (villette del Liceo Tarantino) unito il 14/10/2026 (PR #24, con l'approvazione anticipata del committente perché il contesto della chat si saturava); N5 (Capotenda e vigna di Botromagno) unito il 14/10/2026 (PR #25, approvato dal committente); **prossimo: N5b** (prompt `riferimenti/PROMPT_BLOCCHI_N5b_N8.md`), poi N5c, N6, N7 e N8 (richieste nuove del committente del 14/10/2026).
+Stato al 14 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2, N2b, N3, N4 (Casino di Meninni) e N4b (villette) della fase 3.4 uniti (N2 il 07/10/2026, PR #20; N2b il 09/10/2026, PR #21; N3 il 13/10/2026, PR #22; N4 il 14/10/2026, PR #23, con l'approvazione anticipata del committente perché il contesto della chat si saturava); N4b (villette del Liceo Tarantino) unito il 14/10/2026 (PR #24, con l'approvazione anticipata del committente perché il contesto della chat si saturava); N5 (Capotenda e vigna di Botromagno) unito il 14/10/2026 (PR #25, approvato dal committente); **in corso: N5b** (branch `fase-3-4-n5b-uliveti-scacchi`, prompt `riferimenti/PROMPT_BLOCCHI_N5b_N8.md`; piano breve per Casino Scacchi e Sportland), poi N5c, N6, N7 e N8 (richieste nuove del committente del 14/10/2026).
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
@@ -257,7 +257,7 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N2b → N3 �
       blocco.
 - [ ] Capotenda, ritocchi possibili: il belvedere «Patre Eterno» su Via Madonna della Stella (oggi niente), la casetta bianca sul pianoro
       (satellite), le canne attorno al laghetto grande (tolte per il peso), la posizione vera delle cave e dei laghetti con altre foto.
-- [ ] **N5b · uliveti, Casino Scacchi e Sportland** (`fase-3-4-n5b-uliveti-scacchi`, richieste del 14/10/2026): sei uliveti a
+- [ ] **N5b · uliveti, Casino Scacchi e Sportland** (`fase-3-4-n5b-uliveti-scacchi`, richieste del 14/10/2026; **in corso** dal 14/10/2026): sei uliveti a
       filari (Meninni est, OSM w1152762647, Contrada Salsa, Terrasanta, Castello, Cozzarolo); il Casino Scacchi coi terrazzamenti e
       gli alberi, senza strada; Sportland costruito bene e la SP201 percorribile fin davanti, dall'esterno.
 - [ ] **N5c · Hortus a piedi** (`fase-3-4-n5c-hortus`): Via Leopardi e un percorso nel giardino, con la sosta su una panchina e
