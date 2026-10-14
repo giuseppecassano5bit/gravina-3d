@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 14 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2, N2b, N3, N4 (Casino di Meninni) e N4b (villette) della fase 3.4 uniti (N2 il 07/10/2026, PR #20; N2b il 09/10/2026, PR #21; N3 il 13/10/2026, PR #22; N4 il 14/10/2026, PR #23, con l'approvazione anticipata del committente perché il contesto della chat si saturava); N4b (villette del Liceo Tarantino) unito il 14/10/2026 (PR #24, con l'approvazione anticipata del committente perché il contesto della chat si saturava); **in corso: N5** (piano approvato il 14/10/2026, lavoro fatto, in attesa del feedback; prompt `riferimenti/PROMPT_BLOCCHI_N5_N8.md`), poi N5b, N5c, N6, N7 e N8 (richieste nuove del committente del 14/10/2026).
+Stato al 14 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2, N2b, N3, N4 (Casino di Meninni) e N4b (villette) della fase 3.4 uniti (N2 il 07/10/2026, PR #20; N2b il 09/10/2026, PR #21; N3 il 13/10/2026, PR #22; N4 il 14/10/2026, PR #23, con l'approvazione anticipata del committente perché il contesto della chat si saturava); N4b (villette del Liceo Tarantino) unito il 14/10/2026 (PR #24, con l'approvazione anticipata del committente perché il contesto della chat si saturava); N5 (Capotenda e vigna di Botromagno) unito il 14/10/2026 (PR #25, approvato dal committente); **prossimo: N5b** (prompt `riferimenti/PROMPT_BLOCCHI_N5b_N8.md`), poi N5c, N6, N7 e N8 (richieste nuove del committente del 14/10/2026).
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
@@ -238,8 +238,8 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N2b → N3 �
       le eccezioni della tabella `VILLETTE`), la trama dei coppi (oggi tinta unita, come i tetti del centro storico).
 - [ ] Casino di Meninni, ritocchi possibili: il muro di cinta a est e a sud (il satellite non lo mostra), i muretti a secco e i
       pali col filo spinato dello spiazzo (Street View), una foschia leggera vicino al rudere se il committente la vuole.
-- [ ] **N5 · Capotenda e vigna di Botromagno** (`fase-3-4-n5-capotenda-vigne`, PR #25; **piano approvato il 14/10/2026**, lavoro
-      fatto il 14/10/2026, in attesa del feedback del committente):
+- [x] **N5 · Capotenda e vigna di Botromagno** (`fase-3-4-n5-capotenda-vigne`, PR #25; piano approvato il 14/10/2026, unita il
+      14/10/2026 con l'approvazione del committente):
       - **a piedi**: carrarecce e sentieri OSM di Capotenda (9 vie, «Sentiero di Capotenda»), tre anelli col sentiero degli scavi; il
         **guado** (eccezione approvata, `GUADO`): la figurina passa su 8 sassi sopra l'acqua e gira con la goccia sul greto dell'altra
         sponda; il mezzo prende 393 m in più di Via Madonna della Stella, con la goccia all'imbocco della carrareccia. Rete da 1 549 a
@@ -250,7 +250,11 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N2b → N3 �
         a zoom 20), bancata delle cave di salnitro con le bocche e due grate, grotta del Padre Eterno nella parete, muretti a secco e la
         rovina, cespugli sulle pareti; scheda «Capotenda» (testo approvato) e luogo nell'elenco («La gravina e il paesaggio»);
       - **vigna di Botromagno**: classe `vigna` (16) dell'uso del suolo, 18 200 m², filari a spalliera nord-sud ogni 2,5 m da vicino;
-      - misure: vedi la PR #25 (peso +9 KB compressi invece dei 4 stimati: detto al committente prima di tagliare).
+      - misure (`shots/prestazioni-dopo-n5.txt`): 420 KB compressi (+9 invece dei 4 stimati), triangoli PC «alta» 342 100, telefono
+        «centro» 232 300, vista «capotenda» 26 500 / 22 500, draw call invariate, «Pronto» 1,35 s; `interazioni` 70 controlli verdi.
+- [x] **Peso** (decisione del committente del 14/10/2026, dopo N5): «se sforiamo non succede nulla, dobbiamo far venire il lavoro fatto
+      bene». Il tetto di 450 KB compressi resta un riferimento, non un vincolo: prima viene la qualità; si dice comunque quanto pesa ogni
+      blocco.
 - [ ] Capotenda, ritocchi possibili: il belvedere «Patre Eterno» su Via Madonna della Stella (oggi niente), la casetta bianca sul pianoro
       (satellite), le canne attorno al laghetto grande (tolte per il peso), la posizione vera delle cave e dei laghetti con altre foto.
 - [ ] **N5b · uliveti, Casino Scacchi e Sportland** (`fase-3-4-n5b-uliveti-scacchi`, richieste del 14/10/2026): sei uliveti a
