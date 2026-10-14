@@ -409,7 +409,7 @@ def build_edges(segments, connectors):
         on_bridge_route = name == BRIDGE_ROUTE_NAME and cls != 'steps'
         near_bridge_west = cls in ('footway', 'path') and not walk_osm and any(
             BRIDGE_WEST_BOX[0] < p[0] < BRIDGE_WEST_BOX[1] and BRIDGE_WEST_BOX[2] < p[1] < BRIDGE_WEST_BOX[3] for p in pts)
-        to_castle = cls in ('track', 'service') and all(inside(p, CASTLE_BOX) for p in pts)
+        to_castle = (cls in ('track', 'service') and all(inside(p, CASTLE_BOX) for p in pts)) or (cls == 'service' and bool(ids & SERVIZIO_OSM))
         if to_castle:
             cls = 'track'
         # vie senza classe (per lo più traverse cieche dei quartieri nuovi): solo da guardare
@@ -978,7 +978,14 @@ luoghi_m2.detto = False
 VIE_CIECHE = [
     (946720266, (-140, 1044)),      # strada della Fiera fino al parcheggio dello stadio (w1340515588): la goccia resta fuori dalla recinzione
     (28355376, (1912, 126)),        # Via Bari fino al monumento alla Cola Cola (OSM w411137509)
+    (1158532123, (1559, -816)),     # blocco N5b: via Guardialto Alto fino al piazzale dei campi di Sportland (vedi SERVIZIO_OSM)
 ]
+# Blocco N5b (piano approvato dal committente il 14/10/2026, risposta «1b»; eccezione scritta in CLAUDE.md): la SP201 torna
+# percorribile oltre lo sterrato del Casino di Meninni fino al bivio di via Guardialto Alto (OSM w1158532123, highway=service),
+# e questa fino al piazzale sterrato davanti ai campi di Sportland, fuori dal recinto del centro sportivo (OSM w1158532121) e
+# dal cancello della pizzeria (Street View ottobre 2025, satellite). In OSM via Guardialto Alto è cieca: niente anello, la goccia
+# del mezzo sta nel piazzale. Le `service` non entrano nella rete: questa sì, per id, come sterrato (il resto resta decorativo).
+SERVIZIO_OSM = {1158532123}
 # Blocco N4 (piano approvato dal committente il 14/10/2026, eccezione scritta in CLAUDE.md): la strada del Casino di
 # Meninni. Non è in OSM: uno sterrato di circa 20 m che lascia la SP201 (Via Guardialto, OSM w1068971736) ed entra nello
 # spiazzo di terra battuta davanti al cancello, dove si parcheggia (Street View ottobre 2025 da [1432, -462] e
@@ -1131,6 +1138,8 @@ def build_network(data, buildings, bosco_osm):
     for e in edges:
         code = next((codes[w] for w in sorted(e['osm']) if w in codes), 0)
         e['surf'] = {code: length(e['poly'])} if code else {}
+        if e['osm'] & SERVIZIO_OSM:
+            e['surf'] = {4: length(e['poly'])}         # blocco N5b: via Guardialto Alto è uno sterrato chiaro
     edges, pos = merge_close_nodes(edges, pos)
     # Blocco M2: Villa Comunale e Piazza della Repubblica pedonali (decisione del committente)
     m2 = osm_m2()
@@ -1656,13 +1665,36 @@ DEM_STEP = 30             # m: passo della griglia delle quote in GEO
 COVER_STEP = 15           # m: passo della griglia dell'uso del suolo in GEO
 COVER = {'campagna': 0, 'citta': 1, 'parco': 2, 'bosco': 3, 'campo': 4, 'uliveto': 5, 'industria': 6,
          'cimitero': 7, 'sport': 8, 'piazza': 9, 'macchia': 10, 'cava': 11, 'querce': 12, 'bruciato': 13, 'fitto': 14, 'roccia': 15,
-         'vigna': 16}
+         'vigna': 16, 'filari': 17}
 # Blocco N5: la vigna di Botromagno (indicazione del committente del 03/10/2026: «a Botromagno vicino a Padre Eterno c'è la
 # vigna di Botromagno»; piano approvato il 14/10/2026). Sul satellite a zoom 20 filari nord-sud a spalliera, ogni 2,4 m. Il
 # contorno viene dagli elementi OSM: Via Madonna della Stella a sud-ovest, le carrarecce w578916725–726 a est (i vertici qui
 # sotto sono loro punti), il bordo della zolla a ovest e nord 1 078 (dove finiscono i filari). Si tolgono le carreggiate.
 VIGNA = [(-764, 891), (-835, 958), (-835, 1078), (-668, 1078), (-678.1, 1045.2), (-696.6, 1016.7), (-714.5, 997.7), (-729.1, 946.2)]
 VIGNA_BORDI = {'Via Madonna della Stella': 8, 578916725: 6, 578916726: 6}     # metri tolti attorno alle vie
+# Blocco N5b: gli uliveti a filari (approvati dal committente il 14/10/2026 coi numeri del piano di N5; il n. 1 è la vigna).
+# Contorni indicativi dal satellite di Google (zoom 17–19, solo come riferimento visivo; le immagini sono spostate di 8–12 m
+# rispetto a OSM), tranne il n. 3 che è l'uliveto OSM w1152762647. Si tolgono le carreggiate (ULIVETI_BORDO m dall'asse di ogni
+# via) e quello che esce dalla zolla. `angolo`: direzione dei filari in gradi da est verso nord; ulivi ogni ULIVETI_PASSO m.
+ULIVETI = [
+    (2, [(1700, -409), (1748, -439), (1715, -547), (1667, -532)], 75,
+     'a est del muro di cinta del Casino di Meninni (indicazione del committente in N4), striscia tra i muretti'),
+    (3, [(1047.3, -1026.6), (1070.1, -1016.3), (1112.2, -984.1), (1116.7, -980.2), (1111.3, -974.8), (1105.5, -971.4), (1074.2, -961.8),
+         (1029.3, -937.1), (986.3, -908.7), (949.9, -952.9), (1027.0, -1016.1), (1038.0, -1022.8)], -27, 'uliveto OSM w1152762647'),
+    (4, [(944, -632), (1139, -644), (1160, -700), (1150, -760), (1150, -890), (1075, -940), (990, -895), (944, -874), (979, -780),
+         (932, -721)], 50, 'Contrada Salsa, a ovest e a sud del Casino Scacchi (i terrazzamenti attorno al Casino sono a parte)'),
+    (5, [(-487, -668), (-433, -680), (-385, -716), (-382, -758), (-415, -812), (-469, -794), (-490, -758), (-490, -704)], -38,
+     'Terrasanta, tra la via curva e la scarpata del torrente'),
+    (6, [(563, 1797), (602, 1800), (596, 1710), (560, 1710)], 90, 'accanto al Castello Svevo, lungo la carrareccia a sud'),
+    (7, [(-188, -1010), (-149, -995), (-92, -1028), (-107, -1112), (-122, -1133), (-197, -1040)], -58,
+     'Contrada Cozzarolo, il recinto murato a ovest'),
+    # richiesta del committente del 14/10/2026: gli ulivi della Madonna della Stella stanno dall'altra parte della strada, tra
+    # Contrada Botromagno e Via Madonna della Stella (satellite: uliveto a filari a sud della contrada, a ovest del fossato)
+    (8, [(-503, 150), (-389, 255), (-362, 243), (-344, 162), (-329, 0), (-551, 0), (-551, 108)], 43,
+     'tra Contrada Botromagno e Via Madonna della Stella, a ovest del fossato'),
+]
+ULIVETI_PASSO = 7.0
+ULIVETI_BORDO = 5.0
 OVERPASS_URL = 'https://overpass-api.de/api/interpreter'
 OVERPASS_BBOX = '40.79,16.39,40.85,16.46'
 OVERPASS_QUERY = f"""[out:json][timeout:160];
@@ -1842,7 +1874,22 @@ def vigna_botromagno(segments):
     return poly
 
 
-def land_cover(data, buildings, bosco_osm, rock=None, vigna=None):
+def uliveti(segments):
+    """Blocco N5b: i poligoni degli uliveti a filari (ULIVETI meno le carreggiate, dentro la zolla): [(n, poligono, angolo)]."""
+    roads = [LineString([to_local(*p) for p in sg['geom']['coordinates']]).buffer(ULIVETI_BORDO) for sg in segments
+             if sg.get('subtype') == 'road' and sg.get('class') not in ('footway', 'path', 'steps', 'pedestrian')]
+    roads = shapely.union_all([r for r in roads if r.intersects(box(*BOUND[::2], *BOUND[1::2]))])
+    zone = CITY_ZONE.buffer(-3)
+    out = []
+    for k, ring, ang, _ in ULIVETI:
+        poly = Polygon(ring).difference(roads).intersection(zone)
+        poly = max(getattr(poly, 'geoms', [poly]), key=lambda g: g.area).simplify(0.5)
+        out.append((k, poly, ang))
+    print('  uliveti a filari: ' + ', '.join(f'n. {k} {p.area:.0f} m²' for k, p, _ in out))
+    return out
+
+
+def land_cover(data, buildings, bosco_osm, rock=None, vigna=None, filari=()):
     """
     Uso del suolo su una griglia di COVER_STEP m (centri delle celle): colori del terreno e alberi nella città moderna.
     `rock`: la roccia di Botromagno (blocco M1), lungo il ciglio ovest e negli scavi.
@@ -1874,6 +1921,8 @@ def land_cover(data, buildings, bosco_osm, rock=None, vigna=None):
     bosco_cover(grid, E, N, bosco_osm)
     if vigna is not None:
         grid[raster([vigna], E, N)] = COVER['vigna']   # blocco N5: la vigna di Botromagno
+    if filari:
+        grid[raster([p for _, p, _ in filari], E, N)] = COVER['filari']   # blocco N5b: gli uliveti a filari (niente ulivi a caso)
     # Blocco M2: la Pineta Parco Robinson (OSM w473031981, «parco con giochi, panchine, pini») è una pineta;
     # prato senza alberi attorno ai giochi e al busto al centro dei vialetti.
     m2 = osm_m2()
@@ -2006,6 +2055,66 @@ def meninni_ruderi(city):
                          'level': 0, 'osm': wid})
             print(f'  rudere sul muro di cinta del Casino di Meninni: w{wid} ({geo[wid].area:.0f} m²)')
 
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Blocco N5b · Casino Scacchi e Sportland (piano approvato dal committente il 14/10/2026)
+#   Casino Scacchi («Vecchia Domus Storica (Casino Scacchi)» su Google, in Contrada Salsa): il rudere OSM w411138777 (due
+#   piani senza tetto, foto di utenti su Google dell'aprile 2026) e la cappella con la vela w411137455 (in OSM anche lei
+#   `building=ruins`). Tutti e due diventano «ruderi» (tipo 12): li disegna l'oggetto Scacchi del diorama. Nessuna strada.
+#   Sportland, di fronte al Casino di Meninni: centro sportivo OSM w1158532121 coi campi, la pizzeria nell'edificio grande
+#   w411139162 e le tettoie. Overture dava palazzi di 14–17 m: piani da Street View (ottobre 2025) e satellite. Niente
+#   scritte né insegne (decisione del committente): i campi, le reti e le torri faro li disegna l'oggetto Sportland.
+# ─────────────────────────────────────────────────────────────────────────────
+SCACCHI = ('Casino Scacchi', 411138777, 9.5)       # nome, sagoma OSM, altezza dei muri più alti (m)
+SCACCHI_CAPPELLA = (411137455, 5.2)
+# Sportland: (id OSM, tipo, altezza in m). Tipi della città: 0 casa, 3 tettoia, 6 capannone.
+SPORTLAND_EDIFICI = {
+    411139162: (0, 7.0),      # la pizzeria: due piani col tetto piano (Street View dalla SP201)
+    411139646: (3, 3.4),      # corpo lungo e basso lungo il lato ovest, tetti grigi
+    411148081: (0, 3.6),      # casetta a un piano a nord
+    411140007: (0, 3.4),      # corpo basso a sud della pizzeria
+    411142991: (3, 3.0),
+    411145026: (6, 7.5),      # palestra coperta (building=sport, covered=yes): tetto bianco
+}
+SPORTLAND_OSM = 1158532121
+SPORTLAND_OVERPASS = '[out:json][timeout:60];(way(1158532121);way(1158532124);way(1158532125);way(1158532126);way(1158532127););out tags geom;'
+
+
+def casino_scacchi(city):
+    """Blocco N5b: il Casino Scacchi e la cappella diventano ruderi (tipo 12); restituisce GEO.scacchi coi due anelli."""
+    out = {}
+    for b in city:
+        if b.get('osm') == SCACCHI[1]:
+            b.update(name=SCACCHI[0], kind=CITY_KIND['rudere'], height=SCACCHI[2])
+            out['casino'] = flat(b['poly'].exterior.coords[:-1])
+        elif b.get('osm') == SCACCHI_CAPPELLA[0]:
+            b.update(name=None, kind=CITY_KIND['rudere'], height=SCACCHI_CAPPELLA[1])
+            out['cappella'] = flat(b['poly'].exterior.coords[:-1])
+    print(f'  Casino Scacchi: ' + ', '.join(out) + (' trovati' if len(out) == 2 else ' (manca qualcosa)'))
+    return out
+
+
+def sportland(city):
+    """Blocco N5b: piani veri degli edifici di Sportland; restituisce GEO.sportland (recinto e campi da OSM)."""
+    n = 0
+    for b in city:
+        if b.get('osm') in SPORTLAND_EDIFICI:
+            b['kind'], b['height'] = SPORTLAND_EDIFICI[b['osm']]
+            n += 1
+    els = overpass_cached('sportland', SPORTLAND_OVERPASS)
+    ring = lambda el: flat([to_local(g['lon'], g['lat']) for g in el['geometry']][:-1])
+    out = {'recinto': [], 'campi': []}
+    for el in els:
+        if el.get('type') != 'way' or not el.get('geometry'):
+            continue
+        t = el.get('tags') or {}
+        if el['id'] == SPORTLAND_OSM:
+            out['recinto'] = ring(el)
+        elif t.get('leisure') == 'pitch':
+            out['campi'].append([{'soccer': 1, 'tennis': 2}.get(t.get('sport'), 0)] + ring(el))
+    print(f'  Sportland: {n} edifici coi piani veri, {len(out["campi"])} campi')
+    return out
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Blocco N4b · villette del Liceo Tarantino (piano approvato dal committente il 14/10/2026: «tutto il triangolo formato
@@ -2996,6 +3105,9 @@ def encode(edges, deco, pos, buildings, city, arches, feats, extra):
         'meninni': extra['meninni'],
         'villette': extra['villette'],
         'capotenda': extra['capotenda'],
+        'uliveti': extra['uliveti'],
+        'scacchi': extra['scacchi'],
+        'sportland': extra['sportland'],
     }
     lines = ['const GEO = {']
     for k, v in geo.items():
@@ -3090,7 +3202,8 @@ def main():
     rovine = overpass_cached('rovine', ROVINE_OVERPASS)
     buildings, bot = botromagno(rovine, feats['river'], rims[1], buildings)
     vigna = vigna_botromagno(data['segment'])
-    cover = land_cover(data, buildings, bosco_osm, bot['rock'], vigna)
+    filari = uliveti(data['segment'])
+    cover = land_cover(data, buildings, bosco_osm, bot['rock'], vigna, filari)
     old = [b for b in buildings if inside(b['poly'].centroid.coords[0], Z0)]
     city = city_buildings([b for b in buildings if not inside(b['poly'].centroid.coords[0], Z0)], cover)
     print(f'  edifici: {len(old)} nel centro storico, {len(city)} nella città')
@@ -3101,6 +3214,8 @@ def main():
     city, sport = stadio_fiera(overpass_cached('stadio_fiera', STADIO_FIERA_OVERPASS), city)
     name_places(old, city)
     meninni_ruderi(city)
+    scacchi = casino_scacchi(city)
+    sport_n5b = sportland(city)
     extra = {
         'ground': ground, 'cover': cover, 'rails': build_rails(data), 'pois': city_pois(osm),
         'riverY': river_bed(feats['river'], lambda e, n: at(e, n)), 'rims': rims,
@@ -3109,6 +3224,8 @@ def main():
         'meninni': {'muro': [flat(m) for m in MURO_MENINNI], 'cancello': list(CANCELLO_MENINNI)},
         'villette': villette_dati(city),
         'capotenda': {'vigna': flat(vigna.exterior.coords[:-1])},
+        'uliveti': [[ang] + flat(p.exterior.coords[:-1]) for _, p, ang in filari],
+        'scacchi': scacchi, 'sportland': sport_n5b,
         'botromagno': {'rovine': [flat(r.exterior.coords[:-1]) for r in bot['ruins']],
                        'scavi': flat(bot['scavi'].simplify(0.5).exterior.coords[:-1]) if bot['scavi'] is not None else []},
     }

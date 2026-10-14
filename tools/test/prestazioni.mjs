@@ -47,6 +47,10 @@ const VIEWS = {
   villette: { at: [688, -458], heading: [-0.35, 1] },
   // Blocco N5: camera di guida su Via Madonna della Stella verso la goccia, con la vigna, la gola e la passerella di Capotenda.
   capotenda: { at: [-705, 830], heading: [-0.69, 0.73] },
+  // Blocco N5b: camera di guida sulla SP201 verso Sportland (campi, reti, torri faro, uliveto di Meninni est) e su Contrada
+  // Salsa tra gli uliveti 3 e 4 (i più grandi), col Casino Scacchi e i terrazzamenti sullo sfondo.
+  sportland: { at: [1546, -655], heading: [0.62, -0.78] },
+  salsa: { at: [960, -865], heading: [0.81, -0.59] },
   // Blocco M3: la mongolfiera nel punto più pesante del giro (2 250 m, sopra il ciglio ovest verso la città),
   // vista esterna (cercato ogni 150 m con quattro angoli della camera). Resta l'ultima: dopo si è in volo.
   mongolfiera: { balloon: 2250, spin: 4.71 },
