@@ -246,7 +246,8 @@ await page.evaluate(() => {
       if (mode === 'loop' && foot && !d.onFoot && d.speed > 1) { back = true; break; }
       g.advance(0.1, 1 / 30);
     }
-    return { back, walked: Math.round(walked), names: [...names], cards: [...cards], street: d.edge.name, onFoot: d.onFoot, sitting: !!d.sitting, speed: d.speed };
+    return { back, walked: Math.round(walked), names: [...names], cards: [...cards], street: d.edge.name, onFoot: d.onFoot, sitting: !!d.sitting, speed: d.speed,
+      ids: [...visits.keys()].map((e) => e.id) };
   };
 });
 const guide = (mode, target, seconds) => page.evaluate(([m, t, s]) => window.__guide(m, t, s), [mode, target, seconds]);
@@ -339,6 +340,21 @@ check('Casino di Meninni: dallo spiazzo a piedi per il cancello e il giardino fi
   !!mg && w.onFoot && w.names.includes('Giardino del Casino di Meninni') && w.cards.includes('Casino di Meninni'), `${w.street} · schede ${w.cards.join(', ')}`);
 w = await guide('loop', null, 400);
 check('poi si torna al mezzo nello spiazzo e si riparte', w.back && !w.onFoot && w.speed > 0.5, w.street);
+
+// Blocco N5b: in auto sulla SP201 oltre lo sterrato del Casino di Meninni, giù fino al bivio e su via Guardialto Alto fino al
+// piazzale dei campi di Sportland: il mezzo gira nella goccia (fuori dal recinto) e torna indietro sulla SP201.
+const sp = await page.evaluate(() => {
+  const N = window.gravina.network.edges, near = (x) => Math.hypot(x.e - 1548, x.n + 825) < 6 || Math.hypot(x.e - 1559, x.n + 816) < 6;
+  return N.find((e) => e.turn && !e.walk && /Guardialto Alto/.test(e.name ?? '') && (near(e.a) || near(e.b)))?.id;
+});
+await page.evaluate(() => { const g = window.gravina; g.placeAt(1480, -548, [0.55, -0.83], 0); g.rig.snap(g.driver); g.driver.decision = null; });
+w = await guide('to', sp, 120);
+const spBack = await page.evaluate(() => { const d = window.gravina.driver; return { name: d.edge.name, n: -d.position.z }; });
+check('Sportland: in auto sulla SP201 fino al piazzale dei campi, si gira nella goccia e si torna indietro',
+  !!sp && w.ids.includes(sp) && !w.onFoot && w.speed > 0.5, `goccia ${sp} ${w.ids.includes(sp) ? 'fatta' : 'mancata'} · ${spBack.name} a nord ${spBack.n.toFixed(0)}`);
+await page.keyboard.press('p');
+check('nell’elenco dei luoghi c’è il Casino Scacchi (solo l’etichetta)', await page.isVisible('.poi >> text=Casino Scacchi'), '');
+await page.keyboard.press('Escape');
 
 // Blocco N5: dall'elenco dei luoghi a Capotenda (su Via Madonna della Stella, verso la goccia), poi a piedi sul sentiero del
 // pianoro (la scheda), giù fino al guado: sui sassi sopra l'acqua e alla goccia della figurina sull'altra sponda; poi al mezzo.

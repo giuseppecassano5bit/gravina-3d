@@ -112,6 +112,14 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
   Michele: il tratto esce dalla zolla in Overture e i suoi punti OSM sono nella costante `GUADO`. Nel terreno la gola stretta tra il
   belvedere e il guado (`GOLA` e `Gola`, sezione 4) è incisa a mano sulle quote reali (non alza mai il terreno; vicino ai sentieri
   lascia la cengia); la vigna di Botromagno è la classe `vigna` (16) dell'uso del suolo.
+- **SP201 fino a Sportland (blocco N5b, piano approvato dal committente il 14/10/2026)**: la SP201 torna percorribile oltre lo
+  sterrato del Casino di Meninni fino al bivio di via Guardialto Alto (OSM w1158532123, `highway=service`: entra nella rete per id,
+  `SERVIZIO_OSM`), e questa fino al piazzale sterrato davanti ai campi di Sportland, con la goccia del mezzo (`VIE_CIECHE`), fuori dal
+  recinto del centro sportivo: in OSM è cieca, nessun anello. A Sportland niente scritte, insegne, cartelloni né etichetta (decisione
+  del committente: niente pubblicità), ma la zona riconoscibile (campi, reti, torri faro, cancello con l'arco). Il Casino Scacchi (rudere
+  OSM w411138777, oggetto `Scacchi`) si guarda soltanto: nessuna strada, solo l'etichetta. Gli uliveti a filari stanno in `ULIVETI`
+  (contorni indicativi dal satellite, tranne l'uliveto OSM w1152762647); il prato tra Via Madonna della Stella e la gravina è senza
+  alberi (`PRATO_STELLA`).
 - **Villette del Liceo Tarantino (blocco N4b, piano approvato dal committente il 14/10/2026)**: tutto il triangolo Via Montale – Via
   Quasimodo – Via Bertocchi (in OSM «Bertocchi» è un refuso di Betocchi: nel diorama resta il nome OSM, segnalato nel README) è di tipo
   «villetta» (`CITY_KIND` 13, oggetto `Villette` in sezione 6d); i livelli stanno nelle righe della città di `LIVELLI` (3 m per piano
