@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 14 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2, N2b, N3, N4 (Casino di Meninni) e N4b (villette) della fase 3.4 uniti (N2 il 07/10/2026, PR #20; N2b il 09/10/2026, PR #21; N3 il 13/10/2026, PR #22; N4 il 14/10/2026, PR #23, con l'approvazione anticipata del committente perché il contesto della chat si saturava); N4b (villette del Liceo Tarantino) unito il 14/10/2026 (PR #24, con l'approvazione anticipata del committente perché il contesto della chat si saturava); N5 (Capotenda e vigna di Botromagno) unito il 14/10/2026 (PR #25, approvato dal committente); **in corso: N5b** (branch `fase-3-4-n5b-uliveti-scacchi`, prompt `riferimenti/PROMPT_BLOCCHI_N5b_N8.md`; piano breve per Casino Scacchi e Sportland), poi N5c, N6, N7 e N8 (richieste nuove del committente del 14/10/2026).
+Stato al 14 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2, N2b, N3, N4 (Casino di Meninni) e N4b (villette) della fase 3.4 uniti (N2 il 07/10/2026, PR #20; N2b il 09/10/2026, PR #21; N3 il 13/10/2026, PR #22; N4 il 14/10/2026, PR #23, con l'approvazione anticipata del committente perché il contesto della chat si saturava); N4b (villette del Liceo Tarantino) unito il 14/10/2026 (PR #24, con l'approvazione anticipata del committente perché il contesto della chat si saturava); N5 (Capotenda e vigna di Botromagno) unito il 14/10/2026 (PR #25, approvato dal committente); **N5b fatto, in attesa del feedback del committente** (branch `fase-3-4-n5b-uliveti-scacchi`, PR #26; prompt `riferimenti/PROMPT_BLOCCHI_N5b_N8_SEGUITO.md`, stato in `riferimenti/STATO_LAVORO.md`, anche per Google Antigravity), poi N5c, N6, N7 e N8 (richieste nuove del committente del 14/10/2026).
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
@@ -257,9 +257,23 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N2b → N3 �
       blocco.
 - [ ] Capotenda, ritocchi possibili: il belvedere «Patre Eterno» su Via Madonna della Stella (oggi niente), la casetta bianca sul pianoro
       (satellite), le canne attorno al laghetto grande (tolte per il peso), la posizione vera delle cave e dei laghetti con altre foto.
-- [ ] **N5b · uliveti, Casino Scacchi e Sportland** (`fase-3-4-n5b-uliveti-scacchi`, richieste del 14/10/2026; **in corso** dal 14/10/2026): sei uliveti a
-      filari (Meninni est, OSM w1152762647, Contrada Salsa, Terrasanta, Castello, Cozzarolo); il Casino Scacchi coi terrazzamenti e
-      gli alberi, senza strada; Sportland costruito bene e la SP201 percorribile fin davanti, dall'esterno.
+- [x] **N5b · uliveti, Casino Scacchi e Sportland** (`fase-3-4-n5b-uliveti-scacchi`, PR #26; piano approvato il 14/10/2026 con le risposte
+      «1b, nessuna scritta né cartellone a Sportland ma zona riconoscibile»; in attesa del feedback):
+      - **uliveti a filari**: otto campi (`ULIVETI`, classe 17 «filari», `GEO.uliveti`, `Tiles._olives`), ulivi ogni 7 m, da lontano metà senza tronco;
+      - **Casino Scacchi** (rudere OSM w411138777, oggetto `Scacchi`): due piani senza tetto con la cima crollata, portale, finestre murate,
+        corpo basso; cappella con la vela e l'edera; terrazzamenti a muretti a secco con mandorli e ulivi; macchia nel fossato; solo l'etichetta;
+      - **Sportland**: piani veri degli edifici (pizzeria a due piani, tettoie, palestra), campi da calcetto e tennis con righe, porte, rete,
+        recinzioni alte e torri faro, cancello con l'arco senza scritta, piazzale sterrato; nessuna etichetta;
+      - **strada**: la SP201 di nuovo percorribile fino al bivio di via Guardialto Alto (OSM w1158532123) e questa fino al piazzale dei campi,
+        con la goccia (eccezione in CLAUDE.md); rete da 1 569 a 1 573 tratti, da 96,77 a 97,25 km, 15 gocce; pendenza massima 16,5%;
+      - **richieste nuove durante il blocco**: niente ulivi nel prato tra Via Madonna della Stella e la gravina (`PRATO_STELLA`): stanno
+        dall'altra parte della strada (uliveto n. 8, verso Contrada Botromagno); la roccia della gravina **grigio-bianca** con la macchia
+        a chiazze (`PALETTE.strata`, `Tiles._banks`), sotto lo stadio e lungo tutto il torrente;
+      - `Plane.dbl`: i poligoni scritti a mano con numeri interi rallentavano `Plane.contains` per tutti («Pronto» +150 ms);
+      - misure: 430 KB compressi (+10); triangoli PC «alta» 341 600, telefono «centro» 232 100 (invariati); viste nuove «sportland» 45 300 /
+        39 500 e «salsa» 133 600 / 160 400; draw call invariate; «Pronto» 1,46 s su PC e 1,36 sul telefono (prima 1,34 e 1,31 nella stessa sessione: in gran parte la compilazione degli shader, che oscilla); `difetti.mjs` come prima.
+- [ ] Da N5b, ritocchi possibili: dove guarda davvero la facciata del Casino Scacchi (scelta: sud-est), la sagoma vera del corpo alto
+      (OSM è stretta e lunga), il manufatto tondo di Sportland (w411140007), il colore dello sterrato di via Guardialto Alto.
 - [ ] **N5c · Hortus a piedi** (`fase-3-4-n5c-hortus`): Via Leopardi e un percorso nel giardino, con la sosta su una panchina e
       il pulsante «Riprendi il percorso».
 - [ ] **N6 · mezzi nuovi** (`fase-3-4-n6-mezzi`): Audi RS Q8, Fiat Panda del 2013, Ferrari Monza SP2, John Deere 8R coi
