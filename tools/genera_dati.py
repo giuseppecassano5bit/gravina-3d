@@ -144,7 +144,7 @@ PEDONALI_NO = {'Corso Vittorio Emanuele'}     # resta carrabile
 # Blocco N2 (piano approvato dal committente il 05/10/2026): nel Fondovito le vie che nella realtà non si fanno
 # in auto per i dislivelli sono pedonali anche dove OSM segna residential. Su Street View l'auto di Google non è
 # passata sulla Calata Grotte San Michele (solo foto a 360° di utenti); Via Civita resta carrabile.
-PEDONALI_FONDOVITO = {76151641, 385174951}    # Calata Grotte San Michele, tutta
+PEDONALI_FONDOVITO = {76151641, 385174951, 1384781495}    # Calata Grotte San Michele, tutta; blocco N5c: Via Giacomo Leopardi fino al cancello di Hortus
 # Il ponticello in fondo alla terrazza di San Michele delle Grotte (richiesta del committente, 05/10/2026): una
 # passerella di pietra col parapetto che scavalca la testa del canalone e porta al promontorio delle mura (OSM
 # w1512581512). Non è in OSM: punti scelti sul satellite e sulla foto da drone (solo come riferimento) tra la fine
@@ -1027,6 +1027,16 @@ PERCORSI = [
         [(-2990, -7447), (-3012, -7420), (-3045, -7386), (-3080, -7352), (-3097, -7334), (-3106, -7313), (-3127, -7311),
          (-3140, -7330), (-3133, -7352), (-3110, -7385), (-3092, -7430), (-3085, -7480), (-3080, -7530), (-3076, -7561)]]),
 ]
+# Blocco N5c (richiesta del committente del 14/10/2026): il percorso a piedi nel giardino di Hortus.
+# Dal cancello su Via Giacomo Leopardi sale tra i terrazzamenti di tufo fino alla panchina panoramica
+# affacciata sul Fondovico e sulla gravina, poi fa il giro della terrazza alta e riscende verso il cancello.
+GIARDINO_HORTUS = (
+    'Giardino di Hortus',
+    [
+        [(-26.0, -248.0), (-29.0, -245.0), (-33.0, -241.0), (-36.5, -235.0), (-37.5, -228.0), (-35.0, -227.0)],
+        [(-35.0, -227.0), (-31.0, -230.0), (-28.0, -237.0), (-26.0, -248.0)],
+    ]
+)
 
 
 def split_edge(edges, pos, pt, ok=lambda e: True, near=3.0):
@@ -1180,6 +1190,20 @@ def build_network(data, buildings, bosco_osm):
                   'bridge': False, 'foot': True, 'deco': False, 'walk': True, 'tunnel': False,
                   'surf': {4: length(pts)}})
     print(f'  {name}: {length(pts):.0f} m a piedi')
+    # Blocco N5c: il giardino di Hortus a piedi (anello che parte e torna al cancello su Via Leopardi)
+    hname, hparts = GIARDINO_HORTUS
+    gate_pt = hparts[0][0]
+    gate_node = split_edge(edges, pos, gate_pt, lambda e: 1384781495 in e['osm'] and not e['deco'])
+    high_pt = hparts[0][-1]
+    high_node = f'piedi:{hname}:alto'
+    pos[high_node] = high_pt
+    edges.append({'a': gate_node, 'b': high_node, 'poly': [pos[gate_node]] + list(hparts[0][1:-1]) + [high_pt],
+                  'cls': 'path', 'name': hname, 'osm': set(), 'bridge': False, 'foot': True, 'deco': False,
+                  'walk': True, 'tunnel': False, 'surf': {4: length(hparts[0])}})
+    edges.append({'a': high_node, 'b': gate_node, 'poly': [high_pt] + list(hparts[1][1:-1]) + [pos[gate_node]],
+                  'cls': 'path', 'name': hname, 'osm': set(), 'bridge': False, 'foot': True, 'deco': False,
+                  'walk': True, 'tunnel': False, 'surf': {4: length(hparts[1])}})
+    print(f'  {hname}: {length(hparts[0]) + length(hparts[1]):.0f} m di anello a piedi')
     # Vie cieche che portano a un luogo (VIE_CIECHE): si tagliano nel punto d'arrivo, dove andrà la goccia.
     ends = [split_edge(edges, pos, pt, lambda e, w=wid: w in e['osm'] and not e['deco'] and not e.get('walk')) for wid, pt in VIE_CIECHE]
     # Blocco N4: lo sterrato del Casino di Meninni lascia la SP201 in un incrocio nuovo e finisce nello spiazzo, da dove
