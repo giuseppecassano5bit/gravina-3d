@@ -276,7 +276,7 @@ check('sentiero degli scavi (A) a piedi, poi di nuovo al mezzo', scaviStart.onFo
 // Villa Comunale: a piedi fino alla panchina davanti al Monumento ai Caduti; la figurina si siede, c'è la
 // scheda, dopo circa 5 s il pulsante «Esci dalla piazzetta · torna al mezzo», che riporta al mezzo.
 await page.evaluate(() => { const g = window.gravina; g.placeAt(330, -95, [-1, -0.3], 0); g.rig.snap(g.driver); g.driver.decision = null; });
-const sostaEdge = await page.evaluate(() => window.gravina.network.edges.find((e) => e.soste)?.id);
+const sostaEdge = await page.evaluate(() => window.gravina.network.edges.find((e) => e.soste?.some((s) => s.sosta.lm === 'caduti'))?.id);
 w = await guide('to', sostaEdge, 300);
 const bench = await page.evaluate(() => ({ card: document.getElementById('card').classList.contains('is-visible'), title: document.getElementById('card-title').textContent, btn: !document.getElementById('btn-bench').hidden, car: window.gravina.driver.car?.edge.name }));
 check('Villa: la figurina si siede sulla panchina, con la scheda dei Caduti', w.sitting && bench.card && /Caduti/.test(bench.title) && !bench.btn, bench.title);
@@ -380,6 +380,52 @@ const cw3 = await guide('to', carEdge, 600);             // si ferma appena la f
 await advance(6);
 const cafter = await foot();
 check('poi si risale per i sentieri e si ritrova il mezzo', cw3.onFoot && !cafter.onFoot && cafter.speed > 0.5, `${cafter.street}, ${cafter.speed.toFixed(1)} m/s`);
+
+// Blocco N5c: dall'elenco dei luoghi a Hortus (arriva su Via San Vito Vecchio all'imbocco di Via Leopardi),
+// poi a piedi per Via Leopardi e nel giardino di Hortus fino alla panchina panoramica: si siede, si apre
+// la scheda, il pulsante «Riprendi il percorso» fa rialzare la figurina, che completa l'anello e torna al mezzo.
+await page.keyboard.press('p');
+await page.click('.poi >> text=Hortus');
+await page.waitForFunction(() => window.gravina.phase === 'drive', null, { timeout: 20000 }).catch(() => {});
+const hPlace = await page.evaluate(() => {
+  const d = window.gravina.driver;
+  return { phase: window.gravina.phase, e: d.position.x, n: -d.position.z, street: d.edge.name };
+});
+check('dall’elenco si arriva a Hortus su Via San Vito Vecchio', hPlace.phase === 'drive' && hPlace.street === 'Via San Vito Vecchio' && Math.hypot(hPlace.e - 27, hPlace.n + 245) < 30,
+  `${hPlace.street} a [${hPlace.e.toFixed(0)}, ${hPlace.n.toFixed(0)}]`);
+
+const hortusBenchEdge = await page.evaluate(() => {
+  const e = window.gravina.network.edges.find((x) => x.soste?.some((s) => s.sosta.lm === 'hortus'));
+  return e?.id;
+});
+const hw1 = await guide('to', hortusBenchEdge, 400);
+const hbench = await page.evaluate(() => ({
+  card: document.getElementById('card').classList.contains('is-visible'),
+  title: document.getElementById('card-title').textContent,
+  btn: !document.getElementById('btn-bench').hidden,
+  sitting: !!window.gravina.driver.sitting,
+  car: window.gravina.driver.car?.edge.name,
+}));
+check('Hortus: a piedi nel giardino e sulla panchina panoramica con la scheda', hw1.sitting && hbench.sitting && hbench.card && /Hortus/i.test(hbench.title),
+  `${hbench.title} · seduti: ${hbench.sitting}`);
+
+await advance(5.5);
+const hbenchBtn = await page.isVisible('#btn-bench');
+const hbenchText = hbenchBtn ? await page.textContent('#btn-bench') : '';
+check('dopo circa 5 s compare «Riprendi il percorso»', hbenchBtn && /riprendi il percorso/i.test(hbenchText), hbenchText.trim());
+
+if (hbenchBtn) await page.click('#btn-bench');
+await page.waitForTimeout(300);
+const hStood = await page.evaluate(() => !window.gravina.driver.sitting && window.gravina.driver.onFoot);
+check('il pulsante fa rialzare la figurina e prosegue a piedi', hStood);
+
+const hCarEdge = await page.evaluate(() => window.gravina.driver.car?.edge.id);
+const hw2 = await guide('to', hCarEdge, 500);
+await advance(6);
+const hafter = await foot();
+check('completa l’anello nel giardino e risale sul mezzo su Via San Vito Vecchio', hw2.onFoot && !hafter.onFoot && hafter.speed > 0.5,
+  `${hafter.street}, ${hafter.speed.toFixed(1)} m/s`);
+
 
 // Blocco N2b: dalla ringhiera della Cattedrale (belvedere OSM n3348673132) il ponte si vede. Prima del blocco una casa a
 // tre piani (in OSM un rudere) lo nascondeva a 16 m: tre raggi dall'occhio (1,6 m) all'impalcato, nessun ostacolo.

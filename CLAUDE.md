@@ -97,7 +97,11 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
   - il **ponticello di San Michele** (`PONTICELLO`) non è in OSM: si vede sul satellite e nella foto da drone
     del 2019 in fondo alla terrazza, sopra la testa del canalone; si percorre a piedi, in piano, e sotto scende
     il filo d'acqua (`Cascata`, richiesta del committente);
-  - Via Giacomo Leopardi, cieca, si disegna (decorativa, `DECO_Z0`) perché porta al cancello di Hortus.
+  - **Hortus a piedi (blocco N5c, piano approvato dal committente il 14/10/2026)**: Via Giacomo Leopardi
+    (OSM w1384781495, 65 m) è pedonale fino al cancello di Hortus (`PEDONALI_FONDOVITO`) e oltre il cancello è decorativa;
+    il giardino a piedi (`GIARDINO_HORTUS`, 53 m, non in OSM) entra dal cancellino, compie un anello tra i terrazzamenti
+    di tufo toccando la panchina panoramica (con la sosta, la scheda e il pulsante «Riprendi il percorso») e si richiude
+    al cancello per tornare al mezzo che aspetta su Via San Vito Vecchio.
 - **Eccezione di Santa Lucia (blocco N2b, piano approvato dal committente il 07/10/2026)**: il footway OSM w1195336380
   («Calata S. Lucia» su Google, 60 m da Via Michelangelo Calderoni alla chiesa) si percorre a piedi e finisce con la
   **goccia della figurina** nello slargo davanti alla chiesa (`GOCCE_PIEDI`), come il ponticello di San Michele. L'anello con
