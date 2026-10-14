@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 15 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2, N2b, N3, N4 (Casino di Meninni), N4b (villette), N5 (Capotenda), N5b (uliveti, Casino Scacchi, Sportland), N5c (Hortus a piedi) e N6 (mezzi nuovi) uniti su main (N6 il 15/10/2026, PR #28); **N7 (cinema, teatri e luoghi della cultura) in preparazione** (prompt `riferimenti/PROMPT_BLOCCHI_N5b_N8_SEGUITO.md`), poi N8.
+Stato al 15 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2, N2b, N3, N4 (Casino di Meninni), N4b (villette), N5 (Capotenda), N5b (uliveti, Casino Scacchi, Sportland), N5c (Hortus a piedi) e N6 (mezzi nuovi) uniti su main (N6 il 15/10/2026, PR #28); **N7 (cinema, teatri e luoghi della cultura) in corso** (branch `fase-3-4-n7-cultura`; Cinema Mastrogiacomo, Cinema Centrone, Teatro Vida e luoghi culturali; prompt `riferimenti/PROMPT_BLOCCHI_N5b_N8_SEGUITO.md`), poi N8.
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
