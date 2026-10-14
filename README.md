@@ -411,6 +411,13 @@ Notizie storiche e posizioni dei monumenti da fonti pubbliche, tra cui:
   maggio 2022) e S. G. Bosco 2 («16 Via Guardialto», ottobre 2025) su Street View sono palazzi di abitazioni, come
   l'Arcobaleno: solo l'etichetta. Padre Pio, Giovanni Paolo II, Tommaso Fiore e Santomasi: nessuna foto utile (siepi,
   cassonetti, altri palazzi), restano con le regole comuni.
+* Cinema, teatri e luoghi della cultura (blocco N7, in `Details.luoghiCultura` e schede in `LANDMARKS`):
+  **Cinema Teatro Mastrogiacomo** (Piazza Arcangelo Scacchi 16, edificio 306): prospetto sulla piazza con portale in tufo, trabeazione, insegna con fascia dorata e bacheche locandine a giorno; fonti storiche dell'attività teatrale e cinematografica cittadina e Street View.
+  **Cinema Teatro Centrone** (Via Alcide De Gasperi 14, edificio 239): maestoso fronte tardo-liberty su Via De Gasperi, portale monumentale a colonne doriche binate, balconata, grande rosone radiale, avancorpi laterali e insegna dorata; documentazione architettonica del Novecento e Street View.
+  **Teatro Vida** (Via Giardini 72, edificio 494): ingresso al civico 72 con vetrata scura, insegna rossa stilizzata, bacheca locandina illuminata a giorno e lanterna a muro; sito ufficiale della compagnia e Street View.
+  **Fondazione Museo Pomarici Santomasi** (Via Museo 20, palazzo seicentesco): portale monumentale bugnato ad arco a tutto sesto con stemma nobiliare dorato in chiave di volta, balconata con balaustra in ferro e lapide; archivi della Fondazione e rilievi fotografici.
+  **Gravina Sotterranea** (Rione Piaggio / Via Meucci, edificio 267): ingresso monumentale agli ipogei e cunicoli scavati nel tufo, portale ad arco con cancello in ferro e lanterna antica a braccio; documentazione dell'Associazione Gravina Sotterranea.
+  **Biblioteca Capitolare Finia** (Piazza Benedetto XIII, ala di Palazzo Vescovile, edificio 121): la più antica biblioteca pubblica pugliese (fondata nel 1636), con portale d'onore in pietra a colonne binate, timpano triangolare spezzato e targa scolpita; fonti diocesane e documentazione della cattedrale.
 * Geografia generale: [Wikipedia, Gravina in Puglia](https://en.wikipedia.org/wiki/Gravina_in_Puglia)
 
 Dati geografici della città intera (fase 3.4):
