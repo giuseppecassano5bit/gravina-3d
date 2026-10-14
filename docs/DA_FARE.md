@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 14 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2, N2b, N3, N4 (Casino di Meninni) e N4b (villette) della fase 3.4 uniti (N2 il 07/10/2026, PR #20; N2b il 09/10/2026, PR #21; N3 il 13/10/2026, PR #22; N4 il 14/10/2026, PR #23, con l'approvazione anticipata del committente perché il contesto della chat si saturava); N4b (villette del Liceo Tarantino) unito il 14/10/2026 (PR #24, con l'approvazione anticipata del committente perché il contesto della chat si saturava); N5 (Capotenda e vigna di Botromagno) unito il 14/10/2026 (PR #25, approvato dal committente); **N5b fatto, in attesa del feedback del committente** (branch `fase-3-4-n5b-uliveti-scacchi`, PR #26; prompt `riferimenti/PROMPT_BLOCCHI_N5b_N8_SEGUITO.md`, stato in `riferimenti/STATO_LAVORO.md`, anche per Google Antigravity), poi N5c, N6, N7 e N8 (richieste nuove del committente del 14/10/2026).
+Stato al 14 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2, N2b, N3, N4 (Casino di Meninni) e N4b (villette) della fase 3.4 uniti (N2 il 07/10/2026, PR #20; N2b il 09/10/2026, PR #21; N3 il 13/10/2026, PR #22; N4 il 14/10/2026, PR #23, con l'approvazione anticipata del committente perché il contesto della chat si saturava); N4b (villette del Liceo Tarantino) unito il 14/10/2026 (PR #24, con l'approvazione anticipata del committente perché il contesto della chat si saturava); N5 (Capotenda e vigna di Botromagno) unito il 14/10/2026 (PR #25, approvato dal committente); N5b (uliveti, Casino Scacchi, Sportland) unito il 14/10/2026 (PR #26, approvato dal committente); **N5c (Hortus a piedi) in corso** (branch `fase-3-4-n5c-hortus`; prompt `riferimenti/PROMPT_BLOCCHI_N5b_N8_SEGUITO.md`, stato in `riferimenti/STATO_LAVORO.md`, anche per Google Antigravity), poi N6, N7 e N8 (richieste nuove del committente del 14/10/2026).
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
@@ -258,7 +258,7 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N2b → N3 �
 - [ ] Capotenda, ritocchi possibili: il belvedere «Patre Eterno» su Via Madonna della Stella (oggi niente), la casetta bianca sul pianoro
       (satellite), le canne attorno al laghetto grande (tolte per il peso), la posizione vera delle cave e dei laghetti con altre foto.
 - [x] **N5b · uliveti, Casino Scacchi e Sportland** (`fase-3-4-n5b-uliveti-scacchi`, PR #26; piano approvato il 14/10/2026 con le risposte
-      «1b, nessuna scritta né cartellone a Sportland ma zona riconoscibile»; in attesa del feedback):
+      «1b, nessuna scritta né cartellone a Sportland ma zona riconoscibile»; unito su `main` il 14/10/2026):
       - **uliveti a filari**: otto campi (`ULIVETI`, classe 17 «filari», `GEO.uliveti`, `Tiles._olives`), ulivi ogni 7 m, da lontano metà senza tronco;
       - **Casino Scacchi** (rudere OSM w411138777, oggetto `Scacchi`): due piani senza tetto con la cima crollata, portale, finestre murate,
         corpo basso; cappella con la vela e l'edera; terrazzamenti a muretti a secco con mandorli e ulivi; macchia nel fossato; solo l'etichetta;
@@ -274,7 +274,7 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N2b → N3 �
         39 500 e «salsa» 133 600 / 160 400; draw call invariate; «Pronto» 1,46 s su PC e 1,36 sul telefono (prima 1,34 e 1,31 nella stessa sessione: in gran parte la compilazione degli shader, che oscilla); `difetti.mjs` come prima.
 - [ ] Da N5b, ritocchi possibili: dove guarda davvero la facciata del Casino Scacchi (scelta: sud-est), la sagoma vera del corpo alto
       (OSM è stretta e lunga), il manufatto tondo di Sportland (w411140007), il colore dello sterrato di via Guardialto Alto.
-- [ ] **N5c · Hortus a piedi** (`fase-3-4-n5c-hortus`): Via Leopardi e un percorso nel giardino, con la sosta su una panchina e
+- [ ] **N5c · Hortus a piedi** (`fase-3-4-n5c-hortus`, **in corso**): Via Leopardi e un percorso nel giardino, con la sosta su una panchina e
       il pulsante «Riprendi il percorso».
 - [ ] **N6 · mezzi nuovi** (`fase-3-4-n6-mezzi`): Audi RS Q8, Fiat Panda del 2013, Ferrari Monza SP2, John Deere 8R coi
       contropesi (al posto di RS6 Avant, Panda 4x4 del 1999, Huracán e trattore di oggi); modelli da confermare nel piano.
