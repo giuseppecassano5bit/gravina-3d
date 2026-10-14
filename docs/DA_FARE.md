@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 14 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2, N2b, N3, N4 (Casino di Meninni) e N4b (villette) della fase 3.4 uniti (N2 il 07/10/2026, PR #20; N2b il 09/10/2026, PR #21; N3 il 13/10/2026, PR #22; N4 il 14/10/2026, PR #23, con l'approvazione anticipata del committente perché il contesto della chat si saturava); N4b (villette del Liceo Tarantino) unito il 14/10/2026 (PR #24, con l'approvazione anticipata del committente perché il contesto della chat si saturava); **in corso: N5** (prompt `riferimenti/PROMPT_BLOCCHI_N5_N6.md`), poi N6.
+Stato al 14 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2, N2b, N3, N4 (Casino di Meninni) e N4b (villette) della fase 3.4 uniti (N2 il 07/10/2026, PR #20; N2b il 09/10/2026, PR #21; N3 il 13/10/2026, PR #22; N4 il 14/10/2026, PR #23, con l'approvazione anticipata del committente perché il contesto della chat si saturava); N4b (villette del Liceo Tarantino) unito il 14/10/2026 (PR #24, con l'approvazione anticipata del committente perché il contesto della chat si saturava); **in corso: N5** (piano approvato il 14/10/2026; prompt `riferimenti/PROMPT_BLOCCHI_N5_N8.md`), poi N5b, N5c, N6, N7 e N8 (richieste nuove del committente del 14/10/2026).
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
@@ -8,7 +8,7 @@ del lavoro su due chat in [`PIANO_FASE_3_4.md`](PIANO_FASE_3_4.md).
 
 ### Fase 3.4, seconda parte (decisioni del 30/09/2026)
 
-Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N3 → N4 → N5 → N6, dettagli e decisioni nella sezione 7 del piano.
+Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N2b → N3 → N4 → N4b → N5 → N5b → N5c → N6 → N7 → N8, dettagli e decisioni nella sezione 7 del piano.
 
 - [x] **I · spazio sul telefono** (`fase-3-4-i-prestazioni`, PR #13, unita il 30/09/2026):
       due livelli di dettaglio per riquadro nella stessa mesh (terreno a maglia doppia, vie rade,
@@ -238,11 +238,23 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N3 → N4 →
       le eccezioni della tabella `VILLETTE`), la trama dei coppi (oggi tinta unita, come i tetti del centro storico).
 - [ ] Casino di Meninni, ritocchi possibili: il muro di cinta a est e a sud (il satellite non lo mostra), i muretti a secco e i
       pali col filo spinato dello spiazzo (Street View), una foschia leggera vicino al rudere se il committente la vuole.
-- [ ] **N5 · Capotenda, vigne e uliveti** (`fase-3-4-n5-capotenda-vigne`, iniziato il 14/10/2026, PR in bozza; piano in
-      attesa di risposta): il sentiero che dal Padre Eterno scende alle grotte e al torrente, la vigna di Botromagno, uliveti e
-      vigne in periferia.
-- [ ] **N6 · cartolina, giro guidato e ritocchi** (`fase-3-4-n6-cartolina-giro`, era N3): cartolina con
-      la cornice, giro guidato dei monumenti, camera dopo il teletrasporto, schede lunghe, memoria JS.
+- [ ] **N5 · Capotenda e vigna di Botromagno** (`fase-3-4-n5-capotenda-vigne`, PR #25 in bozza; **piano approvato il
+      14/10/2026**, lavoro nella chat successiva): a piedi le carrarecce e i sentieri OSM di Capotenda (9 vie, tre anelli col
+      sentiero degli scavi; a piedi da 5,6 a 7,4 km nella prova a vuoto), il **guado** coi sassi attraversato con la goccia della
+      figurina sull'altra sponda (eccezione approvata), il mezzo 393 m più avanti su Via Madonna della Stella con la goccia
+      all'imbocco della carrareccia; la gola incisa tra il belvedere e il guado coi laghetti, le cave di salnitro con le grate e la
+      passerella, la grotta del Padre Eterno; scheda «Capotenda» (testo approvato); la vigna di Botromagno (classe `vigna`).
+- [ ] **N5b · uliveti, Casino Scacchi e Sportland** (`fase-3-4-n5b-uliveti-scacchi`, richieste del 14/10/2026): sei uliveti a
+      filari (Meninni est, OSM w1152762647, Contrada Salsa, Terrasanta, Castello, Cozzarolo); il Casino Scacchi coi terrazzamenti e
+      gli alberi, senza strada; Sportland costruito bene e la SP201 percorribile fin davanti, dall'esterno.
+- [ ] **N5c · Hortus a piedi** (`fase-3-4-n5c-hortus`): Via Leopardi e un percorso nel giardino, con la sosta su una panchina e
+      il pulsante «Riprendi il percorso».
+- [ ] **N6 · mezzi nuovi** (`fase-3-4-n6-mezzi`): Audi RS Q8, Fiat Panda del 2013, Ferrari Monza SP2, John Deere 8R coi
+      contropesi (al posto di RS6 Avant, Panda 4x4 del 1999, Huracán e trattore di oggi); modelli da confermare nel piano.
+- [ ] **N7 · cinema, teatri e luoghi della cultura** (`fase-3-4-n7-cultura`): Cinema Mastrogiacomo, Cinema Centrone, Teatro
+      Vida e gli altri luoghi culturali, con facciate dalle foto e schede coi fatti verificati.
+- [ ] **N8 · cartolina, giro guidato e ritocchi** (`fase-3-4-n8-cartolina-giro`, era N6): cartolina con
+      la cornice, giro guidato dei monumenti (anche coi luoghi nuovi), camera dopo il teletrasporto, schede lunghe, memoria JS.
 - Versione in inglese: non ora.
 
 ### Fase 3.4, blocco G · percorsi a piedi, quote reali, camera e radio (PR #12, unita il 30/09/2026) ✅

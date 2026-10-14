@@ -364,7 +364,7 @@ licenze), `CLAUDE.md` (nuove regole ed eccezioni).
 
 ### Seconda parte (decisioni del committente del 30/09/2026)
 
-Ordine: **I → D → E → L → M → N** (M diviso in M1, M2, M3 il 01/10/2026; N in sei blocchi, N1–N6, il 03/10/2026), un blocco alla volta, ognuno col suo branch e la sua PR.
+Ordine: **I → D → E → L → M → N** (M diviso in M1, M2, M3 il 01/10/2026; N in sei blocchi, N1–N6, il 03/10/2026, poi N2b, N4b, N5b, N5c, N7 e N8), un blocco alla volta, ognuno col suo branch e la sua PR.
 Decisioni già prese:
 1. **Area Quercus** = l'ex area ristoro «Marcuccio»; in OSM «Rifugio Bosco Difesa Grande»
    (w477739267), dove oggi finisce la strada del Bosco.
@@ -444,7 +444,7 @@ Il blocco M si divide in tre, ognuno col suo branch e la sua PR.
 - Prove: giro campionato ogni 5 m in `simula.mjs`, decollo, scheda, cambio mezzo e fine del giro
   in `interazioni.mjs`, vista «mongolfiera» nel punto peggiore del giro.
 
-### N1–N6 (al posto del blocco N; decisioni del committente del 03/10/2026)
+### N1–N8 (al posto del blocco N; decisioni del committente del 03/10/2026 e del 14/10/2026)
 Il blocco N si divide prima in tre (N1, N2, N3), poi, con le risposte al piano di N1, in sei: ognuno
 col suo branch, il suo piano breve e la sua PR. Il tetto del peso sale a 450 KB compressi (sezione 3);
 triangoli e draw call restano quelli di prima.
@@ -489,8 +489,26 @@ triangoli e draw call restano quelli di prima.
 - Il sentiero che dal Padre Eterno scende alle grotte e al torrente (area di Capotenda, Sentiero
   dell'Acqua e della Pietra), sui sentieri OSM; la vigna di Botromagno vicino al Padre Eterno
   (indicazione del committente); uliveti e vigne in periferia dove ci sono.
+- Piano approvato il 14/10/2026: guado attraversato con la goccia della figurina sull'altra sponda, tutti e sette i campi a filari,
+  scheda «Capotenda»; la vigna resta in N5, gli uliveti vanno in N5b.
 
-#### N6 · Cartolina, giro guidato e ritocchi (`fase-3-4-n6-cartolina-giro`, era N3)
+#### N5b · Uliveti, Casino Scacchi e Sportland (`fase-3-4-n5b-uliveti-scacchi`, richieste del 14/10/2026)
+- Sei uliveti a filari; il Casino Scacchi coi terrazzamenti e gli alberi, senza strada; Sportland di fronte al Casino di Meninni
+  costruito bene, e la SP201 percorribile fin davanti, sempre dall'esterno (goccia in uno slargo reale).
+
+#### N5c · Hortus a piedi (`fase-3-4-n5c-hortus`)
+- Un percorso a piedi per visitare Hortus; su un percorso predefinito la figurina si siede su una panchina e riprende il cammino
+  col pulsante «Riprendi il percorso».
+
+#### N6 · Mezzi nuovi (`fase-3-4-n6-mezzi`)
+- Audi RS Q8, Fiat Panda del 2013, Ferrari Monza SP2 e John Deere 8R coi contropesi al posto di Audi RS6 Avant, Fiat Panda 4x4
+  del 1999, Lamborghini Huracán e trattore di oggi; stesse regole (4 mesh per mezzo, senza loghi). La mongolfiera resta.
+
+#### N7 · Cinema, teatri e luoghi della cultura (`fase-3-4-n7-cultura`)
+- Cinema Mastrogiacomo, Cinema Centrone, Teatro Vida e altri luoghi culturali: sagome vere, facciate dalle foto, schede coi fatti
+  verificati, gruppo «Cultura» nell'elenco dei luoghi.
+
+#### N8 · Cartolina, giro guidato e ritocchi (`fase-3-4-n8-cartolina-giro`, era N6, prima ancora N3)
 - **Cartolina**: immagine ad alta risoluzione con cornice (Gravina in Puglia, luogo, indirizzo del
   sito, attribuzioni OSM e Copernicus in breve), Web Share sul telefono; credito deciso dal committente.
 - **Giro guidato dei monumenti**: il mezzo sceglie le vie, anche i tratti a piedi; «Prossima
