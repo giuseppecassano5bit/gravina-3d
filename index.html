@@ -11248,20 +11248,20 @@ function forestAmount(e, n) {
  */
 const VEHICLES = [
   {
-    id: 'panda', name: 'Fiat Panda 4x4', short: 'Panda 4x4', tag: '1999 · trazione integrale Steyr-Puch', color: '#b3261e', pace: 0.9,
-    icon: { body: 'M3 25.4V14.5L3.9 5.8l1.3-.5h32.5l9.1 8.9 13 1 1.2 1.1v9.1h-4.3a6.2 6.2 0 0 0-12.3 0H19.6a6.2 6.2 0 0 0-12.3 0z', wheels: [[13.5, 25.6, 4.6], [50.5, 25.6, 4.6]] },
+    id: 'panda', name: 'Fiat Panda', short: 'Panda', tag: '2013 · Terza serie “Squircle”', color: '#c4261d', pace: 0.95,
+    icon: { body: 'M3 24.5V13.8l2.2-4.2 1.8-1.5 8.2-3.8h21.4l11.2 7.8 11.8 2.2 1.4 2.1v8h-4.3a6.2 6.2 0 0 0-12.3 0H21.4a6.2 6.2 0 0 0-12.3 0z', wheels: [[15.2, 24.8, 4.6], [49.2, 24.8, 4.6]] },
   },
   {
-    id: 'rs6', name: 'Audi RS6 Avant', short: 'RS6 Avant', tag: 'Station wagon · V8 biturbo', color: '#7f8386', pace: 1.1,
-    icon: { body: 'M3 28.1v-8.7l1.2-1.2 4.1-3.9 1.7-.4 21.1-.2 12.7 6 15.6 2.3 1.6 1.3v4.8h-6.3v-1.8a5 5 0 0 0-10.1 0v1.8H20.7v-1.8a5 5 0 0 0-10.1 0v1.8z', wheels: [[15.6, 26.3, 4], [49.6, 26.3, 4]] },
+    id: 'rs6', name: 'Audi RS Q8', short: 'RS Q8', tag: 'SUV coupé · V8 biturbo 600 CV', color: '#282c32', pace: 1.1,
+    icon: { body: 'M3 24v-9.5l2-3.8 6.5-4.2h19.2l12.8 6.5 14.5 1.8 3 3.2v6h-6.2a6.8 6.8 0 0 0-13.4 0H22.5a6.8 6.8 0 0 0-13.4 0z', wheels: [[15.8, 24, 5.5], [49.4, 24, 5.5]] },
   },
   {
-    id: 'huracan', name: 'Lamborghini Huracán', short: 'Huracán', tag: 'Supersportiva · V10 aspirato', color: '#f08a12', pace: 1.2,
-    icon: { body: 'M3 28.7v-9.6l2-1.3 18.4-2 5-.5 13.2 5.1 16.7 3.6 2.7 1.6v3.1h-7.1v-2.5a5 5 0 0 0-10 0v2.5H20v-2.7a5.2 5.2 0 0 0-10.4 0v2.7z', wheels: [[14.8, 26, 4.3], [48.9, 26.2, 4.1]] },
+    id: 'huracan', name: 'Ferrari Monza SP2', short: 'Monza SP2', tag: 'Barchetta biposto · V12 aspirato 810 CV', color: '#c81e24', pace: 1.25,
+    icon: { body: 'M3 26v-6.2l3.2-2.1 4.5 1.5 5.5-2.2 4.2-3.2 5.5-.2 4.8 3.5 15.5 2.8 14.5 2.8 3.3 3.3v1h-7a5.5 5.5 0 0 0-10.8 0H21.2a5.5 5.5 0 0 0-10.8 0z', wheels: [[15.8, 26, 4.5], [49.5, 26, 4.5]] },
   },
   {
-    id: 'deere', name: 'Trattore John Deere', short: 'Trattore', tag: 'Il “motore” di campagna', color: '#367c2b', pace: 0.62,
-    icon: { body: 'M9 21V3h17v10h28l3 2v8H9z', wheels: [[18, 22, 9], [51, 25, 6]] },
+    id: 'deere', name: 'John Deere 8R', short: 'John Deere 8R', tag: 'Trattore da campo aperto coi contropesi', color: '#367c2b', pace: 0.62,
+    icon: { body: 'M6 19.5v-3.5h7.5V3.5h18v9.5h19l5.5 2.5 5 1.5v6H55a9 9 0 0 0-17 0H24.5a13.5 13.5 0 0 0-26 0z', wheels: [[11.5, 19.5, 10.5], [46.5, 22.5, 7.5]] },
   },
   // Blocco M3: il quinto mezzo vola su un giro fisso (sezione 8b) e non segue le vie.
   {
@@ -11670,210 +11670,352 @@ void main() { float a = max(0.0, 1.0 - length(vUv)); gl_FragColor = vec4(vCol * 
     for (const s of [-1, 1]) k.box(0.045, 0.11, 0.018, F.plateBand, [pos[0] + s * 0.24, pos[1], pos[2]], rot);
   };
 
-  /** FIAT PANDA 4x4 (1999): 3,38 × 1,49 × 1,48 m, passo 2,16 m, ruote 145/80 R13. */
+  /** FIAT PANDA (2013 · terza serie): 3,65 × 1,64 × 1,55 m, passo 2,30 m, design “squircle”. */
   function panda() {
     const k = new Shop('panda-4x4');
-    const P = fin('#b3261e', 0.1, 0.42);              // pastello anni Novanta
-    const r = 0.285;
+    const P = fin('#c4261d', 0.18, 0.35);             // rosso brillante pastello Fiat
+    const r = 0.29;                                   // ruote 175/65 R15
     k.loft({
-      paint: P, pillar: P, sill: 0.3, gap: 0.075, axles: [{ z: -1.08, r }, { z: 1.08, r }],
-      keys: [[-1.69, 0.72, 0.9, 0.93, 0.62], [-1.64, 0.745, 0.93, 1.44, 0.655], [-1.56, 0.745, 0.93, 1.47, 0.66], [0.33, 0.745, 0.93, 1.47, 0.66], [0.86, 0.745, 0.93, 0.95, 0.68], [1.62, 0.74, 0.86, 0.89, 0.66], [1.69, 0.72, 0.82, 0.83, 0.62]],
-      side: [-1.5, 0.8], pillars: [[-0.47, -0.38]], glass: [[-1.69, -1.64], [0.33, 0.86]],
+      paint: P, pillar: P, sill: 0.28, gap: 0.07, axles: [{ z: -1.15, r }, { z: 1.15, r }],
+      keys: [
+        [-1.82, 0.77, 0.88, 0.98, 0.68],              // paraurti posteriore bombato
+        [-1.74, 0.81, 0.94, 1.48, 0.68],              // portellone e montante D con lunotto a squircle
+        [-1.52, 0.82, 0.96, 1.52, 0.69],              // terza luce laterale a squircle
+        [0.32, 0.82, 0.96, 1.55, 0.70],               // tetto bombato moderno
+        [0.82, 0.82, 0.95, 1.08, 0.72],               // base parabrezza inclinato
+        [1.65, 0.80, 0.88, 0.92, 0.70],               // cofano motore arrotondato
+        [1.82, 0.74, 0.78, 0.82, 0.64],               // musetto frontale con baffo
+      ],
+      side: [-1.62, 0.78],
+      pillars: [[-0.45, -0.35], [-1.18, -1.10]],      // montanti B e C neri: lascia visibile la terza luce a squircle!
+      glass: [[-1.82, -1.74], [0.32, 0.82]],
     });
-    // Protezioni in plastica grezza della 4x4: paraurti, fasce laterali, bordi dei passaruota.
-    k.box(1.54, 0.22, 0.18, F.plastic, [0, 0.43, 1.7]).box(1.54, 0.22, 0.18, F.plastic, [0, 0.43, -1.7]);
+    // Fascia paracolpi inferiore e inserto scuro nei paraurti con motivo squircle
+    k.box(1.58, 0.24, 0.16, F.plastic, [0, 0.42, 1.81]).box(1.58, 0.24, 0.16, F.plastic, [0, 0.42, -1.81]);
     k.both((s) => {
-      k.box(0.05, 0.2, 1.3, F.plastic, [0.755 * s, 0.45, 0]);
-      for (const z of [-1.62, 1.62]) k.box(0.05, 0.2, 0.16, F.plastic, [0.74 * s, 0.43, z]);   // angoli dei paraurti
-      // fari rettangolari, frecce, fanali verticali, specchietti, maniglie, fessure delle porte
-      k.box(0.26, 0.13, 0.03, F.head, [0.5 * s, 0.71, 1.7]);
-      k.box(0.09, 0.06, 0.03, s > 0 ? F.blinkL : F.blinkR, [0.67 * s, 0.6, 1.7]);
-      k.box(0.15, 0.2, 0.03, F.tail, [0.6 * s, 0.7, -1.7]);
-      k.box(0.15, 0.06, 0.03, s > 0 ? F.blinkL : F.blinkR, [0.6 * s, 0.84, -1.7]);
-      k.box(0.12, 0.09, 0.07, F.black, [0.81 * s, 1.0, 0.72]).box(0.06, 0.03, 0.06, F.black, [0.77 * s, 0.97, 0.74]);
-      k.box(0.015, 0.03, 0.12, F.black, [0.75 * s, 0.86, -0.3]);
-      for (const z of [0.78, -0.42]) k.box(0.008, 0.6, 0.012, F.black, [0.748 * s, 0.63, z]);
-      // barre portapacchi con i piedini
-      k.box(0.045, 0.045, 1.9, F.black, [0.52 * s, 1.56, -0.6]);
-      for (const z of [-1.45, 0.25]) k.box(0.06, 0.08, 0.06, F.black, [0.52 * s, 1.51, z]);
-      k.halo([0.5 * s, 0.71, 1.72], 0.42, '#ffe2b0', 1).halo([0.6 * s, 0.7, -1.72], 0.32, '#ff3020', 2, -1);
-      k.halo([0.67 * s, 0.6, 1.72], 0.38, '#ffa030', s > 0 ? 3 : 4).halo([0.6 * s, 0.84, -1.72], 0.38, '#ffa030', s > 0 ? 3 : 4, -1);
+      // fascione paracolpi laterale della Panda con sagoma a squircle
+      k.box(0.04, 0.18, 1.55, F.plastic, [0.825 * s, 0.46, 0]);
+      // fari anteriori a squircle alti
+      k.box(0.24, 0.16, 0.04, F.head, [0.55 * s, 0.76, 1.80]);
+      // luci diurne DRL tondo/ovali sotto i fari
+      k.box(0.12, 0.10, 0.03, F.drl, [0.34 * s, 0.62, 1.82]);
+      // fendinebbia incassati nel fascione inferiore
+      k.box(0.09, 0.09, 0.03, F.drl, [0.56 * s, 0.42, 1.82]);
+      // freccia anteriore integrata
+      k.box(0.07, 0.06, 0.03, s > 0 ? F.blinkL : F.blinkR, [0.68 * s, 0.74, 1.78]);
+      // fanali posteriori verticali alti ai lati del lunotto sul montante
+      k.box(0.13, 0.28, 0.04, F.tail, [0.65 * s, 1.16, -1.77]);
+      k.box(0.11, 0.08, 0.045, s > 0 ? F.blinkL : F.blinkR, [0.65 * s, 0.98, -1.77]);
+      // specchietti a squircle e maniglie
+      k.box(0.15, 0.11, 0.08, F.black, [0.88 * s, 1.05, 0.76]).box(0.06, 0.03, 0.06, F.black, [0.83 * s, 1.02, 0.78]);
+      k.box(0.02, 0.04, 0.14, F.plastic, [0.825 * s, 0.88, -0.2]);
+      // barre longitudinali nere sul tetto a profilo sagomato
+      k.box(0.04, 0.04, 1.85, F.black, [0.55 * s, 1.62, -0.6]);
+      for (const z of [-1.4, 0.2]) k.box(0.06, 0.08, 0.06, F.black, [0.55 * s, 1.57, z]);
+      k.halo([0.55 * s, 0.76, 1.83], 0.42, '#ffe6bd', 1).halo([0.65 * s, 1.16, -1.80], 0.32, '#ff2a1a', 2, -1);
+      k.halo([0.68 * s, 0.74, 1.81], 0.36, '#ffa030', s > 0 ? 3 : 4).halo([0.65 * s, 0.98, -1.80], 0.36, '#ffa030', s > 0 ? 3 : 4, -1);
     });
-    k.box(0.84, 0.13, 0.03, F.black, [0, 0.71, 1.695]);                               // mascherina
-    for (let i = 0; i < 3; i++) k.box(0.62, 0.012, 0.035, F.plastic, [0, 0.67 + i * 0.035, 1.7]);
-    k.box(1.2, 0.03, 0.02, F.black, [0, 0.95, 0.9], [-0.9, 0, 0]);                     // tergicristalli
-    plate(k, [0, 0.43, 1.795]);
-    plate(k, [0, 0.62, -1.7]);
-    k.pool(1.8, 4.2, 2.6, '#ffd59a');
-    k.cabin({ hip: [0.36, 0.52, -0.3], dash: [0.86, 0.62], wheelAt: [0.36, 0.73, 0.2], width: 0.7, rear: -1.05 });
-    for (const [x, z] of [[0.64, 1.08], [-0.64, 1.08], [0.64, -1.08], [-0.64, -1.08]]) k.wheel({ x, z, r, w: 0.17, rimR: 0.6, style: 'steel' });
-    return k.build({ dims: { length: 3.38, width: 1.49, height: 1.48 }, shake: 0.009, freq: 13 });
+    // Baffo cromato calandra al centro con logo stilizzato
+    k.box(0.72, 0.04, 0.03, F.steel, [0, 0.76, 1.83]);
+    k.box(0.14, 0.07, 0.04, F.steel, [0, 0.76, 1.835]);
+    k.box(0.9, 0.14, 0.03, F.matte, [0, 0.42, 1.83]);                                 // griglia inferiore
+    k.box(1.2, 0.03, 0.02, F.black, [0, 1.02, 0.86], [-0.85, 0, 0]);                  // tergicristalli
+    plate(k, [0, 0.42, 1.895]);
+    plate(k, [0, 0.65, -1.80]);
+    k.pool(1.9, 4.4, 2.7, '#ffdca8');
+    // Plancia a squircle con tascone e leva del cambio rialzata
+    k.cabin({ hip: [0.38, 0.54, -0.32], dash: [0.92, 0.64], wheelAt: [0.38, 0.78, 0.22], width: 0.74, rear: -1.08 });
+    for (const [x, z] of [[0.70, 1.15], [-0.70, 1.15], [0.70, -1.15], [-0.70, -1.15]]) {
+      k.wheel({ x, z, r, w: 0.18, rimR: 0.64, style: 'steel' });
+    }
+    return k.build({ dims: { length: 3.65, width: 1.64, height: 1.55 }, shake: 0.007, freq: 14 });
   }
 
   /** AUDI RS6 AVANT (C8): 5,00 × 1,95 × 1,46 m, passo 2,93 m, cerchi da 22". */
+  /** AUDI RS Q8: 5,01 × 2,00 × 1,70 m, passo 2,99 m, cerchi da 23", SUV coupé V8 biturbo. */
   function rs6() {
     const k = new Shop('audi-rs6');
-    const P = fin('#7f8386', 0.35, 0.36);            // grigio da pista
-    const r = 0.365;
+    const P = fin('#282c32', 0.4, 0.3);              // grigio Daytona RS metallizzato
+    const r = 0.39;                                   // cerchi da 23" (295/35 R23)
     k.loft({
-      paint: P, sill: 0.21, gap: 0.07, flare: 0.05, axles: [{ z: -1.41, r }, { z: 1.52, r }],
-      keys: [[-2.5, 0.9, 0.9, 0.96, 0.76], [-2.4, 0.93, 0.92, 1.06, 0.74], [-2.04, 0.93, 0.92, 1.4, 0.7], [-1.9, 0.93, 0.92, 1.43, 0.7], [-0.08, 0.93, 0.92, 1.45, 0.7], [1.02, 0.93, 0.89, 0.93, 0.84], [2.36, 0.92, 0.7, 0.73, 0.82], [2.5, 0.88, 0.6, 0.62, 0.74]],
-      side: [-2.12, 0.96], pillars: [[-0.46, -0.36], [-1.44, -1.34]], glass: [[-2.4, -2.04], [-0.08, 1.02]],
+      paint: P, sill: 0.28, gap: 0.08, flare: 0.08, axles: [{ z: -1.48, r }, { z: 1.51, r }],
+      keys: [
+        [-2.50, 0.96, 0.98, 1.08, 0.82],              // diffusore RS e paraurti posteriore massiccio
+        [-2.40, 0.99, 1.05, 1.25, 0.80],              // coda coupé sotto il lunotto spiovente
+        [-1.90, 1.00, 1.10, 1.64, 0.76],              // tetto spiovente sotto lo spoiler RS
+        [-0.10, 1.00, 1.12, 1.70, 0.76],              // sommità del padiglione panoramico
+        [0.98, 1.00, 1.10, 1.18, 0.88],               // base parabrezza inclinato
+        [2.35, 0.98, 0.96, 0.98, 0.86],               // cofano muscoloso con nervature RS
+        [2.51, 0.94, 0.86, 0.88, 0.80],               // calandra Singleframe ottagonale verticale
+      ],
+      side: [-2.05, 0.94],
+      pillars: [[-0.45, -0.35], [-1.35, -1.25]],
+      glass: [[-2.40, -1.90], [-0.10, 0.98]],
     });
     k.both((s) => {
-      k.box(0.04, 0.09, 2.3, F.black, [0.94 * s, 0.25, 0.05]);                                   // minigonne
-      k.box(0.04, 0.04, 1.85, F.black, [0.6 * s, 1.49, -1.05]);                                  // mancorrenti
-      k.box(0.17, 0.1, 0.09, F.black, [0.99 * s, 0.98, 0.94]);                                   // specchietti
-      k.hexa(H(0.15, 2.42, 2.53, 0.24, 0.24, 0.73 * s), H(0.13, 2.42, 2.52, 0.46, 0.46, 0.73 * s), F.black);   // prese d'aria
-      k.box(0.44, 0.06, 0.06, F.head, [0.62 * s, 0.645, 2.43], [0.32, 0.12 * s, 0]);              // fari sottili
-      k.box(0.36, 0.015, 0.05, F.drl, [0.62 * s, 0.61, 2.44], [0.32, 0.12 * s, 0]);               // luci diurne
-      k.box(0.12, 0.03, 0.05, s > 0 ? F.blinkL : F.blinkR, [0.8 * s, 0.62, 2.4], [0.3, 0.2 * s, 0]);
-      k.box(0.28, 0.09, 0.04, F.tail, [0.76 * s, 0.86, -2.505]);
-      k.box(0.12, 0.035, 0.045, s > 0 ? F.blinkL : F.blinkR, [0.78 * s, 0.8, -2.505]);
-      k.geo(new THREE.CylinderGeometry(0.075, 0.075, 0.1, 14).rotateX(Math.PI / 2), F.chrome, M4([0.62 * s, 0.3, -2.53], [0, 0, 0], [1.6, 1, 1]));   // scarichi ovali
-      k.geo(new THREE.CylinderGeometry(0.055, 0.055, 0.12, 14).rotateX(Math.PI / 2), F.black, M4([0.62 * s, 0.3, -2.535], [0, 0, 0], [1.6, 1, 1]));
-      k.halo([0.62 * s, 0.645, 2.46], 0.45, '#ffe6bd', 1).halo([0.76 * s, 0.86, -2.53], 0.36, '#ff2a1a', 2, -1);
-      k.halo([0.8 * s, 0.62, 2.43], 0.38, '#ffa030', s > 0 ? 3 : 4).halo([0.78 * s, 0.8, -2.53], 0.38, '#ffa030', s > 0 ? 3 : 4, -1);
+      // minigonne inferiori RS e passaruota allargati "quattro blisters"
+      k.box(0.05, 0.12, 2.35, F.black, [0.98 * s, 0.32, 0.02]);
+      k.box(0.18, 0.12, 0.10, F.black, [1.02 * s, 1.18, 0.92]);                                  // specchietti RS
+      k.hexa(H(0.18, 2.42, 2.53, 0.32, 0.32, 0.75 * s), H(0.16, 2.42, 2.52, 0.62, 0.62, 0.75 * s), F.black);   // prese d'aria laterali
+      // fari anteriori affilati Matrix LED con ciglia DRL a segmenti
+      k.box(0.42, 0.07, 0.06, F.head, [0.65 * s, 0.85, 2.44], [0.28, 0.12 * s, 0]);
+      k.box(0.36, 0.016, 0.05, F.drl, [0.65 * s, 0.81, 2.45], [0.28, 0.12 * s, 0]);
+      k.box(0.12, 0.035, 0.05, s > 0 ? F.blinkL : F.blinkR, [0.82 * s, 0.82, 2.41], [0.28, 0.2 * s, 0]);
+      // fanali posteriori e frecce dinamiche
+      k.box(0.30, 0.08, 0.04, F.tail, [0.78 * s, 1.08, -2.48]);
+      k.box(0.14, 0.035, 0.045, s > 0 ? F.blinkL : F.blinkR, [0.80 * s, 1.02, -2.48]);
+      // due enormi terminali di scarico ovali RS
+      k.geo(new THREE.CylinderGeometry(0.09, 0.09, 0.12, 14).rotateX(Math.PI / 2), F.steel, M4([0.65 * s, 0.38, -2.52], [0, 0, 0], [1.7, 1, 1]));
+      k.geo(new THREE.CylinderGeometry(0.07, 0.07, 0.14, 14).rotateX(Math.PI / 2), F.black, M4([0.65 * s, 0.38, -2.525], [0, 0, 0], [1.7, 1, 1]));
+      k.halo([0.65 * s, 0.85, 2.47], 0.46, '#ffe6bd', 1).halo([0.78 * s, 1.08, -2.51], 0.36, '#ff2a1a', 2, -1);
+      k.halo([0.82 * s, 0.82, 2.44], 0.38, '#ffa030', s > 0 ? 3 : 4).halo([0.80 * s, 1.02, -2.51], 0.38, '#ffa030', s > 0 ? 3 : 4, -1);
     });
-    // grande calandra a nido d'ape (senza logo), lama, fascia luminosa, estrattore, spoiler
-    k.hexa(H(0.5, 2.47, 2.54, 0.24), H(0.42, 2.45, 2.51, 0.6), F.black);
-    for (let i = -4; i <= 4; i++) for (const d of [-1, 1]) k.box(0.012, 0.4, 0.012, F.graphite, [i * 0.1, 0.42, 2.53], [0, 0, d * 0.6]);
-    k.box(1.72, 0.04, 0.2, F.carbon, [0, 0.21, 2.45]);
-    k.box(1.62, 0.04, 0.035, F.tail, [0, 0.885, -2.508]);
-    k.box(1.5, 0.18, 0.12, F.black, [0, 0.3, -2.5]);
-    k.box(1.3, 0.04, 0.24, P, [0, 1.43, -2.08]);
-    plate(k, [0, 0.55, -2.51]);
-    plate(k, [0, 0.3, 2.53]);
-    k.pool(2.6, 4.6, 2.9, '#ffdca8');
-    k.cabin({ hip: [0.4, 0.48, -0.55], dash: [0.86, 0.5], wheelAt: [0.4, 0.69, -0.05], width: 0.86, rear: -1.35 });
-    for (const [x, z] of [[0.84, 1.52], [-0.84, 1.52], [0.84, -1.41], [-0.84, -1.41]]) k.wheel({ x, z, r, w: 0.28, rimR: 0.74, style: 'spokes', caliper: F.red });
-    return k.build({ dims: { length: 5.0, width: 1.95, height: 1.46 }, shake: 0.004, freq: 12 });
+    // Calandra Singleframe ottagonale RS a nido d'ape nero lucido
+    k.hexa(H(0.55, 2.46, 2.54, 0.32), H(0.48, 2.44, 2.51, 0.82), F.black);
+    for (let i = -5; i <= 5; i++) for (const d of [-1, 1]) k.box(0.012, 0.48, 0.012, F.graphite, [i * 0.09, 0.58, 2.53], [0, 0, d * 0.6]);
+    k.box(1.78, 0.05, 0.22, F.carbon, [0, 0.28, 2.46]);                              // lama anteriore
+    k.box(1.68, 0.04, 0.035, F.tail, [0, 1.10, -2.485]);                              // fascia LED continua a tutta larghezza
+    k.box(1.60, 0.22, 0.14, F.carbon, [0, 0.38, -2.49]);                              // diffusore RS
+    k.box(1.42, 0.05, 0.28, P, [0, 1.67, -2.02]);                                     // spoiler sdoppiato RS da tetto
+    plate(k, [0, 0.72, -2.49]);
+    plate(k, [0, 0.42, 2.54]);
+    k.pool(2.8, 5.0, 3.1, '#ffdca8');
+    k.cabin({ hip: [0.42, 0.62, -0.45], dash: [1.02, 0.62], wheelAt: [0.42, 0.86, 0.05], width: 0.92, rear: -1.30 });
+    for (const [x, z] of [[0.88, 1.51], [-0.88, 1.51], [0.88, -1.48], [-0.88, -1.48]]) {
+      k.wheel({ x, z, r, w: 0.30, rimR: 0.76, style: 'spokes', caliper: F.red });
+    }
+    return k.build({ dims: { length: 5.01, width: 2.00, height: 1.70 }, shake: 0.005, freq: 12 });
   }
 
-  /** LAMBORGHINI HURACÁN: 4,46 × 1,93 × 1,17 m, passo 2,62 m, cerchi da 20". */
+  /** FERRARI MONZA SP2: 4,66 × 1,99 × 1,15 m, passo 2,72 m, barchetta biposto senza parabrezza. */
   function huracan() {
     const k = new Shop('lamborghini-huracan');
-    const P = fin('#f08a12', 0.45, 0.26);
+    const P = fin('#c81e24', 0.52, 0.22);             // Rosso Corsa Ferrari metallizzato brillante
+    const cuoio = fin('#9e5127', 0.05, 0.72);         // interni in pelle cuoio vintage
+    const r = 0.35;                                   // ruote 21"
     k.loft({
-      paint: P, sill: 0.14, gap: 0.055, flare: 0.03, axles: [{ z: -1.32, r: 0.345 }, { z: 1.3, r: 0.33 }],
-      keys: [[-2.23, 0.9, 0.8, 0.88, 0.7], [-2.08, 0.95, 0.86, 0.98, 0.62], [-0.66, 0.965, 0.84, 1.13, 0.52], [-0.28, 0.96, 0.8, 1.165, 0.52], [0.74, 0.94, 0.72, 0.78, 0.76], [2.02, 0.88, 0.47, 0.5, 0.76], [2.23, 0.8, 0.37, 0.38, 0.68]],
-      side: [-0.62, 0.7], glass: [[-0.28, 0.74]], dark: [[-2.06, -0.7]],
+      paint: P, sill: 0.12, gap: 0.045, flare: 0.038, axles: [{ z: -1.36, r }, { z: 1.36, r }],
+      keys: [
+        [-2.33, 0.88, 0.64, 0.72, 0.76],              // coda affilata a lama con nastro LED continuo
+        [-1.90, 0.98, 0.70, 0.78, 0.82],              // parafanghi posteriori muscolosi
+        [-0.95, 0.99, 0.73, 0.82, 0.84],              // base delle carenature twin buttress
+        [-0.20, 0.98, 0.69, 0.72, 0.82],              // pozzetto aperto (senza montanti né tetto)
+        [0.65, 0.96, 0.66, 0.70, 0.78],               // base deflettore / cofano lungo allungato
+        [1.36, 0.98, 0.60, 0.64, 0.74],               // parafanghi anteriori muscolosi sopra le ruote
+        [2.15, 0.88, 0.44, 0.48, 0.66],               // bocca anteriore e musetto
+        [2.33, 0.76, 0.32, 0.36, 0.58],               // splitter frontale a lama
+      ],
+      side: [0, 0], glass: [], dark: [],
     });
-    // lamelle del cofano motore
-    for (let i = 0; i < 6; i++) k.box(0.9, 0.025, 0.05, P, [0, 1.02 - i * 0.03, -0.85 - i * 0.2]);
+    // Bocca e presa d'aria anteriore in carbonio con griglia esagonale nera
+    k.box(1.52, 0.22, 0.15, F.black, [0, 0.28, 2.22]);
+    k.box(1.86, 0.035, 0.22, F.carbon, [0, 0.14, 2.24]);                              // splitter anteriore a lama
+    // Spina centrale / tunnel di separazione tra i due pozzetti (guidatore e passeggero)
+    k.box(0.14, 0.18, 1.15, P, [0, 0.69, -0.22]);
+    k.box(0.12, 0.02, 1.12, F.carbon, [0, 0.785, -0.22]);
     k.both((s) => {
-      // prese d'aria esagonali, fari a Y, fanali sottili, specchietti, quattro scarichi
-      k.geo(new THREE.CylinderGeometry(0.2, 0.2, 0.06, 6).rotateX(Math.PI / 2), F.black, M4([0.6 * s, 0.25, 2.17], [0, 0, Math.PI / 6], [1.3, 0.5, 1]));
-      k.hexa(H(0.04, -0.95, -0.3, 0.4, 0.55, 0.955 * s), H(0.04, -0.85, -0.55, 0.78, 0.78, 0.965 * s), F.black);
-      // fari a Y sul bordo del muso, nel piano della pendenza (circa 30°), a filo della carrozzeria
-      k.box(0.32, 0.02, 0.15, F.head, [0.6 * s, 0.457, 2.08], [0.52, -0.12 * s, 0]);
-      k.box(0.16, 0.012, 0.045, F.drl, [0.73 * s, 0.443, 2.12], [0.52, 0, 0.55 * s]);
-      k.box(0.16, 0.012, 0.045, F.drl, [0.5 * s, 0.447, 2.12], [0.52, 0, -0.55 * s]);
-      k.box(0.08, 0.012, 0.05, s > 0 ? F.blinkL : F.blinkR, [0.8 * s, 0.425, 2.12], [0.52, 0, 0]);
-      k.box(0.42, 0.04, 0.04, F.tail, [0.62 * s, 0.8, -2.235]);
-      k.box(0.18, 0.04, 0.04, F.tail, [0.84 * s, 0.74, -2.21], [0, 0, 0.6 * s]);
-      k.box(0.1, 0.03, 0.04, s > 0 ? F.blinkL : F.blinkR, [0.84 * s, 0.68, -2.215]);
-      k.box(0.16, 0.08, 0.1, P, [1.0 * s, 0.86, 0.5]).box(0.1, 0.025, 0.04, F.black, [0.93 * s, 0.84, 0.5]);
-      for (const x of [0.28, 0.46]) k.geo(new THREE.CylinderGeometry(0.055, 0.055, 0.1, 10).rotateX(Math.PI / 2), F.chrome, M4([x * s, 0.3, -2.26]));
-      k.halo([0.6 * s, 0.45, 2.12], 0.42, '#ffe6bd', 1).halo([0.62 * s, 0.8, -2.26], 0.34, '#ff2a1a', 2, -1);
-      k.halo([0.8 * s, 0.43, 2.15], 0.38, '#ffa030', s > 0 ? 3 : 4).halo([0.84 * s, 0.68, -2.24], 0.38, '#ffa030', s > 0 ? 3 : 4, -1);
+      // Twin buttresses: gobbe aerodinamiche posteriori affusolate dietro ciascun sedile
+      k.box(0.42, 0.18, 0.35, P, [0.42 * s, 0.82, -0.58], [-0.12, 0, 0]);
+      k.geo(new THREE.CylinderGeometry(0.12, 0.16, 0.38, 12).rotateX(Math.PI / 2), P, M4([0.42 * s, 0.86, -0.58]));
+      k.geo(new THREE.ConeGeometry(0.18, 1.1, 10).rotateX(-Math.PI / 2), P, M4([0.42 * s, 0.75, -1.25], [-0.08, 0, 0]));
+      k.box(0.24, 0.04, 0.04, F.chrome, [0.42 * s, 0.94, -0.52]);
+
+      // Minigonne laterali sagomate in carbonio
+      k.box(0.06, 0.05, 2.4, F.carbon, [0.96 * s, 0.14, 0]);
+
+      // Fari anteriori a lama orizzontale incassati nei parafanghi
+      k.box(0.26, 0.022, 0.14, F.head, [0.62 * s, 0.54, 2.08], [0.38, -0.08 * s, 0]);
+      k.box(0.22, 0.015, 0.05, F.drl, [0.62 * s, 0.545, 2.12], [0.38, -0.08 * s, 0]);
+      k.box(0.08, 0.015, 0.05, s > 0 ? F.blinkL : F.blinkR, [0.78 * s, 0.52, 2.10], [0.38, 0, 0]);
+
+      // Specchietti retrovisori aerodinamici a goccia in carbonio
+      k.box(0.16, 0.07, 0.08, F.carbon, [1.02 * s, 0.78, 0.52]).box(0.12, 0.02, 0.03, F.carbon, [0.94 * s, 0.74, 0.54]);
+
+      // Aloni anteriori
+      k.halo([0.62 * s, 0.54, 2.14], 0.44, '#ffe6bd', 1);
+      k.halo([0.78 * s, 0.52, 2.12], 0.36, '#ffa030', s > 0 ? 3 : 4);
     });
-    k.box(0.5, 0.12, 0.08, F.black, [0, 0.22, 2.2]);
-    k.box(1.8, 0.03, 0.18, F.carbon, [0, 0.13, 2.18]);                                // splitter
-    k.box(1.72, 0.3, 0.05, F.black, [0, 0.52, -2.24]);                                // griglia posteriore
-    for (let i = 0; i < 5; i++) k.box(1.66, 0.012, 0.06, F.graphite, [0, 0.4 + i * 0.06, -2.25]);
-    k.box(1.2, 0.14, 0.2, F.carbon, [0, 0.2, -2.2]);                                  // diffusore
-    k.box(1.5, 0.03, 0.16, P, [0, 0.99, -2.16], [0.15, 0, 0]);                        // codino
-    plate(k, [0, 0.36, -2.25]);
-    k.pool(2.3, 4.4, 2.8, '#ffdca8');
-    k.cabin({ hip: [0.38, 0.3, -0.38], dash: [0.66, 0.36], wheelAt: [0.38, 0.6, -0.03], width: 0.84, recline: 0.32, scale: 0.85, wheelTilt: 0.4 });
-    for (const [x, z, r, w] of [[0.84, 1.3, 0.33, 0.25], [-0.84, 1.3, 0.33, 0.25], [0.83, -1.32, 0.345, 0.31], [-0.83, -1.32, 0.345, 0.31]]) {
+
+    // "Virtual Wind Shield": cupolino aerodinamico trasparente/fumè davanti al guidatore
+    k.box(0.48, 0.09, 0.04, F.carbon, [0.42, 0.74, 0.42], [0.42, 0, 0]);
+    k.geo(new THREE.BoxGeometry(0.46, 0.06, 0.02), null, M4([0.42, 0.79, 0.40], [0.42, 0, 0]), { glass: true });
+
+    // Barra LED continua posteriore a tutta larghezza (firma visiva Monza SP2)
+    k.box(1.72, 0.028, 0.04, F.tail, [0, 0.71, -2.335]);
+    k.both((s) => {
+      // curvatura del fanale continuo agli estremi della carrozzeria
+      k.box(0.14, 0.028, 0.12, F.tail, [0.84 * s, 0.69, -2.28], [0, 0.45 * s, 0]);
+      k.box(0.12, 0.025, 0.04, s > 0 ? F.blinkL : F.blinkR, [0.82 * s, 0.66, -2.32]);
+      k.halo([0.60 * s, 0.71, -2.34], 0.36, '#ff2a1a', 2, -1);
+      k.halo([0.82 * s, 0.66, -2.33], 0.34, '#ffa030', s > 0 ? 3 : 4, -1);
+      // Quattro terminali di scarico rotondi cromati inseriti nel diffusore posteriore (2 per lato)
+      for (const ox of [0.30, 0.48]) {
+        k.geo(new THREE.CylinderGeometry(0.048, 0.048, 0.12, 12).rotateX(Math.PI / 2), F.chrome, M4([ox * s, 0.28, -2.32]));
+      }
+    });
+    // Diffusore posteriore in carbonio con alette estrattore
+    k.box(1.58, 0.22, 0.25, F.carbon, [0, 0.22, -2.26]);
+    for (let i = -2; i <= 2; i++) k.box(0.02, 0.12, 0.26, F.carbon, [i * 0.25, 0.20, -2.27]);
+    plate(k, [0, 0.46, -2.335]);
+
+    // Pozza di luce sull'asfalto
+    k.pool(2.4, 4.8, 3.0, '#ffdca8');
+
+    // Abitacolo: sedili sportivi con finitura cuoio, volante sportivo F1 e plancia
+    k.cabin({
+      hip: [0.42, 0.28, -0.34], dash: [0.58, 0.40], wheelAt: [0.42, 0.56, 0.02],
+      width: 0.88, recline: 0.30, scale: 0.85, wheelTilt: 0.42, seatFin: cuoio,
+    });
+
+    // Cerchi in lega forgiati a stella da 21" (stile 'y') con pinze freno sportive gialle
+    for (const [x, z, w] of [[0.86, 1.36, 0.29], [-0.86, 1.36, 0.29], [0.86, -1.36, 0.34], [-0.86, -1.36, 0.34]]) {
       k.wheel({ x, z, r, w, rimR: 0.76, style: 'y', caliper: F.yellow });
     }
-    return k.build({ dims: { length: 4.46, width: 1.93, height: 1.17 }, shake: 0.005, freq: 15 });
+    return k.build({ dims: { length: 4.66, width: 1.99, height: 1.15 }, shake: 0.005, freq: 16 });
   }
 
-  /** TRATTORE JOHN DEERE (serie media): 4,6 × 2,35 × 3,0 m, ruote posteriori da 1,76 m. */
+  /** JOHN DEERE SERIE 8R (coi contropesi anteriori): 6,65 × 2,55 × 3,45 m, ruote posteriori da 2,16 m. */
   function deere() {
     const k = new Shop('trattore-john-deere');
-    const G = fin('#367c2b', 0.2, 0.42);              // il verde John Deere
-    // Telaio e motore; cofano lungo a sezioni, un po' bombato, con le griglie.
-    k.box(0.62, 0.55, 2.7, F.black, [0, 0.82, 0.95]);
+    const G = fin('#367c2b', 0.22, 0.40);             // il verde brillante John Deere
+    const rRear = 1.08;                               // ruote posteriori giganti: diametro 2,16 m (710/70 R42)
+    const rFront = 0.80;                              // ruote anteriori: diametro 1,60 m (600/70 R30)
+
+    // Telaio portante massiccio, ponte posteriore e sollevatore
+    k.box(0.72, 0.70, 3.6, F.black, [0, 0.95, 0.5]);
+    k.box(1.2, 0.8, 1.4, F.black, [0, 1.1, -1.25]);                                  // scatola cambio / differenziale
+    k.box(1.8, 0.25, 0.25, F.black, [0, 0.75, 1.80]);                                 // assale anteriore sospeso ILS
+
+    // Cofano motore imponente, bombato e inclinato in avanti verso la zavorra
     k.loft({
-      paint: G, pillar: G, sill: 1.02, gap: 0, axles: [],
-      keys: [[0.3, 0.4, 1.66, 1.74, 0.3], [1.4, 0.39, 1.62, 1.7, 0.3], [2.18, 0.37, 1.52, 1.6, 0.28], [2.3, 0.35, 1.46, 1.52, 0.26]],
+      paint: G, pillar: G, sill: 1.15, gap: 0, axles: [],
+      keys: [
+        [0.42, 0.52, 1.95, 2.05, 0.42],               // giunzione cabina
+        [1.60, 0.50, 1.88, 1.98, 0.40],               // corpo centrale cofano motore
+        [2.45, 0.46, 1.75, 1.84, 0.36],               // rastremazione anteriore
+        [2.75, 0.42, 1.62, 1.70, 0.32],               // calandra frontale
+      ],
       side: [0, 0],
     });
-    k.hexa(H(0.36, 2.28, 2.36, 0.98), H(0.32, 2.24, 2.32, 1.5, 1.5), F.black);       // calandra
-    for (let i = 0; i < 6; i++) k.box(0.6, 0.02, 0.03, F.graphite, [0, 1.06 + i * 0.075, 2.345]);
+
+    // Calandra anteriore nera esagonale con griglie
+    k.hexa(H(0.40, 2.72, 2.80, 1.18), H(0.35, 2.68, 2.76, 1.70, 1.70), F.black);
+    for (let i = 0; i < 7; i++) k.box(0.68, 0.02, 0.03, F.graphite, [0, 1.25 + i * 0.065, 2.78]);
+
+    // Fari anteriori LED e modanatura gialla John Deere sul cofano
     k.both((s) => {
-      k.box(0.13, 0.08, 0.03, F.head, [0.18 * s, 1.42, 2.35]);
-      k.box(0.03, 0.06, 0.22, F.head, [0.405 * s, 1.56, 1.95]);                       // fari sui fianchi del cofano
-      k.box(0.012, 0.05, 1.6, F.deereYellow, [0.4 * s, 1.5, 1.3]);                    // filetto giallo
-      for (let i = 0; i < 5; i++) k.box(0.012, 0.04, 0.28, F.black, [0.398 * s, 1.15 + i * 0.07, 1.95]);   // griglie laterali
-      k.halo([0.18 * s, 1.42, 2.38], 0.4, '#ffe6bd', 1);
+      // gruppi ottici principali sulla calandra
+      k.box(0.14, 0.09, 0.03, F.head, [0.20 * s, 1.58, 2.78]);
+      // fari di profondità inclinati sul muso
+      k.box(0.04, 0.08, 0.26, F.head, [0.44 * s, 1.70, 2.35]);
+      // classica fascia gialla longitudinale John Deere
+      k.box(0.012, 0.065, 2.2, F.deereYellow, [0.45 * s, 1.64, 1.55]);
+      // griglie laterali di raffreddamento a nido d'ape
+      for (let i = 0; i < 6; i++) k.box(0.012, 0.045, 0.34, F.black, [0.445 * s, 1.25 + i * 0.075, 2.25]);
+      k.halo([0.20 * s, 1.58, 2.82], 0.44, '#ffe6bd', 1);
     });
-    k.box(0.86, 0.46, 0.34, F.black, [0, 0.95, 2.52]);                                 // zavorre anteriori
-    for (let i = 0; i < 6; i++) k.box(0.13, 0.4, 0.36, F.matte, [-0.33 + i * 0.132, 0.95, 2.53]);
-    k.box(1.5, 0.16, 0.2, F.black, [0, 0.6, 1.75]);                                    // assale anteriore
-    // Trasmissione tra le ruote posteriori e sollevatore a tre punti.
-    k.box(0.8, 0.7, 1.1, F.black, [0, 1.0, -0.9]);
-    k.box(0.9, 0.12, 0.12, F.black, [0, 0.6, -1.78]);
-    k.both((s) => k.box(0.08, 0.08, 0.7, F.black, [0.35 * s, 0.56, -1.5]));
-    k.box(0.08, 0.08, 0.6, F.black, [0, 1.25, -1.55], [0.5, 0, 0]);
-    // Cabina a quattro montanti con le grandi vetrate (si vede il guidatore).
-    k.box(1.3, 0.12, 1.75, F.black, [0, 1.56, -0.43]);
-    k.hexa(H(0.66, -1.28, 0.42, 1.62), H(0.66, -1.22, 0.46, 2.7), null, { glass: true });
+
+    // PACCO CONTROPESI ANTERIORI A SBALZO (massiccio blocco zavorre in ghisa)
+    // Supporto portazavorre centrale che sporge oltre il muso
+    k.box(0.70, 0.48, 0.65, F.black, [0, 0.96, 2.95]);
+    // Piastre contropesi a valigetta (14 zavorre in ghisa affiancate)
+    const nWeights = 14;
+    const wSpan = 1.08, stepW = wSpan / nWeights;
+    for (let i = 0; i < nWeights; i++) {
+      const wx = -wSpan / 2 + (i + 0.5) * stepW;
+      k.box(stepW * 0.88, 0.44, 0.42, F.matte, [wx, 0.98, 3.16]);
+      k.box(stepW * 0.88, 0.06, 0.12, F.black, [wx, 1.22, 3.16]);
+    }
+    // Gancio centrale di traino anteriore in fusione
+    k.box(0.18, 0.22, 0.20, F.black, [0, 0.84, 3.32]);
+    k.cyl(0.04, 0.04, 0.24, 8, F.steel, [0, 0.84, 3.32]);
+
+    // Attacco a tre punti posteriore e barra di traino
+    k.box(0.95, 0.14, 0.14, F.black, [0, 0.65, -1.95]);
     k.both((s) => {
-      for (const z of [-1.26, 0.44]) k.box(0.07, 1.1, 0.07, F.black, [0.665 * s, 2.16, z]);
-      k.box(0.05, 0.05, 1.7, F.black, [0.665 * s, 2.68, -0.41]);
-      k.box(0.35, 0.03, 0.03, F.black, [0.84 * s, 2.45, 0.4]);                         // bracci degli specchi
-      k.box(0.04, 0.28, 0.18, F.black, [1.02 * s, 2.4, 0.4]);
-      k.box(0.12, 0.08, 0.06, F.head, [0.42 * s, 2.79, 0.6]);                          // fari da lavoro
-      k.box(0.08, 0.12, 0.04, F.tail, [0.62 * s, 1.95, -1.3]);
-      k.box(0.08, 0.06, 0.04, s > 0 ? F.blinkL : F.blinkR, [0.7 * s, 2.62, 0.5]);       // frecce sugli angoli della cabina
-      k.box(0.08, 0.06, 0.04, s > 0 ? F.blinkL : F.blinkR, [0.7 * s, 2.62, -1.33]);
-      k.box(0.3, 0.04, 0.3, F.black, [0.74 * s, 0.78, -0.2]);                          // gradini
-      k.halo([0.42 * s, 2.79, 0.64], 0.32, '#ffe6bd', 1).halo([0.62 * s, 1.95, -1.33], 0.26, '#ff2a1a', 2, -1);
-      k.halo([0.72 * s, 2.62, 0.53], 0.32, '#ffa030', s > 0 ? 3 : 4).halo([0.72 * s, 2.62, -1.36], 0.32, '#ffa030', s > 0 ? 3 : 4, -1);
+      k.box(0.09, 0.09, 0.85, F.black, [0.42 * s, 0.62, -1.65]);
+      k.box(0.06, 0.48, 0.06, F.steel, [0.40 * s, 0.85, -1.60], [0.35, 0, 0]);
     });
-    k.hexa(H(0.76, -1.38, 0.58, 2.7), H(0.74, -1.34, 0.54, 2.86), G);                  // tetto
-    k.box(0.12, 0.12, 0.12, F.beacon, [0.42, 2.93, -0.2]);                            // lampeggiante
-    // Marmitta verticale davanti alla cabina.
-    k.cyl(0.06, 0.06, 1.35, 8, F.black, [0.5, 2.35, 0.62]);
-    k.cyl(0.11, 0.11, 0.55, 8, F.graphite, [0.5, 1.95, 0.62]);
-    // Parafanghi posteriori: settori di corona estrusi.
+    k.box(0.09, 0.09, 0.75, F.steel, [0, 1.35, -1.70], [0.45, 0, 0]);
+
+    // Cabina panoramica CommandView IV a 4 montanti con vetrature bombate
+    k.box(1.48, 0.14, 1.85, F.black, [0, 1.76, -0.42]);                               // pianale cabina
+    k.hexa(H(0.74, -1.34, 0.48, 1.82), H(0.72, -1.26, 0.52, 2.95), null, { glass: true });
+    k.both((s) => {
+      // 4 montanti sottili neri ad alta visibilità
+      for (const z of [-1.30, 0.46]) k.box(0.075, 1.15, 0.075, F.black, [0.73 * s, 2.38, z]);
+      k.box(0.05, 0.05, 1.80, F.black, [0.73 * s, 2.94, -0.42]);                      // longherone superiore tetto
+      // Bracci specchi retrovisori telescopici lunghi e doppi specchi
+      k.box(0.42, 0.035, 0.035, F.black, [0.94 * s, 2.68, 0.44]);
+      k.box(0.045, 0.32, 0.18, F.black, [1.14 * s, 2.62, 0.44]);                      // specchio principale
+      k.box(0.045, 0.14, 0.16, F.black, [1.14 * s, 2.38, 0.44]);                      // specchio grandangolare inferiore
+      // Fari da lavoro a LED ad alta intensità
+      k.box(0.14, 0.08, 0.06, F.head, [0.48 * s, 3.06, 0.62]);                        // fari anteriori alti su tetto
+      k.box(0.14, 0.08, 0.06, F.head, [0.48 * s, 3.06, -1.40]);                       // fari posteriori lavoro
+      k.box(0.09, 0.14, 0.04, F.tail, [0.70 * s, 2.15, -1.38]);                       // fanali posteriori
+      k.box(0.09, 0.07, 0.04, s > 0 ? F.blinkL : F.blinkR, [0.78 * s, 2.85, 0.52]);    // frecce cabina
+      k.box(0.09, 0.07, 0.04, s > 0 ? F.blinkL : F.blinkR, [0.78 * s, 2.85, -1.38]);
+      // Scaletta di salita in metallo forato con corrimano
+      k.box(0.36, 0.04, 0.34, F.black, [0.86 * s, 0.88, -0.22]);
+      k.box(0.36, 0.04, 0.34, F.black, [0.84 * s, 1.25, -0.22]);
+      k.box(0.03, 1.0, 0.03, F.black, [1.02 * s, 1.45, -0.05]);                       // corrimano
+      // Doppi lampeggianti rotanti arancioni sul tetto cabina
+      k.box(0.12, 0.14, 0.12, F.beacon, [0.55 * s, 3.22, -0.15]);
+      k.halo([0.48 * s, 3.06, 0.66], 0.38, '#ffe6bd', 1).halo([0.70 * s, 2.15, -1.42], 0.30, '#ff2a1a', 2, -1);
+      k.halo([0.55 * s, 3.22, -0.15], 0.40, '#ffa030', 6);
+      k.halo([0.78 * s, 2.85, 0.55], 0.34, '#ffa030', s > 0 ? 3 : 4).halo([0.78 * s, 2.85, -1.42], 0.34, '#ffa030', s > 0 ? 3 : 4, -1);
+    });
+
+    // Tetto cabina verde John Deere con bordo arrotondato
+    k.hexa(H(0.85, -1.46, 0.64, 2.96), H(0.82, -1.42, 0.60, 3.15), G);
+    k.box(1.64, 0.04, 2.05, F.deereYellow, [0, 2.97, -0.41]);                         // fascia decorativa gialla sottotetto
+
+    // Tubo di scarico verticale ad alta capacità con silenziatore sul montante destro
+    k.cyl(0.08, 0.08, 1.55, 10, F.black, [0.60, 2.65, 0.64]);
+    k.cyl(0.14, 0.14, 0.65, 10, F.graphite, [0.60, 2.15, 0.64]);                      // scambiatore / silenziatore
+
+    // Parafanghi posteriori avvolgenti sagomati sulle ruote da 2,16 m
     const fender = (rIn, rOut, width) => {
       const sh = new THREE.Shape();
-      sh.absarc(0, 0, rOut, 0.3, Math.PI - 0.3, false);
-      sh.absarc(0, 0, rIn, Math.PI - 0.3, 0.3, true);
+      sh.absarc(0, 0, rOut, 0.28, Math.PI - 0.28, false);
+      sh.absarc(0, 0, rIn, Math.PI - 0.28, 0.28, true);
       sh.closePath();
-      return new THREE.ExtrudeGeometry(sh, { depth: width, bevelEnabled: false, curveSegments: 8 }).translate(0, 0, -width / 2).rotateY(Math.PI / 2);
+      return new THREE.ExtrudeGeometry(sh, { depth: width, bevelEnabled: false, curveSegments: 10 }).translate(0, 0, -width / 2).rotateY(Math.PI / 2);
     };
-    k.both((s) => k.geo(fender(0.94, 1.02, 0.64), G, M4([0.9 * s, 0.88, -0.95])));
-    k.cabin({ hip: [0, 1.98, -0.62], dash: [2.05, 0.1, 0.3], wheelAt: [0, 2.2, -0.12], wheelTilt: 0.95, width: 0.5, passenger: false, scale: 1 });
-    for (const [x, z, r, w, lugs] of [[0.9, -0.95, 0.88, 0.55, 20], [-0.9, -0.95, 0.88, 0.55, 20], [0.78, 1.75, 0.6, 0.4, 14], [-0.78, 1.75, 0.6, 0.4, 14]]) {
-      k.wheel({ x, z, r, w, rimR: 0.62, style: 'deere', lugs, n: 20 });
+    k.both((s) => k.geo(fender(1.14, 1.25, 0.82), G, M4([1.08 * s, rRear, -1.25])));
+
+    // Abitacolo: sedile a sospensione pneumatica, volante con comando idraulico e bracciolo CommandARM
+    k.cabin({ hip: [0, 2.18, -0.62], dash: [2.25, 0.12, 0.32], wheelAt: [0, 2.40, -0.10], wheelTilt: 0.95, width: 0.54, passenger: false, scale: 1 });
+
+    // RUOTE:
+    // Posteriori da 2,16 m (r = 1.08, w = 0.78, 22 tasselli a spina di pesce, cerchio giallo con zavorre in ghisa)
+    // Anteriori da 1,60 m (r = 0.80, w = 0.52, 16 tasselli a spina di pesce)
+    for (const [x, z, r, w, lugs] of [
+      [1.08, -1.25, rRear, 0.78, 22], [-1.08, -1.25, rRear, 0.78, 22],
+      [0.92, 1.80, rFront, 0.52, 16], [-0.92, 1.80, rFront, 0.52, 16],
+    ]) {
+      k.wheel({ x, z, r, w, rimR: 0.60, style: 'deere', lugs, n: 22 });
     }
-    // Sbuffi di fumo dalla marmitta (istanze: una draw call): salgono, si allargano e svaniscono.
-    const N = 7, puffs = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 0),
-      new THREE.MeshStandardMaterial({ color: 0x6f6a63, roughness: 1, transparent: true, opacity: 0.32, depthWrite: false, flatShading: true }), N);
+
+    // Sbuffi di fumo animati dalla marmitta alta (quota emissione 3.42 m)
+    const N = 8, puffs = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 0),
+      new THREE.MeshStandardMaterial({ color: 0x5e5954, roughness: 1, transparent: true, opacity: 0.35, depthWrite: false, flatShading: true }), N);
     puffs.name = 'fumo';
     puffs.frustumCulled = false;
     k.extra.push(puffs);
     const ph = Array.from({ length: N }, (_, i) => i / N), m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), v = new THREE.Vector3(), sc = new THREE.Vector3();
     const smoke = (dt, speed) => {
       for (let i = 0; i < N; i++) {
-        const t = (ph[i] = (ph[i] + dt * (0.5 + speed * 0.05)) % 1);
-        sc.setScalar(Math.max(1e-3, (0.08 + t * 0.34) * (1 - t * t)));
-        puffs.setMatrixAt(i, m.compose(v.set(0.5 + t * 0.12, 3.05 + t * 1.3, 0.62 - t * (0.25 + speed * 0.28)), q.setFromEuler(e.set(t * 2, t * 3, 0)), sc));
+        const t = (ph[i] = (ph[i] + dt * (0.55 + speed * 0.06)) % 1);
+        sc.setScalar(Math.max(1e-3, (0.09 + t * 0.40) * (1 - t * t)));
+        puffs.setMatrixAt(i, m.compose(v.set(0.60 + t * 0.15, 3.42 + t * 1.45, 0.64 - t * (0.28 + speed * 0.32)), q.setFromEuler(e.set(t * 2, t * 3, 0)), sc));
       }
       puffs.instanceMatrix.needsUpdate = true;
     };
-    return k.build({ dims: { length: 4.6, width: 2.35, height: 3.0 }, shake: 0.012, freq: 17, extra: smoke });
+    return k.build({ dims: { length: 6.65, width: 2.55, height: 3.45 }, shake: 0.012, freq: 17, extra: smoke });
   }
 
-  const MODELS = { panda, rs6, huracan, deere };
+  const MODELS = { panda, rs6, rsq8: rs6, huracan, monza: huracan, deere };
   const cache = new Map();
   return {
     F, Shop, M4, fin,
