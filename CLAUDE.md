@@ -72,11 +72,18 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
 - **Musica**: solo brani originali generati dal codice (sezione 11b). Niente canzoni o campioni di
   terzi, anche se richiesti: sono protetti e pesano più dell'intero diorama.
 - **Eccezioni approvate dal committente il 01/10/2026 (blocco M2)**: i percorsi a piedi dentro la
-  Fiera di San Giorgio, nel giardino del Casino di Meninni e fino alla Base Scout non sono in OSM
-  (`PERCORSI` in `genera_dati.py`) e si disegnano solo perché chiudono un anello con vie reali;
-  Villa Comunale e Piazza della Repubblica sono pedonali anche dove OSM segna `residential`; tre vie
-  cieche reali si percorrono fino al luogo, con la goccia (`VIE_CIECHE`): la strada della Fiera fino
-  al parcheggio dello stadio, Via Guardialto fino al Casino di Meninni, Via Bari fino alla Cola Cola.
+  Fiera di San Giorgio e fino alla Base Scout non sono in OSM (`PERCORSI` in `genera_dati.py`) e si
+  disegnano solo perché chiudono un anello con vie reali; Villa Comunale e Piazza della Repubblica sono
+  pedonali anche dove OSM segna `residential`; due vie cieche reali si percorrono fino al luogo, con la
+  goccia (`VIE_CIECHE`): la strada della Fiera fino al parcheggio dello stadio, Via Bari fino alla Cola Cola.
+- **Casino di Meninni (blocco N4, piano approvato dal committente il 14/10/2026)**: lo sterrato «Ingresso del
+  Casino di Meninni» (`STRADA_MENINNI`, 18 m, non in OSM: punti scelti su satellite e Street View) lascia la SP201
+  e finisce con la goccia del mezzo nello spiazzo davanti al cancello; la goccia di prima in mezzo alla SP201 non
+  c'è più e oltre l'incrocio la SP201 è decorativa. Il giardino a piedi (`GIARDINO_MENINNI`, non in OSM) va dal
+  fondo dello sterrato per il cancello attorno al Casino fino alla goccia della figurina nella radura dietro
+  (`GOCCE_PIEDI`). Il muro di cinta (`MURO_MENINNI`) è indicativo (satellite e Street View) e tiene lontane le gocce;
+  la cappella di famiglia non si vede in nessuna foto: è semplice, nel posto proposto col piano. Corvi e vento
+  generati dal codice, con l'interruttore dei suoni del bosco.
 - **Sottopassi** (blocco M2): dove OSM segna una galleria sotto i binari la via scende in trincea
   (`Sottopassi`, rampe entro il 18%) e i binari, se serve, salgono di poco; il terreno si ritaglia.
 - **Eccezioni del Fondovito (blocco N2, piano approvato dal committente il 05/10/2026)**:
