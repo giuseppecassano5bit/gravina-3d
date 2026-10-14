@@ -2016,10 +2016,10 @@ const Gola = {
   },
   /** Il riquadro tocca la gola? (maglia vicina a 7,5 m) */
   touches(t) { const [a, b, c, d] = GOLA.box; return t.e0 < b && t.e1 > a && t.n0 < d && t.n1 > c; },
+  _out(e, n) { const [a, b, c, d] = GOLA.box; return e < a - 60 || e > b + 60 || n < c - 60 || n > d + 60; },
   /** Faccia di roccia della gola (per il colore): vicino al torrente, nel tratto inciso. */
   rock(e, n) {
-    const [a, b, c, d] = GOLA.box;
-    if (e < a - 60 || e > b + 60 || n < c - 60 || n > d + 60) return false;
+    if (this._out(e, n)) return false;
     const q = Ravine.bed(e, n);
     return q.d < GOLA.wall + 2 && this.weight(q.s) > 0.35 && this.path(e, n) > 3;
   },
@@ -2029,8 +2029,7 @@ const Gola = {
    * sentieri a piedi non scava (resta una cengia per il sentiero). Restituisce { y, zone, w }.
    */
   at(e, n, y, b) {
-    const [a, c0, c, d] = GOLA.box;
-    if (b.d >= GOLA.wall || e < a - 60 || e > c0 + 60 || n < c - 60 || n > d + 60) return null;
+    if (b.d >= GOLA.wall || this._out(e, n)) return null;
     const w = this.weight(b.s) * smoothstep(4, 10, this.path(e, n));
     if (w <= 0) return null;
     const floor = Math.max(GOLA.floor, this.pool(b.s)), bed = b.y - GOLA.depth;
@@ -6968,81 +6967,54 @@ const HORTUS = {
 };
 
 /**
- * CAPOTENDA (blocco N5, piano approvato dal committente il 14/10/2026). Dove Via Madonna della Stella corre accanto alla
- * gravina, l'area naturalistica di Capotenda: la gola stretta tra rocce chiare (GOLA e Gola nella sezione 4; i laghetti nel
- * nastro del torrente, World.buildRiver), i sentieri OSM a piedi fino al guado. Qui, nello strato dei dettagli (solo da
- * vicino, preparati dopo «Parti» con Tiles.later):
- *  - i sassi piatti del guado (OSM w578916735, ford=stepping_stones), su cui passa la figurina;
- *  - la passerella di legno col corrimano che scende a zig-zag lungo la bancata (satellite a zoom 20, foto di utenti del
- *    2022: è il sentiero OSM) e la bancata di roccia con le bocche delle cave di salnitro e le grate di ferro (foto di utenti
- *    del 2020 e del 2022; in OSM non ci sono: posizione indicativa lungo il sentiero, sotto il ciglio del pianoro);
- *  - la bocca di grotta del Padre Eterno nella parete della gola, al punto OSM n4491972089 (la chiesa-grotta non è
- *    verificata: resta l'etichetta);
- *  - muretti a secco e la rovina OSM n13243527101 sul pianoro (recinti visti sul satellite: posizioni indicative);
- *  - i filari della vigna di Botromagno (GEO.capotenda.vigna, indicazione del committente: nord-sud ogni 2,5 m, a spalliera,
- *    satellite a zoom 20); da lontano resta il colore del suolo (COVER.VIGNA);
- *  - cespugli sulle pareti della gola e canne attorno al laghetto grande (foto del 2020).
- * Niente sulle vie e sui sentieri (Terrain.conformer.clearance).
+ * CAPOTENDA (blocco N5, piano approvato dal committente il 14/10/2026): la gola è in GOLA e Gola (sezione 4), i laghetti nel
+ * nastro del torrente (World.buildRiver). Qui, nello strato dei dettagli (solo da vicino, dopo «Parti» con Tiles.later): i
+ * sassi del guado (OSM w578916735, ford=stepping_stones); la passerella di legno col corrimano (sul satellite a zoom 20 è il
+ * sentiero OSM a zig-zag) e la bancata con le bocche delle cave di salnitro e le grate (foto di utenti del 2020 e del 2022;
+ * non sono in OSM: posizione indicativa); la grotta del Padre Eterno al punto OSM n4491972089; muretti a secco (indicativi,
+ * dal satellite) e la rovina OSM n13243527101; i filari della vigna di Botromagno (GEO.capotenda.vigna: nord-sud ogni
+ * 2,5 m, a spalliera); cespugli sulle pareti della gola. Niente sulle vie e sui sentieri.
  */
 const Capotenda = {
   BB: [-840, -360, 700, 1330],
-  PASSERELLA: [-728, -664, 866, 902],      // il tratto del sentiero OSM che sul satellite è la passerella di legno
-  CAVE: [[-690, 871], [-648, 891]],       // la bancata delle cave, lungo il sentiero (indicativa)
-  GROTTA: [-622, 873],                     // OSM n4491972089 «Padre Eterno»
-  ROVINA: [-621, 966],                     // OSM n13243527101 (historic=ruins)
-  // muretti a secco sul pianoro (indicativi, dal satellite): polilinee [est, nord]
+  PASSERELLA: [-728, -664, 866, 902], CAVE: [-694, -644, 867, 895], GROTTA: [-622, 873], ROVINA: [-621, 966],
   MURETTI: [
     [[-640, 958], [-631, 979], [-612, 984], [-600, 978]], [[-633, 955], [-627, 944], [-611, 940]],
     [[-706, 948], [-690, 952], [-688, 963], [-704, 961], [-706, 948]], [[-694, 990], [-676, 992], [-674, 1002], [-692, 1000]],
     [[-660, 915], [-648, 920], [-640, 932]],
   ],
   count: { sassi: 0, passerella: 0, cave: 0, muretti: 0, filari: 0, cespugli: 0 },
-  init() {
-    const C = (h) => new THREE.Color(h);
-    this.col = {
-      stone: [C('#d3ccb8'), C('#c2baa3'), C('#dcd5c2'), C('#b9b098')], rock: [C('#e2dccd'), C('#d4ccb8'), C('#cbc2ab'), C('#dbd4c2')],
-      damp: C('#b0a68d'), hole: C('#2b241d'), iron: C('#3b3630'), wood: [C('#9a7a55'), C('#8a6c4a'), C('#a5855e')], rail: C('#7d6243'),
-      leaf: [C('#5d7a30'), C('#68852f'), C('#56722c')], trunk: C('#6d5a43'), dry: [C('#a49a7a'), C('#b3a988'), C('#988e70')],
-      shrub: [C('#5b6b35'), C('#677a3c'), C('#4f6230')], reed: [C('#8f9a4e'), C('#a3a35a'), C('#7f8c45')],
-    };
-  },
   build() {
-    this.init();
-    this.guado();
-    this.passerella();
-    this.cave();
-    this.grotta();
-    this.muretti();
-    this.vigna();
-    this.verde();
+    const C = (...h) => h.map((x) => new THREE.Color(x));
+    this.col = {
+      stone: C('#d3ccb8', '#c2baa3', '#dcd5c2', '#b9b098'), rock: C('#e2dccd', '#d4ccb8', '#cbc2ab', '#dbd4c2'), damp: C('#b0a68d')[0],
+      hole: C('#2b241d')[0], iron: C('#3b3630')[0], wood: C('#9a7a55', '#8a6c4a', '#a5855e'), rail: C('#7d6243')[0],
+      leaf: C('#5d7a30', '#68852f', '#56722c'), trunk: C('#6d5a43')[0], dry: C('#a49a7a', '#b3a988', '#988e70'), shrub: C('#5b6b35', '#677a3c', '#4f6230'),
+    };
+    for (const f of ['guado', 'passerella', 'cave', 'grotta', 'muretti', 'vigna', 'verde']) this[f]();
   },
   _tb(e, n, layer = 'dettagli') { return Tiles.builderAt(e, n, layer); },
   _free(e, n, gap) { return Terrain.conformer.clearance(e, n) > gap; },
-  /** Fuori dallo spazio del passaggio di ogni via e sentiero (come il controllo di simula: mezza larghezza − 0,2 m), con `m` di margine. */
+  /** Fuori dal passaggio di ogni via e sentiero (come simula: mezza larghezza − 0,2 m), con `m` di margine. */
   _off(e, n, m = 0.15) { const c = Details.net.closestSample(e, n); return !c || c.d > c.edge.width / 2 - 0.2 + m; },
 
-  /** I sassi del guado: dove il sentiero passa sull'acqua (edge.wet), uno ogni 1,15 m, con la cima alla quota del sentiero. */
+  /** I sassi del guado, uno ogni 1,1 m dove il sentiero passa sull'acqua (edge.wet), con la cima alla quota del sentiero. */
   guado() {
     const edge = Details.net.edges.find((x) => x.wet), r = rng(5309);
     if (!edge) return;
-    const S = edge.samples, pts = [];
-    for (let i = 0; i <= edge.count; i++) if (edge.wet[i]) pts.push([S[i * 3], S[i * 3 + 1], S[i * 3 + 2]]);
-    let L = 0;
-    for (let i = 1; i < pts.length; i++) L += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][2] - pts[i - 1][2]);
-    const k = Math.max(2, Math.round(L / 1.1) + 1);
+    const S = edge.samples, P = [];
+    for (let i = 0; i <= edge.count; i++) if (edge.wet[i]) P.push(i);
+    const k = Math.max(2, Math.round(((P.length - 1) * edge.step) / 1.1) + 1);
     for (let j = 0; j < k; j++) {
-      let want = (j / (k - 1)) * L, i = 1;
-      for (; i < pts.length - 1; i++) { const l = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][2] - pts[i - 1][2]); if (want <= l) break; want -= l; }
-      const A = pts[i - 1], B = pts[i], l = Math.hypot(B[0] - A[0], B[2] - A[2]) || 1, t = clamp(want / l, 0, 1);
-      const x = lerp(A[0], B[0], t) + (r() - 0.5) * 0.2, z = lerp(A[2], B[2], t) + (r() - 0.5) * 0.2, y = lerp(A[1], B[1], t);
-      const rad = 0.4 + r() * 0.1, g = new THREE.CylinderGeometry(rad * 0.95, rad * 1.1, 0.8, 7).rotateY(r() * TAU).scale(1.15, 1, 0.85);
-      g.translate(x, y - 0.4, z);
+      const f = P[0] + (j / (k - 1)) * (P[P.length - 1] - P[0]), i = Math.min(Math.floor(f), edge.count - 1), t = f - i;
+      const at = (o) => lerp(S[i * 3 + o], S[i * 3 + 3 + o], t), x = at(0) + (r() - 0.5) * 0.2, z = at(2) + (r() - 0.5) * 0.2, rad = 0.4 + r() * 0.1;
+      const g = new THREE.CylinderGeometry(rad * 0.95, rad * 1.1, 0.8, 7).rotateY(r() * TAU).scale(1.15, 1, 0.85).translate(x, at(1) - 0.4, z);
       this._tb(x, -z).addGeometry(g, this.col.stone[Math.floor(r() * 4)]);
       this.count.sassi++;
     }
   },
 
-  /** I campioni dei sentieri di Capotenda dentro il rettangolo bb, a pezzi contigui: [[x, y, z, edge, i], …]. */
+  /** I campioni dei sentieri di Capotenda dentro il rettangolo bb, a pezzi contigui: [[x, y, z, edge], …]. */
   _runs(bb) {
     const out = [];
     for (const edge of Details.net.edges) {
@@ -7051,114 +7023,85 @@ const Capotenda = {
       let cur = null;
       for (let i = 0; i <= edge.count; i++) {
         const e = S[i * 3], n = -S[i * 3 + 2];
-        if (e > bb[0] && e < bb[1] && n > bb[2] && n < bb[3]) (cur ??= (out.push([]), out[out.length - 1])).push([S[i * 3], S[i * 3 + 1], S[i * 3 + 2], edge, i]);
+        if (e > bb[0] && e < bb[1] && n > bb[2] && n < bb[3]) (cur ??= (out.push([]), out[out.length - 1])).push([e, S[i * 3 + 1], S[i * 3 + 2], edge]);
         else cur = null;
       }
     }
     return out.filter((r) => r.length > 1);
   },
 
-  /** La passerella di legno: assi di traverso sul sentiero e il corrimano ai due lati (fuori dal passaggio). */
+  /** La passerella: assi di traverso sul sentiero (agli incroci resta la terra) e il corrimano fuori dal passaggio. */
   passerella() {
-    const half = 1.15, c = new THREE.Color();
+    const c = new THREE.Color();
     for (const run of this._runs(this.PASSERELLA)) {
       let along = 0, post = 0;
       for (let k = 0; k + 1 < run.length; k++) {
-        const [x0, y0, z0, edge] = run[k], [x1, y1, z1] = run[k + 1];
-        const tx = x1 - x0, tz = z1 - z0, l = Math.hypot(tx, tz) || 1, ox = (-tz / l) * half, oz = (tx / l) * half;
-        const tb = this._tb(x0, -z0);
+        const [x0, y0, z0, edge] = run[k], [x1, y1, z1] = run[k + 1], l = Math.hypot(x1 - x0, z1 - z0) || 1, ux = (x1 - x0) / l, uz = (z1 - z0) / l;
+        const tb = this._tb(x0, -z0), V = (x, y, z, s) => [x - uz * s, y + 0.12, z + ux * s];
         c.copy(this.col.wood[Math.floor(along / 0.7) % 3]);
-        // agli incroci coi sentieri (quote diverse) resta la terra battuta
-        if (![edge.a, edge.b].some((N) => N.edges.length > 2 && Math.hypot(N.e - x0, N.n + z0) < 2.6)) tb.quad([x0 + ox, y0 + 0.12, z0 + oz], [x0 - ox, y0 + 0.12, z0 - oz], [x1 - ox, y1 + 0.12, z1 - oz], [x1 + ox, y1 + 0.12, z1 + oz], c, null, [0, 1, 0]);
+        if (![edge.a, edge.b].some((N) => N.edges.length > 2 && Math.hypot(N.e - x0, N.n + z0) < 2.6)) tb.quad(V(x0, y0, z0, 1.15), V(x0, y0, z0, -1.15), V(x1, y1, z1, -1.15), V(x1, y1, z1, 1.15), c, null, [0, 1, 0]);
         along += l;
         this.count.passerella += 2;
         if (along - post < 2) continue;
         post = along;
-        // corrimano: paletto e tratto fino al paletto di prima, a 1,35 m dall'asse, solo dove resta fuori dai sentieri
-        for (const s of [1, -1]) {
-          const px = x1 + (-tz / l) * 1.35 * s, pz = z1 + (tx / l) * 1.35 * s;
+        for (const s of [1.35, -1.35]) {                                               // paletto e tratto fino al paletto di prima
+          const [px, , pz] = V(x1, 0, z1, s), [qx, , qz] = V(x0, 0, z0, s), g = Terrain.heightAt(px, -pz), lo = Math.min(g, y1) - 0.1, top = Math.max(g, y1) + 1;
           if (!this._off(px, -pz)) continue;
-          const g = Terrain.heightAt(px, -pz), top = Math.max(g, y1) + 1.0;
-          tb.box(px, -pz, Math.min(g, y1) - 0.1, 0.11, top - Math.min(g, y1) + 0.1, 0.11, [tx / l, -tz / l], this.col.rail);
-          const qx = x0 + (-tz / l) * 1.35 * s, qz = z0 + (tx / l) * 1.35 * s;
+          tb.box(px, -pz, lo, 0.11, top - lo, 0.11, [ux, -uz], this.col.rail);
           const L = Math.hypot(px - qx, pz - qz);
-          if (L > 0.3 && L < 3.2 && this._off(qx, -qz) && [0.25, 0.5, 0.75].every((t) => this._off(lerp(qx, px, t), -lerp(qz, pz, t)))) {
-            const ym = Math.max(Terrain.heightAt(qx, -qz), y0) + 1.0;
-            tb.box((px + qx) / 2, -(pz + qz) / 2, (top + ym) / 2 - 0.05, L, 0.08, 0.09, [(px - qx) / L, -(pz - qz) / L], this.col.rail);
-          }
+          if (L > 0.3 && L < 3.2 && [0, 0.25, 0.5, 0.75].every((t) => this._off(lerp(qx, px, t), -lerp(qz, pz, t))))
+            tb.box((px + qx) / 2, -(pz + qz) / 2, (top + Math.max(Terrain.heightAt(qx, -qz), y0) + 1) / 2 - 0.05, L, 0.08, 0.09, [(px - qx) / L, -(pz - qz) / L], this.col.rail);
           this.count.passerella++;
         }
       }
     }
   },
 
-  /**
-   * Lastrone di roccia irregolare: il fronte va da F0 a F1 ([est, nord], alla base y0), profondo `dep` verso `nrm` (la parete
-   * guarda dalla parte opposta); cima a quote diverse ai due capi (ya, yb), spigoli mossi a caso. 5 facce, 10 triangoli.
-   */
+  /** Lastrone di roccia: fronte da F0 a F1 ([est, nord], base y0, cima ya e yb), profondo `dep` verso `nrm`, spigoli mossi. */
   _slab(tb, F0, F1, nrm, dep, y0, ya, yb, color, r) {
-    const j = () => (r() - 0.5) * 0.5;
-    const P = (F, k, y) => [F[0] + nrm[0] * k + j(), y, -(F[1] + nrm[1] * k) + j()];
-    const A = P(F0, 0, y0), B = P(F1, 0, y0), A1 = P(F0, 0, ya), B1 = P(F1, 0, yb);
-    const C = P(F1, dep, y0), D = P(F0, dep, y0), C1 = P(F1, dep, yb + j() * 2), D1 = P(F0, dep, ya + j() * 2);
-    const out = [-nrm[0], 0, nrm[1]];
-    tb.quad(A, B, B1, A1, color, null, out);                                       // fronte
-    tb.quad(A1, B1, C1, D1, color, null, [0, 1, 0]);                               // cima
-    tb.quad(B, C, C1, B1, color, null, [F1[0] - F0[0], 0, -(F1[1] - F0[1])]);      // fianchi
-    tb.quad(D, A, A1, D1, color, null, [F0[0] - F1[0], 0, -(F0[1] - F1[1])]);
-    tb.quad(C, D, D1, C1, color, null, [nrm[0], 0, -nrm[1]]);                      // dietro
+    const j = () => (r() - 0.5) * 0.5, P = (F, k, y) => [F[0] + nrm[0] * k + j(), y, -(F[1] + nrm[1] * k) + j()];
+    const A = P(F0, 0, y0), B = P(F1, 0, y0), A1 = P(F0, 0, ya), B1 = P(F1, 0, yb), C = P(F1, dep, y0), D = P(F0, dep, y0), C1 = P(F1, dep, yb + j() * 2), D1 = P(F0, dep, ya + j() * 2);
+    tb.quad(A, B, B1, A1, color, null, [-nrm[0], 0, nrm[1]]);
+    tb.quad(A1, B1, C1, D1, color, null, [0, 1, 0]);
+    tb.quad(B, C, C1, B1, color, null, [F1[0] - F0[0], 0, F0[1] - F1[1]]);
+    tb.quad(D, A, A1, D1, color, null, [F0[0] - F1[0], 0, F1[1] - F0[1]]);
+    tb.quad(C, D, D1, C1, color, null, [nrm[0], 0, -nrm[1]]);
   },
 
   /**
-   * La bancata delle cave di salnitro: una parete di roccia chiara a strati sotto il ciglio del pianoro, dal lato del sentiero
-   * lontano dalla gola (foto del 2020): lo zoccolo con le bocche rettangolari, la cengia sporgente a metà, la cima mossa; due
-   * bocche hanno la grata di ferro alta (foto del 2022).
+   * La bancata delle cave di salnitro, a 3,4 m dal sentiero dal lato lontano dalla gola: zoccolo umido con le bocche
+   * rettangolari, cengia sporgente, cima mossa (foto del 2020); due bocche con la grata di ferro alta (foto del 2022).
    */
   cave() {
-    const [A, B] = this.CAVE, r = rng(4417);
-    const run = this._runs([Math.min(A[0], B[0]) - 4, Math.max(A[0], B[0]) + 4, Math.min(A[1], B[1]) - 4, Math.max(A[1], B[1]) + 4]).sort((a, b) => b.length - a.length)[0];
+    const run = this._runs(this.CAVE).sort((a, b) => b.length - a.length)[0], r = rng(4417), col = this.col, c = new THREE.Color();
     if (!run) return;
-    // da che parte: lontano dal torrente
-    const [x0, , z0] = run[0], [x1, , z1] = run[run.length - 1], tl = Math.hypot(x1 - x0, z1 - z0);
-    const lE = (z1 - z0) / tl, lN = (x1 - x0) / tl;                                // normale a sinistra del verso, in [est, nord]
-    const mid = run[Math.floor(run.length / 2)];
-    const side = Ravine.side(mid[0] + lE * 8, -mid[2] + lN * 8).d > Ravine.side(mid[0] - lE * 8, -mid[2] - lN * 8).d ? 1 : -1;
-    // punti del fronte, ogni 3 m circa, a 3,4 m dall'asse del sentiero
     const front = [];
-    let along = 0, last = -1e9;
+    let along = 0, last = -1e9, side = 0;
     for (let i = 1; i < run.length; i++) {
       along += Math.hypot(run[i][0] - run[i - 1][0], run[i][2] - run[i - 1][2]);
       if (along - last < 3 && i < run.length - 1) continue;
       last = along;
-      const [x, y, z] = run[i], j = Math.max(0, i - 3), J = Math.min(run.length - 1, i + 3);
-      const te = run[J][0] - run[j][0], tn = -(run[J][2] - run[j][2]), tlen = Math.hypot(te, tn) || 1;
-      const nrm = [(-tn / tlen) * side, (te / tlen) * side];
+      const [x, y, z] = run[i], a = run[Math.max(0, i - 3)], b = run[Math.min(run.length - 1, i + 3)], te = b[0] - a[0], tn = a[2] - b[2], tl = Math.hypot(te, tn) || 1;
+      side ||= Ravine.side(x - tn / tl * 8, -z + te / tl * 8).d > Ravine.side(x + tn / tl * 8, -z - te / tl * 8).d ? 1 : -1;
+      const nrm = [(-tn / tl) * side, (te / tl) * side];
       front.push({ F: [x + nrm[0] * 3.4, -z + nrm[1] * 3.4], nrm, y });
     }
-    const col = this.col, c = new THREE.Color();
     for (let k = 0; k + 1 < front.length; k++) {
-      const P0 = front[k], P1 = front[k + 1], F0 = P0.F, F1 = P1.F;
-      if (!this._free(F0[0], F0[1], 1.4) || !this._free(F1[0], F1[1], 1.4)) continue;
-      const nrm = [(P0.nrm[0] + P1.nrm[0]) / 2, (P0.nrm[1] + P1.nrm[1]) / 2];
-      const g = Math.min(Terrain.heightAt(...F0), Terrain.heightAt(...F1), P0.y, P1.y) - 0.7, tb = this._tb(F0[0], F0[1]);
-      const gb = Math.max(Terrain.heightAt(F0[0] + nrm[0] * 5, F0[1] + nrm[1] * 5), Terrain.heightAt(F1[0] + nrm[0] * 5, F1[1] + nrm[1] * 5));
-      const h = Math.max(5.6, gb - g + 1.4), ha = h + (r() - 0.5) * 1.4, hb = h + (r() - 0.5) * 1.4;
-      // lo zoccolo umido, la cengia che sporge di 0,7 m, la cima rientrata e mossa
+      const { F: F0, y: ya } = front[k], { F: F1, y: yb } = front[k + 1];
+      if (!this._free(...F0, 1.4) || !this._free(...F1, 1.4)) continue;
+      const nrm = [(front[k].nrm[0] + front[k + 1].nrm[0]) / 2, (front[k].nrm[1] + front[k + 1].nrm[1]) / 2], tb = this._tb(...F0);
+      const sh = (F, d) => [F[0] + nrm[0] * d, F[1] + nrm[1] * d], g = Math.min(Terrain.heightAt(...F0), Terrain.heightAt(...F1), ya, yb) - 0.7;
+      const h = Math.max(5.6, Terrain.heightAt(...sh(F0, 5)) - g + 1.4, Terrain.heightAt(...sh(F1, 5)) - g + 1.4);
       this._slab(tb, F0, F1, nrm, 4.5, g, g + 3.6 + r() * 0.3, g + 3.6 + r() * 0.3, c.copy(col.rock[k % 4]).lerp(col.damp, 0.4), r);
-      const out = (F) => [F[0] - nrm[0] * 0.7, F[1] - nrm[1] * 0.7];
-      this._slab(tb, out(F0), out(F1), nrm, 4.6, g + 3.5, g + 4.5 + r() * 0.3, g + 4.5 + r() * 0.3, col.rock[(k + 1) % 4], r);
-      const inn = (F) => [F[0] + nrm[0] * 0.5, F[1] + nrm[1] * 0.5];
-      this._slab(tb, inn(F0), inn(F1), nrm, 4, g + 4.4, g + ha, g + hb, col.rock[(k + 3) % 4], r);
-      // bocche delle cave sul fronte dello zoccolo: rettangoli scuri, due con la grata di ferro alta
-      const kind = [1, 0, 0, 2, 0, 1, 0, 3, 0, 0, 1, 0][k % 12];
+      this._slab(tb, sh(F0, -0.7), sh(F1, -0.7), nrm, 4.6, g + 3.5, g + 4.5 + r() * 0.3, g + 4.5 + r() * 0.3, col.rock[(k + 1) % 4], r);
+      this._slab(tb, sh(F0, 0.5), sh(F1, 0.5), nrm, 4, g + 4.4, g + h + (r() - 0.5) * 1.4, g + h + (r() - 0.5) * 1.4, col.rock[(k + 3) % 4], r);
+      const kind = [1, 0, 0, 2, 0, 1, 0, 3, 0, 0, 1, 0][k % 12];                           // 1 bocca, 2 bocca larga, 3 alta; 2 e 3 con la grata
       if (!kind) continue;
-      const u = [F1[0] - F0[0], F1[1] - F0[1]], L = Math.hypot(...u);
-      u[0] /= L; u[1] /= L;
-      const bw = Math.min(L - 0.6, kind === 2 ? 2.4 : kind === 3 ? 1.5 : 1.1), bh = kind === 2 ? 2.6 : kind === 3 ? 2.9 : 1.8;
-      const M = [(F0[0] + F1[0]) / 2 - nrm[0] * 0.04, (F0[1] + F1[1]) / 2 - nrm[1] * 0.04], b0 = g + 0.7;
+      const L = Math.hypot(F1[0] - F0[0], F1[1] - F0[1]), u = [(F1[0] - F0[0]) / L, (F1[1] - F0[1]) / L], M = sh([(F0[0] + F1[0]) / 2, (F0[1] + F1[1]) / 2], -0.04);
+      const bw = Math.min(L - 0.6, [0, 1.1, 2.4, 1.5][kind]), bh = [0, 1.8, 2.6, 2.9][kind], b0 = g + 0.7;
       const Q = (s, hh, o = 0) => [M[0] + u[0] * s - nrm[0] * o, b0 + hh, -(M[1] + u[1] * s - nrm[1] * o)];
       tb.quad(Q(-bw / 2, 0), Q(bw / 2, 0), Q(bw / 2, bh), Q(-bw / 2, bh), col.hole, null, [-nrm[0], 0, nrm[1]]);
-      if (kind >= 2) {
+      if (kind > 1) {
         for (let q = 0; q <= 6; q++) { const p = Q(-bw / 2 + (q * bw) / 6, 0, 0.1); tb.box(p[0], -p[2], b0, 0.05, bh, 0.05, u, col.iron); }
         for (const hh of [0.15, bh / 2, bh - 0.1]) { const p = Q(0, 0, 0.1); tb.box(p[0], -p[2], b0 + hh, bw, 0.06, 0.05, u, col.iron); }
       }
@@ -7169,125 +7112,72 @@ const Capotenda = {
   /** La grotta del Padre Eterno: uno sperone di roccia col fronte verso il torrente e la bocca ad arco. */
   grotta() {
     const [e0, n0] = this.GROTTA, q = Ravine.side(e0, n0), d = Math.hypot(q.e - e0, q.n - n0) || 1, r = rng(2208);
-    const ne = (q.e - e0) / d, nn = (q.n - n0) / d, u = [-nn, ne];                   // ne, nn: verso il torrente
-    const fe = e0 + ne * 1.5, fn = n0 + nn * 1.5;                                    // il fronte
-    const gf = Terrain.heightAt(fe + ne * 0.8, fn + nn * 0.8), gb = Terrain.heightAt(e0 - ne * 4, n0 - nn * 4);
-    const tb = this._tb(e0, n0), top = Math.max(gb + 0.3, gf + 4.6), back = [-ne, -nn];
+    const ne = (q.e - e0) / d, nn = (q.n - n0) / d, u = [-nn, ne], fe = e0 + ne * 1.5, fn = n0 + nn * 1.5;   // [ne, nn]: verso il torrente
+    const gf = Terrain.heightAt(fe + ne * 0.8, fn + nn * 0.8), tb = this._tb(e0, n0), top = Math.max(Terrain.heightAt(e0 - ne * 4, n0 - nn * 4) + 0.3, gf + 4.6);
     const F = (s) => [fe + u[0] * s, fn + u[1] * s];
-    this._slab(tb, F(-4), F(-1), back, 5, gf - 1.5, top - 0.8, top, GOLA.pal[1], r);
-    this._slab(tb, F(-1.3), F(1.3), back, 5, gf - 1.5, top, top + 0.3, GOLA.pal[3], r);
-    this._slab(tb, F(1), F(3.8), back, 5, gf - 1.5, top + 0.2, top - 1.1, GOLA.pal[2], r);
+    this._slab(tb, F(-4), F(-1), [-ne, -nn], 5, gf - 1.5, top - 0.8, top, GOLA.pal[1], r);
+    this._slab(tb, F(-1.3), F(1.3), [-ne, -nn], 5, gf - 1.5, top, top + 0.3, GOLA.pal[3], r);
+    this._slab(tb, F(1), F(3.8), [-ne, -nn], 5, gf - 1.5, top + 0.2, top - 1.1, GOLA.pal[2], r);
     const arch = new THREE.Shape();
     arch.moveTo(-1.1, 0); arch.lineTo(1.1, 0); arch.lineTo(1.1, 1.5); arch.absarc(0, 1.5, 1.1, 0, Math.PI, false); arch.lineTo(-1.1, 0);
-    // la forma è nel piano x-y: la giro perché guardi verso il torrente (normale [ne, nn] → mondo (ne, 0, -nn))
-    const g = new THREE.ShapeGeometry(arch, 4);
-    g.applyMatrix4(new THREE.Matrix4().makeBasis(new THREE.Vector3(u[0], 0, -u[1]), new THREE.Vector3(0, 1, 0), new THREE.Vector3(ne, 0, -nn)));
-    g.translate(fe + ne * 0.05, gf + 0.2, -(fn + nn * 0.05));
-    tb.addGeometry(g, this.col.hole);
+    const g = new THREE.ShapeGeometry(arch, 4).applyMatrix4(new THREE.Matrix4().makeBasis(new THREE.Vector3(u[0], 0, -u[1]), new THREE.Vector3(0, 1, 0), new THREE.Vector3(ne, 0, -nn)));
+    tb.addGeometry(g.translate(fe + ne * 0.05, gf + 0.2, -(fn + nn * 0.05)), this.col.hole);
   },
 
-  /** Muretti a secco (pietre chiare, alti 0,8–1,1 m, con qualche breccia) e la rovina sul pianoro. */
+  /** Muretti a secco (0,8–1,1 m, con le brecce) e la rovina: un ricovero di 5 × 4 m senza tetto, coi muri crollati a tratti. */
   muretti() {
     const r = rng(8821), c = new THREE.Color();
-    const piece = (e, n, L, h, u, th = 0.7) => {
-      if (!this._free(e, n, 1.0) || !this._free(e + u[0] * L / 2, n + u[1] * L / 2, 1.0) || !this._free(e - u[0] * L / 2, n - u[1] * L / 2, 1.0)) return;
-      const g = Math.min(Terrain.heightAt(e - u[0] * L / 2, n - u[1] * L / 2), Terrain.heightAt(e + u[0] * L / 2, n + u[1] * L / 2)) - 0.3;
-      this._tb(e, n).box(e, n, g, L, h + 0.3, th, u, c.copy(this.col.dry[Math.floor(r() * 3)]));
-      this.count.muretti++;
-    };
-    for (const line of this.MURETTI) {
-      for (let k = 0; k + 1 < line.length; k++) {
-        const [a0, b0] = line[k], [a1, b1] = line[k + 1], L = Math.hypot(a1 - a0, b1 - b0), u = [(a1 - a0) / L, (b1 - b0) / L];
-        const m = Math.max(1, Math.round(L / 2.6));
-        for (let j = 0; j < m; j++) {
-          if (r() < 0.12) continue;                                                     // brecce
-          const t = (j + 0.5) / m;
-          piece(lerp(a0, a1, t), lerp(b0, b1, t), L / m + 0.05, 0.75 + r() * 0.35, u);
-        }
-      }
-    }
-    // la rovina: un ricovero di 5 × 4 m senza tetto, coi muri crollati a tratti
-    const [e0, n0] = this.ROVINA, u = [0.8, 0.6], v = [-0.6, 0.8];
-    const walls = [[[-2.5, -2], [2.5, -2]], [[2.5, -2], [2.5, 2]], [[2.5, 2], [-2.5, 2]], [[-2.5, 2], [-2.5, -2]]];
-    for (const [[x0, y0], [x1, y1]] of walls) {
-      const L = Math.hypot(x1 - x0, y1 - y0), m = Math.round(L / 1.25), dir = [(u[0] * (x1 - x0) + v[0] * (y1 - y0)) / L, (u[1] * (x1 - x0) + v[1] * (y1 - y0)) / L];
+    const wall = (A, B, step, hmin, hvar, gap, th) => {
+      const L = Math.hypot(B[0] - A[0], B[1] - A[1]), u = [(B[0] - A[0]) / L, (B[1] - A[1]) / L], m = Math.max(1, Math.round(L / step)), l = L / m + 0.06;
       for (let j = 0; j < m; j++) {
-        const t = (j + 0.5) / m, x = lerp(x0, x1, t), y = lerp(y0, y1, t), h = 0.6 + r() * 1.7;
-        if (r() < 0.15) continue;
-        piece(e0 + u[0] * x + v[0] * y, n0 + u[1] * x + v[1] * y, L / m + 0.08, h, dir, 0.6);
+        const e = lerp(A[0], B[0], (j + 0.5) / m), n = lerp(A[1], B[1], (j + 0.5) / m), h = hmin + r() * hvar;
+        if (r() < gap || [-0.5, 0, 0.5].some((t) => !this._free(e + u[0] * l * t, n + u[1] * l * t, 1.0))) continue;
+        const g = Math.min(Terrain.heightAt(e - u[0] * l / 2, n - u[1] * l / 2), Terrain.heightAt(e + u[0] * l / 2, n + u[1] * l / 2)) - 0.3;
+        this._tb(e, n).box(e, n, g, l, h + 0.3, th, u, c.copy(this.col.dry[Math.floor(r() * 3)]));
+        this.count.muretti++;
       }
-    }
+    };
+    for (const line of this.MURETTI) for (let k = 0; k + 1 < line.length; k++) wall(line[k], line[k + 1], 2.6, 0.75, 0.35, 0.12, 0.7);
+    const [e0, n0] = this.ROVINA, R = [[-2.5, -2], [2.5, -2], [2.5, 2], [-2.5, 2]].map(([x, y]) => [e0 + 0.8 * x - 0.6 * y, n0 + 0.6 * x + 0.8 * y]);
+    R.forEach((A, k) => wall(A, R[(k + 1) % 4], 1.25, 0.6, 1.7, 0.15, 0.6));
   },
 
   /** I filari della vigna: siepi verdi a spalliera nord-sud ogni 2,5 m, coi ceppi scuri sotto, a tratti di 12 m. */
   vigna() {
     const P = GEO.capotenda?.vigna?.length ? DATA.pairs(GEO.capotenda.vigna) : null;
     if (!P) return;
-    const [a, b, c0, d] = Plane.bbox(P), col = this.col, C = new THREE.Color();
+    const [a, b] = Plane.bbox(P), col = this.col;
     for (let x = Math.ceil((a + 1.25) / 2.5) * 2.5, row = 0; x < b; x += 2.5, row++) {
-      // intervalli del filare dentro il poligono
-      const ys = [];
-      for (let i = 0; i < P.length; i++) {
-        const [e0, n0] = P[i], [e1, n1] = P[(i + 1) % P.length];
-        if ((e0 <= x) !== (e1 <= x)) ys.push(n0 + ((x - e0) / (e1 - e0)) * (n1 - n0));
-      }
+      const ys = [];                                                                   // dove il filare entra ed esce dal poligono
+      P.forEach(([e0, n0], i) => { const [e1, n1] = P[(i + 1) % P.length]; if ((e0 <= x) !== (e1 <= x)) ys.push(n0 + ((x - e0) / (e1 - e0)) * (n1 - n0)); });
       ys.sort((p, q) => p - q);
       for (let k = 0; k + 1 < ys.length; k += 2) {
-        const n0 = ys[k] + 1.2, n1 = ys[k + 1] - 1.2;
+        const n0 = ys[k] + 1.2, n1 = ys[k + 1] - 1.2, m = Math.max(1, Math.round((n1 - n0) / 12)), C = col.leaf[row % 3];
         if (n1 - n0 < 3) continue;
-        const m = Math.max(1, Math.round((n1 - n0) / 12));
-        C.copy(col.leaf[row % 3]);
         for (let j = 0; j < m; j++) {
-          const na = lerp(n0, n1, j / m), nb = lerp(n0, n1, (j + 1) / m), ga = Terrain.heightAt(x, na), gb = Terrain.heightAt(x, nb);
-          const tb = this._tb(x, (na + nb) / 2), w0 = 0.22, w1 = 0.3;
-          const V = (s, n, g, h, w) => [x + s * w, g + h, -n];
+          const na = lerp(n0, n1, j / m), nb = lerp(n0, n1, (j + 1) / m), ga = Terrain.heightAt(x, na), gb = Terrain.heightAt(x, nb), tb = this._tb(x, (na + nb) / 2);
+          const V = (s, n, h, w) => [x + s * w, (n === na ? ga : gb) + h, -n];
           for (const s of [1, -1]) {
-            tb.quad(V(s, na, ga, -0.1, w0 * 0.5), V(s, nb, gb, -0.1, w0 * 0.5), V(s, nb, gb, 0.55, w0), V(s, na, ga, 0.55, w0), col.trunk, null, [s, 0, 0]);
-            tb.quad(V(s, na, ga, 0.55, w0), V(s, nb, gb, 0.55, w0), V(s, nb, gb, 1.4, w1), V(s, na, ga, 1.4, w1), C, null, [s, 0, 0]);
+            tb.quad(V(s, na, -0.1, 0.11), V(s, nb, -0.1, 0.11), V(s, nb, 0.55, 0.22), V(s, na, 0.55, 0.22), col.trunk, null, [s, 0, 0]);
+            tb.quad(V(s, na, 0.55, 0.22), V(s, nb, 0.55, 0.22), V(s, nb, 1.4, 0.3), V(s, na, 1.4, 0.3), C, null, [s, 0, 0]);
           }
-          tb.quad(V(1, na, ga, 1.4, w1), V(1, nb, gb, 1.4, w1), V(-1, nb, gb, 1.4, w1), V(-1, na, ga, 1.4, w1), C, null, [0, 1, 0]);
-          if (j === 0) tb.quad(V(1, na, ga, -0.1, w1), V(-1, na, ga, -0.1, w1), V(-1, na, ga, 1.4, w1), V(1, na, ga, 1.4, w1), C, null, [0, 0, 1]);
-          if (j === m - 1) tb.quad(V(1, nb, gb, -0.1, w1), V(-1, nb, gb, -0.1, w1), V(-1, nb, gb, 1.4, w1), V(1, nb, gb, 1.4, w1), C, null, [0, 0, -1]);
+          tb.quad(V(1, na, 1.4, 0.3), V(1, nb, 1.4, 0.3), V(-1, nb, 1.4, 0.3), V(-1, na, 1.4, 0.3), C, null, [0, 1, 0]);
+          for (const [n, last, o] of [[na, j === 0, 1], [nb, j === m - 1, -1]]) if (last) tb.quad(V(1, n, -0.1, 0.3), V(-1, n, -0.1, 0.3), V(-1, n, 1.4, 0.3), V(1, n, 1.4, 0.3), C, null, [0, 0, o]);
         }
         this.count.filari++;
       }
     }
   },
 
-  /** Cespugli sulle pareti della gola (lontano dai sentieri) e canne attorno al laghetto grande. */
+  /** Cespugli sulle pareti della gola, lontano dai sentieri. */
   verde() {
-    const shapes = Tiles.treeShapes(), r = rng(6143), c = new THREE.Color();
+    const round = Tiles.treeShapes().round, r = rng(6143), [a, b, c, d] = GOLA.box;
     for (let k = 0; k < 160; k++) {
-      const e = lerp(GOLA.box[0], GOLA.box[1], r()), n = lerp(GOLA.box[2], GOLA.box[3], r()), q = Ravine.bed(e, n);
+      const e = lerp(a, b, r()), n = lerp(c, d, r()), q = Ravine.bed(e, n), s = 0.7 + r() * 0.8, rot = r() * TAU;
       if (q.d < 4 || q.d > GOLA.wall + 6 || Gola.weight(q.s) < 0.3 || !this._free(e, n, 2.2) || Gola.path(e, n) < 3) continue;
-      const s = 0.7 + r() * 0.8, g = Terrain.heightAt(e, n);
-      Tiles.put(this._tb(e, n, 'alberi'), shapes.round, c.copy(this.col.shrub[k % 3]), e, g + 0.35 * s, n, 1.3 * s, 0.9 * s, 1.3 * s, r() * TAU);
+      Tiles.put(this._tb(e, n, 'alberi'), round, this.col.shrub[k % 3], e, Terrain.heightAt(e, n) + 0.35 * s, n, 1.3 * s, 0.9 * s, 1.3 * s, rot);
       this.count.cespugli++;
     }
-    // canne attorno al laghetto grande (il più largo di GOLA.laghi)
-    const [sl, hl, hw] = GOLA.laghi.reduce((a, b) => (b[2] > a[2] ? b : a));
-    for (let k = 0; k < 26; k++) {
-      const t = (k / 26) * 2 - 1, side = k % 2 ? 1 : -1;
-      // punto del torrente a sl + t·hl metri: lo cerco dai vertici (la polilinea è a tratti)
-      const p = this._riverAt(sl + t * hl * 0.9);
-      if (!p) continue;
-      const w = hw * Math.sqrt(Math.max(0, 1 - (t * 0.9) ** 2)) + 0.3 + r() * 0.8;
-      const e = p[0] + p[2] * w * side, n = p[1] + p[3] * w * side, g = Terrain.heightAt(e, n);
-      if (!this._free(e, n, 1.5)) continue;
-      Tiles.put(this._tb(e, n, 'alberi'), shapes.cone, c.copy(this.col.reed[k % 3]), e, g + 1.1, n, 0.5, 2.3 + r() * 0.8, 0.5, r() * TAU);
-      this.count.cespugli++;
-    }
-  },
-  /** Punto del torrente a `s` metri da sud: [est, nord, normale est, normale nord]. */
-  _riverAt(s) {
-    const { E, N } = Ravine.river;
-    let acc = 0;
-    for (let i = 0; i + 1 < E.length; i++) {
-      const L = Math.hypot(E[i + 1] - E[i], N[i + 1] - N[i]);
-      if (acc + L >= s) { const t = (s - acc) / L; return [lerp(E[i], E[i + 1], t), lerp(N[i], N[i + 1], t), -(N[i + 1] - N[i]) / L, (E[i + 1] - E[i]) / L]; }
-      acc += L;
-    }
-    return null;
   },
 };
 
