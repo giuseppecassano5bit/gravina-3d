@@ -1599,8 +1599,23 @@ const LANDMARKS = [
     text: 'Fu eretta nel 1645, per volontà testamentaria di Balsamo Lupi, trasformando due stalle a pianterreno e due stanze del Palazzo Lupi. Oggi è sconsacrata e ospita la confraternita di San Michele Arcangelo.',
   },
   {
-    id: 'santomasi', name: 'Museo Pomarici Santomasi', ref: 'Museo e Biblioteca Ettore Pomarici Santomasi', kicker: 'Fondazione Ettore Pomarici Santomasi', radius: 30,
-    text: 'Museo e biblioteca in un palazzo del centro storico: raccolte d’arte e reperti archeologici del territorio.',
+    // Blocco N7: Cinema Teatro Mastrogiacomo
+    id: 'mastrogiacomo', name: 'Cinema Teatro Mastrogiacomo', at: [438, -16], kicker: 'Piazza Scacchi · aperto nel 1927', radius: 26,
+    text: 'Voluto dal cavaliere Michele Mastrogiacomo e progettato dall’ingegnere De Martino, fu inaugurato nel 1927 come primo grande teatro moderno della città, con galleria e palchetti in stile Liberty. Trasformato in seguito con struttura in cemento armato e sala cinematografica, ha animato per decenni la vita culturale gravinese prima della chiusura nel 1995. Nel 2024 è stato acquisito al patrimonio comunale per il recupero a teatro e polo culturale polifunzionale.',
+  },
+  {
+    // Blocco N7: Cinema Teatro Centrone
+    id: 'centrone', name: 'Cinema Teatro Centrone', at: [348, -245], kicker: 'Via De Gasperi · politeama del 1947', radius: 36,
+    text: 'Costruito tra il 1946 e il 1947 in tufo locale per iniziativa dell’imprenditore Leonardo Centrone, è uno degli edifici teatrali più imponenti e originali della Murgia. La facciata tardo-liberty con colonne doriche, balconata e grande rosone geometrico introduceva a una maestosa sala da oltre 2.000 posti. Tempio del cinema e della musica, ha ospitato concerti memorabili di cantautori come Domenico Modugno, Francesco De Gregori e Riccardo Cocciante prima della chiusura nel 1990.',
+  },
+  {
+    // Blocco N7: Teatro Vida
+    id: 'teatrovida', name: 'Teatro Vida', at: [388, 478], kicker: 'Via Giardini · teatro e formazione artistica', radius: 32,
+    text: 'Spazio teatrale indipendente e sede della compagnia e accademia teatrale Vida, in Via Giardini 72. È un attivo punto di riferimento cittadino per la prosa contemporanea, il teatro comico, le rassegne per ragazzi e i laboratori di formazione artistica e cinematografica.',
+  },
+  {
+    id: 'santomasi', name: 'Museo Pomarici Santomasi', ref: 'Museo e Biblioteca Ettore Pomarici Santomasi', kicker: 'Via Museo · palazzo nobiliare e pinacoteca', radius: 30,
+    text: 'Palazzo nobiliare lasciato in eredità alla città nel 1917 dal barone Ettore Pomarici Santomasi. Custodisce un museo con ricche collezioni archeologiche apule e peucete, maioliche, armeria, quadreria nobiliare e gli straordinari affreschi bizantini dell’XI secolo della cripta di San Vito Vecchio, qui salvati e rimontati dopo la demolizione della chiesetta rupestre.',
   },
   {
     id: 'santalucia', name: 'Santa Lucia', ref: 'Chiesa Rupestre Santa Lucia', kicker: 'Rione Piaggio · chiesa rupestre', radius: 30,
@@ -1624,8 +1639,13 @@ const LANDMARKS = [
   },
   { id: 'addolorata', name: 'Addolorata', ref: "Chiesa Madonna dell'Addolorata", card: false },
   {
-    id: 'sotterranea', name: 'Gravina Sotterranea', ref: 'Gravina Sotterranea', kicker: 'Percorsi nel sottosuolo', radius: 28,
-    text: 'Sotto il centro storico si estende una rete di cisterne, cantine, cunicoli e grotte scavati nel tufo.',
+    id: 'sotterranea', name: 'Gravina Sotterranea', at: [146, -56], kicker: 'Rione Piaggio · la città sotto la città', radius: 28,
+    text: 'Ingresso al suggestivo labirinto ipogeo scavato nel banco di tufo sotto il centro storico. Una fitta rete di ambienti su più livelli articolata tra monumentali cisterne per l’acqua piovana, cantine nobiliari, granai medievali, frantoi rupestri e cunicoli di fuga che per secoli hanno garantito la sopravvivenza della città.',
+  },
+  {
+    // Blocco N7: Biblioteca Finia
+    id: 'finia', name: 'Biblioteca Finia', at: [106, -24], kicker: 'Piazza Benedetto XIII · fondata nel Seicento', radius: 24,
+    text: 'Tra le più antiche biblioteche di pubblica lettura della Puglia, istituita nel XVII secolo nel complesso episcopale grazie ai lasciti del cardinale Fini e del cardinale Niccolò Coscia. Conserva un patrimonio librario di oltre 40.000 volumi, tra cui incunaboli, cinquecentine, pergamene manoscritte e gli archivi storici della diocesi di Gravina.',
   },
   {
     id: 'pellicciari', name: 'Piazza Pellicciari', ref: 'Piazza Giuseppe Pellicciari', kicker: 'Porta del rione Fondovito', radius: 30,
@@ -8302,6 +8322,7 @@ const Details = {
     // Blocco D: Porta San Michele e Piazza Scacchi, Quattro Fontane, facciata di San Francesco
     this.portaSanMichele(tops);
     this.piazzaScacchi();
+    this.luoghiCultura(tops);                 // blocco N7: cinema, teatri e luoghi della cultura
     if (lm('quattrofontane')) this.quattroFontane(lm('quattrofontane').at);
     for (const [e, n] of GEO.views) this.railing(e, n);
     this.cityPlaces();
@@ -8561,6 +8582,133 @@ const Details = {
           f.box(0.1, 2.5, 0.1, iron, s * 2.2, y, 0);
         }
       }
+    }
+  },
+
+  /**
+   * LUOGHI DELLA CULTURA (blocco N7: cinema, teatri, musei e biblioteche):
+   *  - Cinema Teatro Mastrogiacomo (Piazza Scacchi 16): facciata rosata con portale, lesene, insegna e bacheche locandine;
+   *  - Cinema Teatro Centrone (Via De Gasperi 14): monumentale facciata tardo-liberty in tufo, colonne, loggia, rosone e insegna;
+   *  - Teatro Vida (Via Giardini 72): ingresso moderno vetrato, insegna retroilluminata e bacheca della stagione;
+   *  - Fondazione Pomarici Santomasi (Via Museo 20): grande portone bugnato, stemma nobiliare scolpito, balcone nobile;
+   *  - Gravina Sotterranea (Via Meucci / Rione Piaggio): portale ad arco in conci di tufo, cancellata, lanterna e targa in pietra;
+   *  - Biblioteca Finia (Piazza Benedetto XIII): portale in pietra e targa storica.
+   */
+  luoghiCultura(tops) {
+    const C = (h) => new THREE.Color(h), { light, iron, stone } = this.col;
+    const gold = C('#cca84a'), dark = C('#202226'), glass = C('#3a4a58'), wood = C('#4a3525'), tufo = C('#d9caa5');
+
+    // 1. CINEMA TEATRO MASTROGIACOMO (Piazza Scacchi 16, edificio 306)
+    const mastroWall = this.wallNear([438.0, -16.0], 4);
+    if (mastroWall) {
+      const tb = this.near(mastroWall.M), f = this.frame(mastroWall, tb), y = f.ground;
+      const top = tops.get('#306')?.top ?? y + 9.5;
+      const L = mastroWall.len;
+      f.box(L - 0.1, top - y, 0.08, C('#df9f8b'), 0, y, 0.04);
+      f.box(L + 0.1, 0.45, 0.35, tufo, 0, top - 0.45, 0.15);
+      f.box(L - 0.2, 0.18, 0.14, tufo, 0, y + 4.2, 0.08);
+      f.box(2.8, 0.18, 0.8, tufo, 0, y, 0.4);
+      f.box(2.4, 3.2, 0.12, dark, 0, y + 0.18, 0.06);
+      f.box(2.2, 2.9, 0.06, wood, 0, y + 0.18, 0.08);
+      for (const s of [-1, 1]) f.box(0.25, 3.4, 0.18, tufo, s * 1.35, y, 0.1);
+      f.box(3.2, 0.35, 0.24, tufo, 0, y + 3.4, 0.12);
+      f.box(4.8, 0.65, 0.14, C('#2a2320'), 0, y + 3.95, 0.14);
+      f.box(4.5, 0.18, 0.06, gold, 0, y + 4.18, 0.22);
+      f.box(4.2, 0.24, 0.08, gold, 0, y + 3.82, 0.22);
+      for (const s of [-1, 1]) {
+        f.box(1.0, 1.6, 0.08, dark, s * 2.3, y + 1.2, 0.08);
+        f.box(0.85, 1.4, 0.02, C('#f4ecc8'), s * 2.3, y + 1.3, 0.13);
+        f.box(0.88, 1.45, 0.04, glass, s * 2.3, y + 1.28, 0.14);
+      }
+    }
+
+    // 2. CINEMA TEATRO CENTRONE (Via Alcide De Gasperi 14, edificio 239)
+    const centroneWall = this.wallNear([349.3, -241.9], 6) ?? this.wallNear([345.2, -281.8], 8);
+    if (centroneWall) {
+      const tb = this.near(centroneWall.M), f = this.frame(centroneWall, tb), y = f.ground;
+      const top = tops.get('#239')?.top ?? y + 11.5;
+      const L = Math.min(18, centroneWall.len);
+      f.box(L, top - y, 0.15, tufo, 0, y, 0.08);
+      for (const s of [-1, 1]) {
+        f.box(3.2, top - y + 1.2, 0.45, tufo, s * (L / 2 - 1.6), y, 0.25);
+        f.box(3.5, 0.35, 0.55, tufo, s * (L / 2 - 1.6), top + 0.8, 0.28);
+      }
+      f.box(2.8, 3.6, 0.15, wood, 0, y, 0.12);
+      for (const s of [-1, 1]) {
+        f.add(new THREE.CylinderGeometry(0.24, 0.28, 3.8, 12), tufo, s * 1.8, y + 1.9, 0.55);
+        f.box(0.65, 0.25, 0.65, tufo, s * 1.8, y + 3.7, 0.55);
+        f.box(0.68, 0.30, 0.68, tufo, s * 1.8, y + 0.15, 0.55);
+      }
+      f.box(4.6, 0.28, 1.2, tufo, 0, y + 3.95, 0.65);
+      f.box(4.4, 0.85, 0.08, tufo, 0, y + 4.35, 1.15);
+      for (let bx = -1.9; bx <= 1.9; bx += 0.45) {
+        f.box(0.12, 0.72, 0.12, tufo, bx, y + 4.30, 1.15);
+      }
+      f.box(2.2, 2.6, 0.1, dark, 0, y + 4.25, 0.15);
+      f.add(new THREE.CylinderGeometry(1.4, 1.4, 0.25, 16).rotateX(Math.PI / 2), tufo, 0, y + 8.2, 0.2);
+      f.add(new THREE.CylinderGeometry(1.15, 1.15, 0.3, 16).rotateX(Math.PI / 2), dark, 0, y + 8.2, 0.22);
+      for (let a = 0; a < 8; a++) {
+        f.add(new THREE.BoxGeometry(0.12, 2.2, 0.35).rotateZ((a / 8) * Math.PI), tufo, 0, y + 8.2, 0.25);
+      }
+      f.box(L - 2, 0.45, 0.4, tufo, 0, top - 0.45, 0.25);
+      for (let dx = -L / 2 + 3; dx <= L / 2 - 3; dx += 0.8) {
+        f.box(0.35, 0.25, 0.45, tufo, dx, top - 0.6, 0.26);
+      }
+      f.box(5.8, 0.75, 0.16, C('#1e2228'), 0, y + 5.7, 0.22);
+      f.box(5.4, 0.28, 0.08, gold, 0, y + 5.7, 0.32);
+    }
+
+    // 3. TEATRO VIDA (Via Giardini 72, edificio 494)
+    const vidaWall = this.wallNear([384.5, 474.9], 6);
+    if (vidaWall) {
+      const tb = this.near(vidaWall.M), f = this.frame(vidaWall, tb), y = f.ground;
+      f.box(3.2, 2.9, 0.15, dark, 0, y, 0.08);
+      f.box(2.8, 2.6, 0.08, glass, 0, y + 0.1, 0.12);
+      for (const s of [-1, 1]) f.box(0.12, 2.8, 0.16, iron, s * 1.4, y, 0.14);
+      f.box(4.2, 0.65, 0.18, C('#18191c'), 0, y + 3.3, 0.15);
+      f.box(3.8, 0.25, 0.08, C('#e85238'), 0, y + 3.3, 0.26);
+      f.box(1.1, 1.5, 0.08, dark, -2.4, y + 1.2, 0.08);
+      f.box(0.95, 1.35, 0.04, C('#ffffff'), -2.4, y + 1.25, 0.12);
+      f.box(0.25, 0.15, 0.25, iron, 0, y + 3.8, 0.25);
+    }
+
+    // 4. FONDAZIONE PALAZZO POMARICI SANTOMASI (Via Museo 20)
+    const santomasiWall = this.wallNear([151.3, 123.5], 5);
+    if (santomasiWall) {
+      const tb = this.near(santomasiWall.M), f = this.frame(santomasiWall, tb), y = f.ground;
+      const arch = (w, h, d) => { const sh = new THREE.Shape(); sh.moveTo(-w / 2, 0); sh.lineTo(w / 2, 0); sh.lineTo(w / 2, h - w / 2); sh.absarc(0, h - w / 2, w / 2, 0, Math.PI, false); sh.closePath(); return new THREE.ExtrudeGeometry(sh, { depth: d, bevelEnabled: false, curveSegments: 8 }); };
+      f.add(arch(2.8, 3.8, 0.25), tufo, 0, y, 0.15);
+      f.add(arch(2.1, 3.4, 0.12), wood, 0, y, 0.18);
+      f.box(0.65, 0.85, 0.22, tufo, 0, y + 3.85, 0.28);
+      f.box(0.45, 0.65, 0.08, gold, 0, y + 3.85, 0.38);
+      f.box(3.2, 0.25, 0.95, stone, 0, y + 4.6, 0.55);
+      f.box(3.2, 1.0, 0.08, iron, 0, y + 4.85, 0.95);
+      for (const s of [-1, 1]) f.box(0.08, 1.0, 0.95, iron, s * 1.55, y + 4.85, 0.55);
+      f.box(1.8, 0.45, 0.08, C('#f2eee5'), 0, y + 4.25, 0.22);
+    }
+
+    // 5. GRAVINA SOTTERRANEA (Rione Piaggio / Via Meucci, edificio 267)
+    const sotterraneaWall = this.wallNear([143.8, -58.0], 4) ?? this.wallNear([146.1, -56.8], 4);
+    if (sotterraneaWall) {
+      const tb = this.near(sotterraneaWall.M), f = this.frame(sotterraneaWall, tb), y = f.ground;
+      const arch = (w, h, d) => { const sh = new THREE.Shape(); sh.moveTo(-w / 2, 0); sh.lineTo(w / 2, 0); sh.lineTo(w / 2, h - w / 2); sh.absarc(0, h - w / 2, w / 2, 0, Math.PI, false); sh.closePath(); return new THREE.ExtrudeGeometry(sh, { depth: d, bevelEnabled: false, curveSegments: 8 }); };
+      f.add(arch(2.4, 3.0, 0.22), tufo, 0, y, 0.12);
+      f.add(arch(1.8, 2.6, 0.08), dark, 0, y, 0.16);
+      for (let gx = -0.75; gx <= 0.75; gx += 0.25) f.box(0.04, 2.4, 0.04, iron, gx, y + 0.1, 0.18);
+      f.box(2.2, 0.50, 0.12, stone, 0, y + 3.15, 0.18);
+      f.box(0.05, 0.45, 0.35, iron, 1.45, y + 2.4, 0.25);
+      f.box(0.24, 0.35, 0.24, iron, 1.45, y + 2.1, 0.42);
+      f.box(0.18, 0.25, 0.18, C('#ffea9f'), 1.45, y + 2.1, 0.42);
+    }
+
+    // 6. BIBLIOTECA FINIA (Piazza Benedetto XIII, edificio 121)
+    const finiaWall = this.wallNear([104.7, -31.8], 3) ?? this.wallNear([108.8, -22.6], 3);
+    if (finiaWall) {
+      const tb = this.near(finiaWall.M), f = this.frame(finiaWall, tb), y = f.ground;
+      f.box(2.2, 3.2, 0.15, stone, 0, y, 0.08);
+      f.box(1.7, 2.8, 0.08, wood, 0, y, 0.12);
+      f.box(2.4, 0.42, 0.22, stone, 0, y + 3.25, 0.12);
+      f.box(1.6, 0.35, 0.06, stone, 0, y + 3.65, 0.15);
     }
   },
 
@@ -13383,7 +13531,8 @@ class MiniMap {
 const POI_GROUPS = [
   { name: 'Chiese', ids: ['duomo', 'purgatorio', 'gesu', 'sanfrancesco', 'sannicola', 'santasofia', 'santateresa', 'santacecilia', 'agostino', 'addolorata'] },
   { name: 'Chiese e grotte rupestri', ids: ['sanmichele', 'santalucia', 'stella', 'settecamere'] },
-  { name: 'Palazzi e musei', ids: ['orsini', 'santomasi', 'sotterranea'] },
+  { name: 'Cinema, teatri e cultura', ids: ['mastrogiacomo', 'centrone', 'teatrovida', 'santomasi', 'sotterranea', 'finia'] },
+  { name: 'Palazzi e monumenti', ids: ['orsini'] },
   { name: 'Porte, mura e fontane', ids: ['portasanmichele', 'bastione', 'quattrofontane'] },
   { name: 'Piazze e giardini', ids: ['scacchi', 'pellicciari', 'fondovico', 'hortus', 'repubblica', 'villa'] },
   { name: 'La gravina e il paesaggio', ids: ['belvedere', 'ponte', 'fontana', 'botromagno', 'necropoli', 'scavi', 'padreeterno', 'capotenda'] },

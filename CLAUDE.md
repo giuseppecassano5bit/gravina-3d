@@ -109,6 +109,15 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
   3. Ferrari Monza SP2 (barchetta biposto aperta senza parabrezza, 4,66 × 1,99 × 1,15 m, Virtual Wind Shield, twin buttresses, fascia continua LED a tutta larghezza e 4 scarichi);
   4. Trattore John Deere serie 8R coi contropesi anteriori (6,65 × 2,55 × 3,45 m, castello zavorre in ghisa a sbalzo, ruote posteriori giganti da 2,16 m, cabina CommandView IV e fumo alto).
   La mongolfiera (quinto mezzo volante introdotto nel blocco M3) resta invariata.
+- **Cinema, teatri e luoghi della cultura (blocco N7)**:
+  Modellazione delle facciate e dei portali dei luoghi storici della cultura in `Details.luoghiCultura(tops)` (0 draw call aggiuntive, geometrie nello strato `dettagli` dei riquadri vicini):
+  1. *Cinema Teatro Mastrogiacomo* (Piazza Arcangelo Scacchi 16): portale in tufo, trabeazione, insegna a sbalzo con fascia oro e bacheche locandine a giorno;
+  2. *Cinema Teatro Centrone* (Via Alcide De Gasperi 14): facciata monumentale tardo-liberty con loggia a colonne doriche, balconata, grande rosone radiale, avancorpi laterali e insegna dorata;
+  3. *Teatro Vida* (Via Giardini 72): portale d'ingresso moderno con vetrata, insegna stilizzata rossa, bacheca locandina illuminata a giorno e lanterna a muro;
+  4. *Fondazione Museo Pomarici Santomasi* (Via Museo 20): portale ad arco a tutto sesto in bugnato con stemma nobiliare in chiave di volta e balconata con ringhiera in ferro;
+  5. *Gravina Sotterranea* (Rione Piaggio / Via Meucci): portale d'accesso all'ipogeo ad arco con cancello in ferro e lanterna antica a braccio;
+  6. *Biblioteca Capitolare Finia* (Piazza Benedetto XIII): portale monumentale in pietra a colonne binate doriche, timpano triangolare spezzato e targa dedicatoria.
+  Schede curate in `LANDMARKS` con fonti storiche e gruppo dedicato `Cinema, teatri e cultura` in `POI_GROUPS` nella pausa.
 - **Eccezione di Santa Lucia (blocco N2b, piano approvato dal committente il 07/10/2026)**: il footway OSM w1195336380
   («Calata S. Lucia» su Google, 60 m da Via Michelangelo Calderoni alla chiesa) si percorre a piedi e finisce con la
   **goccia della figurina** nello slargo davanti alla chiesa (`GOCCE_PIEDI`), come il ponticello di San Michele. L'anello con

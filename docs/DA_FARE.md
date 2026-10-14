@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 15 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2, N2b, N3, N4 (Casino di Meninni), N4b (villette), N5 (Capotenda), N5b (uliveti, Casino Scacchi, Sportland), N5c (Hortus a piedi) e N6 (mezzi nuovi) uniti su main (N6 il 15/10/2026, PR #28); **N7 (cinema, teatri e luoghi della cultura) in corso** (branch `fase-3-4-n7-cultura`; Cinema Mastrogiacomo, Cinema Centrone, Teatro Vida e luoghi culturali; prompt `riferimenti/PROMPT_BLOCCHI_N5b_N8_SEGUITO.md`), poi N8.
+Stato al 15 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2, N2b, N3, N4 (Casino di Meninni), N4b (villette), N5 (Capotenda), N5b (uliveti, Casino Scacchi, Sportland), N5c (Hortus a piedi), N6 (mezzi nuovi) e N7 (cinema, teatri e luoghi della cultura) completati; **N7 in unione** (branch `fase-3-4-n7-cultura`, PR #29); prossimo **N8 (cartolina, giro guidato e ritocchi)**.
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
@@ -284,10 +284,19 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N2b → N3 �
       - vincolo delle 4 mesh consolidato (`opaqueMaterial`, `haloMaterial`), zero draw call aggiuntive, compatibilità id preservata (`panda`, `rs6`, `huracan`, `deere` + alias `rsq8`, `monza`);
       - prove verdi: `npm run simula` (0 problemi, 0 case sulla strada), `npm run interazioni` (77 controlli), `node difetti.mjs` invariato;
       - screenshot completi e foglio comparativo salvato in `riferimenti/foto_n6/n6-prima-dopo.jpg`.
-- [ ] **N7 · cinema, teatri e luoghi della cultura** (`fase-3-4-n7-cultura`): Cinema Mastrogiacomo, Cinema Centrone, Teatro
-      Vida e gli altri luoghi culturali, con facciate dalle foto e schede coi fatti verificati.
-- [ ] **N8 · cartolina, giro guidato e ritocchi** (`fase-3-4-n8-cartolina-giro`, era N6): cartolina con
-      la cornice, giro guidato dei monumenti (anche coi luoghi nuovi), camera dopo il teletrasporto, schede lunghe, memoria JS.
+- [x] **N7 · cinema, teatri e luoghi della cultura** (`fase-3-4-n7-cultura`, PR #29, 15/10/2026):
+      - **modellazione prospetti** in `Details.luoghiCultura(tops)` (strato `dettagli` dei riquadri urbani, zero draw call aggiuntive):
+        1. *Cinema Teatro Mastrogiacomo* (Piazza Scacchi 16, edificio 306): prospetto in intonaco salmone chiaro, basamento e marcapiano in tufo, portale con stipiti e architrave profilati, insegna stilizzata a sbalzo con fascia oro e bacheche locandine a giorno;
+        2. *Cinema Teatro Centrone* (Via Alcide De Gasperi 14, edificio 239): maestoso fronte tardo-liberty su Via De Gasperi, portale monumentale con colonne doriche scanalate e basamenti, balconata superiore con colonnine in tufo, grande rosone radiale ornamentale a 16 razze, due avancorpi laterali con coronamenti sagomati, mensole e insegna dorata;
+        3. *Teatro Vida* (Via Giardini 72, edificio 494): ingresso moderno al civico 72 con vetrata scura e profili in ferro, insegna stilizzata rossa incorniciata, bacheca locandina illuminata a giorno e lanterna a muro a braccio;
+        4. *Fondazione Museo Pomarici Santomasi* (Via Museo 20, palazzo seicentesco): portale monumentale bugnato ad arco a tutto sesto, stemma nobiliare in chiave di volta, balconata nobile con ringhiera in ferro battuto e lapide dedicatoria;
+        5. *Gravina Sotterranea* (Rione Piaggio / Via Meucci, edificio 267): accesso agli ipogei ad arco in tufo, portale con cancello in ferro a barre verticali e lanterna antica a braccio con alone caldo;
+        6. *Biblioteca Capitolare Finia* (Piazza Benedetto XIII, edificio 121): portale monumentale in pietra d'onore con colonne binate doriche, trabeazione con timpano triangolare spezzato e targa scolpita;
+      - **schede POI verificate in `LANDMARKS`**: coordinate reali, vicinanza stradale verificata per il teletrasporto dal menu di pausa, cenni storici accurati;
+      - **gruppo tematico in `POI_GROUPS`**: aggiunto `Cinema, teatri e cultura` con tutti e 6 i luoghi;
+      - prove verdi: `npm run simula` (0 problemi, 0 case sulla strada, dettagli liberi), `npm run interazioni` (77 controlli), `node difetti.mjs` invariato;
+      - screenshot ortogonali ad alta definizione e foglio d'insieme in `riferimenti/foto_n7/n7-luoghi-cultura.jpg`.
+- [ ] **N8 · cartolina, giro guidato e ritocchi** (`fase-3-4-n8-cartolina-giro`): cartolina con la cornice, giro guidato dei monumenti (anche coi luoghi nuovi), camera dopo il teletrasporto, schede lunghe, memoria JS.
 - Versione in inglese: non ora.
 
 ### Fase 3.4, blocco G · percorsi a piedi, quote reali, camera e radio (PR #12, unita il 30/09/2026) ✅
