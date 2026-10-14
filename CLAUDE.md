@@ -97,11 +97,18 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
   - il **ponticello di San Michele** (`PONTICELLO`) non è in OSM: si vede sul satellite e nella foto da drone
     del 2019 in fondo alla terrazza, sopra la testa del canalone; si percorre a piedi, in piano, e sotto scende
     il filo d'acqua (`Cascata`, richiesta del committente);
-  - **Hortus a piedi (blocco N5c, piano approvato dal committente il 14/10/2026)**: Via Giacomo Leopardi
-    (OSM w1384781495, 65 m) è pedonale fino al cancello di Hortus (`PEDONALI_FONDOVITO`) e oltre il cancello è decorativa;
-    il giardino a piedi (`GIARDINO_HORTUS`, 53 m, non in OSM) entra dal cancellino, compie un anello tra i terrazzamenti
-    di tufo toccando la panchina panoramica (con la sosta, la scheda e il pulsante «Riprendi il percorso») e si richiude
-    al cancello per tornare al mezzo che aspetta su Via San Vito Vecchio.
+- **Hortus a piedi (blocco N5c, piano approvato dal committente il 14/10/2026)**: Via Giacomo Leopardi
+  (OSM w1384781495, 65 m) è pedonale fino al cancello di Hortus (`PEDONALI_FONDOVITO`) e oltre il cancello è decorativa;
+  il giardino a piedi (`GIARDINO_HORTUS`, 53 m, non in OSM) entra dal cancellino, compie un anello tra i terrazzamenti
+  di tufo toccando la panchina panoramica (con la sosta, la scheda e il pulsante «Riprendi il percorso») e si richiude
+  al cancello per tornare al mezzo che aspetta su Via San Vito Vecchio.
+- **Mezzi nuovi (blocco N6, decisione del committente del 14/10/2026)**:
+  Sostituiti i 4 mezzi terrestri originali con i modelli richiesti:
+  1. Fiat Panda del 2013 (terza serie "Squircle", 3,65 × 1,64 × 1,55 m, passo 2,30 m, fari alti e terza luce sagomata);
+  2. Audi RS Q8 (SUV coupé sportivo, 5,01 × 2,00 × 1,70 m, Singleframe RS a nido d'ape, cerchi 23", doppio scarico ovale);
+  3. Ferrari Monza SP2 (barchetta biposto aperta senza parabrezza, 4,66 × 1,99 × 1,15 m, Virtual Wind Shield, twin buttresses, fascia continua LED a tutta larghezza e 4 scarichi);
+  4. Trattore John Deere serie 8R coi contropesi anteriori (6,65 × 2,55 × 3,45 m, castello zavorre in ghisa a sbalzo, ruote posteriori giganti da 2,16 m, cabina CommandView IV e fumo alto).
+  La mongolfiera (quinto mezzo volante introdotto nel blocco M3) resta invariata.
 - **Eccezione di Santa Lucia (blocco N2b, piano approvato dal committente il 07/10/2026)**: il footway OSM w1195336380
   («Calata S. Lucia» su Google, 60 m da Via Michelangelo Calderoni alla chiesa) si percorre a piedi e finisce con la
   **goccia della figurina** nello slargo davanti alla chiesa (`GOCCE_PIEDI`), come il ponticello di San Michele. L'anello con

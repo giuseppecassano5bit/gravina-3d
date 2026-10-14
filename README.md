@@ -5,8 +5,8 @@ costruito sulle **vie, gli edifici e il torrente reali**.
 Progetto open source di **Giuseppe Cassano** ([github.com/giuseppecassano5bit](https://github.com/giuseppecassano5bit)).
 
 Appena si apre, il mezzo aspetta accanto al **Ponte Acquedotto**. Scegli con che cosa
-girare: **Fiat Panda 4x4 del 1999**, **Audi RS6 Avant**, **Lamborghini Huracán**,
-**trattore John Deere** o **mongolfiera**. Le auto percorrono da sole le vie reali del centro storico, e a
+girare: **Fiat Panda del 2013**, **Audi RS Q8**, **Ferrari Monza SP2**,
+**trattore John Deere 8R coi contropesi** o **mongolfiera**. Le auto percorrono da sole le vie reali del centro storico, e a
 ogni incrocio reale scegli tu quale via prendere. Nel centro storico alcuni cartelli portano
 **a piedi** su passaggi e scalinate reali: il mezzo si ferma, prosegue una figurina, e il mezzo
 la aspetta al tratto carrabile successivo. La camera gira da sola attorno al mezzo, e puoi
@@ -101,10 +101,10 @@ modello, fari al tramonto, **stop** quando rallentano e **frecce** prima delle s
 
 | Mezzo | Carattere nel diorama |
 |---|---|
-| Fiat Panda 4x4 (1999) | rossa, squadrata, con protezioni in plastica, barre sul tetto e cerchi in lamiera; passo tranquillo |
-| Audi RS6 Avant | familiare grigia con parafanghi allargati, cerchi a dieci razze e pinze rosse; brillante |
-| Lamborghini Huracán | arancione, a cuneo, con i fari a Y e le pinze gialle; la più svelta (sempre a passo da centro storico) |
-| Trattore John Deere | verde e giallo, ruote tassellate e sbuffi di fumo; il più lento, e la camera sale un po' |
+| Fiat Panda (2013 · terza serie) | rossa pastello con motivo “squircle”, protezioni scure, barre sul tetto e terza luce sagomata; agile e scattante |
+| Audi RS Q8 | SUV coupé sportivo grigio con calandra Singleframe ottagonale RS, cerchi da 23", fari Matrix LED e doppio scarico ovale; possente e brillante |
+| Ferrari Monza SP2 | barchetta biposto aperta senza parabrezza, Virtual Wind Shield, doppie gobbe posteriori, nastro LED continuo a tutta larghezza e 4 scarichi; la più svelta (sempre a passo da centro storico) |
+| Trattore John Deere 8R coi contropesi | verde e giallo col massiccio castello zavorre in ghisa a sbalzo, ruote posteriori giganti da 2,16 m, cabina CommandView IV e sbuffi di fumo procedurale; il più imponente e lento |
 | Mongolfiera | pallone a spicchi nei colori del diorama con una fascia blu, cesta di vimini, fiamma e soffio del bruciatore; vola su un **giro fisso** di 2,7 km da Botromagno, sempre almeno 30 m sopra tetti e monumenti, e non segue le vie (un'eccezione come il Ponte Acquedotto). Il pulsante **Vista dalla cesta / Vista esterna** passa dalla prima alla terza persona. Alla fine del giro si riparte con l'ultima auto dalla via più vicina al decollo; i luoghi lontani dal giro (il bosco, il P.I.P., il Castello, il Casino di Meninni) si raggiungono scendendo e prendendo l'auto |
 
 ## Com'è fatto
@@ -122,7 +122,7 @@ Il file `index.html` è diviso in sezioni numerate e commentate:
 | 6 | Mondo | terreno, strade, Ponte Acquedotto ad archi, edifici reali con le case a gradoni dei rioni, archi sulle vie, Cattedrale, chiese rupestri, grotte, abitazioni rupestri, alberi |
 | 6e | Città a riquadri | la zolla in riquadri da 240 m (una mesh ciascuno): terreno a 5/15/30 m (7,5 m da vicino lungo le vie difficili), vie ed edifici della città, binari, alberi, fianco della zolla; finestre e marciapiedi disegnati dallo shader; da lontano una versione semplificata nella stessa mesh (livelli di dettaglio, blocco I); la maglia adattata alle vie (`MeshFit`, blocco M1) |
 | 6d | Dettagli | portali delle chiese, portale del Purgatorio, palazzi, Fontana della Stella, scalinate, belvederi, lanterne; dal blocco M1 le rovine e le tombe di Botromagno, lo stadio e la Fiera; dal blocco N4 il Casino di Meninni, dal blocco N4b le villette del Liceo Tarantino (`Villette`: unità della schiera, balconi, terrazze, coppi, giardinetti, piazzette), dal blocco N5 Capotenda (`Capotenda`: sassi del guado, passerella, cave di salnitro, grotta del Padre Eterno, muretti, filari della vigna) |
-| 7 | Mezzi | Panda 4x4, RS6, Huracán e trattore per sezioni (`Shop.loft`), con abitacolo, guidatore, luci da uniform e 4 mesh per mezzo; mappa d'ambiente al tramonto solo per i mezzi |
+| 7 | Mezzi | Panda 2013, RS Q8, Monza SP2 e John Deere 8R per sezioni (`Shop.loft`), con abitacolo, guidatore, luci da uniform e 4 mesh per mezzo; mappa d'ambiente al tramonto solo per i mezzi |
 | 7c | Mongolfiera | pallone a 14 spicchi, cesta, funi, bruciatore con la fiamma, pilota e visitatore (circa 2 400 triangoli) |
 | 7 | Figurina | il visitatore a piedi (`Walker`), circa 200 triangoli in una mesh |
 | 8 | Conducente | movimento automatico, incroci, pausa con frenata, tratti a piedi (sosta all'imbocco, mezzo che aspetta all'uscita), sosta in panchina alla Villa |
@@ -311,7 +311,7 @@ sotto il terreno o sospese, dischi sfasati, decorative sovrapposte) con `node di
 * **Codice**: la licenza è ancora da scegliere (per esempio MIT).
 * **Librerie e caratteri**: [Three.js](https://threejs.org) (MIT) da CDN; Marcellus SC, Barlow e
   Barlow Semi Condensed (SIL Open Font License) da Google Fonts.
-* **Fiat** e **Panda**, **Audi** e **RS6**, **Lamborghini** e **Huracán**, **John Deere** (e i
+* **Fiat** e **Panda**, **Audi** e **RS Q8**, **Ferrari** e **Monza SP2**, **John Deere** (e i
   suoi colori verde e giallo) sono marchi dei rispettivi proprietari. I mezzi del diorama sono
   interpretazioni stilizzate non ufficiali e non riproducono loghi. Prima di un uso commerciale
   o promozionale, verificate i diritti.
