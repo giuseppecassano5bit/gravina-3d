@@ -327,6 +327,19 @@ check('davanti alla chiesa la figurina gira nella goccia, con la scheda di Santa
 w = await guide('loop', null, 300);
 check('poi si torna per il passaggio e si ritrova il mezzo', w.back && !w.onFoot && w.speed > 0.5, w.street);
 
+// Blocco N4: dallo sterrato del Casino di Meninni a piedi per il cancello e il giardino dei pini, attorno al Casino fino
+// alla goccia della figurina nella radura dietro (con la scheda), poi di nuovo al mezzo che aspetta nello spiazzo.
+const mg = await page.evaluate(() => {
+  const N = window.gravina.network.edges, end = (e) => Math.hypot(e.b.e - 1590, e.b.n + 572) < 3 || Math.hypot(e.a.e - 1590, e.a.n + 572) < 3;
+  return N.find((e) => e.walk && e.turn && end(e))?.id;
+});
+await page.evaluate(() => { const g = window.gravina; g.placeAt(1437, -468, [1, 0.1], 0); g.rig.snap(g.driver); g.driver.decision = null; });
+w = await guide('to', mg, 400);
+check('Casino di Meninni: dallo spiazzo a piedi per il cancello e il giardino fino alla goccia dietro il Casino, con la scheda',
+  !!mg && w.onFoot && w.names.includes('Giardino del Casino di Meninni') && w.cards.includes('Casino di Meninni'), `${w.street} · schede ${w.cards.join(', ')}`);
+w = await guide('loop', null, 400);
+check('poi si torna al mezzo nello spiazzo e si riparte', w.back && !w.onFoot && w.speed > 0.5, w.street);
+
 // Blocco N2b: dalla ringhiera della Cattedrale (belvedere OSM n3348673132) il ponte si vede. Prima del blocco una casa a
 // tre piani (in OSM un rudere) lo nascondeva a 16 m: tre raggi dall'occhio (1,6 m) all'impalcato, nessun ostacolo.
 const vistaPonte = await page.evaluate(() => {
@@ -343,7 +356,8 @@ const vistaPonte = await page.evaluate(() => {
 check('dalla ringhiera della Cattedrale il ponte si vede (nessuna casa sulla linea d’occhio)', vistaPonte.tiles > 20 && vistaPonte.hits === 0, `${vistaPonte.hits} ostacoli, impalcato a ${vistaPonte.deck} m, ${vistaPonte.tiles} riquadri`);
 
 // Vie cieche reali con la goccia (blocco M2): dall'elenco dei luoghi si arriva in auto e si riparte.
-for (const [name, at] of [['Casino di Meninni', [1572, -536]], ['Monumento alla Cola Cola', [1893, 102]], ['Fiera di San Giorgio', [-53, 948]]]) {
+// Blocco N4: il Casino di Meninni si raggiunge con lo sterrato nuovo, fino allo spiazzo davanti al cancello (circa 140 m dal Casino).
+for (const [name, at] of [['Casino di Meninni', [1451, -463]], ['Monumento alla Cola Cola', [1893, 102]], ['Fiera di San Giorgio', [-53, 948]]]) {
   await page.keyboard.press('p');
   await page.click(`.poi >> text=${name}`);
   // con SwiftShader, a fine giro, costruire i riquadri del luogo può richiedere qualche secondo
