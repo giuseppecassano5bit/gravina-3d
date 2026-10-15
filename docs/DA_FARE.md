@@ -1,9 +1,9 @@
 # Cosa resta da fare
 
-Stato al 15 ottobre 2026: fase 3 approvata e online, fase 3.4 completata con tutti i blocchi da A a N8 (A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2, N2b, N3, N4, N4b, N5, N5b, N5c, N6, N7, N8); **N8 in unione** (branch `fase-3-4-n8-cartolina-giro`).
+Stato al 15 ottobre 2026: fase 3 approvata e online, fase 3.4 completata e unita su `main` con tutti i blocchi da A a N8 (PR #30, commit `caceef6`). **Fase 4 · Rifinitura in corso**, avviato il **Blocco 4.1 · Golden hour** (branch `fase-4-1-golden-hour`).
 Aggiornare questo file a ogni fase.
 
-**Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
+**Fase 3.4 (Gravina oltre il centro storico) completata**: piano, dati, budget, rischi e divisione
 del lavoro su due chat in [`PIANO_FASE_3_4.md`](PIANO_FASE_3_4.md).
 
 ### Fase 3.4, seconda parte (decisioni del 30/09/2026)
@@ -414,7 +414,7 @@ commerciali e protette: il committente ha scelto musica ambient originale, gener
 
 ## 3. Fase 4 · Rifinitura (dal piano originale)
 
-- [ ] Golden hour: luci, nebbia e ombre nette; un leggero bloom solo se regge i 60 fps.
+- [ ] **4.1 · Golden hour** (in corso, branch `fase-4-1-golden-hour`): luci radenti calde, cielo e nebbia al tramonto, ombre e calibrazione flat-shading a 60 fps; un leggero bloom procedurale solo se regge rigorosamente i 60 fps.
 - [x] Musica procedurale Web Audio: la radio ambient del blocco G.
 - [x] Camera: giro automatico e camera libera nel blocco G.
 - [ ] Prestazioni su telefono: livelli di dettaglio per le finestre, misura su un telefono vero.
