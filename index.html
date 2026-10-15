@@ -3394,21 +3394,64 @@ const World = {
       tmp.copy(up ? deck : stone).multiplyScalar(0.94 + hash2(i, 7) * 0.1);
       tb.tri(v[0].toArray(), v[1].toArray(), v[2].toArray(), tmp);
     }
-    // Parapetti
-    for (const side of [-1, 1]) {
-      const box = new THREE.BoxGeometry(L, 1.0, 0.45);
-      const mid = p0.clone().lerp(p1, 0.5);
-      box.applyMatrix4(new THREE.Matrix4().makeBasis(along, new THREE.Vector3(0, 1, 0), across)
-        .setPosition(mid.x + across.x * side * (width / 2 - 0.22), mid.y + CONFIG.road.lift + 0.5, mid.z + across.z * side * (width / 2 - 0.22)));
-      tb.addGeometry(box, stone);
-    }
-    // Lesene sui piloni tra le grandi arcate e due cornici marcapiano su entrambe le fronti.
+    // Colori di dettaglio architettonico e naturale
     const light = new THREE.Color('#ecdcb2');
     const local = (geo, color) => { geo.applyMatrix4(m); tb.addGeometry(geo, color); };
     const slope = Math.atan2(p1.y - p0.y, L);
+
+    // Helper per pilastrino monumentale squadrato con capitello modanato in coordinate locali
+    const pillar = (px, py, pz, h = 1.05) => {
+      const b = new THREE.BoxGeometry(0.82, 0.22, 0.82);
+      b.translate(px, py + 0.11, pz);
+      local(b, light);
+      const f = new THREE.BoxGeometry(0.72, h, 0.72);
+      f.translate(px, py + 0.22 + h / 2, pz);
+      local(f, stone);
+      const c = new THREE.BoxGeometry(0.88, 0.18, 0.88);
+      c.translate(px, py + 0.22 + h + 0.09, pz);
+      local(c, light);
+      const top = new THREE.ConeGeometry(0.52, 0.22, 4).rotateY(Math.PI / 4);
+      top.translate(px, py + 0.22 + h + 0.18 + 0.11, pz);
+      local(top, light);
+    };
+
+    // Parapetti del ponte: da x = 0.9 a x = L - 0.9 (lasciano spazio ai pilastrini di testata)
+    const pLen = L - 1.8;
+    for (const zSide of [0.22, width - 0.22]) {
+      const pWall = new THREE.BoxGeometry(pLen, 1.0, 0.45).rotateZ(slope);
+      pWall.translate(L / 2, deckAt(L / 2) + 0.5, zSide);
+      local(pWall, stone);
+      const pCap = new THREE.BoxGeometry(pLen + 0.05, 0.10, 0.52).rotateZ(slope);
+      pCap.translate(L / 2, deckAt(L / 2) + 1.05, zSide);
+      local(pCap, light);
+    }
+
+    // Pilastri monumentali alle testate (est e ovest)
+    pillar(0.45, deckAt(0), 0.22);
+    pillar(0.45, deckAt(0), width - 0.22);
+    pillar(L - 0.45, deckAt(L), 0.22);
+    pillar(L - 0.45, deckAt(L), width - 0.22);
+
+    // Sponda est: innesti a ventaglio verso Via Fontana la Stella e la scalinata di Via giudice Montea
+    for (const [vSide, angle] of [[0.22, -0.32], [width - 0.22, 0.32]]) {
+      const vLen = 2.8;
+      const vWall = new THREE.BoxGeometry(vLen, 1.0, 0.45).rotateY(angle);
+      const vx = -Math.cos(angle) * (vLen / 2) + 0.1;
+      const vz = vSide - Math.sin(angle) * (vLen / 2);
+      vWall.translate(vx, deckAt(0) + 0.5, vz);
+      local(vWall, stone);
+      const vCap = new THREE.BoxGeometry(vLen + 0.05, 0.10, 0.52).rotateY(angle);
+      vCap.translate(vx, deckAt(0) + 1.05, vz);
+      local(vCap, light);
+      const endX = -Math.cos(angle) * vLen;
+      const endZ = vSide - Math.sin(angle) * vLen;
+      pillar(endX, deckAt(0), endZ, 1.15);
+    }
+
+    // Cornici marcapiano rifinite: si arrestano contro i pilastri terminali e la spalla (senza sporgere nel vuoto)
     for (const z of [-0.18, width + 0.18]) {
       for (const drop of [7.9, 0.75]) {
-        const band = new THREE.BoxGeometry(L, 0.38, 0.4).rotateZ(slope);
+        const band = new THREE.BoxGeometry(pLen, 0.38, 0.4).rotateZ(slope);
         band.translate(L / 2, deckAt(L / 2) - drop, z);
         local(band, light);
       }
@@ -3418,6 +3461,111 @@ const World = {
         const pier = new THREE.BoxGeometry(2.2, y1 - y0, 0.5);
         pier.translate(x, (y0 + y1) / 2, z);
         local(pier, stone);
+      }
+    }
+
+    // Spalla monumentale ovest in tufo e conci di pietra che salda l'impalcato e l'arcata alla falesia
+    const spallaLen = 7.0;
+    const spallaY0 = groundAt(L) - 5.5;
+    const spallaY1 = deckAt(L) - 0.25;
+    const spallaH = Math.max(4.0, spallaY1 - spallaY0);
+    // Posizionata interamente sotto il corpo del ponte prima della testata
+    const spalla = new THREE.BoxGeometry(spallaLen, spallaH, width - 0.1);
+    spalla.translate(L - spallaLen / 2, (spallaY0 + spallaY1) / 2, width / 2);
+    local(spalla, stone);
+    // Basamento a scarpa allargato conficcato nella scarpata rocciosa
+    const scarpa = new THREE.BoxGeometry(spallaLen + 1.0, 4.0, width + 0.8);
+    scarpa.translate(L - spallaLen / 2, spallaY0 + 2.0, width / 2);
+    local(scarpa, new THREE.Color(PALETTE.stoneDark));
+
+    // Sperone naturale di roccia calcarea viva sotto l'arcata ovest e la falesia verso la gravina (PALETTE.strata)
+    const strataCol1 = new THREE.Color('#d8ceb8'), strataCol2 = new THREE.Color('#b8af9c'), strataCol3 = new THREE.Color('#cfc3ab');
+    const bushCol1 = new THREE.Color('#44582c'), bushCol2 = new THREE.Color('#384824');
+    const balze = [
+      { x: 78, y: groundAt(78) - 2.5, z: width + 2.8, w: 10, h: 7.0, d: 7.5, ry: 0.15, col: strataCol1 },
+      { x: 88, y: groundAt(88) - 3.8, z: width + 3.8, w: 12, h: 8.0, d: 8.5, ry: -0.12, col: strataCol2 },
+      { x: 97, y: groundAt(97) - 4.8, z: width + 3.5, w: 14, h: 9.0, d: 9.0, ry: 0.08, col: strataCol3 },
+      { x: 104, y: groundAt(103) - 5.8, z: width + 2.2, w: 11, h: 9.5, d: 8.0, ry: -0.20, col: strataCol1 },
+    ];
+    for (const b of balze) {
+      const rock = new THREE.BoxGeometry(b.w, b.h, b.d).rotateY(b.ry);
+      rock.translate(b.x, b.y, b.z);
+      local(rock, b.col);
+      // Cespugli di macchia mediterranea distribuiti sulle cenge rupestri verso la gravina
+      for (let s = -1; s <= 1; s += 2) {
+        const bush = new THREE.DodecahedronGeometry(0.70 + hash2(b.x + s, 3) * 0.40, 0).scale(1, 0.65, 1);
+        bush.translate(b.x + s * (b.w * 0.25), b.y + b.h / 2 + 0.15, b.z + (s * b.d * 0.22));
+        local(bush, s > 0 ? bushCol1 : bushCol2);
+      }
+    }
+
+    // Muretto continuo di protezione lungo la rampa ovest (Via giudice Montea verso Madonna della Stella)
+    const westNode = edge.a.e < edge.b.e ? edge.a : edge.b;
+    const rampEdge = westNode.edges.find((e) => e !== edge && !e.turn);
+    if (rampEdge) {
+      const RS = rampEdge.samples, rCount = rampEdge.count;
+      const dStart = Math.hypot(RS[0] - westNode.pos.x, RS[2] - westNode.pos.z);
+      const dEnd = Math.hypot(RS[rCount * 3] - westNode.pos.x, RS[rCount * 3 + 2] - westNode.pos.z);
+      const forward = dStart < dEnd;
+      const segs = Math.min(36, rCount);
+      let distAcc = 0;
+      let firstMidPt = null;
+      for (let s = 0; s < segs; s++) {
+        const i0 = forward ? s : rCount - s;
+        const i1 = forward ? s + 1 : rCount - s - 1;
+        const pA = new THREE.Vector3(RS[i0 * 3], RS[i0 * 3 + 1], RS[i0 * 3 + 2]);
+        const pB = new THREE.Vector3(RS[i1 * 3], RS[i1 * 3 + 1], RS[i1 * 3 + 2]);
+        const segVec = new THREE.Vector3().subVectors(pB, pA);
+        const segLen = segVec.length();
+        if (segLen < 0.2) continue;
+        const segDir = segVec.clone().normalize();
+        let nor = new THREE.Vector3(-segDir.z, 0, segDir.x);
+        if (nor.x < 0) nor.negate();
+        const mOff = rampEdge.width / 2 + 0.18;
+        const midPt = pA.clone().lerp(pB, 0.5).addScaledVector(nor, mOff);
+        if (!firstMidPt) firstMidPt = midPt.clone();
+        const groundH = Terrain.heightAt(midPt.x, -midPt.z);
+        const roadH = midPt.y;
+        const wallH = 1.05;
+        const baseDrop = Math.max(0.6, roadH - groundH + 0.4);
+        const rotY = Math.atan2(segVec.x, segVec.z);
+
+        const mBox = new THREE.BoxGeometry(0.44, wallH + baseDrop, segLen + 0.06).rotateY(rotY);
+        mBox.translate(midPt.x, roadH + wallH / 2 - baseDrop / 2, midPt.z);
+        tb.addGeometry(mBox, stone);
+
+        const cBox = new THREE.BoxGeometry(0.54, 0.12, segLen + 0.08).rotateY(rotY);
+        cBox.translate(midPt.x, roadH + wallH + 0.06, midPt.z);
+        tb.addGeometry(cBox, light);
+
+        distAcc += segLen;
+        if (distAcc >= 6.5) {
+          distAcc = 0;
+          const pil = new THREE.BoxGeometry(0.58, wallH + baseDrop + 0.15, 0.58).rotateY(rotY);
+          pil.translate(midPt.x, roadH + wallH / 2 - baseDrop / 2 + 0.08, midPt.z);
+          tb.addGeometry(pil, light);
+        }
+      }
+
+      // Raccordo continuo tra il pilastro della testata ovest del ponte e l'inizio del muretto della rampa
+      if (firstMidPt) {
+        const pillarWestPos = p0.clone().setY(0)
+          .addScaledVector(across, -width / 2)
+          .addScaledVector(along, L - 0.45)
+          .addScaledVector(across, width - 0.22)
+          .setY(deckAt(L));
+        const connVec = new THREE.Vector3().subVectors(firstMidPt, pillarWestPos);
+        const connLen = connVec.length();
+        if (connLen > 0.3) {
+          const connMid = pillarWestPos.clone().lerp(firstMidPt, 0.5);
+          const connRotY = Math.atan2(connVec.x, connVec.z);
+          const rWall = new THREE.BoxGeometry(0.44, 1.05 + 1.2, connLen + 0.1).rotateY(connRotY);
+          rWall.translate(connMid.x, connMid.y + 1.05 / 2 - 0.6, connMid.z);
+          tb.addGeometry(rWall, stone);
+          const rCap = new THREE.BoxGeometry(0.54, 0.12, connLen + 0.12).rotateY(connRotY);
+          rCap.translate(connMid.x, connMid.y + 1.05 + 0.06, connMid.z);
+          tb.addGeometry(rCap, light);
+        }
       }
     }
     const mesh = new THREE.Mesh(tb.build(), vertexColorMaterial({ roughness: 0.85 }));
@@ -10538,7 +10686,7 @@ const Details = {
     f.box(2.5, 3.8, 0.1, door, 0, y, 0.03);
   },
 
-  /** FONTANA DELLA STELLA: vasca e muro con nicchia ad arco, accanto alla testata del ponte, fuori dalla strada. */
+  /** FONTANA DELLA STELLA: monumento settecentesco in tufo con nicchia archivoltata, cannelle gemelle, vasca e muretti d'ala di raccordo al belvedere. */
   fountain([e0, n0]) {
     let best = null;
     for (let r = 3; r <= 16 && !best; r += 1) {
@@ -10556,15 +10704,39 @@ const Details = {
     if (!best) return;
     const l = Math.hypot(...best.n);
     best.n = [best.n[0] / l, best.n[1] / l];
-    const f = this.frame(best), y = Terrain.heightAt(...best.M), { stone, light, water, hole } = this.col;
-    f.box(4.2, 2.8, 0.7, stone, 0, y - 0.3, -0.9);                         // muro di fondo
-    f.box(4.5, 0.3, 0.9, light, 0, y + 2.5, -0.9);                         // cornice
+    const f = this.frame(best), y = Terrain.heightAt(...best.M), { stone, light, water, hole, dark } = this.col;
+    // Zoccolo basamentale
+    f.box(4.2, 0.35, 0.75, dark, 0, y - 0.25, -0.95);
+    // Muro monumentale in conci di tufo
+    f.box(4.0, 2.8, 0.65, stone, 0, y + 0.10, -0.95);
+    // Due lesene laterali di riquadratura
+    for (const side of [-1, 1]) f.box(0.38, 2.9, 0.72, light, side * 1.8, y + 0.10, -0.90);
+    // Trabeazione modanata superiore e fastigio centinato
+    f.box(4.3, 0.32, 0.85, light, 0, y + 2.85, -0.90);
+    f.box(2.0, 0.45, 0.30, light, 0, y + 3.20, -0.90);
+    // Nicchia archivoltata profonda con semicalotta scavata
     const niche = new THREE.Shape();
-    niche.moveTo(-0.7, 0); niche.lineTo(0.7, 0); niche.lineTo(0.7, 0.9); niche.absarc(0, 0.9, 0.7, 0, Math.PI, false); niche.closePath();
-    f.add(new THREE.ExtrudeGeometry(niche, { depth: 0.05, bevelEnabled: false, curveSegments: 6 }), hole, 0, y + 0.8, -0.53);
-    f.box(3.4, 0.75, 1.5, light, 0, y - 0.1, 0.2);                         // vasca
-    f.box(3.0, 0.06, 1.1, water, 0, y + 0.6, 0.2);                         // acqua
-    f.add(new THREE.CylinderGeometry(0.06, 0.06, 0.5, 6).rotateX(Math.PI / 2), light, 0, y + 1.3, -0.3);   // cannella
+    niche.moveTo(-0.75, 0); niche.lineTo(0.75, 0); niche.lineTo(0.75, 0.95); niche.absarc(0, 0.95, 0.75, 0, Math.PI, false); niche.closePath();
+    f.add(new THREE.ExtrudeGeometry(niche, { depth: 0.28, bevelEnabled: false, curveSegments: 6 }), hole, 0, y + 0.75, -0.62);
+    // Cornice modanata della nicchia
+    f.box(0.14, 1.15, 0.10, light, -0.80, y + 0.75, -0.58);
+    f.box(0.14, 1.15, 0.10, light, 0.80, y + 0.75, -0.58);
+    // Cannelle gemelle in ottone con borchie a rilievo
+    const brass = new THREE.Color('#b09568');
+    for (const cSide of [-0.32, 0.32]) {
+      f.add(new THREE.CylinderGeometry(0.04, 0.04, 0.35, 6).rotateX(Math.PI / 2), brass, cSide, y + 1.25, -0.42);
+      f.box(0.18, 0.18, 0.06, light, cSide, y + 1.25, -0.60);
+    }
+    // Vasca monolitica in pietra squadrata con bordo sagomato
+    f.box(3.2, 0.80, 1.15, light, 0, y - 0.1, -0.05);
+    f.box(3.4, 0.12, 1.30, stone, 0, y + 0.68, -0.05);
+    f.box(2.9, 0.06, 0.95, water, 0, y + 0.62, -0.05);
+    // Muretti d'ala laterali compatti di raccordo
+    for (const side of [-1, 1]) {
+      f.box(0.9, 1.05, 0.40, stone, side * 2.35, y - 0.1, -0.92);
+      f.box(0.95, 0.10, 0.45, light, side * 2.35, y + 0.95, -0.92);
+      f.box(0.48, 1.25, 0.48, light, side * 2.85, y - 0.1, -0.92);
+    }
   },
 
   /**
