@@ -6,10 +6,10 @@ Progetto open source di **Giuseppe Cassano** ([github.com/giuseppecassano5bit](h
 
 Appena si apre, il mezzo aspetta accanto al **Ponte Acquedotto**. Scegli con che cosa
 girare: **Fiat Panda del 2013**, **Audi RS Q8**, **Ferrari Monza SP2**,
-**trattore John Deere 8R coi contropesi** o **mongolfiera**. Le auto percorrono da sole le vie reali del centro storico, e a
-ogni incrocio reale scegli tu quale via prendere. Nel centro storico alcuni cartelli portano
+**trattore John Deere 8R coi contropesi** o **mongolfiera**. Puoi avviare la guida libera oppure il **Giro guidato dei monumenti**, che ti conduce automaticamente attraverso 14 tappe storiche e culturali con schede informative e banner di navigazione dedicato. Le auto percorrono da sole le vie reali del centro storico, e a
+ogni incrocio reale scegli tu quale via prendere (o il giro guidato seleziona automaticamente l'uscita migliore verso la tappa successiva). Nel centro storico alcuni cartelli portano
 **a piedi** su passaggi e scalinate reali: il mezzo si ferma, prosegue una figurina, e il mezzo
-la aspetta al tratto carrabile successivo. La camera gira da sola attorno al mezzo, e puoi
+la aspetta al tratto carrabile successivo. In qualsiasi momento puoi scattare una **Cartolina da Gravina in Puglia** (tasto **C** o pulsante nell'HUD), con cornice in stile tufo, luogo dinamico e crediti, pronta da scaricare in PNG o condividere. La camera gira da sola attorno al mezzo, e puoi
 girarla anche tu trascinando; una radio suona brani ambient originali, generati dal diorama.
 In mongolfiera si decolla da Botromagno per un giro di sette minuti sopra la necropoli, il Ponte
 Acquedotto e il centro storico, con la vista esterna o dalla cesta.

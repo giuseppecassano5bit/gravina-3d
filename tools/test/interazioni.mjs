@@ -541,6 +541,54 @@ b = await bal();
 const dTake = await page.evaluate(() => { const p = window.gravina.driver.position; return Math.hypot(p.x + 379, -p.z - 685); });
 check('fine del giro: atterra al decollo e si riparte con l’ultima auto', landed && b.mode === 'car' && b.pace === 1.1 && b.speed > 0.5 && dTake < 500, `${b.street}, a ${dTake.toFixed(0)} m dal decollo`);
 
+// Blocco N8: Cartolina e Giro guidato dei monumenti
+await page.evaluate(() => { const g = window.gravina; g.placeAt(300, 0, [1, 0]); g.rig.snap(g.driver); document.activeElement?.blur?.(); });
+await page.waitForTimeout(300);
+
+// 1. Cartolina: tasto C e notifica toast
+await page.keyboard.press('c');
+const toastEl = await page.waitForSelector('#toast.is-visible', { timeout: 4000 });
+const toastText = (await toastEl?.textContent()) || '';
+check('il tasto C scatta la cartolina e mostra il toast', !!toastEl && /cartolina/i.test(toastText), toastText);
+
+// 2. Giro guidato dei monumenti: 14 tappe, HUD dedicato, salto ed uscita
+const stopsCount = await page.evaluate(() => window.gravina.TOUR_STOPS?.length);
+check('il giro guidato ha 14 tappe definite', stopsCount === 14, `${stopsCount} tappe`);
+
+await page.keyboard.press('p');
+await page.click('#btn-pause-tour');
+await page.waitForTimeout(400);
+let tourState = await page.evaluate(() => {
+  const d = window.gravina.driver;
+  const h = document.getElementById('tour-hud');
+  const info = document.getElementById('tour-hud-info');
+  return {
+    active: d.tour?.active,
+    index: d.tour?.index,
+    hudVisible: h && !h.hidden,
+    hudInfo: info?.textContent,
+  };
+});
+check('il giro guidato si avvia dalla pausa col banner HUD', tourState.active && tourState.hudVisible && /Tappa 1\/14/i.test(tourState.hudInfo), tourState.hudInfo);
+
+await page.click('#btn-tour-skip');
+await page.waitForTimeout(300);
+tourState = await page.evaluate(() => {
+  const d = window.gravina.driver;
+  const info = document.getElementById('tour-hud-info');
+  return { active: d.tour?.active, index: d.tour?.index, hudInfo: info?.textContent };
+});
+check('il pulsante «Salta tappa» avanza alla tappa 2', tourState.active && tourState.index === 1 && /Tappa 2\/14/i.test(tourState.hudInfo), tourState.hudInfo);
+
+await page.click('#btn-tour-exit');
+await page.waitForTimeout(300);
+tourState = await page.evaluate(() => {
+  const d = window.gravina.driver;
+  const h = document.getElementById('tour-hud');
+  return { active: !!d.tour?.active, hudVisible: h && !h.hidden };
+});
+check('il pulsante «Esci dal giro» interrompe il tour e chiude l’HUD', !tourState.active && !tourState.hudVisible);
+
 const errors = logs.filter((l) => /error/i.test(l));
 check('nessun errore in console', errors.length === 0, errors.join(' | '));
 await browser.close();
