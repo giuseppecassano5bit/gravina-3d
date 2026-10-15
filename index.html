@@ -1748,6 +1748,11 @@ const LANDMARKS = [
     text: 'Tra le più antiche biblioteche di pubblica lettura della Puglia, istituita nel XVII secolo nel complesso episcopale grazie ai lasciti del cardinale Fini e del cardinale Niccolò Coscia. Conserva un patrimonio librario di oltre 40.000 volumi, tra cui incunaboli, cinquecentine, pergamene manoscritte e gli archivi storici della diocesi di Gravina.',
   },
   {
+    // Blocco 4.3: Seminario Vescovile (Piazza Benedetto XIII 25)
+    id: 'seminario', name: 'Seminario Vescovile', at: [70, -25], kicker: 'Piazza Benedetto XIII · fondato nel 1595', radius: 24,
+    text: 'Fondato nel 1595 dal vescovo Vincenzo Giustiniani in attuazione dei decreti del Concilio di Trento, fu il primo seminario istituito in Terra di Bari. Ampliato nel Settecento sotto il patrocinio di papa Benedetto XIII Orsini, presenta un’austera facciata tardo-rinascimentale con portale bugnato e stemma vescovile. Oggi ospita il Museo Capitolare d’Arte Sacra.',
+  },
+  {
     id: 'pellicciari', name: 'Piazza Pellicciari', ref: 'Piazza Giuseppe Pellicciari', kicker: 'Porta del rione Fondovito', radius: 30,
     text: 'Da qui una scalinata attraversa il rione medievale di Fondovito e scende fino alla chiesa rupestre di San Michele.',
   },
@@ -8571,6 +8576,7 @@ const Details = {
     this.portaSanMichele(tops);
     this.piazzaScacchi();
     this.luoghiCultura(tops);                 // blocco N7: cinema, teatri e luoghi della cultura
+    this.seminario(tops);                     // blocco 4.3: Seminario Vescovile in Piazza Benedetto XIII
     if (lm('quattrofontane')) this.quattroFontane(lm('quattrofontane').at);
     for (const [e, n] of GEO.views) this.railing(e, n);
     this.cityPlaces();
@@ -8972,6 +8978,99 @@ const Details = {
       f.box(1.7, 2.8, 0.08, wood, 0, y, 0.12);
       f.box(2.4, 0.42, 0.22, stone, 0, y + 3.25, 0.12);
       f.box(1.6, 0.35, 0.06, stone, 0, y + 3.65, 0.15);
+    }
+  },
+
+  /**
+   * SEMINARIO VESCOVILE (blocco 4.3, Piazza Benedetto XIII 25, edificio 123):
+   * Fondato nel 1595 da mons. Vincenzo Giustiniani (primo seminario della Terra di Bari) e ampliato nel Settecento
+   * sotto papa Benedetto XIII Orsini. Facciata monumentale in tufo e pietra calcarea con portale bugnato a tutto sesto,
+   * stemma vescovile scolpito in chiave di volta, portone ligneo chiodato, fasce marcapiano, finestre modanate con
+   * inferriate al pianterreno e targa dedicatoria.
+   */
+  seminario(tops) {
+    const semWall = this.wallNear([62.2, -27.0], 3);
+    if (!semWall) return;
+    const C = (h) => new THREE.Color(h), { iron, stone } = this.col;
+    const tufo = C('#dfd0b0'), bugna = C('#cbb994'), wood = C('#432e1f'), gold = C('#cca84a'), dark = C('#222428'), marble = C('#f0eadc');
+    const tb = this.near(semWall.M), f = this.frame(semWall, tb), y = f.ground;
+    const top = tops.get('#' + semWall.index)?.top ?? y + 11.2;
+    const L = semWall.len, H = top - y;
+    this.keepOut.push({ M: semWall.M, n: semWall.n, half: L / 2 + 0.4, top: top + 1.5 });
+
+    // Paramento nobile in tufo, zoccolo basamentale bugnato, lesene e fasce marcapiano
+    f.box(L - 0.1, H, 0.10, tufo, 0, y, 0.05);
+    f.box(L, 1.15, 0.18, bugna, 0, y, 0.09);
+    for (const lx of [-L / 2 + 0.35, -3.2, L / 2 - 0.35]) {
+      f.box(0.65, H, 0.20, stone, lx, y, 0.10);
+    }
+    f.box(L + 0.2, 0.22, 0.26, stone, 0, y + 3.85, 0.13);   // marcapiano 1° livello
+    f.box(L + 0.2, 0.20, 0.24, stone, 0, y + 7.35, 0.12);   // marcapiano 2° livello
+    f.box(L + 0.4, 0.48, 0.42, stone, 0, top - 0.48, 0.21); // cornicione sommitale
+    for (let mx = -L / 2 + 1.2; mx <= L / 2 - 1.2; mx += 1.1) {
+      f.box(0.24, 0.22, 0.36, stone, mx, top - 0.65, 0.22);
+    }
+
+    // Grande portale monumentale al civico 25 (nello slargo lastricato a est dell'aiuola: x = -8.5)
+    const px = -8.5;
+    const arch = (w, h, d) => {
+      const sh = new THREE.Shape();
+      sh.moveTo(-w / 2, 0); sh.lineTo(w / 2, 0); sh.lineTo(w / 2, h - w / 2);
+      sh.absarc(0, h - w / 2, w / 2, 0, Math.PI, false); sh.closePath();
+      return new THREE.ExtrudeGeometry(sh, { depth: d, bevelEnabled: false, curveSegments: 10 });
+    };
+    f.box(3.6, 0.18, 0.70, stone, px, y, 0.35);             // gradino di soglia in pietra
+    f.add(arch(3.0, 3.75, 0.26), stone, px, y, 0.12);       // archivolto a tutto sesto
+    for (let k = 0; k < 6; k++) {                           // bugnato sugli stipiti
+      for (const s of [-1, 1]) {
+        f.box(0.56, 0.42, 0.32, k % 2 ? stone : bugna, px + s * 1.32, y + 0.18 + k * 0.46, 0.18);
+      }
+    }
+    for (let a = 1; a <= 5; a++) {                          // conci radiali sull'arco bugnato
+      const ang = (a / 6) * Math.PI;
+      f.add(new THREE.BoxGeometry(0.32, 0.48, 0.34).rotateZ(ang - Math.PI / 2), a % 2 ? bugna : stone, px + Math.cos(ang) * 1.28, y + 2.25 + Math.sin(ang) * 1.28, 0.20);
+    }
+    // Portone ligneo chiodato a due battenti
+    f.add(arch(2.2, 3.35, 0.16), wood, px, y + 0.12, 0.26);
+    f.box(0.08, 3.25, 0.18, C('#2c1d12'), px, y + 0.12, 0.28);
+    for (const s of [-1, 1]) {
+      for (const by of [0.65, 1.65, 2.45]) f.box(0.72, 0.55, 0.06, C('#362417'), px + s * 0.54, y + by, 0.33);
+      f.add(new THREE.TorusGeometry(0.11, 0.025, 6, 10), gold, px + s * 0.32, y + 1.45, 0.36); // batacchi
+    }
+    // Stemma vescovile scolpito in chiave di volta
+    f.box(0.76, 0.92, 0.28, stone, px, y + 3.45, 0.28);
+    f.box(0.52, 0.64, 0.10, gold, px, y + 3.45, 0.40);
+    f.box(0.68, 0.16, 0.14, bugna, px, y + 3.88, 0.38);     // galero vescovile
+
+    // Balconata nobile in ferro battuto sopra il portale e targa dedicatoria
+    f.box(3.4, 0.22, 0.88, stone, px, y + 4.35, 0.44);
+    for (const s of [-1, 0, 1]) f.box(0.22, 0.32, 0.65, stone, px + s * 1.25, y + 4.05, 0.34);
+    f.box(3.3, 0.06, 0.06, iron, px, y + 5.42, 0.84);       // corrimano frontale
+    for (const s of [-1, 1]) f.box(0.06, 0.06, 0.84, iron, px + s * 1.62, y + 5.42, 0.44);
+    for (let bx = -1.55; bx <= 1.56; bx += 0.22) f.box(0.035, 0.86, 0.035, iron, px + bx, y + 4.57, 0.84);
+    for (const s of [-1, 1]) for (let bz = 0.15; bz <= 0.80; bz += 0.22) f.box(0.035, 0.86, 0.035, iron, px + s * 1.62, y + 4.57, bz);
+    f.box(1.45, 0.62, 0.08, marble, px + 2.45, y + 2.15, 0.14); // targa storica scolpita
+    f.box(1.25, 0.06, 0.04, C('#6e6558'), px + 2.45, y + 2.52, 0.19);
+    f.box(1.05, 0.05, 0.04, C('#6e6558'), px + 2.45, y + 2.34, 0.19);
+    f.box(1.15, 0.05, 0.04, C('#6e6558'), px + 2.45, y + 2.18, 0.19);
+
+    // Finestre modanate su 3 ordini con inferriate storiche al pianterreno
+    const cols = [-12.6, -8.5, -4.4, -0.4, 3.8, 8.0, 12.2];
+    for (const wx of cols) {
+      // Pianterreno (salta il portale a px = -8.5)
+      if (Math.abs(wx - px) > 1.5) {
+        f.box(1.38, 1.88, 0.12, stone, wx, y + 1.25, 0.08);
+        f.box(1.06, 1.56, 0.08, dark, wx, y + 1.40, 0.13);
+        for (let gx = -0.4; gx <= 0.41; gx += 0.2) f.box(0.03, 1.55, 0.06, iron, wx + gx, y + 1.40, 0.17);
+      }
+      // Piano nobile (1° piano)
+      const h1 = Math.abs(wx - px) < 0.5 ? 2.25 : 1.95;
+      f.box(1.48, h1 + 0.25, 0.12, stone, wx, y + 4.55, 0.08);
+      f.box(1.14, h1, 0.08, C('#354f39'), wx, y + 4.67, 0.13);
+      f.box(1.68, 0.24, 0.24, stone, wx, y + 4.55 + h1 + 0.22, 0.14); // timpanetto
+      // Secondo piano
+      f.box(1.38, 1.75, 0.12, stone, wx, y + 7.95, 0.08);
+      f.box(1.08, 1.48, 0.08, C('#4a3728'), wx, y + 8.08, 0.13);
     }
   },
 
@@ -13895,7 +13994,7 @@ const POI_GROUPS = [
   { name: 'Chiese', ids: ['duomo', 'purgatorio', 'gesu', 'sanfrancesco', 'sannicola', 'santasofia', 'santateresa', 'santacecilia', 'agostino', 'addolorata'] },
   { name: 'Chiese e grotte rupestri', ids: ['sanmichele', 'santalucia', 'stella', 'settecamere'] },
   { name: 'Cinema, teatri e cultura', ids: ['mastrogiacomo', 'centrone', 'teatrovida', 'santomasi', 'sotterranea', 'finia'] },
-  { name: 'Palazzi e monumenti', ids: ['orsini'] },
+  { name: 'Palazzi e monumenti', ids: ['orsini', 'seminario'] },
   { name: 'Porte, mura e fontane', ids: ['portasanmichele', 'bastione', 'quattrofontane'] },
   { name: 'Piazze e giardini', ids: ['scacchi', 'pellicciari', 'fondovico', 'hortus', 'repubblica', 'villa'] },
   { name: 'La gravina e il paesaggio', ids: ['belvedere', 'ponte', 'fontana', 'botromagno', 'necropoli', 'scavi', 'padreeterno', 'capotenda'] },
