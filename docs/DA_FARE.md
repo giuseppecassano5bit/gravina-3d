@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 15 ottobre 2026: fase 3 approvata e online, blocchi A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2, N2b, N3, N4 (Casino di Meninni), N4b (villette), N5 (Capotenda), N5b (uliveti, Casino Scacchi, Sportland), N5c (Hortus a piedi), N6 (mezzi nuovi) e N7 (cinema, teatri e luoghi della cultura) completati; **N7 in unione** (branch `fase-3-4-n7-cultura`, PR #29); prossimo **N8 (cartolina, giro guidato e ritocchi)**.
+Stato al 15 ottobre 2026: fase 3 approvata e online, fase 3.4 completata con tutti i blocchi da A a N8 (A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2, N2b, N3, N4, N4b, N5, N5b, N5c, N6, N7, N8); **N8 in unione** (branch `fase-3-4-n8-cartolina-giro`).
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
@@ -296,7 +296,12 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N2b → N3 �
       - **gruppo tematico in `POI_GROUPS`**: aggiunto `Cinema, teatri e cultura` con tutti e 6 i luoghi;
       - prove verdi: `npm run simula` (0 problemi, 0 case sulla strada, dettagli liberi), `npm run interazioni` (77 controlli), `node difetti.mjs` invariato;
       - screenshot ortogonali ad alta definizione e foglio d'insieme in `riferimenti/foto_n7/n7-luoghi-cultura.jpg`.
-- [ ] **N8 · cartolina, giro guidato e ritocchi** (`fase-3-4-n8-cartolina-giro`): cartolina con la cornice, giro guidato dei monumenti (anche coi luoghi nuovi), camera dopo il teletrasporto, schede lunghe, memoria JS.
+- [x] **N8 · cartolina, giro guidato e ritocchi** (`fase-3-4-n8-cartolina-giro`, 15/10/2026):
+      - **Cartolina da Gravina in Puglia**: cattura WebGL ad alta risoluzione con cornice color tufo/pergamena calda (`#f4eee2`), filetto dorato (`#cca84a`), passepartout interno, titolo in caratteri serif «GRAVINA IN PUGLIA», sottotitolo con il luogo corrente dinamico (monumento o via), credito «Un progetto di Giuseppe Cassano», link al sito e attribuzioni OSM/Copernicus; supporto Web Share API su dispositivi mobili e download immediato PNG su PC; pulsante dedicato nell'HUD (`#btn-postcard`), scorciatoia da tastiera (tasto `C`) e notifica toast elegante (`Cartolina scattata!`, `Cartolina salvata!`);
+      - **Giro guidato dei monumenti (14 tappe)**: sequenza logica tra centro storico, rioni rupestri, luoghi di cultura e archeologia (Ponte Acquedotto, Bastione medievale, San Michele delle Grotte, Gravina Sotterranea, Cattedrale, Chiesa del Purgatorio, Palazzo Orsini, Cinema Teatro Mastrogiacomo, Monumento ai Caduti, Cinema Teatro Centrone, Santa Lucia, Hortus, Botromagno, Madonna della Stella); attivazione da schermata iniziale (`#btn-tour-start`) e da menu di pausa (`#btn-pause-tour`); navigazione automatica con selezione intelligente della via ottimale a ogni bivio; banner HUD dedicato in alto con avanzamento (`Tappa X/14: [Nome] (a [D] m)`), pulsanti `Prossima` ed `Esci dal giro` (e tasto Esc); rallentamento dolce all'arrivo alla tappa (2,5 m/s) e apertura automatica della scheda;
+      - **Camera post-teletrasporto (`Rig.snap`)**: azzeramento completo delle variabili di stato (`lift = 0`, `slope = 0`, `sitMix = 0`) ed esecuzione di due passate di convergenza `update(0, driver)` in modo che `#roofLift` e arretramento convergano istantaneamente, eliminando qualsiasi vicinanza ai tetti;
+      - **Schede descrittive e panchina**: impostato `max-height: min(280px, 46dvh)` e scroll verticale con scrollbar sottile; aggiunta classe `.card--bench` per non occludere il monumento o il panorama durante le soste in panchina; scheda del Monumento ai Caduti sintetizzata a 50 parole;
+      - **Misure e prove**: `index.html` 440 KB compresso (sotto il limite di 450 KB), 60 fps costanti su PC e mobile, 0 draw call aggiuntive, 0 errori in console; prove `npm run simula` (0 problemi, 0 case sulla strada), `npm run interazioni` (tutti i controlli verdi) e `node difetti.mjs` invariati; foglio fotografico in `riferimenti/foto_n8/n8-cartolina-giro.jpg`.
 - Versione in inglese: non ora.
 
 ### Fase 3.4, blocco G · percorsi a piedi, quote reali, camera e radio (PR #12, unita il 30/09/2026) ✅
