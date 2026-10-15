@@ -1,9 +1,9 @@
 # Cosa resta da fare
 
-Stato al 15 ottobre 2026: fase 3 approvata e online, fase 3.4 completata con tutti i blocchi da A a N8 (A, C, D, E, F, G, I, L, M1, M2, M3, N1, N2, N2b, N3, N4, N4b, N5, N5b, N5c, N6, N7, N8); **N8 in unione** (branch `fase-3-4-n8-cartolina-giro`).
+Stato al 15 ottobre 2026: fase 3 approvata e online, fase 3.4 completata e unita su `main` con tutti i blocchi da A a N8 (PR #30, commit `caceef6`). **Fase 4 · Rifinitura in corso**, completato il **Blocco 4.1 · Golden hour** (branch `fase-4-1-golden-hour`, PR #31).
 Aggiornare questo file a ogni fase.
 
-**Fase 3.4 (Gravina oltre il centro storico) in corso**: piano, dati, budget, rischi e divisione
+**Fase 3.4 (Gravina oltre il centro storico) completata**: piano, dati, budget, rischi e divisione
 del lavoro su due chat in [`PIANO_FASE_3_4.md`](PIANO_FASE_3_4.md).
 
 ### Fase 3.4, seconda parte (decisioni del 30/09/2026)
@@ -414,7 +414,7 @@ commerciali e protette: il committente ha scelto musica ambient originale, gener
 
 ## 3. Fase 4 · Rifinitura (dal piano originale)
 
-- [ ] Golden hour: luci, nebbia e ombre nette; un leggero bloom solo se regge i 60 fps.
+- [x] **4.1 · Golden hour** (`fase-4-1-golden-hour`, PR #31): atmosfera Golden hour murgiana al calar del sole; cielo equirettangolare con gradiente crepuscolare profondo (cobalto, indaco, rosa, ambra, oro), alone solare morbido ad ampia diffusione radiale e disco luminoso; luce solare radente calda ambrata (`#ffa958`, intensità 3.15, azimut 248°, elevazione 11.5°), luce emisferica coordinata cielo/tufo (`#ffd5b2`/`#563e2f`, intensità 0.58), nebbia volumetrica all'orizzonte perfettamente intonata (`#e2a16d`); mappa d'ambiente riflessi mezzi (`VehicleFactory.setEnv`) arricchita; ACES Filmic Tone Mapping calibrato (esposizione 1.08) e ombre morbide senza acne (`normalBias: 0.45`); 60 fps costanti su PC e mobile, 0 draw call in più, peso invariato (440 KB compressi), prove `simula` (0 problemi, 0 case sulla strada) e `interazioni` (82/82) tutte verdi; foglio comparativo in `riferimenti/foto_4_1/4_1-prima-dopo.jpg`.
 - [x] Musica procedurale Web Audio: la radio ambient del blocco G.
 - [x] Camera: giro automatico e camera libera nel blocco G.
 - [ ] Prestazioni su telefono: livelli di dettaglio per le finestre, misura su un telefono vero.

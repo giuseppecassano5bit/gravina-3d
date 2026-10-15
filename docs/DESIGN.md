@@ -728,9 +728,11 @@ edifici del centro storico ora usano il `CODEC` (a 0,1 m, senza perdite), da 90 
 | 3.4 E + L | **Luoghi della città, scuole e chiese; il Bosco da vicino**, acceleratore su PC | ✅ (PR #15) |
 | 3.4 M1 | **Botromagno, strade, stadio e Fiera** | ✅ (PR #16) |
 | 3.4 M2 | **Percorsi a piedi, zone pedonali, sottopassi, parchi, suoni del bosco** | ✅ (PR #17) |
-| 3.4 M3 | **Mezzi realistici e mongolfiera**, con il resto di M2 | ⏳ (PR #18) |
-| 3.4 N | Cartolina, giro guidato e ritocchi | da fare |
-| 4 | Rifinitura: luci, prove su telefoni reali, restyling | ⏳ |
+| 3.4 M3 | **Mezzi realistici e mongolfiera**, con il resto di M2 | ✅ (PR #18) |
+| 3.4 N1–N8 | **Centro storico vero, Fondovito, facciate, Meninni, villette, Capotenda, uliveti, Hortus, mezzi nuovi, luoghi cultura, cartolina e giro guidato** | ✅ (PR #19–#30) |
+| 4.1 | **Golden hour**: luci radenti calde, cielo crepuscolare murgiano, nebbia coordinata e ombre | ✅ (PR #31) |
+| 4.2 | Licenza open source (`LICENSE`), note ODbL e Copernicus | ⏳ |
+| 4.3 | Rifinitura interfaccia e accessibilità | ⏳ |
 
 ### Da decidere insieme (fase 3, punto 6)
 

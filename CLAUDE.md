@@ -118,6 +118,10 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
   5. *Gravina Sotterranea* (Rione Piaggio / Via Meucci): portale d'accesso all'ipogeo ad arco con cancello in ferro e lanterna antica a braccio;
   6. *Biblioteca Capitolare Finia* (Piazza Benedetto XIII): portale monumentale in pietra a colonne binate doriche, timpano triangolare spezzato e targa dedicatoria.
   Schede curate in `LANDMARKS` con fonti storiche e gruppo dedicato `Cinema, teatri e cultura` in `POI_GROUPS` nella pausa.
+- **Cartolina e giro guidato dei monumenti (blocco N8)**:
+  Cartolina ad alta risoluzione con cornice color tufo/oro e crediti (tasto C e pulsante `#btn-postcard`); giro guidato di 14 tappe con banner HUD dedicato e navigazione automatica agli incroci; schede descrittive scrollabili con classe `.card--bench` per non occludere la vista nelle soste in panchina; convergenza istantanea della camera post-teletrasporto.
+- **Golden hour (blocco 4.1)**:
+  Atmosfera serale murgiana: luce solare radente calda ambrata (`#ffa958`, 3.15, azimut 248°, elevazione 11.5°), cielo con gradiente crepuscolare profondo (cobalto, indaco, rosa, ambra, oro) e alone solare ad ampia diffusione; luce emisferica cielo/tufo (`#ffd5b2`/`#563e2f`, 0.58), nebbia volumetrica coordinata (`#e2a16d`); mappa d'ambiente riflessi mezzi arricchita; ACES Filmic Tone Mapping calibrato (esposizione 1.08) e ombre morbide senza acne (`normalBias: 0.45`).
 - **Eccezione di Santa Lucia (blocco N2b, piano approvato dal committente il 07/10/2026)**: il footway OSM w1195336380
   («Calata S. Lucia» su Google, 60 m da Via Michelangelo Calderoni alla chiesa) si percorre a piedi e finisce con la
   **goccia della figurina** nello slargo davanti alla chiesa (`GOCCE_PIEDI`), come il ponticello di San Michele. L'anello con
