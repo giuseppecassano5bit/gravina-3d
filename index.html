@@ -6333,7 +6333,7 @@ const Tiles = {
         const h1 = hash2(t.i * 97 + gi, t.j * 89 + gj), h2 = hash2(t.i * 31 + gi * 7, t.j * 17 + gj * 5);
         const e = t.e0 + (gi + h1) * step, n = t.n0 + (gj + h2) * step;
         const code = Relief.coverAt(e, n), p = (density[code] ?? 0) * dens;
-        if (hash2(gi * 13 + t.i, gj * 11 + t.j) > p || Terrain.procWeight(e, n) > 0.2 || Meninni.inside(e, n) || Villette.inside(e, n) || Scacchi.inside(e, n)) continue;   // blocco N4: lì i pini del Casino; N4b: i cedri delle piazzette
+        if (hash2(gi * 13 + t.i, gj * 11 + t.j) > p || Terrain.procWeight(e, n) > 0.2 || Meninni.inside(e, n) || Villette.inside(e, n) || Scacchi.inside(e, n) || Details.insidePitch?.(e, n)) continue;   // blocco N4: lì i pini del Casino; N4b: i cedri delle piazzette
         keepFar = hash2(gi * 7 + t.j, gj * 5 + t.i) < 0.5;
         if (!near && !keepFar) continue;
         const rot = h1 * TAU, s = 0.8 + h2 * 0.6;
@@ -8583,6 +8583,7 @@ const Details = {
     this.bosco();
     this.botromagno();
     this.stadio();
+    this.campiSportivi();                 // blocco 4.3: campi da calcio e calcetto delle chiese/oratori (senza etichetta)
     this.fiera();
     this.villaComunale();                 // blocco M2: Monumento ai Caduti, panchine e fontane della Villa
     this.robinson();                      // blocco M2: Pineta e Parco Robinson
@@ -9711,6 +9712,126 @@ const Details = {
         continue;
       }
       tb.addGeometry(new THREE.BoxGeometry(L + 0.05, Math.max(Terrain.heightAt(...m.A), Terrain.heightAt(...m.B)) + 2.6 - yy, 0.3).rotateY(r).translate(M[0], (yy + Math.max(Terrain.heightAt(...m.A), Terrain.heightAt(...m.B)) + 2.6) / 2, -M[1]), col.wall);
+    }
+  },
+
+  /**
+   * BLOCCO 4.3, CAMPI DA CALCIO E CALCETTO DELLE CHIESE E DEGLI ORATORI (senza etichetta né card):
+   * - Campo sportivo parrocchiale SS. Crocifisso «Giuseppe Dipalma» (adiacente al complesso di [445.9, -563.5], a [470.5, -557.5],
+   *   più il campetto interno nel chiostro a [435.1, -578.6]);
+   * - Campetto parrocchiale di San Domenico (adiacente al convento di [557.6, -74.7], a [593.6, -84.7], più il campetto
+   *   dell'oratorio nel grande cortile interno a [554.7, -63.7]);
+   * - Campetti degli oratori parrocchiali cittadini: Gesù Buon Pastore (Via Guardialto), Spirito Santo (Via Bari),
+   *   Santi Pietro e Paolo (Via Falcone e Borsellino), Madonna delle Grazie.
+   * Manto in erba sintetica a strisce bicolori, linee regolamentari bianche, porte con rete, recinzione alta con pali
+   * e correnti, torri faro d'angolo e panchine. La base sta nello strato «edifici» (visibile anche da lontano).
+   */
+  campiSportivi() {
+    const C = (h) => new THREE.Color(h);
+    const col = {
+      turf: [C('#4d8c3c'), C('#427d34')], white: C('#f3f1ea'), net: C('#c8ccd0'),
+      skirt: C('#a89f8c'), post: C('#2d4d38'), wire: C('#395c45'), pole: C('#7a8085'),
+      lamp: C('#f5efd6'), bench: C('#335c96'),
+    };
+    const pitches = [
+      // SS. Crocifisso «Giuseppe Dipalma»: campo principale a est del convento + campetto nel cortile interno
+      { c: [470.5, -557.5], L: 34, W: 18, deg: -104, lights: true, benches: true },
+      { c: [435.1, -578.6], L: 12, W: 10, deg: -104, lights: false, courtyard: true },
+      // San Domenico: campo parrocchiale sul fianco est + campetto dell'oratorio nel grande chiostro
+      { c: [593.6, -84.7], L: 26, W: 14, deg: 74, lights: true, benches: true },
+      { c: [554.7, -63.7], L: 16, W: 11, deg: 74, lights: false, courtyard: true },
+      // Oratori delle parrocchie cittadine
+      { c: [1092.5, -181.5], L: 28, W: 15, deg: 45, lights: true, benches: true },   // Gesù Buon Pastore
+      { c: [1744.0, 178.0], L: 28, W: 15, deg: -40, lights: true, benches: true },   // Spirito Santo
+      { c: [1065.0, 1113.5], L: 28, W: 15, deg: 60, lights: true, benches: true },   // Santi Pietro e Paolo
+      { c: [-275.0, 455.0], L: 26, W: 14, deg: 70, lights: true, benches: false },   // Madonna delle Grazie
+    ];
+    this.pitchPolys = [];
+    this.insidePitch = (e, n) => this.pitchPolys.some((poly) => Plane.contains(poly, e, n));
+    for (const p of pitches) {
+      const a = (p.deg * Math.PI) / 180, u = [Math.cos(a), Math.sin(a)], v = [-u[1], u[0]];
+      const hl = p.L / 2, hw = p.W / 2;
+      const P = (x, z) => [p.c[0] + u[0] * x + v[0] * z, p.c[1] + u[1] * x + v[1] * z];
+      // Verifica sicurezza: nessun punto del campo può invadere una strada
+      const samples = [[-hl, -hw], [hl, -hw], [hl, hw], [-hl, hw], [0, 0], [-hl, 0], [hl, 0], [0, -hw], [0, hw]];
+      if (samples.some(([x, z]) => Terrain.conformer.clearance(...P(x, z)) < 1.0)) continue;
+      this.pitchPolys.push([P(-hl - 2.5, -hw - 2.5), P(hl + 2.5, -hw - 2.5), P(hl + 2.5, hw + 2.5), P(-hl - 2.5, hw + 2.5)]);
+      const hs = samples.map(([x, z]) => Terrain.heightAt(...P(x, z)));
+      const y0 = Math.max(...hs) + 0.08, low = Math.min(...hs) - 0.35;
+      const etb = Tiles.builderAt(...p.c, 'edifici'), dtb = this.near(p.c);
+      const box = (tb, x, z, l, h, w, yb, color, rot = 0) => {
+        const q = P(x, z);
+        tb.addGeometry(new THREE.BoxGeometry(l, h, w).rotateY(a + rot).translate(q[0], yb + h / 2, -q[1]), color);
+      };
+      // Basamento livellato e manto a strisce bicolori
+      box(etb, 0, 0, p.L + 0.8, y0 - low, p.W + 0.8, low, col.skirt);
+      box(etb, 0, 0, p.L, 0.04, p.W, y0, col.turf[0]);
+      const stripes = Math.max(6, Math.round(p.L / 3.2));
+      const sw = (p.L - 0.8) / stripes;
+      for (let k = 0; k < stripes; k++) {
+        box(dtb, -hl + 0.4 + (k + 0.5) * sw, 0, sw, 0.02, p.W - 0.8, y0 + 0.04, col.turf[k % 2]);
+      }
+      // Linee regolamentari bianche (perimetro, metà campo, cerchio di centrocampo, aree di rigore)
+      const Lf = p.L - 1.6, Wf = p.W - 1.6, ly = y0 + 0.062;
+      const line = (x, z, l, w, rot = 0) => box(dtb, x, z, l, 0.015, w, ly, col.white, rot);
+      for (const s of [-1, 1]) {
+        line(0, (s * Wf) / 2, Lf, 0.10);
+        line((s * Lf) / 2, 0, 0.10, Wf);
+      }
+      line(0, 0, 0.10, Wf);
+      const rc = Math.min(3.0, Wf * 0.24);
+      for (let k = 0; k < 16; k++) {
+        const t = ((k + 0.5) / 16) * TAU, seg = (TAU * rc) / 16 + 0.04;
+        line(Math.cos(t) * rc, Math.sin(t) * rc, 0.09, seg, t);
+      }
+      const penD = Math.min(4.2, Lf * 0.18), penW = Math.min(8.2, Wf * 0.62);
+      const goalW = p.courtyard ? 2.4 : 3.0, goalH = p.courtyard ? 1.85 : 2.05, goalD = 1.0;
+      for (const s of [-1, 1]) {
+        const gx = (s * Lf) / 2;
+        line(gx - s * penD, 0, 0.10, penW);
+        for (const q of [-1, 1]) line(gx - (s * penD) / 2, (q * penW) / 2, penD, 0.10);
+        box(dtb, gx - s * (penD * 0.72), 0, 0.22, 0.016, 0.22, ly, col.white); // dischetto
+        // Porte da calcetto con pali, traversa e rete
+        for (const q of [-1, 1]) {
+          box(dtb, gx, (q * goalW) / 2, 0.10, goalH, 0.10, y0 + 0.05, col.white);
+          box(dtb, gx + (s * goalD) / 2, (q * goalW) / 2, goalD, 0.04, 0.06, y0 + 0.05, col.net);
+        }
+        box(dtb, gx, 0, 0.10, 0.10, goalW + 0.12, y0 + goalH, col.white);
+        box(dtb, gx + s * goalD, 0, 0.04, goalH - 0.05, goalW, y0 + 0.05, col.net);
+      }
+      // Recinzione perimetrale alta con montanti e correnti
+      if (!p.courtyard) {
+        const fh = 4.0, ox = hl + 0.3, oz = hw + 0.3;
+        for (const [x0, z0, x1, z1] of [[-ox, -oz, ox, -oz], [ox, -oz, ox, oz], [ox, oz, -ox, oz], [-ox, oz, -ox, -oz]]) {
+          const sideL = Math.hypot(x1 - x0, z1 - z0), m = Math.max(2, Math.round(sideL / 3.2));
+          const rot = Math.abs(z1 - z0) > Math.abs(x1 - x0) ? Math.PI / 2 : 0;
+          for (let i = 0; i <= m; i++) {
+            const xm = lerp(x0, x1, i / m), zm = lerp(z0, z1, i / m);
+            if (Terrain.conformer.clearance(...P(xm, zm)) < 0.8) continue;
+            box(dtb, xm, zm, 0.08, fh, 0.08, y0, col.post);
+          }
+          for (const rh of [0.9, 2.0, 3.1, fh - 0.05]) {
+            box(dtb, (x0 + x1) / 2, (z0 + z1) / 2, sideL, 0.035, 0.035, y0 + rh, rh > 3.5 ? col.post : col.wire, rot);
+          }
+        }
+      }
+      // Panchine coperte a bordo campo e torri faro agli angoli
+      if (p.benches) {
+        for (const s of [-1, 1]) {
+          if (this.free(...P(s * 3.8, -hw - 0.9), 0.8)) {
+            box(dtb, s * 3.8, -hw - 0.85, 2.6, 1.65, 0.75, y0, col.bench);
+            box(dtb, s * 3.8, -hw - 0.80, 2.4, 0.08, 0.38, y0 + 0.45, col.white);
+          }
+        }
+      }
+      if (p.lights) {
+        for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+          const spot = P(sx * (hl + 0.6), sz * (hw + 0.6));
+          if (Terrain.conformer.clearance(...spot) < 1.0) continue;
+          box(etb, sx * (hl + 0.6), sz * (hw + 0.6), 0.22, 9.2, 0.22, y0 - 0.2, col.pole);
+          box(etb, sx * (hl + 0.35), sz * (hw + 0.35), 0.55, 0.42, 1.15, y0 + 8.9, col.lamp, sx * sz * 0.45);
+        }
+      }
     }
   },
 
