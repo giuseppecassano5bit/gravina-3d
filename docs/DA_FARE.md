@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 15 ottobre 2026: fase 3 approvata e online, fase 3.4 completata e unita su `main` con tutti i blocchi da A a N8 (PR #30, commit `caceef6`). **Fase 4 · Rifinitura in corso**, avviato il **Blocco 4.1 · Golden hour** (branch `fase-4-1-golden-hour`).
+Stato al 15 ottobre 2026: fase 3 approvata e online, fase 3.4 completata e unita su `main` con tutti i blocchi da A a N8 (PR #30, commit `caceef6`). **Fase 4 · Rifinitura in corso**, completato il **Blocco 4.1 · Golden hour** (branch `fase-4-1-golden-hour`, PR #31).
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) completata**: piano, dati, budget, rischi e divisione
@@ -414,7 +414,7 @@ commerciali e protette: il committente ha scelto musica ambient originale, gener
 
 ## 3. Fase 4 · Rifinitura (dal piano originale)
 
-- [ ] **4.1 · Golden hour** (in corso, branch `fase-4-1-golden-hour`): luci radenti calde, cielo e nebbia al tramonto, ombre e calibrazione flat-shading a 60 fps; un leggero bloom procedurale solo se regge rigorosamente i 60 fps.
+- [x] **4.1 · Golden hour** (`fase-4-1-golden-hour`, PR #31): atmosfera Golden hour murgiana al calar del sole; cielo equirettangolare con gradiente crepuscolare profondo (cobalto, indaco, rosa, ambra, oro), alone solare morbido ad ampia diffusione radiale e disco luminoso; luce solare radente calda ambrata (`#ffa958`, intensità 3.15, azimut 248°, elevazione 11.5°), luce emisferica coordinata cielo/tufo (`#ffd5b2`/`#563e2f`, intensità 0.58), nebbia volumetrica all'orizzonte perfettamente intonata (`#e2a16d`); mappa d'ambiente riflessi mezzi (`VehicleFactory.setEnv`) arricchita; ACES Filmic Tone Mapping calibrato (esposizione 1.08) e ombre morbide senza acne (`normalBias: 0.45`); 60 fps costanti su PC e mobile, 0 draw call in più, peso invariato (440 KB compressi), prove `simula` (0 problemi, 0 case sulla strada) e `interazioni` (82/82) tutte verdi; foglio comparativo in `riferimenti/foto_4_1/4_1-prima-dopo.jpg`.
 - [x] Musica procedurale Web Audio: la radio ambient del blocco G.
 - [x] Camera: giro automatico e camera libera nel blocco G.
 - [ ] Prestazioni su telefono: livelli di dettaglio per le finestre, misura su un telefono vero.
