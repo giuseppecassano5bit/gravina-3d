@@ -1699,13 +1699,13 @@ const LANDMARKS = [
     text: 'Fu eretta nel 1645, per volontà testamentaria di Balsamo Lupi, trasformando due stalle a pianterreno e due stanze del Palazzo Lupi. Oggi è sconsacrata e ospita la confraternita di San Michele Arcangelo.',
   },
   {
-    // Blocco N7: Cinema Teatro Mastrogiacomo
-    id: 'mastrogiacomo', name: 'Cinema Teatro Mastrogiacomo', at: [438, -16], kicker: 'Piazza Scacchi · aperto nel 1927', radius: 26,
+    // Blocco N7 / 4.3: Cinema Teatro Mastrogiacomo (Piazza Arcangelo Scacchi 16, cortina nord-est)
+    id: 'mastrogiacomo', name: 'Cinema Teatro Mastrogiacomo', at: [440, -1], kicker: 'Piazza Scacchi · aperto nel 1927', radius: 26,
     text: 'Voluto dal cavaliere Michele Mastrogiacomo e progettato dall’ingegnere De Martino, fu inaugurato nel 1927 come primo grande teatro moderno della città, con galleria e palchetti in stile Liberty. Trasformato in seguito con struttura in cemento armato e sala cinematografica, ha animato per decenni la vita culturale gravinese prima della chiusura nel 1995. Nel 2024 è stato acquisito al patrimonio comunale per il recupero a teatro e polo culturale polifunzionale.',
   },
   {
-    // Blocco N7: Cinema Teatro Centrone
-    id: 'centrone', name: 'Cinema Teatro Centrone', at: [348, -245], kicker: 'Via De Gasperi · politeama del 1947', radius: 36,
+    // Blocco N7 / 4.3: Cinema Teatro Centrone (Via Alcide De Gasperi 14, primi 60 m da Piazza Scacchi)
+    id: 'centrone', name: 'Cinema Teatro Centrone', at: [415, -50], kicker: 'Via De Gasperi · politeama del 1947', radius: 36,
     text: 'Costruito tra il 1946 e il 1947 in tufo locale per iniziativa dell’imprenditore Leonardo Centrone, è uno degli edifici teatrali più imponenti e originali della Murgia. La facciata tardo-liberty con colonne doriche, balconata e grande rosone geometrico introduceva a una maestosa sala da oltre 2.000 posti. Tempio del cinema e della musica, ha ospitato concerti memorabili di cantautori come Domenico Modugno, Francesco De Gregori e Riccardo Cocciante prima della chiusura nel 1990.',
   },
   {
@@ -8846,64 +8846,79 @@ const Details = {
     const C = (h) => new THREE.Color(h), { light, iron, stone } = this.col;
     const gold = C('#cca84a'), dark = C('#202226'), glass = C('#3a4a58'), wood = C('#4a3525'), tufo = C('#d9caa5');
 
-    // 1. CINEMA TEATRO MASTROGIACOMO (Piazza Scacchi 16, edificio 306)
-    const mastroWall = this.wallNear([438.0, -16.0], 4);
+    // 1. CINEMA TEATRO MASTROGIACOMO (Piazza Arcangelo Scacchi 16, cortina nord-est, edificio 306)
+    const mastroWall = this.wallNear([440.3, -1.25], 3) ?? this.wallNear([439.3, -9.45], 4);
     if (mastroWall) {
       const tb = this.near(mastroWall.M), f = this.frame(mastroWall, tb), y = f.ground;
-      const top = tops.get('#306')?.top ?? y + 9.5;
+      const top = tops.get('#306')?.top ?? y + 11.5;
       const L = mastroWall.len;
+      this.keepOut.push({ M: mastroWall.M, n: mastroWall.n, half: L / 2 + 0.3, top: top + 1 });
       f.box(L - 0.1, top - y, 0.08, C('#df9f8b'), 0, y, 0.04);
-      f.box(L + 0.1, 0.45, 0.35, tufo, 0, top - 0.45, 0.15);
-      f.box(L - 0.2, 0.18, 0.14, tufo, 0, y + 4.2, 0.08);
-      f.box(2.8, 0.18, 0.8, tufo, 0, y, 0.4);
+      for (const s of [-1, 1]) f.box(0.45, top - y, 0.16, tufo, s * (L / 2 - 0.28), y, 0.08);   // lesene laterali in tufo
+      f.box(L + 0.1, 0.45, 0.35, tufo, 0, top - 0.45, 0.15);                                    // cornicione sommitale
+      f.box(L - 0.2, 0.18, 0.14, tufo, 0, y + 4.3, 0.08);                                       // marcapiano
+      f.box(2.8, 0.18, 0.65, tufo, 0, y, 0.32);                                                 // soglia d'ingresso
       f.box(2.4, 3.2, 0.12, dark, 0, y + 0.18, 0.06);
       f.box(2.2, 2.9, 0.06, wood, 0, y + 0.18, 0.08);
-      for (const s of [-1, 1]) f.box(0.25, 3.4, 0.18, tufo, s * 1.35, y, 0.1);
-      f.box(3.2, 0.35, 0.24, tufo, 0, y + 3.4, 0.12);
-      f.box(4.8, 0.65, 0.14, C('#2a2320'), 0, y + 3.95, 0.14);
-      f.box(4.5, 0.18, 0.06, gold, 0, y + 4.18, 0.22);
-      f.box(4.2, 0.24, 0.08, gold, 0, y + 3.82, 0.22);
-      for (const s of [-1, 1]) {
-        f.box(1.0, 1.6, 0.08, dark, s * 2.3, y + 1.2, 0.08);
-        f.box(0.85, 1.4, 0.02, C('#f4ecc8'), s * 2.3, y + 1.3, 0.13);
-        f.box(0.88, 1.45, 0.04, glass, s * 2.3, y + 1.28, 0.14);
+      for (const s of [-1, 1]) f.box(0.26, 3.4, 0.18, tufo, s * 1.35, y, 0.1);                  // stipiti portale
+      f.box(3.2, 0.35, 0.24, tufo, 0, y + 3.4, 0.12);                                           // architrave
+      f.box(4.6, 0.65, 0.14, C('#2a2320'), 0, y + 3.85, 0.14);                                  // insegna scura
+      f.box(4.3, 0.16, 0.06, gold, 0, y + 4.08, 0.22);
+      f.box(4.0, 0.22, 0.08, gold, 0, y + 3.72, 0.22);
+      for (const s of [-1, 1]) {                                                                // bacheche locandine a giorno
+        f.box(1.0, 1.6, 0.08, dark, s * 2.4, y + 1.2, 0.08);
+        f.box(0.85, 1.4, 0.02, C('#f4ecc8'), s * 2.4, y + 1.3, 0.13);
+        f.box(0.88, 1.45, 0.04, glass, s * 2.4, y + 1.28, 0.14);
+      }
+      // Finestre modanate e balconcino al piano nobile
+      f.box(2.2, 0.16, 0.65, tufo, 0, y + 4.5, 0.32);
+      f.box(2.1, 0.85, 0.06, iron, 0, y + 4.66, 0.62);
+      for (const s of [-1, 0, 1]) {
+        const wx = s * 2.5, wy = y + 4.66, wh = s === 0 ? 2.1 : 1.7;
+        f.box(1.15, wh + 0.2, 0.12, tufo, wx, s === 0 ? wy : wy + 0.35, 0.07);
+        f.box(0.92, wh, 0.08, C('#3d5a45'), wx, s === 0 ? wy : wy + 0.42, 0.10);
       }
     }
 
-    // 2. CINEMA TEATRO CENTRONE (Via Alcide De Gasperi 14, edificio 239)
-    const centroneWall = this.wallNear([349.3, -241.9], 6) ?? this.wallNear([345.2, -281.8], 8);
+    // 2. CINEMA TEATRO CENTRONE (Via Alcide De Gasperi 14, primi 60 m da Piazza Scacchi verso sud, edificio 297)
+    const centroneWall = this.wallNear([415.0, -58.0], 8);
     if (centroneWall) {
       const tb = this.near(centroneWall.M), f = this.frame(centroneWall, tb), y = f.ground;
-      const top = tops.get('#239')?.top ?? y + 11.5;
-      const L = Math.min(18, centroneWall.len);
-      f.box(L, top - y, 0.15, tufo, 0, y, 0.08);
-      for (const s of [-1, 1]) {
-        f.box(3.2, top - y + 1.2, 0.45, tufo, s * (L / 2 - 1.6), y, 0.25);
-        f.box(3.5, 0.35, 0.55, tufo, s * (L / 2 - 1.6), top + 0.8, 0.28);
+      const top = tops.get('#' + centroneWall.index)?.top ?? y + 12.5;
+      const L = Math.min(16.5, centroneWall.len);
+      this.keepOut.push({ M: centroneWall.M, n: centroneWall.n, half: L / 2 + 0.5, top: top + 2 });
+      f.box(L, top - y, 0.16, tufo, 0, y, 0.08);                                                // paramento in tufo
+      for (const s of [-1, 1]) {                                                                // avancorpi laterali tardo-liberty
+        const ax = s * (L / 2 - 1.5);
+        f.box(3.0, top - y + 1.1, 0.42, tufo, ax, y, 0.22);
+        f.box(3.3, 0.35, 0.50, tufo, ax, top + 0.75, 0.26);
+        f.box(0.95, 1.6, 0.12, dark, ax, y + 4.6, 0.42);
       }
-      f.box(2.8, 3.6, 0.15, wood, 0, y, 0.12);
-      for (const s of [-1, 1]) {
-        f.add(new THREE.CylinderGeometry(0.24, 0.28, 3.8, 12), tufo, s * 1.8, y + 1.9, 0.55);
-        f.box(0.65, 0.25, 0.65, tufo, s * 1.8, y + 3.7, 0.55);
-        f.box(0.68, 0.30, 0.68, tufo, s * 1.8, y + 0.15, 0.55);
+      f.box(2.8, 3.6, 0.15, wood, 0, y, 0.12);                                                  // portone centrale
+      for (const s of [-1, 1]) {                                                                // colonne doriche binate in tufo
+        f.add(new THREE.CylinderGeometry(0.24, 0.28, 3.7, 12), tufo, s * 1.75, y + 1.85, 0.50);
+        f.box(0.62, 0.25, 0.62, tufo, s * 1.75, y + 3.65, 0.50);
+        f.box(0.66, 0.28, 0.66, tufo, s * 1.75, y + 0.14, 0.50);
       }
-      f.box(4.6, 0.28, 1.2, tufo, 0, y + 3.95, 0.65);
-      f.box(4.4, 0.85, 0.08, tufo, 0, y + 4.35, 1.15);
-      for (let bx = -1.9; bx <= 1.9; bx += 0.45) {
-        f.box(0.12, 0.72, 0.12, tufo, bx, y + 4.30, 1.15);
+      f.box(4.5, 0.28, 0.95, tufo, 0, y + 3.90, 0.50);                                          // balconata loggia
+      f.box(4.3, 0.82, 0.08, tufo, 0, y + 4.18, 0.92);
+      for (let bx = -1.85; bx <= 1.85; bx += 0.45) {                                            // colonnine loggetta
+        f.box(0.12, 0.72, 0.12, tufo, bx, y + 4.18, 0.92);
       }
-      f.box(2.2, 2.6, 0.1, dark, 0, y + 4.25, 0.15);
-      f.add(new THREE.CylinderGeometry(1.4, 1.4, 0.25, 16).rotateX(Math.PI / 2), tufo, 0, y + 8.2, 0.2);
-      f.add(new THREE.CylinderGeometry(1.15, 1.15, 0.3, 16).rotateX(Math.PI / 2), dark, 0, y + 8.2, 0.22);
+      f.box(2.2, 2.5, 0.10, dark, 0, y + 4.18, 0.15);
+      // Grande rosone radiale ornamentale a 16 razze
+      const ry = y + 8.3;
+      f.add(new THREE.CylinderGeometry(1.35, 1.35, 0.25, 16).rotateX(Math.PI / 2), tufo, 0, ry, 0.20);
+      f.add(new THREE.CylinderGeometry(1.12, 1.12, 0.30, 16).rotateX(Math.PI / 2), dark, 0, ry, 0.22);
       for (let a = 0; a < 8; a++) {
-        f.add(new THREE.BoxGeometry(0.12, 2.2, 0.35).rotateZ((a / 8) * Math.PI), tufo, 0, y + 8.2, 0.25);
+        f.add(new THREE.BoxGeometry(0.11, 2.15, 0.34).rotateZ((a / 8) * Math.PI), tufo, 0, ry, 0.24);
       }
-      f.box(L - 2, 0.45, 0.4, tufo, 0, top - 0.45, 0.25);
-      for (let dx = -L / 2 + 3; dx <= L / 2 - 3; dx += 0.8) {
-        f.box(0.35, 0.25, 0.45, tufo, dx, top - 0.6, 0.26);
+      f.box(L - 2.0, 0.45, 0.38, tufo, 0, top - 0.45, 0.24);                                    // cornicione a mensole
+      for (let dx = -L / 2 + 2.8; dx <= L / 2 - 2.8; dx += 0.78) {
+        f.box(0.32, 0.24, 0.42, tufo, dx, top - 0.60, 0.26);
       }
-      f.box(5.8, 0.75, 0.16, C('#1e2228'), 0, y + 5.7, 0.22);
-      f.box(5.4, 0.28, 0.08, gold, 0, y + 5.7, 0.32);
+      f.box(5.4, 0.72, 0.16, C('#1e2228'), 0, y + 5.75, 0.22);                                  // insegna dorata
+      f.box(5.0, 0.26, 0.08, gold, 0, y + 5.75, 0.31);
     }
 
     // 3. TEATRO VIDA (Via Giardini 72, edificio 494)
