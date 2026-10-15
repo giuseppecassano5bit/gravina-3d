@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 15 ottobre 2026: fase 3 approvata e online, fase 3.4 completata e unita su `main` con tutti i blocchi da A a N8 (PR #30, commit `caceef6`). **Fase 4 · Rifinitura in corso**, completato il **Blocco 4.1 · Golden hour** (branch `fase-4-1-golden-hour`, PR #31).
+Stato al 15 ottobre 2026: fase 3 approvata e online, fase 3.4 completata e unita su `main` con tutti i blocchi da A a N8 (PR #30, commit `caceef6`). **Fase 4 · Rifinitura in corso**, completato il **Blocco 4.1 · Golden hour** (branch `fase-4-1-golden-hour`, PR #31). In corso il **Blocco 4.2 · Sponde del Ponte, stabilità mezzi, rumore motori e boost Shift** (branch `fase-4-2-ponte-motori-stabilita`, PR #32 in bozza).
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) completata**: piano, dati, budget, rischi e divisione
@@ -415,6 +415,11 @@ commerciali e protette: il committente ha scelto musica ambient originale, gener
 ## 3. Fase 4 · Rifinitura (dal piano originale)
 
 - [x] **4.1 · Golden hour** (`fase-4-1-golden-hour`, PR #31): atmosfera Golden hour murgiana al calar del sole; cielo equirettangolare con gradiente crepuscolare profondo (cobalto, indaco, rosa, ambra, oro), alone solare morbido ad ampia diffusione radiale e disco luminoso; luce solare radente calda ambrata (`#ffa958`, intensità 3.15, azimut 248°, elevazione 11.5°), luce emisferica coordinata cielo/tufo (`#ffd5b2`/`#563e2f`, intensità 0.58), nebbia volumetrica all'orizzonte perfettamente intonata (`#e2a16d`); mappa d'ambiente riflessi mezzi (`VehicleFactory.setEnv`) arricchita; ACES Filmic Tone Mapping calibrato (esposizione 1.08) e ombre morbide senza acne (`normalBias: 0.45`); 60 fps costanti su PC e mobile, 0 draw call in più, peso invariato (440 KB compressi), prove `simula` (0 problemi, 0 case sulla strada) e `interazioni` (82/82) tutte verdi; foglio comparativo in `riferimenti/foto_4_1/4_1-prima-dopo.jpg`.
+- [ ] **4.2 · Sponde del Ponte, stabilità mezzi, rumore motori e boost Shift** (`fase-4-2-ponte-motori-stabilita`, PR #32 in bozza):
+      - **Ponte Acquedotto e le due sponde fedelissime alla realtà**: studio approfondito da Google Maps e Street View; sponda ovest (versante opposto alla partenza del mezzo) con falesia rocciosa, sperone di appoggio delle arcate, rampa lastricata verso Madonna della Stella e Botromagno, muretti di protezione in conci di tufo e pietra, macchia mediterranea circostante; sponda est (testata lato città / Fontana la Stella) con innesti di Via Fontana la Stella e Via giudice Montea, parapetti e muretto di contenimento;
+      - **Stabilità di marcia dei veicoli**: eliminazione di ondeggiamenti, rollio e beccheggio eccessivo lungo i campioni delle vie in `Driver`; smorzamento progressivo (filtro passa-basso esponenziale / lerp con costante temporale), raggio di anticipo pendenza (`pitchLookahead`), azzeramento micro-oscillazioni parassite per una marcia solida e realistica;
+      - **Rumore reale procedurale per ogni mezzo**: Web Audio procedurale specifico (V12 aspirato Ferrari Monza SP2, V8 biturbo Audi RS Q8, 4 cilindri Fire Fiat Panda, diesel John Deere 8R, soffio mongolfiera); pulsante e selettore volume motore nell'HUD coordinato con la radio;
+      - **Acceleratore potenziato su PC (Shift Boost)**: incremento del moltiplicatore `CONFIG.drive.boost` (~2.6 – 2.8) con transizione morbida per rendere i tratti lunghi periferici scorrevoli.
 - [x] Musica procedurale Web Audio: la radio ambient del blocco G.
 - [x] Camera: giro automatico e camera libera nel blocco G.
 - [ ] Prestazioni su telefono: livelli di dettaglio per le finestre, misura su un telefono vero.
