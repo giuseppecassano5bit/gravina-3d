@@ -589,6 +589,23 @@ tourState = await page.evaluate(() => {
 });
 check('il pulsante «Esci dal giro» interrompe il tour e chiude l’HUD', !tourState.active && !tourState.hudVisible);
 
+// Blocco 4.2: audio procedurale motore
+const engineCheck = await page.evaluate(async () => {
+  const g = window.gravina;
+  const initOn = g.EngineAudio.enabled;
+  window.dispatchEvent(new KeyboardEvent('keydown', { key: 'v' }));
+  const offWithV = !g.EngineAudio.enabled;
+  const btn = document.getElementById('btn-engine');
+  btn.click();
+  const onWithBtn = g.EngineAudio.enabled;
+  const slider = document.getElementById('engine-vol');
+  slider.value = '0.4';
+  slider.dispatchEvent(new Event('input'));
+  const volOk = Math.abs(g.EngineAudio.volume - 0.4) < 0.01;
+  return { initOn, offWithV, onWithBtn, volOk };
+});
+check('motore: tasto V spegne, pulsante HUD riaccende e volume regolabile', engineCheck.initOn && engineCheck.offWithV && engineCheck.onWithBtn && engineCheck.volOk);
+
 const errors = logs.filter((l) => /error/i.test(l));
 check('nessun errore in console', errors.length === 0, errors.join(' | '));
 await browser.close();
