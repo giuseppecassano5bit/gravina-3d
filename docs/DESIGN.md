@@ -617,6 +617,12 @@ riquadri). A Via Spinazzola i binari passano su un viadotto con le pile.
   mezzo** (visibile solo con la camera libera, anche sul telefono), che la riporta dietro in circa
   1,5 s: niente ritorno automatico. Tetti e terreno valgono anche qui; le panoramiche si sospendono.
 * **A piedi**: più bassa e vicina (6,5 m dietro, 4,6 m sopra), sale al massimo di 15 m sui tetti.
+* **Dopo il teletrasporto** (blocco 4.4, `Rig.snap`): la camera prova cinque direzioni attorno al mezzo
+  (dietro e fino a 50° di lato, `CONFIG.camera.snapAims`) e prende quella che deve salire meno perché nessun
+  tetto entro 20 m arrivi alla sua quota (`snapRing`: 6 m di margine sopra la camera e vicino, mezzo metro a
+  20 m), con una piccola penalità per l'angolo. Il controllo allargato resta 2,5 s (`snapHold`), mentre compare
+  la scheda; poi la camera torna dietro al mezzo e scende piano col controllo normale dei vicoli. Sui 42 luoghi
+  con la scheda, quelli che partivano con un tetto a ridosso della camera sono passati da 16 a 0.
 * **Pausa**: vista dall'alto che gira piano sopra il mezzo; si gira trascinando e si zooma. Non
   entra più nei tetti delle palazzine (stesso `#roofLift` dell'inseguimento).
 * **Pannelli**: l'inquadratura si sposta (view offset) nella parte di schermo libera dal pannello iniziale o dal menu di pausa.

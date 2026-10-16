@@ -1113,6 +1113,10 @@ const CONFIG = {
     fov: 45, fovPortrait: 62,
     chaseDistance: 12, chaseHeight: 18, lookAhead: 8,   // vista da plastico, abbastanza dall'alto per i vicoli
     maxLift: 22,             // m: quanto può salire la camera per scavalcare i tetti nei vicoli
+    /** Blocco 4.4, dopo il teletrasporto: direzioni provate attorno al mezzo (gradi, 0 = dietro) e tetti
+     *  controllati attorno alla camera, [raggio, margine sotto la camera] in metri. */
+    snapAims: [0, 25, -25, 50, -50], snapRing: [[0, 6], [4, 6], [8, 5], [12, 4], [16, 2], [20, 0.5]],
+    snapHold: 2.5,           // s in cui, dopo il teletrasporto, la camera tiene l'inquadratura libera prima di scendere
     walk: { distance: 6.5, height: 4.6, lookAhead: 2.5, maxLift: 15 },   // a piedi: più bassa e più vicina alla figurina
     /** Camera libera: si gira attorno al mezzo trascinando; resta dov'è finché non si preme «Segui il mezzo» (blocco M1). */
     orbit: { minDist: 8, maxDist: 70, minElev: 10, maxElev: 80 },
@@ -13683,6 +13687,8 @@ class CameraRig {
     this.aerialAngle = 0;
     this.lift = 0;                   // m in più sopra i tetti quando le case coprono il mezzo
     this.footMix = 0;                // 0 in auto, 1 a piedi (passaggio morbido)
+    this.aim = 0;                    // blocco 4.4: angolo in più attorno al mezzo scelto dal teletrasporto, poi torna a 0
+    this.wideT = 0;                  // blocco 4.4: s in cui vale ancora il controllo dei tetti allargato del teletrasporto
     // Camera libera (trascinamento, rotella, pizzico): angolo attorno al mezzo, inclinazione, distanza.
     this.orbit = { on: false, w: 0, yaw: 0, elev: 0.98, dist: 22, quick: false };
     this.auto = { yaw: 0, k: 1, t: 0, shot: 0 };   // giro automatico nei rettilinei
@@ -13811,7 +13817,14 @@ class CameraRig {
     this.chaseYaw = driver.yaw;
   }
 
-  /** Porta subito la camera dietro al mezzo (teletrasporto, strumenti di debug). */
+  /**
+   * Porta subito la camera dietro al mezzo (teletrasporto, strumenti di debug).
+   * Blocco 4.4: la camera non parte a ridosso di un tetto o di un cornicione. Tra alcune direzioni
+   * attorno al mezzo (dietro e fino a 50° di lato) sceglie quella che deve salire meno perché nessun
+   * tetto entro 20 m arrivi alla sua quota (`snapRing` in #roofLift), con una piccola penalità per l'angolo.
+   * Il controllo allargato resta per `snapHold` secondi, così la prima inquadratura si tiene mentre compare
+   * la scheda; poi l'inseguimento torna dietro al mezzo e scende piano (`aim` e `lift` si smorzano da soli).
+   */
   snap(driver) {
     this.mode = 'drive';
     Object.assign(this.orbit, { on: false, w: 0 });
@@ -13823,6 +13836,17 @@ class CameraRig {
     this.sitMix = 0;
     this.vista.weight = 0;
     this.vista.active = false;
+    this.wideT = CONFIG.camera.snapHold;
+    let best = { aim: 0, cost: Infinity };
+    for (const deg of CONFIG.camera.snapAims) {
+      this.aim = THREE.MathUtils.degToRad(deg);
+      this.lift = 0;
+      this.update(0, driver);
+      this.update(0, driver);                                   // la seconda passata tiene conto della salita
+      const cost = this.lift + Math.abs(deg) * 0.07;           // 50° di lato valgono 3,5 m di salita
+      if (cost < best.cost - 0.01) best = { aim: this.aim, cost };
+    }
+    this.aim = best.aim;
     this.update(0, driver);
     this.update(0, driver);
     this.pos.copy(this._wantPos);
@@ -13926,7 +13950,9 @@ class CameraRig {
     const O = this.orbit, A = this.auto;
     O.w += ((O.on ? 1 : 0) - O.w) * (dt > 0 ? damp(O.on ? 10 : O.quick ? 4 : 2, dt) : 1);
     const w = smoothstep(0, 1, O.w);
-    const yawOff = A.yaw + angleDiff(A.yaw, O.yaw) * w;
+    this.wideT = Math.max(0, this.wideT - dt);
+    if (this.wideT <= 0) this.aim -= this.aim * damp(0.6, dt);  // blocco 4.4: dopo il teletrasporto torna dietro piano
+    const base = A.yaw + this.aim, yawOff = base + angleDiff(base, O.yaw) * w;
     const elev = lerp(elev0 * A.k, O.elev, w), dist = lerp(dist0, O.dist, w);
     this._current = { yaw: yawOff, elev, dist };
     const yaw = this.chaseYaw + yawOff, sy = Math.sin(yaw), cy = Math.cos(yaw);
@@ -13994,9 +14020,13 @@ class CameraRig {
     }
     // …e che la camera stessa non stia a ridosso di un tetto o di una parete:
     // un tetto a pochi metri, alla stessa quota, riempirebbe mezza inquadratura.
-    for (let a = 0; a < 8; a++) {
-      for (const [r, gap] of [[3, 2.5], [7, 4.5]]) {
-        const roof = Buildings.roofAt(cam.x + Math.cos(a * 0.785) * r, -(cam.z + Math.sin(a * 0.785) * r));
+    // Blocco 4.4: subito dopo il teletrasporto (`wideT`) si guarda più lontano e con più margine,
+    // così la prima inquadratura è libera anche accanto a un campanile o a una casa più alta.
+    const wide = this.wideT > 0, ring = wide ? CONFIG.camera.snapRing : [[3, 2.5], [7, 4.5]], dirs = wide ? 16 : 8;
+    for (let a = 0; a < dirs; a++) {
+      const ca = Math.cos(a * TAU / dirs), sa = Math.sin(a * TAU / dirs);
+      for (const [r, gap] of ring) {
+        const roof = Buildings.roofAt(cam.x + ca * r, -(cam.z + sa * r));
         if (roof + gap > cam.y) need = Math.max(need, roof + gap - cam.y);
       }
     }
