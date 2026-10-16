@@ -430,7 +430,7 @@ commerciali e protette: il committente ha scelto musica ambient originale, gener
 - [x] Camera: giro automatico e camera libera nel blocco G.
 - [ ] Prestazioni su telefono: livelli di dettaglio per le finestre, misura su un telefono vero.
 - [ ] Interfaccia: restyling con le skill di design, accessibilità, inglese opzionale.
-- [ ] Licenza del codice (per esempio MIT) e file `LICENSE`.
+- [x] Licenza del codice: MIT, file `LICENSE` (© 2026 Giuseppe Cassano; blocco 4.4). I dati di `GEO` restano ODbL e Copernicus.
 
 ## 4. Da sistemare o verificare (emerso finora)
 

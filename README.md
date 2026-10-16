@@ -308,7 +308,9 @@ sotto il terreno o sospese, dischi sfasati, decorative sovrapposte) con `node di
   GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved".
   Come chiede l'art. 6(c): "The organisations in charge of the Copernicus programme by law or
   by delegation do not incur any liability for any use of the Copernicus WorldDEM-30".
-* **Codice**: la licenza è ancora da scegliere (per esempio MIT).
+* **Codice**: licenza [MIT](LICENSE), © 2026 Giuseppe Cassano. Vale per il codice (CSS, HTML e
+  JavaScript di `index.html`, `tools/`); i dati in `GEO` restano sotto le loro licenze (ODbL per
+  quelli derivati da OSM, licenza del Copernicus DEM per le quote), come scritto qui sopra.
 * **Librerie e caratteri**: [Three.js](https://threejs.org) (MIT) da CDN; Marcellus SC, Barlow e
   Barlow Semi Condensed (SIL Open Font License) da Google Fonts.
 * **Fiat** e **Panda**, **Audi** e **RS Q8**, **Ferrari** e **Monza SP2**, **John Deere** (e i
