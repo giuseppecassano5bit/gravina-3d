@@ -10,3 +10,6 @@ __pycache__/
 .DS_Store
 .claude/launch.json
 riferimenti/
+
+# graphify: grafo e report generati in locale (indice, non va sul sito né su git)
+graphify-out/
