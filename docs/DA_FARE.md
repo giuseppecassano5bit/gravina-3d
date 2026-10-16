@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 16 ottobre 2026: fase 3 approvata e online, fase 3.4 completata e unita su `main` con tutti i blocchi da A a N8 (PR #30, commit `caceef6`). **Fase 4 · Rifinitura in corso**, completati il **Blocco 4.1 · Golden hour** (branch `fase-4-1-golden-hour`, PR #31), il **Blocco 4.2 · Sponde del Ponte, stabilità mezzi, rumore motori e boost Shift** (branch `fase-4-2-ponte-motori-stabilita`, PR #32 in bozza) il **Blocco 4.3 · Via giudice Montea (salita, parapetto e case pericolanti), campi sportivi, Seminario Vescovile e posizioni reali cinema** (branch `fase-4-3-montea-cinema-campi`, PR #33), tutti uniti su `main`. **Blocco 4.4 · Camera dopo il teletrasporto, schede sul telefono, accessibilità, licenza, testate del ponte, motori e velocità massime** (branch `fase-4-4-camera-schede-rifinitura`, PR #34), tutti uniti su `main`. **Blocco 4.5 · La guida** (acceleratore sul telefono e dritto agli incroci, niente tremolio, vie lunghe dritte; branch `fase-4-5-guida`, PR #35) fatto, in attesa del sì del committente. Poi i blocchi 4.6 e 4.7.
+Stato al 16 ottobre 2026: fase 3 approvata e online, fase 3.4 completata e unita su `main` con tutti i blocchi da A a N8 (PR #30, commit `caceef6`). **Fase 4 · Rifinitura in corso**, completati il **Blocco 4.1 · Golden hour** (branch `fase-4-1-golden-hour`, PR #31), il **Blocco 4.2 · Sponde del Ponte, stabilità mezzi, rumore motori e boost Shift** (branch `fase-4-2-ponte-motori-stabilita`, PR #32 in bozza) il **Blocco 4.3 · Via giudice Montea (salita, parapetto e case pericolanti), campi sportivi, Seminario Vescovile e posizioni reali cinema** (branch `fase-4-3-montea-cinema-campi`, PR #33), tutti uniti su `main`. **Blocco 4.4 · Camera dopo il teletrasporto, schede sul telefono, accessibilità, licenza, testate del ponte, motori e velocità massime** (branch `fase-4-4-camera-schede-rifinitura`, PR #34), tutti uniti su `main`. **Blocco 4.5 · La guida** (acceleratore sul telefono e dritto agli incroci, niente tremolio, vie lunghe dritte; branch `fase-4-5-guida`, PR #35) unito su `main` il 17/10/2026. Prossimo: **Blocco 4.6** (prompt `riferimenti/PROMPT_FASE_4_6.md`), poi il 4.7.
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) completata**: piano, dati, budget, rischi e divisione
@@ -452,7 +452,7 @@ commerciali e protette: il committente ha scelto musica ambient originale, gener
       già tutti costruiti a 2,5 s dall'apertura). Motore: 20–27 µs per blocco audio da 128 campioni (circa 1% del filo audio sul
       Mac; su un telefono medio 5–10%).
 
-### Blocco 4.5 · La guida (branch `fase-4-5-guida`, PR #35 in bozza; piano approvato il 16/10/2026)
+### Blocco 4.5 · La guida (branch `fase-4-5-guida`, PR #35, unito su `main` il 17/10/2026; piano approvato il 16/10/2026)
 - [x] **Niente tremolio sull'asfalto** («movimenti parkinsoniani»): la scocca trema solo al minimo, sobbalzi solo su pietre,
       ciottoli e sterrati (`ROUGH`); a velocità alta sterzo e beccheggio guardano più avanti. Sull'asfalto beccheggio da 0,49 a
       0,015 mrad per fotogramma², sobbalzo da 1,7 mm a 0; sulle pietre come prima.
