@@ -514,7 +514,7 @@
   .engine__toggle[aria-pressed="true"] { border-color: var(--sunset); }
   .engine__toggle[aria-pressed="true"] svg { color: var(--sunset); }
   .engine__toggle[aria-pressed="true"] .engine__label { font: 400 1rem/1 var(--font-display); letter-spacing: 0.04em; text-transform: none; }
-  .engine__vol { width: 88px; height: 6px; accent-color: var(--sunset); cursor: pointer; background: rgba(255, 255, 255, 0.35); border-radius: 99px; }
+  .engine__vol { width: 88px; accent-color: var(--sunset); cursor: pointer; }   /* blocco 4.4: come quello della musica, più facile da prendere */
   .engine__vol[hidden] { display: none; }
   .engine__vol:focus-visible { outline: 3px solid var(--sunset); outline-offset: 2px; }
 
@@ -901,13 +901,13 @@
 
   <p class="attribution attribution--hud">© OpenStreetMap contributors · Copernicus WorldDEM-30 © DLR, Airbus</p>
 
-  <button class="pause-btn" id="btn-pause" type="button" aria-label="Metti in pausa">
+  <button class="pause-btn" id="btn-pause" type="button" aria-label="Metti in pausa" aria-keyshortcuts="P" title="Pausa (tasto P)">
     <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3.6" height="12" rx="1" fill="currentColor"/><rect x="9.4" y="2" width="3.6" height="12" rx="1" fill="currentColor"/></svg>
     <span>Pausa</span>
   </button>
 
-  <div class="radio" id="radio">
-    <button class="pill radio__toggle" id="btn-radio" type="button" aria-pressed="false" aria-label="Accendi la musica">
+  <div class="radio" id="radio" role="group" aria-label="Radio">
+    <button class="pill radio__toggle" id="btn-radio" type="button" aria-pressed="false" aria-label="Musica" aria-keyshortcuts="M" title="Musica (tasto M)">
       <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 2.2 14 .8v10.1a2.3 2.3 0 1 1-1.6-2.2V4.2L7.6 5v7.9A2.3 2.3 0 1 1 6 10.7z" fill="currentColor"/></svg>
       <span class="radio__label" id="radio-label">Musica</span>
     </button>
@@ -917,15 +917,15 @@
     <input class="radio__vol" id="radio-vol" type="range" min="0" max="1" step="0.05" value="0.6" aria-label="Volume della musica" hidden>
   </div>
 
-  <div class="engine" id="engine">
-    <button class="pill engine__toggle" id="btn-engine" type="button" aria-pressed="true" aria-label="Attiva/disattiva rumore motore (tasto V)" title="Attiva/disattiva motore (tasto V)">
+  <div class="engine" id="engine" role="group" aria-label="Motore">
+    <button class="pill engine__toggle" id="btn-engine" type="button" aria-pressed="true" aria-label="Rumore del motore" aria-keyshortcuts="V" title="Rumore del motore (tasto V)">
       <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 8l2.8-2.8M4 11a4.5 4.5 0 0 1 8 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       <span class="engine__label" id="engine-label">Motore</span>
     </button>
     <input class="engine__vol" id="engine-vol" type="range" min="0" max="1" step="0.05" value="0.75" aria-label="Volume del motore" title="Volume del motore">
   </div>
 
-  <button class="pill postcard-btn" id="btn-postcard" type="button" aria-label="Scatta cartolina" title="Scatta cartolina ricordo (tasto C)">
+  <button class="pill postcard-btn" id="btn-postcard" type="button" aria-label="Scatta una cartolina" aria-keyshortcuts="C" title="Scatta una cartolina ricordo (tasto C)">
     <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4A1.5 1.5 0 0 0 1 5.5v7A1.5 1.5 0 0 0 2.5 14h11a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 13.5 4h-2.172a1.5 1.5 0 0 1-1.06-.44l-.828-.828A1.5 1.5 0 0 0 8.38 2.293H7.62a1.5 1.5 0 0 0-1.06.44l-.828.828A1.5 1.5 0 0 1 4.672 4H2.5zm5.5 8a3 3 0 1 1 0-6 3 3 0 0 1 0 6z" fill="currentColor"/></svg>
     <span>Cartolina</span>
   </button>
@@ -958,18 +958,18 @@
   </div>
 
   <button class="touch-arrow touch-arrow--left" id="touch-left" type="button" aria-label="Scegli la via più a sinistra" hidden>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
   </button>
   <button class="touch-arrow touch-arrow--right" id="touch-right" type="button" aria-label="Scegli la via più a destra" hidden>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
   </button>
 
-  <div class="tour-hud" id="tour-hud" hidden>
+  <div class="tour-hud" id="tour-hud" role="region" aria-label="Giro guidato" hidden>
     <span class="tour-hud__badge"><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 4v4l2.5 2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Giro guidato</span>
-    <span class="tour-hud__info" id="tour-hud-info">Tappa 1 di 14: Ponte Acquedotto</span>
+    <span class="tour-hud__info" id="tour-hud-info" aria-live="polite">Tappa 1 di 14: Ponte Acquedotto</span>
     <div class="tour-hud__actions">
-      <button class="tour-hud__btn" id="btn-tour-skip" type="button" title="Passa alla prossima tappa">Prossima</button>
-      <button class="tour-hud__btn tour-hud__btn--exit" id="btn-tour-exit" type="button" title="Esci dal giro guidato">Esci</button>
+      <button class="tour-hud__btn" id="btn-tour-skip" type="button" aria-label="Passa alla prossima tappa" title="Passa alla prossima tappa">Prossima</button>
+      <button class="tour-hud__btn tour-hud__btn--exit" id="btn-tour-exit" type="button" aria-label="Esci dal giro guidato" aria-keyshortcuts="Escape" title="Esci dal giro guidato (Esc)">Esci</button>
     </div>
   </div>
 
@@ -16320,7 +16320,7 @@ async function main() {
   const radioUi = () => {
     const on = Radio.on;
     ui.el.btnRadio.setAttribute('aria-pressed', String(on));
-    ui.el.btnRadio.setAttribute('aria-label', on ? `Spegni la musica (${Radio.title})` : 'Accendi la musica');
+    ui.el.btnRadio.setAttribute('aria-label', on ? `Musica: ${Radio.title}` : 'Musica');   // blocco 4.4: lo stato lo dice aria-pressed
     ui.el.radioLabel.textContent = on ? Radio.title : 'Musica';
     ui.el.btnNext.hidden = ui.el.radioVol.hidden = !on;
   };
@@ -16334,15 +16334,18 @@ async function main() {
   const toggleRadio = () => { Radio.toggle(); try { localStorage.setItem('gravina3d.radio', Radio.on ? '1' : '0'); } catch { /* pazienza */ } };
   ui.el.btnRadio.addEventListener('click', toggleRadio);
   ui.el.btnNext.addEventListener('click', () => Radio.next());
-  ui.el.radioVol.addEventListener('input', () => Radio.volume(+ui.el.radioVol.value));
+  // blocco 4.4: i lettori di schermo dicono il volume in percentuale
+  const volText = (el) => el.setAttribute('aria-valuetext', `${Math.round(+el.value * 100)}%`);
+  ui.el.radioVol.addEventListener('input', () => { Radio.volume(+ui.el.radioVol.value); volText(ui.el.radioVol); });
+  volText(ui.el.radioVol);
 
   // Blocco 4.2: audio procedurale motore
   const engineUi = () => {
     const on = EngineAudio.enabled;
     ui.el.btnEngine.setAttribute('aria-pressed', String(on));
-    ui.el.btnEngine.setAttribute('aria-label', on ? 'Disattiva rumore motore (tasto V)' : 'Attiva rumore motore (tasto V)');
     ui.el.engineVol.hidden = !on;
     ui.el.engineVol.value = String(EngineAudio.volume);
+    volText(ui.el.engineVol);
   };
   ui.el.btnEngine.addEventListener('click', () => {
     EngineAudio.toggle();
@@ -16350,6 +16353,7 @@ async function main() {
   });
   ui.el.engineVol.addEventListener('input', () => {
     EngineAudio.setVolume(+ui.el.engineVol.value);
+    volText(ui.el.engineVol);
   });
   engineUi();
 
@@ -16508,7 +16512,7 @@ async function main() {
       ev.preventDefault();
       return;
     }
-    if (phase !== 'drive') return;
+    if (phase !== 'drive' || onInput) return;           // blocco 4.4: sui cursori del volume le frecce li spostano
     if (k === 'ArrowLeft' || k === 'a' || k === 'A') { driver.steer(-1); ev.preventDefault(); }
     else if (k === 'ArrowRight' || k === 'd' || k === 'D') { driver.steer(1); ev.preventDefault(); }
     else if (k === 'ArrowUp' || k === 'w' || k === 'W') { driver.chooseStraight(); ev.preventDefault(); }
