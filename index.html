@@ -1072,10 +1072,12 @@ const CONFIG = {
     parkGap: 3.2,           // m: il mezzo si ferma a questa distanza dall'imbocco pedonale, e aspetta così all'uscita
     parkBrake: 2.6,         // m/s² di frenata verso l'imbocco pedonale
     stepOut: 0.9, stepIn: 0.7,   // s per scendere dal mezzo e per risalire
-    // Acceleratore (blocco E, solo su PC): con Shift tenuto premuto il mezzo va verso la sua velocità
-    // massima (VEHICLES[].top), con una salita morbida (`boostRate`). Agli incroci il cartello si apre prima, in
-    // proporzione alla velocità, e il mezzo torna alla crociera: il tempo per scegliere resta quello di sempre.
+    // Acceleratore (blocco E; dal blocco 4.5 anche sul telefono, col pulsante): tenuto premuto il mezzo va verso la
+    // sua velocità massima (VEHICLES[].top), con una salita morbida (`boostRate`). Blocco 4.5 (decisione del
+    // committente): agli incroci tira dritto, sulla via più dritta, e rallenta solo quanto serve per la curva
+    // (`lateral`, m/s² di accelerazione laterale); se si sceglie un'altra uscita, la prende.
     boostRate: 1.6,
+    lateral: 4,
     // Blocco 4.4: ma mai oltre il limite della strada, in km/h: centro storico; in città e fuori città per classe
     // (secondaria, terziaria, residenziale, living street, pedonale, sentiero, carrareccia); sterrati.
     limits: { z0: 30, city: [70, 60, 50, 30, 30, 30, 30], country: [Infinity, Infinity, 90, 40, 30, 30, 40], dirt: 50 },
@@ -5058,6 +5060,8 @@ const Scenery = {
 const SURF = { PLAIN: 0, STREET: 1, ROAD: 2, DIRT: 3, FACADE: 4, SHED: 5, RAIL: 6, SKIRT: 7, OLD: 8, PAVE: 9, ASPH: 10, COBBLE: 11, EARTH: 12, ROMBI: 13, WIN: 14, CONCI: 15, SCUOLA: 16, VILLETTA: 17, RINGHIERA: 18 };
 /** Blocco N1: tipo di superficie dello shader per il codice OSM delle vie del centro storico (edge.surface). */
 const PAVING = [SURF.PAVE, SURF.PAVE, SURF.ASPH, SURF.COBBLE, SURF.EARTH, SURF.ROMBI];
+/** Blocco 4.5: quanto sballotta il mezzo su ogni superficie del centro storico (l'asfalto niente). */
+const ROUGH = { [SURF.PAVE]: 1, [SURF.ASPH]: 0, [SURF.COBBLE]: 1, [SURF.EARTH]: 0.7, [SURF.ROMBI]: 1 };
 
 /**
  * Materiale della città: colori per faccia, come il resto del diorama, più i motivi disegnati
@@ -12566,7 +12570,8 @@ void main() { float a = max(0.0, 1.0 - length(vUv)); gl_FragColor = vec4(vCol * 
         const rough = (L.rough ?? 0) * clamp(speed / 4, 0, 1);
         const jolt = rough * (Math.sin(bump * 7.3) * 0.6 + Math.sin(bump * 12.7 + 1.3) * 0.4);
         body.rotation.set(-pitch + jolt * 0.003, 0, roll + rough * 0.003 * Math.sin(bump * 5.1));
-        body.position.y = Math.sin(time * freq) * shake * (0.3 + 0.7 * clamp(speed / 8, 0, 1)) + jolt * 0.010;
+        // blocco 4.5: il motore fa tremare la scocca solo al minimo; in marcia sull'asfalto il mezzo resta piantato
+        body.position.y = Math.sin(time * freq) * shake * 0.3 * (1 - smoothstep(0.5, 3, speed)) + jolt * 0.010;
         U.uHead.value = L.head ?? 1;
         U.uBrake.value = L.brake ?? 0;
         U.uBlinkL.value = L.blinkL ?? 0;
@@ -13340,16 +13345,20 @@ class Driver {
 
       // Velocità obiettivo: crociera, ponte, rallentamento agli incroci con scelta, passo a piedi.
       const base = (this.edge.bridge ? D.bridgeSpeed : D.cruiseSpeed) * this.pace;
-      // Acceleratore: non a piedi, non nelle gocce; con la scelta aperta si torna alla crociera.
-      const boost = this.boosting && !this.onFoot && !this.edge.turn && !parking && !(this.decision?.options.length > 1);
+      // Acceleratore: non a piedi, non nelle gocce; dal blocco 4.5 anche con la scelta aperta (si tira dritto,
+      // e se nel frattempo non si è scelto altro la selezione resta sulla via più dritta).
+      const fly = this.#flying, d = this.decision;
+      if (fly && d && !d.manual && d.selected !== d.fast) { d.selected = d.fast; this.events.emit('decision:change', this); }
+      const boost = this.boosting && !this.onFoot && !this.edge.turn && !parking && (fly || !(d?.options.length > 1));
       this.boost += ((boost ? 1 : 0) - this.boost) * damp(D.boostRate, dt);
       // blocco 4.4: verso la velocità massima del mezzo, entro il limite della strada
       let target = base + Math.max(0, Math.min(this.top, Driver.limit(this.edge)) - base) * this.boost;
       // …e sopra la crociera si frena in tempo per la via dopo (o per l'incrocio con la scelta)
       let braking = false;
       if (target > base || this.speed > base + 1) {
-        const next = this.nextChoice?.edge, junction = this.decision?.options.length > 1;
-        const vEnd = junction ? D.junctionSpeed : next ? (next.turn ? 4.5 : Math.max(base, Math.min(this.top, Driver.limit(next)) * (this.boosting ? 1 : 0))) : null;
+        const sel = this.nextChoice, next = sel?.edge, junction = d?.options.length > 1 && !fly;
+        // blocco 4.5: con l'acceleratore all'incrocio si arriva alla velocità della svolta (cornerSpeed)
+        const vEnd = junction ? D.junctionSpeed : next ? (next.turn ? 4.5 : Math.max(base, Math.min(this.top, Driver.limit(next), this.boosting ? Driver.cornerSpeed(sel.angle) : Infinity) * (this.boosting ? 1 : 0))) : null;
         if (vEnd !== null) {
           const cap = Math.max(base, Math.sqrt(vEnd ** 2 + 2 * D.brake * Math.max(0, this.remaining - (junction ? D.slowDistance : 0))));
           braking = cap < this.speed;
@@ -13357,12 +13366,14 @@ class Driver {
         }
       }
       if (this.edge.turn) target = Math.min(target, 4.5);
-      if (this.decision?.options.length > 1 && this.remaining < D.slowDistance) target = Math.min(target, D.junctionSpeed * Math.min(1, this.pace));
+      if (d?.options.length > 1 && !fly && this.remaining < D.slowDistance) target = Math.min(target, D.junctionSpeed * Math.min(1, this.pace));
       if (this.onFoot) target = D.walkSpeed;
       if (this.tour?.visiting) target = Math.min(target, 2.5);
       let dv = (target - this.speed) * damp(D.accelRate * (this.onFoot ? 2 : 1), dt);
       // blocco 4.4: accelerazione e frenata di un mezzo vero (a tavoletta cala con la velocità)
       // lasciato l'acceleratore rallenta col freno motore; frena davvero solo per arrivare lento all'incrocio
+      // blocco 4.5: quando deve frenare segue la curva di frenata (prima la inseguiva in ritardo e arrivava lungo)
+      if (braking && !this.onFoot) dv = Math.min(dv, target - this.speed);
       if (!this.onFoot) dv = clamp(dv, -(braking || this.speed < base + 1 ? D.brake * 1.4 : 2.2) * dt, (this.boost > 0.3 ? this.accel[1] * (1 - 0.8 * (this.speed / this.top) ** 2) : this.accel[0]) * dt);
       this.speed += dv;
       if (parking) this.speed = Math.min(this.speed, Math.sqrt(2 * D.parkBrake * Math.max(0, room)) + 0.3);
@@ -13492,7 +13503,12 @@ class Driver {
       }
     }
 
-    this.decision = { node, options, selected: straight, straight };
+    // Blocco 4.5: con l'acceleratore si tira dritto sulla via carrabile più dritta (niente gocce né tratti a piedi)
+    let fast = -1;
+    options.forEach((o, i) => { if (!o.walk && !o.edge.turn && (fast < 0 || Math.abs(o.angle) < Math.abs(options[fast].angle))) fast = i; });
+    if (fast < 0 || this.onFoot) fast = straight;
+    if (this.#flying) straight = fast;
+    this.decision = { node, options, selected: straight, straight, fast, manual: false };
     if (options.length > 1) this.events.emit('decision:open', this);
   }
 
@@ -13501,7 +13517,7 @@ class Driver {
     const d = this.decision;
     if (!d || d.options.length < 2) return;
     const next = clamp(d.selected + delta, 0, d.options.length - 1);
-    if (next !== d.selected) { d.selected = next; this.events.emit('decision:change', this); }
+    if (next !== d.selected) { d.selected = next; d.manual = true; this.events.emit('decision:change', this); }
   }
 
   /** Seleziona direttamente un'uscita (clic o tocco su un cartello). */
@@ -13509,6 +13525,7 @@ class Driver {
     const d = this.decision;
     if (!d || index < 0 || index >= d.options.length) return;
     d.selected = index;
+    d.manual = true;
     this.events.emit('decision:change', this);
   }
 
@@ -13516,6 +13533,15 @@ class Driver {
 
   /** Arco su cui si viaggerà dopo l'incrocio (per minimappa e anticipo di sterzo). */
   get nextChoice() { return this.decision ? this.decision.options[this.decision.selected] : null; }
+
+  /** Blocco 4.5: con l'acceleratore premuto (non a piedi, non nel giro guidato) agli incroci si tira dritto. */
+  get #flying() { return this.boosting && !this.onFoot && !this.tour?.active; }
+
+  /** Blocco 4.5: velocità (m/s) per prendere una svolta di `angle` radianti all'incrocio; quasi dritto, nessun limite. */
+  static cornerSpeed(angle) {
+    const a = Math.min(Math.abs(angle), 2.6), D = CONFIG.drive;
+    return a < 0.02 ? Infinity : Math.max(D.junctionSpeed, Math.sqrt(D.lateral * 8 / Math.tan(a / 2)));
+  }
 
   /** Blocco 4.4: limite di velocità della via (m/s), dalla zona e dalla classe (CONFIG.drive.limits). */
   static limit(edge) {
@@ -13545,7 +13571,9 @@ class Driver {
   #updatePose(dt, snap) {
     const D = CONFIG.drive;
     this.net.pointAt(this.edge, this.dir, this.s, this.position);
-    this.#pointAhead(D.yawLookahead, this._ahead);
+    // blocco 4.5: più si va forte, più lontano guarda (a 180 km/h i piccoli angoli della via non fanno sbandare)
+    const fast = Math.max(0, this.speed - D.cruiseSpeed);
+    this.#pointAhead(D.yawLookahead + fast * 0.22, this._ahead);
     if (this.sitting) this._ahead.copy(this.sitting.look);          // in panchina si guarda il monumento
     const dx = this._ahead.x - this.position.x, dz = this._ahead.z - this.position.z;
     if (dx * dx + dz * dz > 1e-6) {
@@ -13555,8 +13583,8 @@ class Driver {
       const rate = dt > 0 ? delta / dt : 0;
       this.yawRate += (rate - this.yawRate) * (snap ? 1 : damp(6, dt));
     }
-    this.#pointAhead(3.6, this._ahead);
-    this.#pointBehind(3.6, this._behind);
+    this.#pointAhead(3.6 + fast * 0.15, this._ahead);
+    this.#pointBehind(3.6 + fast * 0.15, this._behind);
     const run = Math.hypot(this._ahead.x - this._behind.x, this._ahead.z - this._behind.z) || 1;
     const pitch = Math.atan2(this._ahead.y - this._behind.y, run);
     this.pitch += (pitch - this.pitch) * (snap ? 1 : damp(4.2, dt));
@@ -16236,7 +16264,8 @@ async function main() {
     L.head = 1;
     L.driver = driver.onFoot ? 0 : 1;
     const p = driver.position;
-    L.rough = driver.edge.dirt ? 0.7 : Tiles.inZ0(p.x, -p.z) ? 1 : 0.15;
+    // blocco 4.5: sballotta solo dove la via non è d'asfalto (pietre e ciottoli del centro storico, sterrati)
+    L.rough = driver.edge.dirt ? 0.7 : Tiles.inZ0(p.x, -p.z) ? ROUGH[PAVING[driver.edge.surface] ?? SURF.PAVE] ?? 1 : 0;
     return L;
   };
 
@@ -16847,6 +16876,8 @@ async function main() {
       },
       roadWalls, Balconi, useVehicle, pause, resume, teleport, pauseMap, Radio, EngineAudio, Forest, ForestSound, flight, Volo, Burner, VehicleFactory, forestAmount,
       get mode() { return mode; },
+      /** Il mezzo disegnato (root, body, animate): per le prove sul tremolio (blocco 4.5). */
+      get vehicle() { return car; },
       /** Teletrasporto verso il monumento con quell'id (in pausa). */
       goTo(id) { return teleport({ lm: landmarks.find((l) => l.id === id) }); },
     };
