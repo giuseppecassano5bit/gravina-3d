@@ -1699,13 +1699,13 @@ const LANDMARKS = [
     text: 'Fu eretta nel 1645, per volontà testamentaria di Balsamo Lupi, trasformando due stalle a pianterreno e due stanze del Palazzo Lupi. Oggi è sconsacrata e ospita la confraternita di San Michele Arcangelo.',
   },
   {
-    // Blocco N7: Cinema Teatro Mastrogiacomo
-    id: 'mastrogiacomo', name: 'Cinema Teatro Mastrogiacomo', at: [438, -16], kicker: 'Piazza Scacchi · aperto nel 1927', radius: 26,
+    // Blocco N7 / 4.3: Cinema Teatro Mastrogiacomo (Piazza Arcangelo Scacchi 16, cortina nord-est)
+    id: 'mastrogiacomo', name: 'Cinema Teatro Mastrogiacomo', at: [440, -1], kicker: 'Piazza Scacchi · aperto nel 1927', radius: 26,
     text: 'Voluto dal cavaliere Michele Mastrogiacomo e progettato dall’ingegnere De Martino, fu inaugurato nel 1927 come primo grande teatro moderno della città, con galleria e palchetti in stile Liberty. Trasformato in seguito con struttura in cemento armato e sala cinematografica, ha animato per decenni la vita culturale gravinese prima della chiusura nel 1995. Nel 2024 è stato acquisito al patrimonio comunale per il recupero a teatro e polo culturale polifunzionale.',
   },
   {
-    // Blocco N7: Cinema Teatro Centrone
-    id: 'centrone', name: 'Cinema Teatro Centrone', at: [348, -245], kicker: 'Via De Gasperi · politeama del 1947', radius: 36,
+    // Blocco N7 / 4.3: Cinema Teatro Centrone (Via Alcide De Gasperi 14, primi 60 m da Piazza Scacchi)
+    id: 'centrone', name: 'Cinema Teatro Centrone', at: [415, -50], kicker: 'Via De Gasperi · politeama del 1947', radius: 36,
     text: 'Costruito tra il 1946 e il 1947 in tufo locale per iniziativa dell’imprenditore Leonardo Centrone, è uno degli edifici teatrali più imponenti e originali della Murgia. La facciata tardo-liberty con colonne doriche, balconata e grande rosone geometrico introduceva a una maestosa sala da oltre 2.000 posti. Tempio del cinema e della musica, ha ospitato concerti memorabili di cantautori come Domenico Modugno, Francesco De Gregori e Riccardo Cocciante prima della chiusura nel 1990.',
   },
   {
@@ -1746,6 +1746,11 @@ const LANDMARKS = [
     // Blocco N7: Biblioteca Finia
     id: 'finia', name: 'Biblioteca Finia', at: [106, -24], kicker: 'Piazza Benedetto XIII · fondata nel Seicento', radius: 24,
     text: 'Tra le più antiche biblioteche di pubblica lettura della Puglia, istituita nel XVII secolo nel complesso episcopale grazie ai lasciti del cardinale Fini e del cardinale Niccolò Coscia. Conserva un patrimonio librario di oltre 40.000 volumi, tra cui incunaboli, cinquecentine, pergamene manoscritte e gli archivi storici della diocesi di Gravina.',
+  },
+  {
+    // Blocco 4.3: Seminario Vescovile (Piazza Benedetto XIII 25)
+    id: 'seminario', name: 'Seminario Vescovile', at: [70, -25], kicker: 'Piazza Benedetto XIII · fondato nel 1595', radius: 24,
+    text: 'Fondato nel 1595 dal vescovo Vincenzo Giustiniani in attuazione dei decreti del Concilio di Trento, fu il primo seminario istituito in Terra di Bari. Ampliato nel Settecento sotto il patrocinio di papa Benedetto XIII Orsini, presenta un’austera facciata tardo-rinascimentale con portale bugnato e stemma vescovile. Oggi ospita il Museo Capitolare d’Arte Sacra.',
   },
   {
     id: 'pellicciari', name: 'Piazza Pellicciari', ref: 'Piazza Giuseppe Pellicciari', kicker: 'Porta del rione Fondovito', radius: 30,
@@ -2288,8 +2293,16 @@ const Guida = {
   /** Altopiano lato città a `s` metri oltre il ciglio. */
   plateau(e, n, s) {
     if (!this.ok) return pendioFondovico(n, s, 2.5 * smoothstep(0, 250, s) - rioneDrop(n, s).drop, e);   // senza la guida: come prima di N1
-    const Tr = this.rimTrend(n), d0 = rioneDrop(n, 0).drop, R = Math.min(-d0, Tr);
-    const W = Math.max(150, 11 * d0, 12.5 * (Tr - R));
+    const Tr = this.rimTrend(n), d0 = rioneDrop(n, 0).drop;
+    let R = Math.min(-d0, Tr), W = Math.max(150, 11 * d0, 12.5 * (Tr - R));
+    // Blocco 4.3: lungo Via giudice Montea (dal Ponte Acquedotto verso il Bastione e la città, lato est e > 0)
+    // il profilo è in salita continua dal ponte (y ≈ -4,6 m a n = 287) verso il Bastione (y ≈ -2 m a n = 196) e Via Calderoni (y ≈ -0,5 m a n = 150).
+    if (n > 130 && (e === null || e > -10)) {
+      const wMontea = smoothstep(130, 160, n);
+      const rMontea = lerp(-0.5, -4.6, clamp((n - 150) / (287 - 150), 0, 1));
+      R = lerp(R, rMontea, wMontea);
+      W = lerp(W, 95, wMontea);
+    }
     return pendioFondovico(n, s, this.at(e, n) + (R - Tr) * (1 - smoothstep(0, W, Math.max(0, s))), e);
   },
 };
@@ -2383,7 +2396,7 @@ const Terrain = {
     const F = CONFIG.terrain.floorY;
     const L = Ravine.locate(e, n);
     if (L.side > 0) {
-      if (L.t >= 1) return { y: Guida.plateau(e, n, L.s), zone: ZONE.BANK, rough: 0.3, side: 1 };
+      if (L.t >= 1 || (n > 130 && n < 305 && L.s > -4.5)) return { y: Guida.plateau(e, n, Math.max(0, L.s)), zone: ZONE.BANK, rough: 0.3, side: 1 };
       if (L.dR < 7) return { y: F, zone: ZONE.FLOOR, rough: 0.5, side: 1 };
       // Dove il rione scende molto, la falesia si abbassa: i gradoni restano sotto il ciglio.
       // Blocco N1: dove la guida abbassa il ciglio (a sud del Fondovito) tutto il profilo dei gradoni
@@ -2406,6 +2419,7 @@ const Terrain = {
       const u = (L.t - 0.1) / 0.7;
       return { y: F + (F * -1 - 8) * terrace(u, 3), zone: ZONE.WALL, rough: 1.4, side: -1 };
     }
+    if (n > 295 && n < 320 && L.s > -11) return { y: -4.6, zone: ZONE.SLOPE, rough: 0.3, side: -1 }; // testata ovest Ponte Acquedotto
     return { y: -8 + 5 * smoothstep(0.8, 1, L.t), zone: ZONE.SLOPE, rough: 0.5, side: -1 };
   },
 
@@ -6328,7 +6342,7 @@ const Tiles = {
         const h1 = hash2(t.i * 97 + gi, t.j * 89 + gj), h2 = hash2(t.i * 31 + gi * 7, t.j * 17 + gj * 5);
         const e = t.e0 + (gi + h1) * step, n = t.n0 + (gj + h2) * step;
         const code = Relief.coverAt(e, n), p = (density[code] ?? 0) * dens;
-        if (hash2(gi * 13 + t.i, gj * 11 + t.j) > p || Terrain.procWeight(e, n) > 0.2 || Meninni.inside(e, n) || Villette.inside(e, n) || Scacchi.inside(e, n)) continue;   // blocco N4: lì i pini del Casino; N4b: i cedri delle piazzette
+        if (hash2(gi * 13 + t.i, gj * 11 + t.j) > p || Terrain.procWeight(e, n) > 0.2 || Meninni.inside(e, n) || Villette.inside(e, n) || Scacchi.inside(e, n) || Details.insidePitch?.(e, n)) continue;   // blocco N4: lì i pini del Casino; N4b: i cedri delle piazzette
         keepFar = hash2(gi * 7 + t.j, gj * 5 + t.i) < 0.5;
         if (!near && !keepFar) continue;
         const rot = h1 * TAU, s = 0.8 + h2 * 0.6;
@@ -8571,12 +8585,15 @@ const Details = {
     this.portaSanMichele(tops);
     this.piazzaScacchi();
     this.luoghiCultura(tops);                 // blocco N7: cinema, teatri e luoghi della cultura
+    this.seminario(tops);                     // blocco 4.3: Seminario Vescovile in Piazza Benedetto XIII
+    this.viaGiudiceMontea(tops);              // blocco 4.3: Via giudice Montea (case storiche, case a pericolo crollo e parapetto)
     if (lm('quattrofontane')) this.quattroFontane(lm('quattrofontane').at);
     for (const [e, n] of GEO.views) this.railing(e, n);
     this.cityPlaces();
     this.bosco();
     this.botromagno();
     this.stadio();
+    this.campiSportivi();                 // blocco 4.3: campi da calcio e calcetto delle chiese/oratori (senza etichetta)
     this.fiera();
     this.villaComunale();                 // blocco M2: Monumento ai Caduti, panchine e fontane della Villa
     this.robinson();                      // blocco M2: Pineta e Parco Robinson
@@ -8846,64 +8863,79 @@ const Details = {
     const C = (h) => new THREE.Color(h), { light, iron, stone } = this.col;
     const gold = C('#cca84a'), dark = C('#202226'), glass = C('#3a4a58'), wood = C('#4a3525'), tufo = C('#d9caa5');
 
-    // 1. CINEMA TEATRO MASTROGIACOMO (Piazza Scacchi 16, edificio 306)
-    const mastroWall = this.wallNear([438.0, -16.0], 4);
+    // 1. CINEMA TEATRO MASTROGIACOMO (Piazza Arcangelo Scacchi 16, cortina nord-est, edificio 306)
+    const mastroWall = this.wallNear([440.3, -1.25], 3) ?? this.wallNear([439.3, -9.45], 4);
     if (mastroWall) {
       const tb = this.near(mastroWall.M), f = this.frame(mastroWall, tb), y = f.ground;
-      const top = tops.get('#306')?.top ?? y + 9.5;
+      const top = tops.get('#306')?.top ?? y + 11.5;
       const L = mastroWall.len;
+      this.keepOut.push({ M: mastroWall.M, n: mastroWall.n, half: L / 2 + 0.3, top: top + 1 });
       f.box(L - 0.1, top - y, 0.08, C('#df9f8b'), 0, y, 0.04);
-      f.box(L + 0.1, 0.45, 0.35, tufo, 0, top - 0.45, 0.15);
-      f.box(L - 0.2, 0.18, 0.14, tufo, 0, y + 4.2, 0.08);
-      f.box(2.8, 0.18, 0.8, tufo, 0, y, 0.4);
+      for (const s of [-1, 1]) f.box(0.45, top - y, 0.16, tufo, s * (L / 2 - 0.28), y, 0.08);   // lesene laterali in tufo
+      f.box(L + 0.1, 0.45, 0.35, tufo, 0, top - 0.45, 0.15);                                    // cornicione sommitale
+      f.box(L - 0.2, 0.18, 0.14, tufo, 0, y + 4.3, 0.08);                                       // marcapiano
+      f.box(2.8, 0.18, 0.65, tufo, 0, y, 0.32);                                                 // soglia d'ingresso
       f.box(2.4, 3.2, 0.12, dark, 0, y + 0.18, 0.06);
       f.box(2.2, 2.9, 0.06, wood, 0, y + 0.18, 0.08);
-      for (const s of [-1, 1]) f.box(0.25, 3.4, 0.18, tufo, s * 1.35, y, 0.1);
-      f.box(3.2, 0.35, 0.24, tufo, 0, y + 3.4, 0.12);
-      f.box(4.8, 0.65, 0.14, C('#2a2320'), 0, y + 3.95, 0.14);
-      f.box(4.5, 0.18, 0.06, gold, 0, y + 4.18, 0.22);
-      f.box(4.2, 0.24, 0.08, gold, 0, y + 3.82, 0.22);
-      for (const s of [-1, 1]) {
-        f.box(1.0, 1.6, 0.08, dark, s * 2.3, y + 1.2, 0.08);
-        f.box(0.85, 1.4, 0.02, C('#f4ecc8'), s * 2.3, y + 1.3, 0.13);
-        f.box(0.88, 1.45, 0.04, glass, s * 2.3, y + 1.28, 0.14);
+      for (const s of [-1, 1]) f.box(0.26, 3.4, 0.18, tufo, s * 1.35, y, 0.1);                  // stipiti portale
+      f.box(3.2, 0.35, 0.24, tufo, 0, y + 3.4, 0.12);                                           // architrave
+      f.box(4.6, 0.65, 0.14, C('#2a2320'), 0, y + 3.85, 0.14);                                  // insegna scura
+      f.box(4.3, 0.16, 0.06, gold, 0, y + 4.08, 0.22);
+      f.box(4.0, 0.22, 0.08, gold, 0, y + 3.72, 0.22);
+      for (const s of [-1, 1]) {                                                                // bacheche locandine a giorno
+        f.box(1.0, 1.6, 0.08, dark, s * 2.4, y + 1.2, 0.08);
+        f.box(0.85, 1.4, 0.02, C('#f4ecc8'), s * 2.4, y + 1.3, 0.13);
+        f.box(0.88, 1.45, 0.04, glass, s * 2.4, y + 1.28, 0.14);
+      }
+      // Finestre modanate e balconcino al piano nobile
+      f.box(2.2, 0.16, 0.65, tufo, 0, y + 4.5, 0.32);
+      f.box(2.1, 0.85, 0.06, iron, 0, y + 4.66, 0.62);
+      for (const s of [-1, 0, 1]) {
+        const wx = s * 2.5, wy = y + 4.66, wh = s === 0 ? 2.1 : 1.7;
+        f.box(1.15, wh + 0.2, 0.12, tufo, wx, s === 0 ? wy : wy + 0.35, 0.07);
+        f.box(0.92, wh, 0.08, C('#3d5a45'), wx, s === 0 ? wy : wy + 0.42, 0.10);
       }
     }
 
-    // 2. CINEMA TEATRO CENTRONE (Via Alcide De Gasperi 14, edificio 239)
-    const centroneWall = this.wallNear([349.3, -241.9], 6) ?? this.wallNear([345.2, -281.8], 8);
+    // 2. CINEMA TEATRO CENTRONE (Via Alcide De Gasperi 14, primi 60 m da Piazza Scacchi verso sud, edificio 297)
+    const centroneWall = this.wallNear([415.0, -58.0], 8);
     if (centroneWall) {
       const tb = this.near(centroneWall.M), f = this.frame(centroneWall, tb), y = f.ground;
-      const top = tops.get('#239')?.top ?? y + 11.5;
-      const L = Math.min(18, centroneWall.len);
-      f.box(L, top - y, 0.15, tufo, 0, y, 0.08);
-      for (const s of [-1, 1]) {
-        f.box(3.2, top - y + 1.2, 0.45, tufo, s * (L / 2 - 1.6), y, 0.25);
-        f.box(3.5, 0.35, 0.55, tufo, s * (L / 2 - 1.6), top + 0.8, 0.28);
+      const top = tops.get('#' + centroneWall.index)?.top ?? y + 12.5;
+      const L = Math.min(16.5, centroneWall.len);
+      this.keepOut.push({ M: centroneWall.M, n: centroneWall.n, half: L / 2 + 0.5, top: top + 2 });
+      f.box(L, top - y, 0.16, tufo, 0, y, 0.08);                                                // paramento in tufo
+      for (const s of [-1, 1]) {                                                                // avancorpi laterali tardo-liberty
+        const ax = s * (L / 2 - 1.5);
+        f.box(3.0, top - y + 1.1, 0.42, tufo, ax, y, 0.22);
+        f.box(3.3, 0.35, 0.50, tufo, ax, top + 0.75, 0.26);
+        f.box(0.95, 1.6, 0.12, dark, ax, y + 4.6, 0.42);
       }
-      f.box(2.8, 3.6, 0.15, wood, 0, y, 0.12);
-      for (const s of [-1, 1]) {
-        f.add(new THREE.CylinderGeometry(0.24, 0.28, 3.8, 12), tufo, s * 1.8, y + 1.9, 0.55);
-        f.box(0.65, 0.25, 0.65, tufo, s * 1.8, y + 3.7, 0.55);
-        f.box(0.68, 0.30, 0.68, tufo, s * 1.8, y + 0.15, 0.55);
+      f.box(2.8, 3.6, 0.15, wood, 0, y, 0.12);                                                  // portone centrale
+      for (const s of [-1, 1]) {                                                                // colonne doriche binate in tufo
+        f.add(new THREE.CylinderGeometry(0.24, 0.28, 3.7, 12), tufo, s * 1.75, y + 1.85, 0.50);
+        f.box(0.62, 0.25, 0.62, tufo, s * 1.75, y + 3.65, 0.50);
+        f.box(0.66, 0.28, 0.66, tufo, s * 1.75, y + 0.14, 0.50);
       }
-      f.box(4.6, 0.28, 1.2, tufo, 0, y + 3.95, 0.65);
-      f.box(4.4, 0.85, 0.08, tufo, 0, y + 4.35, 1.15);
-      for (let bx = -1.9; bx <= 1.9; bx += 0.45) {
-        f.box(0.12, 0.72, 0.12, tufo, bx, y + 4.30, 1.15);
+      f.box(4.5, 0.28, 0.95, tufo, 0, y + 3.90, 0.50);                                          // balconata loggia
+      f.box(4.3, 0.82, 0.08, tufo, 0, y + 4.18, 0.92);
+      for (let bx = -1.85; bx <= 1.85; bx += 0.45) {                                            // colonnine loggetta
+        f.box(0.12, 0.72, 0.12, tufo, bx, y + 4.18, 0.92);
       }
-      f.box(2.2, 2.6, 0.1, dark, 0, y + 4.25, 0.15);
-      f.add(new THREE.CylinderGeometry(1.4, 1.4, 0.25, 16).rotateX(Math.PI / 2), tufo, 0, y + 8.2, 0.2);
-      f.add(new THREE.CylinderGeometry(1.15, 1.15, 0.3, 16).rotateX(Math.PI / 2), dark, 0, y + 8.2, 0.22);
+      f.box(2.2, 2.5, 0.10, dark, 0, y + 4.18, 0.15);
+      // Grande rosone radiale ornamentale a 16 razze
+      const ry = y + 8.3;
+      f.add(new THREE.CylinderGeometry(1.35, 1.35, 0.25, 16).rotateX(Math.PI / 2), tufo, 0, ry, 0.20);
+      f.add(new THREE.CylinderGeometry(1.12, 1.12, 0.30, 16).rotateX(Math.PI / 2), dark, 0, ry, 0.22);
       for (let a = 0; a < 8; a++) {
-        f.add(new THREE.BoxGeometry(0.12, 2.2, 0.35).rotateZ((a / 8) * Math.PI), tufo, 0, y + 8.2, 0.25);
+        f.add(new THREE.BoxGeometry(0.11, 2.15, 0.34).rotateZ((a / 8) * Math.PI), tufo, 0, ry, 0.24);
       }
-      f.box(L - 2, 0.45, 0.4, tufo, 0, top - 0.45, 0.25);
-      for (let dx = -L / 2 + 3; dx <= L / 2 - 3; dx += 0.8) {
-        f.box(0.35, 0.25, 0.45, tufo, dx, top - 0.6, 0.26);
+      f.box(L - 2.0, 0.45, 0.38, tufo, 0, top - 0.45, 0.24);                                    // cornicione a mensole
+      for (let dx = -L / 2 + 2.8; dx <= L / 2 - 2.8; dx += 0.78) {
+        f.box(0.32, 0.24, 0.42, tufo, dx, top - 0.60, 0.26);
       }
-      f.box(5.8, 0.75, 0.16, C('#1e2228'), 0, y + 5.7, 0.22);
-      f.box(5.4, 0.28, 0.08, gold, 0, y + 5.7, 0.32);
+      f.box(5.4, 0.72, 0.16, C('#1e2228'), 0, y + 5.75, 0.22);                                  // insegna dorata
+      f.box(5.0, 0.26, 0.08, gold, 0, y + 5.75, 0.31);
     }
 
     // 3. TEATRO VIDA (Via Giardini 72, edificio 494)
@@ -8957,6 +8989,288 @@ const Details = {
       f.box(1.7, 2.8, 0.08, wood, 0, y, 0.12);
       f.box(2.4, 0.42, 0.22, stone, 0, y + 3.25, 0.12);
       f.box(1.6, 0.35, 0.06, stone, 0, y + 3.65, 0.15);
+    }
+  },
+
+  /**
+   * SEMINARIO VESCOVILE (blocco 4.3, Piazza Benedetto XIII 25, edificio 123):
+   * Fondato nel 1595 da mons. Vincenzo Giustiniani (primo seminario della Terra di Bari) e ampliato nel Settecento
+   * sotto papa Benedetto XIII Orsini. Facciata monumentale in tufo e pietra calcarea con portale bugnato a tutto sesto,
+   * stemma vescovile scolpito in chiave di volta, portone ligneo chiodato, fasce marcapiano, finestre modanate con
+   * inferriate al pianterreno e targa dedicatoria.
+   */
+  seminario(tops) {
+    const semWall = this.wallNear([62.2, -27.0], 3);
+    if (!semWall) return;
+    const C = (h) => new THREE.Color(h), { iron, stone } = this.col;
+    const tufo = C('#dfd0b0'), bugna = C('#cbb994'), wood = C('#432e1f'), gold = C('#cca84a'), dark = C('#222428'), marble = C('#f0eadc');
+    const tb = this.near(semWall.M), f = this.frame(semWall, tb), y = f.ground;
+    const top = tops.get('#' + semWall.index)?.top ?? y + 11.2;
+    const L = semWall.len, H = top - y;
+    this.keepOut.push({ M: semWall.M, n: semWall.n, half: L / 2 + 0.4, top: top + 1.5 });
+
+    // Paramento nobile in tufo, zoccolo basamentale bugnato, lesene e fasce marcapiano
+    f.box(L - 0.1, H, 0.10, tufo, 0, y, 0.05);
+    f.box(L, 1.15, 0.18, bugna, 0, y, 0.09);
+    for (const lx of [-L / 2 + 0.35, -3.2, L / 2 - 0.35]) {
+      f.box(0.65, H, 0.20, stone, lx, y, 0.10);
+    }
+    f.box(L + 0.2, 0.22, 0.26, stone, 0, y + 3.85, 0.13);   // marcapiano 1° livello
+    f.box(L + 0.2, 0.20, 0.24, stone, 0, y + 7.35, 0.12);   // marcapiano 2° livello
+    f.box(L + 0.4, 0.48, 0.42, stone, 0, top - 0.48, 0.21); // cornicione sommitale
+    for (let mx = -L / 2 + 1.2; mx <= L / 2 - 1.2; mx += 1.1) {
+      f.box(0.24, 0.22, 0.36, stone, mx, top - 0.65, 0.22);
+    }
+
+    // Grande portale monumentale al civico 25 (nello slargo lastricato a est dell'aiuola: x = -8.5)
+    const px = -8.5;
+    const arch = (w, h, d) => {
+      const sh = new THREE.Shape();
+      sh.moveTo(-w / 2, 0); sh.lineTo(w / 2, 0); sh.lineTo(w / 2, h - w / 2);
+      sh.absarc(0, h - w / 2, w / 2, 0, Math.PI, false); sh.closePath();
+      return new THREE.ExtrudeGeometry(sh, { depth: d, bevelEnabled: false, curveSegments: 10 });
+    };
+    f.box(3.6, 0.18, 0.70, stone, px, y, 0.35);             // gradino di soglia in pietra
+    f.add(arch(3.0, 3.75, 0.26), stone, px, y, 0.12);       // archivolto a tutto sesto
+    for (let k = 0; k < 6; k++) {                           // bugnato sugli stipiti
+      for (const s of [-1, 1]) {
+        f.box(0.56, 0.42, 0.32, k % 2 ? stone : bugna, px + s * 1.32, y + 0.18 + k * 0.46, 0.18);
+      }
+    }
+    for (let a = 1; a <= 5; a++) {                          // conci radiali sull'arco bugnato
+      const ang = (a / 6) * Math.PI;
+      f.add(new THREE.BoxGeometry(0.32, 0.48, 0.34).rotateZ(ang - Math.PI / 2), a % 2 ? bugna : stone, px + Math.cos(ang) * 1.28, y + 2.25 + Math.sin(ang) * 1.28, 0.20);
+    }
+    // Portone ligneo chiodato a due battenti
+    f.add(arch(2.2, 3.35, 0.16), wood, px, y + 0.12, 0.26);
+    f.box(0.08, 3.25, 0.18, C('#2c1d12'), px, y + 0.12, 0.28);
+    for (const s of [-1, 1]) {
+      for (const by of [0.65, 1.65, 2.45]) f.box(0.72, 0.55, 0.06, C('#362417'), px + s * 0.54, y + by, 0.33);
+      f.add(new THREE.TorusGeometry(0.11, 0.025, 6, 10), gold, px + s * 0.32, y + 1.45, 0.36); // batacchi
+    }
+    // Stemma vescovile scolpito in chiave di volta
+    f.box(0.76, 0.92, 0.28, stone, px, y + 3.45, 0.28);
+    f.box(0.52, 0.64, 0.10, gold, px, y + 3.45, 0.40);
+    f.box(0.68, 0.16, 0.14, bugna, px, y + 3.88, 0.38);     // galero vescovile
+
+    // Balconata nobile in ferro battuto sopra il portale e targa dedicatoria
+    f.box(3.4, 0.22, 0.88, stone, px, y + 4.35, 0.44);
+    for (const s of [-1, 0, 1]) f.box(0.22, 0.32, 0.65, stone, px + s * 1.25, y + 4.05, 0.34);
+    f.box(3.3, 0.06, 0.06, iron, px, y + 5.42, 0.84);       // corrimano frontale
+    for (const s of [-1, 1]) f.box(0.06, 0.06, 0.84, iron, px + s * 1.62, y + 5.42, 0.44);
+    for (let bx = -1.55; bx <= 1.56; bx += 0.22) f.box(0.035, 0.86, 0.035, iron, px + bx, y + 4.57, 0.84);
+    for (const s of [-1, 1]) for (let bz = 0.15; bz <= 0.80; bz += 0.22) f.box(0.035, 0.86, 0.035, iron, px + s * 1.62, y + 4.57, bz);
+    f.box(1.45, 0.62, 0.08, marble, px + 2.45, y + 2.15, 0.14); // targa storica scolpita
+    f.box(1.25, 0.06, 0.04, C('#6e6558'), px + 2.45, y + 2.52, 0.19);
+    f.box(1.05, 0.05, 0.04, C('#6e6558'), px + 2.45, y + 2.34, 0.19);
+    f.box(1.15, 0.05, 0.04, C('#6e6558'), px + 2.45, y + 2.18, 0.19);
+
+    // Finestre modanate su 3 ordini con inferriate storiche al pianterreno
+    const cols = [-12.6, -8.5, -4.4, -0.4, 3.8, 8.0, 12.2];
+    for (const wx of cols) {
+      // Pianterreno (salta il portale a px = -8.5)
+      if (Math.abs(wx - px) > 1.5) {
+        f.box(1.38, 1.88, 0.12, stone, wx, y + 1.25, 0.08);
+        f.box(1.06, 1.56, 0.08, dark, wx, y + 1.40, 0.13);
+        for (let gx = -0.4; gx <= 0.41; gx += 0.2) f.box(0.03, 1.55, 0.06, iron, wx + gx, y + 1.40, 0.17);
+      }
+      // Piano nobile (1° piano)
+      const h1 = Math.abs(wx - px) < 0.5 ? 2.25 : 1.95;
+      f.box(1.48, h1 + 0.25, 0.12, stone, wx, y + 4.55, 0.08);
+      f.box(1.14, h1, 0.08, C('#354f39'), wx, y + 4.67, 0.13);
+      f.box(1.68, 0.24, 0.24, stone, wx, y + 4.55 + h1 + 0.22, 0.14); // timpanetto
+      // Secondo piano
+      f.box(1.38, 1.75, 0.12, stone, wx, y + 7.95, 0.08);
+      f.box(1.08, 1.48, 0.08, C('#4a3728'), wx, y + 8.08, 0.13);
+    }
+  },
+
+  /**
+   * VIA GIUDICE MONTEA (blocco 4.3, dal Ponte Acquedotto verso il Bastione medievale e la città):
+   * 1. Muretto continuo di parapetto in conci di tufo con copertina in pietra calcarea lungo il ciglio ovest verso la gravina;
+   * 2. Cortina di case storiche in tufo a 2 piani sul lato est del primo tratto di salita dal ponte (n = 252..281);
+   * 3. Case a pericolo crollo reali lungo la via (sia nel primo tratto sia sui fronti storici a [31.4, 242], [25.6, 209.3] e [18.4, 165.3]):
+   *    puntellature strutturali inclinate in travi di legno e acciaio contro le facciate, tiranti e capochiave a croce,
+   *    lesioni e crepe diagonali nel tufo, porte e finestre del piano terra murate o sbarrate con assi a X e transenne.
+   * Ogni elemento verifica la distanza di sicurezza dalla carreggiata (`conformerClearance`).
+   */
+  viaGiudiceMontea(tops) {
+    const C = (h) => new THREE.Color(h), { stone, light, iron, door } = this.col;
+    const tufo = C('#d4c39e'), tufoDark = C('#b8a47c'), tufoRaw = C('#a69067'), crack = C('#383028');
+    const beamWood = C('#7d5835'), beamDark = C('#5e4024'), steel = C('#5b6168'), red = C('#cf382e'), white = C('#f2efe8');
+    const shutter = C('#3c6646'), roofCol = C('#c5b28c');
+
+    // 1. Parapetto continuo in conci di tufo lungo il ciglio ovest (lato gravina) di Via giudice Montea (v198 e v1388)
+    for (const id of ['v198', 'v1388']) {
+      const edge = this.net.edges.find((e) => e.id === id);
+      if (!edge) continue;
+      const S = edge.samples, stride = 2;
+      let acc = 0;
+      for (let i = 0; i < edge.count; i += stride) {
+        const j = Math.min(edge.count, i + stride);
+        const e0 = S[i * 3], y0 = S[i * 3 + 1], n0 = -S[i * 3 + 2];
+        const e1 = S[j * 3], y1 = S[j * 3 + 1], n1 = -S[j * 3 + 2];
+        const segL = Math.hypot(e1 - e0, n1 - n0);
+        if (segL < 0.3) continue;
+        let nx = -(n1 - n0) / segL, nn = (e1 - e0) / segL;
+        if (nx > 0) { nx = -nx; nn = -nn; } // normale verso ovest (lato gravina)
+        const off = edge.width / 2 + 0.48;
+        const me = (e0 + e1) / 2 + nx * off, mn = (n0 + n1) / 2 + nn * off, my = (y0 + y1) / 2;
+        if (id === 'v198' && mn > 283.5) continue; // testata monumentale est del Ponte Acquedotto
+        const cs = this.net.closestSample(me, mn);
+        if (!cs || cs.d < cs.edge.width / 2 + 0.42 || this.net.conformerClearance(me, mn) < 0.12 || Buildings.occupied(me, mn)) continue;
+        const tb = this.near([me, mn]), rot = Math.atan2(n1 - n0, e1 - e0);
+        const g = Terrain.heightAt(me, mn), drop = clamp(my - g + 0.6, 0.6, 3.2), hWall = 0.96;
+        tb.addGeometry(new THREE.BoxGeometry(segL + 0.08, hWall + drop, 0.42).rotateY(rot).translate(me, my + (hWall - drop) / 2, -mn), tufoDark);
+        tb.addGeometry(new THREE.BoxGeometry(segL + 0.10, 0.11, 0.50).rotateY(rot).translate(me, my + hWall + 0.05, -mn), light);
+        acc += segL;
+        if (acc >= 6.8) {
+          acc = 0;
+          tb.addGeometry(new THREE.BoxGeometry(0.54, hWall + drop + 0.12, 0.54).rotateY(rot).translate(me, my + (hWall - drop) / 2 + 0.06, -mn), stone);
+        }
+      }
+    }
+
+    // Helper per attrezzare una facciata (o porzione di essa) come "casa a pericolo crollo" con puntellature, tiranti, crepe e transenne
+    const shoreFacade = (f, M, n, y, x0, x1, H, maxZ = 1.65) => {
+      const span = x1 - x0, cx = (x0 + x1) / 2;
+      const t = [-n[1], n[0]];
+      const worldAt = (x, z) => [M[0] + t[0] * x + n[0] * z, M[1] + t[1] * x + n[1] * z];
+      const safeAt = (x, z, gap = 0.32) => this.net.conformerClearance(...worldAt(x, z)) > gap;
+
+      // Toppe di intonaco caduto con conci di tufo erosi a vista e lesioni diagonali a gradini
+      f.box(span - 0.3, Math.min(H - 0.6, 6.6), 0.07, tufoDark, cx, y + 0.2, 0.04);
+      for (let k = 0; k < 5; k++) {
+        const rx = x0 + 0.8 + ((k + 0.4) * (span - 1.6)) / 5, ry = y + 0.9 + (k % 3) * 1.45;
+        f.box(1.15, 0.65, 0.09, tufoRaw, rx, ry, 0.05);
+      }
+      // Crepe diagonali ramificate sul paramento in tufo
+      for (const sx of [-0.28, 0.24]) {
+        const kx = cx + sx * span;
+        for (let s = 0; s < 5; s++) {
+          f.box(0.07, 0.78, 0.10, crack, kx + s * 0.22 * (sx < 0 ? 1 : -1), y + 1.4 + s * 0.68, 0.06, (sx < 0 ? -0.32 : 0.32));
+        }
+      }
+      // Tiranti metallici e capochiave (bolzoni) a croce / a X tra 1° e 2° piano
+      for (let tx = x0 + 1.2; tx <= x1 - 1.1; tx += 3.1) {
+        for (const ty of [y + 3.55, Math.min(y + 6.45, y + H - 0.85)]) {
+          f.box(0.58, 0.08, 0.12, iron, tx, ty, 0.08, 0.65);
+          f.box(0.58, 0.08, 0.12, iron, tx, ty, 0.08, -0.65);
+          f.box(0.14, 0.14, 0.15, iron, tx, ty, 0.09);
+        }
+      }
+      // Aperture al piano terra e primo piano murate in tufo o sbarrate con assi di legno incrociate a X
+      const nBays = Math.max(2, Math.floor(span / 3.4));
+      for (let b = 0; b < nBays; b++) {
+        const bx = x0 + ((b + 0.5) * span) / nBays;
+        // Vano piano terra tamponato/sbarrato
+        f.box(1.36, 2.35, 0.10, stone, bx, y, 0.05);
+        f.box(1.12, 2.15, 0.08, b % 2 === 0 ? tufoRaw : C('#231f1c'), bx, y + 0.05, 0.08);
+        // Assi di legno inchiodate a croce di Sant'Andrea e traversa
+        f.box(1.24, 0.14, 0.06, beamWood, bx, y + 1.05, 0.13, 0.52);
+        f.box(1.24, 0.14, 0.06, beamWood, bx, y + 1.05, 0.13, -0.52);
+        f.box(1.18, 0.15, 0.06, beamDark, bx, y + 0.55, 0.14);
+        f.box(1.18, 0.15, 0.06, beamDark, bx, y + 1.65, 0.14);
+        // Finestra 1° piano con telaio di puntellatura interno a croce
+        if (H > 5.2) {
+          const wy = y + 3.95;
+          f.box(1.26, 1.75, 0.10, stone, bx, wy, 0.05);
+          f.box(0.98, 1.48, 0.08, C('#201d1a'), bx, wy + 0.12, 0.08);
+          f.box(1.10, 0.11, 0.06, beamWood, bx, wy + 0.78, 0.13, 0.58);
+          f.box(1.10, 0.11, 0.06, beamWood, bx, wy + 0.78, 0.13, -0.58);
+        }
+      }
+      // Puntellature strutturali inclinate (ritti verticali a muro, puntoni inclinati in legno/acciaio e dormienti a terra)
+      let zFoot = maxZ;
+      while (zFoot > 0.55 && (!safeAt(x0 + 0.8, zFoot, 0.38) || !safeAt(cx, zFoot, 0.38) || !safeAt(x1 - 0.8, zFoot, 0.38))) zFoot -= 0.2;
+      if (zFoot >= 0.55) {
+        const nShores = Math.max(3, Math.round(span / 2.6));
+        const shoreH = Math.min(H - 0.8, 5.2);
+        // Banchina orizzontale superiore contro la facciata e dormiente al suolo
+        f.box(span - 0.8, 0.20, 0.18, beamDark, cx, y + shoreH - 0.25, 0.14);
+        f.box(span - 0.8, 0.16, 0.24, beamDark, cx, y - 0.05, zFoot - 0.12);
+        const strutLen = Math.hypot(shoreH - 0.2, zFoot - 0.15);
+        const tilt = Math.atan2(zFoot - 0.15, shoreH - 0.2);
+        for (let i = 0; i < nShores; i++) {
+          const sx = x0 + 0.9 + (i * (span - 1.8)) / Math.max(1, nShores - 1);
+          if (!safeAt(sx, zFoot, 0.35)) continue;
+          const colBeam = i % 2 === 0 ? beamWood : steel;
+          // Ritto verticale addossato al muro
+          f.box(0.18, shoreH + 0.2, 0.16, beamDark, sx, y - 0.05, 0.10);
+          // Puntone strutturale inclinato dalla base esterna fino alla banchina sul muro
+          const gStrut = new THREE.BoxGeometry(0.18, strutLen, 0.18);
+          gStrut.rotateX(-tilt);
+          f.add(gStrut, colBeam, sx, y + shoreH / 2 - 0.05, (zFoot + 0.12) / 2);
+          // Saetta secondaria / Rompitratta orizzontale a metà altezza
+          f.box(0.14, 0.14, (zFoot + 0.1) * 0.55, colBeam, sx, y + shoreH * 0.48, (zFoot + 0.1) * 0.28);
+        }
+        // Controvento orizzontale di collegamento tra i puntoni e transenna bianco-rossa di sicurezza
+        f.box(span - 1.4, 0.12, 0.12, steel, cx, y + 1.85, zFoot * 0.58);
+        for (let bx = x0 + 1.4; bx <= x1 - 1.4; bx += 2.6) {
+          if (!safeAt(bx, zFoot + 0.08, 0.38)) continue;
+          // Transenna stradale con piedi, telaio e fascia a strisce bianche e rosse
+          f.box(1.85, 0.95, 0.05, steel, bx, y, zFoot + 0.06);
+          for (let st = -0.75; st <= 0.76; st += 0.30) {
+            f.box(0.15, 0.22, 0.07, Math.round((st + 0.75) / 0.30) % 2 ? red : white, bx + st, y + 0.62, zFoot + 0.06);
+          }
+          // Cartello giallo/rosso di "Pericolo Crollo"
+          f.box(0.46, 0.34, 0.08, C('#e8c438'), bx, y + 0.26, zFoot + 0.07);
+          f.box(0.38, 0.08, 0.09, red, bx, y + 0.48, zFoot + 0.07);
+        }
+      }
+    };
+
+    // 2. Cortina di case storiche in tufo nel primo tratto di salita dal ponte (lato est, n = 252..280)
+    //    con la casa centrale (n = 265.5) in stato di pericolo crollo e puntellata
+    const newHouses = [
+      { c: [34.0, 274.8], L: 8.6, D: 6.0, H: 7.4, deg: 97, shored: false, wall: C('#dfd0b0') },
+      { c: [34.9, 265.8], L: 9.0, D: 6.2, H: 8.2, deg: 95, shored: true,  wall: C('#d2c09a') },
+      { c: [35.0, 256.6], L: 8.6, D: 6.0, H: 7.8, deg: 92, shored: false, wall: C('#e4d6b8') },
+    ];
+    for (const h of newHouses) {
+      const a = (h.deg * Math.PI) / 180, t = [Math.cos(a), Math.sin(a)], n = [-t[1], t[0]]; // n punta a ovest verso Via giudice Montea
+      const M = [h.c[0] + n[0] * (h.D / 2), h.c[1] + n[1] * (h.D / 2)];
+      if (this.net.conformerClearance(...M) < 1.35) continue;
+      const y = Terrain.heightAt(...M), base = y - 1.2, top = y + h.H;
+      const etb = Tiles.builderAt(...h.c, 'edifici'), dtb = this.near(M);
+      // Corpo di fabbrica in tufo nello strato edifici (visibile anche da lontano)
+      etb.addGeometry(new THREE.BoxGeometry(h.L, top - base, h.D).rotateY(a).translate(h.c[0], (top + base) / 2, -h.c[1]), h.wall);
+      etb.addGeometry(new THREE.BoxGeometry(h.L + 0.3, 0.35, h.D + 0.3).rotateY(a).translate(h.c[0], top - 0.18, -h.c[1]), stone);
+      etb.addGeometry(new THREE.BoxGeometry(h.L - 0.3, 0.12, h.D - 0.3).rotateY(a).translate(h.c[0], top + 0.05, -h.c[1]), roofCol);
+      const f = wallFrame(dtb, M, n);
+      f.box(h.L + 0.08, 0.95, 0.14, tufoDark, 0, y - 0.1, 0.05);  // zoccolo in conci di tufo
+      f.box(h.L + 0.16, 0.18, 0.20, light, 0, y + 3.65, 0.08);    // fascia marcapiano
+      if (h.shored) {
+        shoreFacade(f, M, n, y, -h.L / 2 + 0.3, h.L / 2 - 0.3, h.H, 1.25);
+      } else {
+        for (const wx of [-2.4, 0, 2.4]) {
+          if (wx === 0) {
+            f.box(1.38, 2.35, 0.10, light, wx, y, 0.05);
+            f.box(1.12, 2.18, 0.08, door, wx, y, 0.08);
+          } else {
+            f.box(1.15, 1.45, 0.08, light, wx, y + 0.85, 0.05);
+            f.box(0.92, 1.22, 0.08, shutter, wx, y + 0.95, 0.08);
+          }
+          f.box(1.22, 1.65, 0.10, light, wx, y + 4.25, 0.05);
+          f.box(0.96, 1.42, 0.08, shutter, wx, y + 4.36, 0.08);
+        }
+      }
+    }
+
+    // 3. Case a pericolo crollo reali sulle facciate storiche di Via giudice Montea (edificio 37)
+    const realCollapsible = [
+      { pt: [31.4, 242.0], x0: -9.5, x1: 8.5, maxZ: 1.75 },  // grande cortina nord su Via giudice Montea (len = 24.3 m)
+      { pt: [25.6, 209.3], x0: -2.8, x1: 2.8, maxZ: 0.95 },  // fronte intermedio prima del Bastione (len = 6.4 m)
+      { pt: [18.4, 165.3], x0: -8.5, x1: 8.5, maxZ: 1.85 },  // grande cortina sud verso Via Calderoni (len = 23.7 m)
+    ];
+    for (const item of realCollapsible) {
+      const w = this.wallNear(item.pt, 4);
+      if (!w) continue;
+      const tb = this.near(w.M), f = this.frame(w, tb), y = f.ground;
+      const top = tops.get('#' + w.index)?.top ?? y + 9.5;
+      const H = Math.max(6.8, Math.min(10.5, top - y));
+      this.keepOut.push({ M: w.M, n: w.n, half: w.len / 2 + 0.4, top: top + 1.5 });
+      shoreFacade(f, w.M, w.n, y, Math.max(-w.len / 2 + 0.4, item.x0), Math.min(w.len / 2 - 0.4, item.x1), H, item.maxZ);
     }
   },
 
@@ -9597,6 +9911,126 @@ const Details = {
         continue;
       }
       tb.addGeometry(new THREE.BoxGeometry(L + 0.05, Math.max(Terrain.heightAt(...m.A), Terrain.heightAt(...m.B)) + 2.6 - yy, 0.3).rotateY(r).translate(M[0], (yy + Math.max(Terrain.heightAt(...m.A), Terrain.heightAt(...m.B)) + 2.6) / 2, -M[1]), col.wall);
+    }
+  },
+
+  /**
+   * BLOCCO 4.3, CAMPI DA CALCIO E CALCETTO DELLE CHIESE E DEGLI ORATORI (senza etichetta né card):
+   * - Campo sportivo parrocchiale SS. Crocifisso «Giuseppe Dipalma» (adiacente al complesso di [445.9, -563.5], a [470.5, -557.5],
+   *   più il campetto interno nel chiostro a [435.1, -578.6]);
+   * - Campetto parrocchiale di San Domenico (adiacente al convento di [557.6, -74.7], a [593.6, -84.7], più il campetto
+   *   dell'oratorio nel grande cortile interno a [554.7, -63.7]);
+   * - Campetti degli oratori parrocchiali cittadini: Gesù Buon Pastore (Via Guardialto), Spirito Santo (Via Bari),
+   *   Santi Pietro e Paolo (Via Falcone e Borsellino), Madonna delle Grazie.
+   * Manto in erba sintetica a strisce bicolori, linee regolamentari bianche, porte con rete, recinzione alta con pali
+   * e correnti, torri faro d'angolo e panchine. La base sta nello strato «edifici» (visibile anche da lontano).
+   */
+  campiSportivi() {
+    const C = (h) => new THREE.Color(h);
+    const col = {
+      turf: [C('#4d8c3c'), C('#427d34')], white: C('#f3f1ea'), net: C('#c8ccd0'),
+      skirt: C('#a89f8c'), post: C('#2d4d38'), wire: C('#395c45'), pole: C('#7a8085'),
+      lamp: C('#f5efd6'), bench: C('#335c96'),
+    };
+    const pitches = [
+      // SS. Crocifisso «Giuseppe Dipalma»: campo principale a est del convento + campetto nel cortile interno
+      { c: [470.5, -557.5], L: 34, W: 18, deg: -104, lights: true, benches: true },
+      { c: [435.1, -578.6], L: 12, W: 10, deg: -104, lights: false, courtyard: true },
+      // San Domenico: campo parrocchiale sul fianco est + campetto dell'oratorio nel grande chiostro
+      { c: [593.6, -84.7], L: 26, W: 14, deg: 74, lights: true, benches: true },
+      { c: [554.7, -63.7], L: 16, W: 11, deg: 74, lights: false, courtyard: true },
+      // Oratori delle parrocchie cittadine
+      { c: [1092.5, -181.5], L: 28, W: 15, deg: 45, lights: true, benches: true },   // Gesù Buon Pastore
+      { c: [1744.0, 178.0], L: 28, W: 15, deg: -40, lights: true, benches: true },   // Spirito Santo
+      { c: [1065.0, 1113.5], L: 28, W: 15, deg: 60, lights: true, benches: true },   // Santi Pietro e Paolo
+      { c: [-275.0, 455.0], L: 26, W: 14, deg: 70, lights: true, benches: false },   // Madonna delle Grazie
+    ];
+    this.pitchPolys = [];
+    this.insidePitch = (e, n) => this.pitchPolys.some((poly) => Plane.contains(poly, e, n));
+    for (const p of pitches) {
+      const a = (p.deg * Math.PI) / 180, u = [Math.cos(a), Math.sin(a)], v = [-u[1], u[0]];
+      const hl = p.L / 2, hw = p.W / 2;
+      const P = (x, z) => [p.c[0] + u[0] * x + v[0] * z, p.c[1] + u[1] * x + v[1] * z];
+      // Verifica sicurezza: nessun punto del campo può invadere una strada
+      const samples = [[-hl, -hw], [hl, -hw], [hl, hw], [-hl, hw], [0, 0], [-hl, 0], [hl, 0], [0, -hw], [0, hw]];
+      if (samples.some(([x, z]) => Terrain.conformer.clearance(...P(x, z)) < 1.0)) continue;
+      this.pitchPolys.push([P(-hl - 2.5, -hw - 2.5), P(hl + 2.5, -hw - 2.5), P(hl + 2.5, hw + 2.5), P(-hl - 2.5, hw + 2.5)]);
+      const hs = samples.map(([x, z]) => Terrain.heightAt(...P(x, z)));
+      const y0 = Math.max(...hs) + 0.08, low = Math.min(...hs) - 0.35;
+      const etb = Tiles.builderAt(...p.c, 'edifici'), dtb = this.near(p.c);
+      const box = (tb, x, z, l, h, w, yb, color, rot = 0) => {
+        const q = P(x, z);
+        tb.addGeometry(new THREE.BoxGeometry(l, h, w).rotateY(a + rot).translate(q[0], yb + h / 2, -q[1]), color);
+      };
+      // Basamento livellato e manto a strisce bicolori
+      box(etb, 0, 0, p.L + 0.8, y0 - low, p.W + 0.8, low, col.skirt);
+      box(etb, 0, 0, p.L, 0.04, p.W, y0, col.turf[0]);
+      const stripes = Math.max(6, Math.round(p.L / 3.2));
+      const sw = (p.L - 0.8) / stripes;
+      for (let k = 0; k < stripes; k++) {
+        box(dtb, -hl + 0.4 + (k + 0.5) * sw, 0, sw, 0.02, p.W - 0.8, y0 + 0.04, col.turf[k % 2]);
+      }
+      // Linee regolamentari bianche (perimetro, metà campo, cerchio di centrocampo, aree di rigore)
+      const Lf = p.L - 1.6, Wf = p.W - 1.6, ly = y0 + 0.062;
+      const line = (x, z, l, w, rot = 0) => box(dtb, x, z, l, 0.015, w, ly, col.white, rot);
+      for (const s of [-1, 1]) {
+        line(0, (s * Wf) / 2, Lf, 0.10);
+        line((s * Lf) / 2, 0, 0.10, Wf);
+      }
+      line(0, 0, 0.10, Wf);
+      const rc = Math.min(3.0, Wf * 0.24);
+      for (let k = 0; k < 16; k++) {
+        const t = ((k + 0.5) / 16) * TAU, seg = (TAU * rc) / 16 + 0.04;
+        line(Math.cos(t) * rc, Math.sin(t) * rc, 0.09, seg, t);
+      }
+      const penD = Math.min(4.2, Lf * 0.18), penW = Math.min(8.2, Wf * 0.62);
+      const goalW = p.courtyard ? 2.4 : 3.0, goalH = p.courtyard ? 1.85 : 2.05, goalD = 1.0;
+      for (const s of [-1, 1]) {
+        const gx = (s * Lf) / 2;
+        line(gx - s * penD, 0, 0.10, penW);
+        for (const q of [-1, 1]) line(gx - (s * penD) / 2, (q * penW) / 2, penD, 0.10);
+        box(dtb, gx - s * (penD * 0.72), 0, 0.22, 0.016, 0.22, ly, col.white); // dischetto
+        // Porte da calcetto con pali, traversa e rete
+        for (const q of [-1, 1]) {
+          box(dtb, gx, (q * goalW) / 2, 0.10, goalH, 0.10, y0 + 0.05, col.white);
+          box(dtb, gx + (s * goalD) / 2, (q * goalW) / 2, goalD, 0.04, 0.06, y0 + 0.05, col.net);
+        }
+        box(dtb, gx, 0, 0.10, 0.10, goalW + 0.12, y0 + goalH, col.white);
+        box(dtb, gx + s * goalD, 0, 0.04, goalH - 0.05, goalW, y0 + 0.05, col.net);
+      }
+      // Recinzione perimetrale alta con montanti e correnti
+      if (!p.courtyard) {
+        const fh = 4.0, ox = hl + 0.3, oz = hw + 0.3;
+        for (const [x0, z0, x1, z1] of [[-ox, -oz, ox, -oz], [ox, -oz, ox, oz], [ox, oz, -ox, oz], [-ox, oz, -ox, -oz]]) {
+          const sideL = Math.hypot(x1 - x0, z1 - z0), m = Math.max(2, Math.round(sideL / 3.2));
+          const rot = Math.abs(z1 - z0) > Math.abs(x1 - x0) ? Math.PI / 2 : 0;
+          for (let i = 0; i <= m; i++) {
+            const xm = lerp(x0, x1, i / m), zm = lerp(z0, z1, i / m);
+            if (Terrain.conformer.clearance(...P(xm, zm)) < 0.8) continue;
+            box(dtb, xm, zm, 0.08, fh, 0.08, y0, col.post);
+          }
+          for (const rh of [0.9, 2.0, 3.1, fh - 0.05]) {
+            box(dtb, (x0 + x1) / 2, (z0 + z1) / 2, sideL, 0.035, 0.035, y0 + rh, rh > 3.5 ? col.post : col.wire, rot);
+          }
+        }
+      }
+      // Panchine coperte a bordo campo e torri faro agli angoli
+      if (p.benches) {
+        for (const s of [-1, 1]) {
+          if (this.free(...P(s * 3.8, -hw - 0.9), 0.8)) {
+            box(dtb, s * 3.8, -hw - 0.85, 2.6, 1.65, 0.75, y0, col.bench);
+            box(dtb, s * 3.8, -hw - 0.80, 2.4, 0.08, 0.38, y0 + 0.45, col.white);
+          }
+        }
+      }
+      if (p.lights) {
+        for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+          const spot = P(sx * (hl + 0.6), sz * (hw + 0.6));
+          if (Terrain.conformer.clearance(...spot) < 1.0) continue;
+          box(etb, sx * (hl + 0.6), sz * (hw + 0.6), 0.22, 9.2, 0.22, y0 - 0.2, col.pole);
+          box(etb, sx * (hl + 0.35), sz * (hw + 0.35), 0.55, 0.42, 1.15, y0 + 8.9, col.lamp, sx * sz * 0.45);
+        }
+      }
     }
   },
 
@@ -13880,7 +14314,7 @@ const POI_GROUPS = [
   { name: 'Chiese', ids: ['duomo', 'purgatorio', 'gesu', 'sanfrancesco', 'sannicola', 'santasofia', 'santateresa', 'santacecilia', 'agostino', 'addolorata'] },
   { name: 'Chiese e grotte rupestri', ids: ['sanmichele', 'santalucia', 'stella', 'settecamere'] },
   { name: 'Cinema, teatri e cultura', ids: ['mastrogiacomo', 'centrone', 'teatrovida', 'santomasi', 'sotterranea', 'finia'] },
-  { name: 'Palazzi e monumenti', ids: ['orsini'] },
+  { name: 'Palazzi e monumenti', ids: ['orsini', 'seminario'] },
   { name: 'Porte, mura e fontane', ids: ['portasanmichele', 'bastione', 'quattrofontane'] },
   { name: 'Piazze e giardini', ids: ['scacchi', 'pellicciari', 'fondovico', 'hortus', 'repubblica', 'villa'] },
   { name: 'La gravina e il paesaggio', ids: ['belvedere', 'ponte', 'fontana', 'botromagno', 'necropoli', 'scavi', 'padreeterno', 'capotenda'] },
