@@ -2515,8 +2515,229 @@ function districtAt(e, n) {
  * ═══════════════════════════════════════════════════════════════════════ */
 const FLAG = { BRIDGE: 1, FOOT: 2, TURN: 4, DIRT: 8, URBAN: 16, WALK: 32, TUNNEL: 64 };
 
+/**
+ * Blocco 4.5: vie lunghe dritte (richiesta del committente). Nei dati le vie della città moderna hanno un punto ogni
+ * 5–8 m che va a zig-zag (±10°): la via si sposta di lato fino a 1,8 m proprio agli incroci (Via Tripoli, Via Alcide
+ * De Gasperi, che nei dati è anche spezzata in pezzi senza nome). Qui, una volta e solo in memoria (la costante GEO
+ * resta quella generata), i tratti delle vie principali si uniscono in catene attraverso gli incroci dove proseguono quasi dritti
+ * (prima lo stesso nome entro 40°, poi la prosecuzione più dritta entro 25°), e i punti si smussano lungo la catena
+ * (media gaussiana su ±20 m). Le curve vere (oltre 35° in 24 m) restano; non si muovono il centro storico, il Bosco,
+ * gli estremi delle catene, ponte e sottopassi; nessun punto oltre 2,5 m, e dove la via spostata entrerebbe in una casa
+ * (le facciate nei dati stanno spesso sul bordo della via) i punti vicini si spostano meno.
+ * In più, per tutte le vie che proseguono dritte attraverso un incrocio (`ghosts`): ogni tratto è una curva per i suoi
+ * punti, e senza il punto del tratto accanto la direzione all'incrocio cambiava di colpo (Via Tripoli: 17°), un gomito
+ * proprio sull'incrocio; con quel punto in più (`TrackNetwork.#buildEdge`) la curva prosegue continua.
+ */
+const Raddrizza = {
+  done: false,
+  ghosts: new Map(),                                          // riga → [punto prima di a, punto dopo b] (o null)
+  stats: { catene: 0, punti: 0, spostamentoMax: 0 },
+  run() {
+    if (this.done) return;
+    this.done = true;
+    const t0 = performance.now();
+    const P = GEO.nodes, rows = GEO.edges, [za, zb, zc, zd] = GEO.meta.z0;
+    const inZ0 = (e, n) => e >= za - 30 && e <= zb + 30 && n >= zc - 30 && n <= zd + 30;
+    const NO = FLAG.BRIDGE | FLAG.FOOT | FLAG.TURN | FLAG.WALK | FLAG.DIRT | FLAG.TUNNEL;
+    // solo le vie principali (secondarie e terziarie): nelle residenziali le facciate stanno sul bordo della via
+    const okL = rows.map(([a, b, , , flags, flat]) => a !== b && !(flags & NO) && !DATA.pairs(flat).some(([e, n]) => inZ0(e, n) || n < -1100));
+    const ok = rows.map((r, i) => okL[i] && r[2] <= 1);
+    const at = new Map();                                     // nodo → [[riga, all'estremo a?]]
+    rows.forEach(([a, b], i) => { for (const [k, end] of [[a, true], [b, false]]) (at.get(k) ?? at.set(k, []).get(k)).push([i, end]); });
+    // direzione dal nodo verso l'interno della via, su ~12 m
+    const dir = (i, fromA) => {
+      const pts = DATA.pairs(rows[i][5]), seq = fromA ? pts : pts.reverse(), [e0, n0] = seq[0];
+      let k = 1;
+      while (k < seq.length - 1 && Math.hypot(seq[k][0] - e0, seq[k][1] - n0) < 12) k++;
+      const de = seq[k][0] - e0, dn = seq[k][1] - n0, L = Math.hypot(de, dn) || 1;
+      return [de / L, dn / L];
+    };
+    const link = new Map();                                   // `${riga}:${a|b}` → [riga, estremo a?] dall'altra parte
+    for (const [node, list] of at) {
+      if (list.some(([i]) => rows[i][4] & (FLAG.BRIDGE | FLAG.TUNNEL))) continue;
+      // la coppia che prosegue: stesso nome entro 40°, altrimenti la più dritta entro 25°
+      const xs = list.filter(([i]) => okL[i]), pairs = [];
+      for (let p = 0; p < xs.length; p++) for (let q = p + 1; q < xs.length; q++) {
+        const [u, v] = [dir(...xs[p]), dir(...xs[q])], dev = Math.acos(clamp(-(u[0] * v[0] + u[1] * v[1]), -1, 1)) * 180 / Math.PI;
+        const same = rows[xs[p][0]][3] >= 0 && rows[xs[p][0]][3] === rows[xs[q][0]][3];
+        if (dev < (same ? 40 : 25)) pairs.push([same ? 0 : 1, dev, xs[p], xs[q]]);
+      }
+      if (!pairs.length) continue;
+      pairs.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+      const [, , [i, ea], [j, eb]] = pairs[0];
+      link.set(`${i}:${ea ? 'a' : 'b'}`, [j, eb]);
+      link.set(`${j}:${eb ? 'a' : 'b'}`, [i, ea]);
+    }
+    const seen = new Set();
+    const chainFrom = (i0, fwd0) => {                         // catena da i0, percorsa nel verso fwd0 (true: da a a b)
+      const out = [];
+      let i = i0, fwd = fwd0;
+      while (i !== undefined && ok[i] && !seen.has(i)) {
+        seen.add(i);
+        out.push([i, fwd]);
+        const nx = link.get(`${i}:${fwd ? 'b' : 'a'}`);
+        if (!nx) break;
+        [i, fwd] = [nx[0], nx[1]];                            // si entra dall'estremo a → si va avanti
+      }
+      return out;
+    };
+    const chains = [];
+    rows.forEach((_, i) => {
+      if (!ok[i] || seen.has(i)) return;
+      const hasA = ok[link.get(`${i}:a`)?.[0]], hasB = ok[link.get(`${i}:b`)?.[0]];
+      if (!hasA) chains.push(chainFrom(i, true));
+      else if (!hasB) chains.push(chainFrom(i, false));
+    });
+    rows.forEach((_, i) => { if (ok[i] && !seen.has(i)) chains.push(chainFrom(i, true)); });   // anelli: aperti dove capita
+    // sagome degli edifici (centro storico e città) in celle da 20 m, come in tools/test/simula.mjs
+    const polys = [...GEO.buildings.map(([, , , rings]) => rings.map((r) => DATA.pairs(r))), ...DATA.city().map((b) => b.rings)]
+      .map((rings) => ({ rings, bb: Plane.bbox(rings[0]) }));
+    const CB = 20, cells = new Map();
+    polys.forEach((p, j) => {
+      for (let a = Math.floor(p.bb[0] / CB); a <= Math.floor(p.bb[1] / CB); a++) for (let b = Math.floor(p.bb[2] / CB); b <= Math.floor(p.bb[3] / CB); b++) (cells.get(a * 4099 + b) ?? cells.set(a * 4099 + b, []).get(a * 4099 + b)).push(j);
+    });
+    const inside = (e, n) => (cells.get(Math.floor(e / CB) * 4099 + Math.floor(n / CB)) ?? []).some((j) => {
+      const { rings, bb } = polys[j];
+      return e > bb[0] && e < bb[1] && n > bb[2] && n < bb[3] && Plane.contains(rings[0], e, n) && !rings.slice(1).some((h) => Plane.contains(h, e, n));
+    });
+    const moved = new Map();                                  // nodo → [e, n] nuovi
+    for (const chain of chains) {
+      if (chain.length < 2 && rows[chain[0][0]][5].length < 8) continue;
+      // punti della catena in fila, con la lunghezza d'arco
+      const pts = [], refs = [];
+      for (const [i, fwd] of chain) {
+        const flat = rows[i][5], n = flat.length / 2;
+        for (let q = 0; q < n; q++) {
+          const k = fwd ? q : n - 1 - q;
+          if (q === 0 && pts.length) { refs.push([i, k, pts.length - 1]); continue; }
+          refs.push([i, k, pts.length]);
+          pts.push([flat[k * 2], flat[k * 2 + 1]]);
+        }
+      }
+      const s = [0];
+      for (let k = 1; k < pts.length; k++) s.push(s[k - 1] + Math.hypot(pts[k][0] - pts[k - 1][0], pts[k][1] - pts[k - 1][1]));
+      const L = s[s.length - 1];
+      if (L < 40) continue;
+      // ricampionata ogni metro
+      const m = Math.ceil(L), U = new Float64Array((m + 1) * 2);
+      for (let q = 0, k = 0; q <= m; q++) {
+        const t = Math.min(L, q * L / m);
+        while (k < pts.length - 2 && s[k + 1] < t) k++;
+        const f = (t - s[k]) / ((s[k + 1] - s[k]) || 1);
+        U[q * 2] = lerp(pts[k][0], pts[k + 1][0], f); U[q * 2 + 1] = lerp(pts[k][1], pts[k + 1][1], f);
+      }
+      const step = L / m, S = new Float64Array(U.length), sigma = 8;
+      for (let q = 0; q <= m; q++) {
+        const half = Math.min(20, q * step, (m - q) * step), w = Math.round(half / step);
+        // curve vere: la direzione cambia di oltre 35° tra i 12 m prima e i 12 m dopo
+        const a = Math.max(0, q - 12), b = Math.min(m, q + 12);
+        const h1 = Math.atan2(U[q * 2 + 1] - U[a * 2 + 1], U[q * 2] - U[a * 2]), h2 = Math.atan2(U[b * 2 + 1] - U[q * 2 + 1], U[b * 2] - U[q * 2]);
+        const turn = a < q && b > q ? Math.abs(Math.atan2(Math.sin(h2 - h1), Math.cos(h2 - h1))) * 180 / Math.PI : 0;
+        const keep = 1 - smoothstep(20, 35, turn);
+        let se = 0, sn = 0, sw = 0;
+        for (let d = -w; d <= w; d++) { const g = Math.exp(-((d * step) ** 2) / (2 * sigma * sigma)); se += U[(q + d) * 2] * g; sn += U[(q + d) * 2 + 1] * g; sw += g; }
+        let de = (se / sw - U[q * 2]) * keep, dn = (sn / sw - U[q * 2 + 1]) * keep;
+        const d = Math.hypot(de, dn);
+        if (d > 2.5) { de *= 2.5 / d; dn *= 2.5 / d; }
+        S[q * 2] = U[q * 2] + de; S[q * 2 + 1] = U[q * 2 + 1] + dn;
+      }
+      // i punti dei dati tornano al loro posto lungo la catena, smussati (gli estremi restano)
+      const smooth = (t) => { const x = Math.min(m - 1e-9, t / step), q = Math.floor(x), f = x - q; return [lerp(S[q * 2], S[q * 2 + 2], f), lerp(S[q * 2 + 1], S[q * 2 + 3], f)]; };
+      const D = pts.map((p, k) => { if (k === 0 || k === pts.length - 1) return [0, 0]; const [e, n] = smooth(s[k]); return [e - p[0], n - p[1]]; });
+      // la via vera è la curva (Catmull-Rom) per i punti di ogni tratto: dove passerebbe dentro una casa (bordi e mezzeria,
+      // come in tools/test/simula.mjs) i punti vicini si spostano meno, a passi di un terzo (le facciate stanno spesso sul filo)
+      const F = new Float64Array(pts.length).fill(1), span = [];
+      { let at = 0; for (const [i] of chain) { const n = rows[i][5].length / 2; span.push([i, at, at + n - 1]); at += n - 1; } }
+      // le altre vie che arrivano agli incroci della catena: anche il loro primo tratto si sposta col nodo
+      const inChain = new Set(chain.map(([i]) => i)), sides = [];
+      for (const [i, k, pi] of refs) {
+        if (pi === 0 || pi === pts.length - 1 || (k !== 0 && k !== rows[i][5].length / 2 - 1)) continue;
+        const node = k === 0 ? rows[i][0] : rows[i][1];
+        for (const [j, end] of at.get(node) ?? []) if (!inChain.has(j) && !sides.some((x) => x[0] === j && x[1] === end)) sides.push([j, end, pi]);
+      }
+      const V3 = (e, n) => new THREE.Vector3(e, Terrain.roadHeight(e, n), n);   // in pianta (x, z) = (est, nord), con la quota
+      /** Vero se la curva per `ctrl` (via di larghezza della riga i) passa dentro una casa; `hit(q, cnt, cum)` per ogni campione. */
+      const invades = (ctrl, i, hit) => {
+        const curve = new THREE.CatmullRomCurve3(ctrl, false, 'centripetal'), len = curve.getLength(), cnt = Math.max(2, Math.ceil(len));
+        const h = (rows[i][6] ?? CONFIG.road.widths[rows[i][2]] ?? 4.6) / 2 + 0.05, Q = curve.getSpacedPoints(cnt);
+        const cum = [0];
+        for (let k = 1; k < ctrl.length; k++) cum.push(cum[k - 1] + ctrl[k].distanceTo(ctrl[k - 1]));
+        let found = false;
+        for (let q = 0; q <= cnt; q++) {
+          const a = Math.max(0, q - 1), b = Math.min(cnt, q + 1);
+          let te = Q[b].x - Q[a].x, tn = Q[b].z - Q[a].z;
+          const l = Math.hypot(te, tn) || 1;
+          te /= l; tn /= l;
+          if ([-h, 0, h].some((k) => inside(Q[q].x - tn * k, Q[q].z + te * k))) { found = true; hit?.(q / cnt * cum[cum.length - 1], cum); }
+        }
+        return found;
+      };
+      // vie laterali già dentro una casa prima di spostare (nei dati): non contano
+      const sideOk = sides.map(([j]) => !invades(DATA.pairs(rows[j][5]).map(([e, n]) => V3(e, n)), j));
+      // dove la via dei dati già sfiora una casa (entro il margine) quel punto non conta
+      const before = span.map(([i, a, b]) => { const hits = []; invades(pts.slice(a, b + 1).map(([e, n]) => V3(e, n)), i, (t) => hits.push(t)); return hits; });
+      // le vie larghe (oltre 6,5 m) prima si restringono, fino a 1,2 m, e solo poi si spostano meno
+      const w0 = span.map(([i]) => rows[i][6] ?? CONFIG.road.widths[rows[i][2]] ?? 4.6);
+      for (let pass = 0; pass < 8; pass++) {
+        let any = false;
+        for (const [x, [i, a, b]] of span.entries()) {
+          const ctrl = [];
+          for (let k = a; k <= b; k++) ctrl.push(V3(pts[k][0] + D[k][0] * F[k], pts[k][1] + D[k][1] * F[k]));
+          const w = rows[i][6] ?? w0[x], narrow = w0[x] > 6.5 && w > w0[x] - 1.2 + 1e-6;
+          let hit = false;
+          invades(ctrl, i, (t, cum) => {
+            if (before[x].some((t0) => Math.abs(t - t0) < 1.5)) return;
+            hit = true;
+            if (narrow) return;
+            // i punti di controllo attorno a questo campione (per lunghezza d'arco) si spostano meno
+            let k0 = a;
+            while (k0 < b - 1 && cum[k0 - a + 1] < t) k0++;
+            for (const k of [k0 - 1, k0, k0 + 1, k0 + 2]) if (k > 0 && k < pts.length - 1 && F[k] > 0) { F[k] = Math.max(0, F[k] - 1 / 3); any = true; }
+          });
+          if (hit && narrow) { rows[i][6] = +(w - 0.4).toFixed(2); any = true; this.stats.ristrette = (this.stats.ristrette ?? 0) + 1; }
+        }
+        sides.forEach(([j, end, pi], x) => {
+          if (!sideOk[x] || F[pi] <= 0) return;
+          const P2 = DATA.pairs(rows[j][5]), k = end ? 0 : P2.length - 1;
+          P2[k] = [pts[pi][0] + D[pi][0] * F[pi], pts[pi][1] + D[pi][1] * F[pi]];
+          if (invades(P2.map(([e, n]) => V3(e, n)), j)) { for (const q of [pi - 1, pi, pi + 1]) if (q > 0 && q < pts.length - 1) F[q] = Math.max(0, F[q] - 1 / 3); any = true; }
+        });
+        if (!any) break;
+      }
+      const np = pts.map((p, k) => [p[0] + D[k][0] * F[k], p[1] + D[k][1] * F[k]]);
+      for (const [i, k, pi] of refs) {
+        const [e, n] = np[pi], flat = rows[i][5];
+        this.stats.spostamentoMax = Math.max(this.stats.spostamentoMax, Math.hypot(e - flat[k * 2], n - flat[k * 2 + 1]));
+        flat[k * 2] = Math.round(e * 10) / 10; flat[k * 2 + 1] = Math.round(n * 10) / 10;
+        const last = flat.length / 2 - 1;
+        if ((k === 0 || k === last) && pi > 0 && pi < pts.length - 1) moved.set(k === 0 ? rows[i][0] : rows[i][1], [flat[k * 2], flat[k * 2 + 1]]);
+      }
+      // incroci spostati: subito anche le altre vie che ci arrivano partono dal punto nuovo (le catene dopo lo vedono)
+      for (const [node, [e, n]] of moved) {
+        P[node * 2] = e; P[node * 2 + 1] = n;
+        for (const [i, end] of at.get(node) ?? []) { const flat = rows[i][5], k = end ? 0 : flat.length / 2 - 1; flat[k * 2] = e; flat[k * 2 + 1] = n; }
+      }
+      moved.clear();
+      this.stats.catene++;
+      this.stats.punti += pts.length;
+    }
+    this.stats.spostamentoMax = +this.stats.spostamentoMax.toFixed(2);
+    // punti del tratto accanto, oltre gli estremi (a posto spostamenti fatti)
+    const beyond = (key) => {
+      const nx = link.get(key);
+      if (!nx) return null;
+      const [j, fromA] = nx, f = rows[j][5], k = fromA ? 1 : f.length / 2 - 2;
+      return [f[k * 2], f[k * 2 + 1]];
+    };
+    rows.forEach((_, i) => { if (okL[i]) { const g = [beyond(`${i}:a`), beyond(`${i}:b`)]; if (g[0] || g[1]) this.ghosts.set(i, g); } });
+    this.stats.raccordi = this.ghosts.size;
+    this.stats.ms = Math.round(performance.now() - t0);
+  },
+};
+
 class TrackNetwork {
   constructor() {
+    Raddrizza.run();                          // blocco 4.5: le vie lunghe della città senza zig-zag
     this.nodes = DATA.pairs(GEO.nodes).map(([e, n], id) => {
       const y = Terrain.roadHeight(e, n);
       return { id, e, n, y, pos: Geo.toWorld(e, n, y), edges: [], plaza: 0 };
@@ -2570,9 +2791,25 @@ class TrackNetwork {
       if (i === pts2.length - 1) return B.pos.clone();
       return Geo.toWorld(e, n, bridge || span ? lerp(A.y, B.y, run / total) : Terrain.roadHeight(e, n));
     });
-    const curve = new THREE.CatmullRomCurve3(control, false, 'centripetal');
-    const count = Math.max(2, Math.ceil(curve.getLength() / CONFIG.road.sampleStep));
-    const pts = curve.getSpacedPoints(count);
+    // blocco 4.5: dove la via prosegue dritta oltre un incrocio, la curva tiene conto del punto del tratto accanto
+    // (Raddrizza.ghosts) e si prende solo il pezzo tra i due estremi: all'incrocio la direzione non cambia di colpo
+    const ghost = deco || under || bridge || span ? null : Raddrizza.ghosts.get(index);
+    let count, pts;
+    if (ghost) {
+      const at = (p) => Geo.toWorld(p[0], p[1], Terrain.roadHeight(p[0], p[1]));
+      const ext = [...(ghost[0] ? [at(ghost[0])] : []), ...control, ...(ghost[1] ? [at(ghost[1])] : [])];
+      const curve = new THREE.CatmullRomCurve3(ext, false, 'centripetal'), N = ext.length - 1, Dv = 24;
+      curve.arcLengthDivisions = N * Dv;
+      const lens = curve.getLengths(), total = lens[N * Dv];
+      const s0 = lens[(ghost[0] ? 1 : 0) * Dv], s1 = lens[(ghost[1] ? N - 1 : N) * Dv];
+      count = Math.max(2, Math.ceil((s1 - s0) / CONFIG.road.sampleStep));
+      pts = Array.from({ length: count + 1 }, (_, k) => curve.getPoint(clamp(curve.getUtoTmapping(clamp((s0 + (s1 - s0) * k / count) / total, 0, 1)), 0, 1)));
+      pts[0].copy(control[0]); pts[count].copy(control[control.length - 1]);   // gli estremi esatti sugli incroci
+    } else {
+      const curve = new THREE.CatmullRomCurve3(control, false, 'centripetal');
+      count = Math.max(2, Math.ceil(curve.getLength() / CONFIG.road.sampleStep));
+      pts = curve.getSpacedPoints(count);
+    }
     const mid = pts2[Math.floor(pts2.length / 2)];
     const depth = under ? Float32Array.from(pts, (_, i) => Sottopassi.depth(under, (i / count) * total)) : null;
     if (depth) pts.forEach((p, i) => { p.y -= depth[i]; });
@@ -16938,7 +17175,7 @@ async function main() {
         driver.place(r.edge, r.dir, Math.max(0, r.s - back));
         return r.edge.name;
       },
-      roadWalls, Balconi, useVehicle, pause, resume, teleport, pauseMap, Radio, EngineAudio, Forest, ForestSound, flight, Volo, Burner, VehicleFactory, forestAmount,
+      roadWalls, Balconi, Raddrizza, useVehicle, pause, resume, teleport, pauseMap, Radio, EngineAudio, Forest, ForestSound, flight, Volo, Burner, VehicleFactory, forestAmount,
       get mode() { return mode; },
       /** Il mezzo disegnato (root, body, animate): per le prove sul tremolio (blocco 4.5). */
       get vehicle() { return car; },
