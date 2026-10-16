@@ -501,14 +501,27 @@
   .radio__next[hidden], .radio__vol[hidden] { display: none; }
   .radio__next svg { width: 13px; height: 13px; }
   .radio__vol { width: 88px; accent-color: var(--sunset); }
-  .postcard-btn { position: absolute; top: calc(var(--gutter) + 176px + 30px + 112px + var(--safe-top)); right: calc(var(--gutter) + var(--safe-right)); }
-  .follow-btn { position: absolute; top: calc(var(--gutter) + 176px + 30px + 168px + var(--safe-top)); right: calc(var(--gutter) + var(--safe-right)); }
+
+  /* Blocco 4.2: controllo audio procedurale del motore */
+  .engine {
+    position: absolute; display: flex; flex-direction: row-reverse; align-items: center; gap: 0.45rem;
+    top: calc(var(--gutter) + 176px + 30px + 112px + var(--safe-top)); right: calc(var(--gutter) + var(--safe-right));
+  }
+  .engine__toggle[aria-pressed="true"] { border-color: var(--sunset); }
+  .engine__toggle[aria-pressed="true"] svg { color: var(--sunset); }
+  .engine__toggle[aria-pressed="true"] .engine__label { font: 400 1rem/1 var(--font-display); letter-spacing: 0.04em; text-transform: none; }
+  .engine__vol { width: 88px; height: 6px; accent-color: var(--sunset); cursor: pointer; background: rgba(255, 255, 255, 0.35); border-radius: 99px; }
+  .engine__vol[hidden] { display: none; }
+  .engine__vol:focus-visible { outline: 3px solid var(--sunset); outline-offset: 2px; }
+
+  .postcard-btn { position: absolute; top: calc(var(--gutter) + 176px + 30px + 168px + var(--safe-top)); right: calc(var(--gutter) + var(--safe-right)); }
+  .follow-btn { position: absolute; top: calc(var(--gutter) + 176px + 30px + 224px + var(--safe-top)); right: calc(var(--gutter) + var(--safe-right)); }
   .follow-btn[hidden] { display: none; }
-  .hud.is-paused .radio, .hud.is-paused .follow-btn { display: none; }
+  .hud.is-paused .radio, .hud.is-paused .engine, .hud.is-paused .follow-btn { display: none; }
   /* mongolfiera (blocco M3): «Vista dalla cesta / Vista esterna» al posto di «Segui il mezzo», che scende di una riga */
-  .view-btn { position: absolute; top: calc(var(--gutter) + 176px + 30px + 168px + var(--safe-top)); right: calc(var(--gutter) + var(--safe-right)); }
+  .view-btn { position: absolute; top: calc(var(--gutter) + 176px + 30px + 224px + var(--safe-top)); right: calc(var(--gutter) + var(--safe-right)); }
   .view-btn[hidden], .hud.is-paused .view-btn { display: none; }
-  .hud.is-balloon .follow-btn { top: calc(var(--gutter) + 176px + 30px + 224px + var(--safe-top)); }
+  .hud.is-balloon .follow-btn { top: calc(var(--gutter) + 176px + 30px + 280px + var(--safe-top)); }
 
   /* Blocco N8: banner del Giro guidato dei monumenti e toast */
   .tour-hud {
@@ -656,9 +669,11 @@
     .pill span { display: none; }
     .radio { top: calc(var(--gutter) + 104px + 24px + 58px + var(--safe-top)); }
     .radio__vol { display: none !important; }     /* sul telefono bastano i tasti del volume */
-    .postcard-btn { top: calc(var(--gutter) + 104px + 24px + 116px + var(--safe-top)); }
-    .follow-btn, .view-btn { top: calc(var(--gutter) + 104px + 24px + 174px + var(--safe-top)); }
-    .hud.is-balloon .follow-btn { top: calc(var(--gutter) + 104px + 24px + 232px + var(--safe-top)); }
+    .engine { top: calc(var(--gutter) + 104px + 24px + 116px + var(--safe-top)); }
+    .engine__vol { display: none !important; }
+    .postcard-btn { top: calc(var(--gutter) + 104px + 24px + 174px + var(--safe-top)); }
+    .follow-btn, .view-btn { top: calc(var(--gutter) + 104px + 24px + 232px + var(--safe-top)); }
+    .hud.is-balloon .follow-btn { top: calc(var(--gutter) + 104px + 24px + 290px + var(--safe-top)); }
     .plaque { max-width: calc(100vw - 2 * var(--gutter) - 116px); padding: 0.45rem 0.8rem 0.5rem; }
     .plaque__street { font-size: 1rem; }
     .card { top: calc(132px + var(--safe-top)); width: calc(100vw - 2 * var(--gutter) - 116px); padding: 0.75rem 0.9rem 0.85rem; }
@@ -709,9 +724,11 @@
     .attribution--hud { top: calc(var(--gutter) + 92px + 4px + var(--safe-top)); }
     .pause-btn { top: calc(var(--gutter) + 92px + 24px + var(--safe-top)); }
     .radio { top: calc(var(--gutter) + 92px + 24px + 58px + var(--safe-top)); }
-    .postcard-btn { top: calc(var(--gutter) + 92px + 24px + 116px + var(--safe-top)); }
-    .follow-btn, .view-btn { top: calc(var(--gutter) + 92px + 24px + 174px + var(--safe-top)); }
-    .hud.is-balloon .follow-btn { top: calc(var(--gutter) + 92px + 24px + 232px + var(--safe-top)); }
+    .engine { top: calc(var(--gutter) + 92px + 24px + 116px + var(--safe-top)); }
+    .engine__vol { display: none !important; }
+    .postcard-btn { top: calc(var(--gutter) + 92px + 24px + 174px + var(--safe-top)); }
+    .follow-btn, .view-btn { top: calc(var(--gutter) + 92px + 24px + 232px + var(--safe-top)); }
+    .hud.is-balloon .follow-btn { top: calc(var(--gutter) + 92px + 24px + 290px + var(--safe-top)); }
     .plaque { padding: 0.4rem 0.8rem 0.45rem; }
     .plaque__street { font-size: 1rem; }
     .card { top: calc(var(--gutter) + 58px + var(--safe-top)); width: min(330px, 42vw); padding: 0.6rem 0.8rem 0.7rem; gap: 0.2rem; }
@@ -888,6 +905,14 @@
       <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3l7 5-7 5zM9 3l6 5-6 5z" fill="currentColor"/></svg>
     </button>
     <input class="radio__vol" id="radio-vol" type="range" min="0" max="1" step="0.05" value="0.6" aria-label="Volume della musica" hidden>
+  </div>
+
+  <div class="engine" id="engine">
+    <button class="pill engine__toggle" id="btn-engine" type="button" aria-pressed="true" aria-label="Attiva/disattiva rumore motore (tasto V)" title="Attiva/disattiva motore (tasto V)">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 8l2.8-2.8M4 11a4.5 4.5 0 0 1 8 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span class="engine__label" id="engine-label">Motore</span>
+    </button>
+    <input class="engine__vol" id="engine-vol" type="range" min="0" max="1" step="0.05" value="0.75" aria-label="Volume del motore" title="Volume del motore">
   </div>
 
   <button class="pill postcard-btn" id="btn-postcard" type="button" aria-label="Scatta cartolina" title="Scatta cartolina ricordo (tasto C)">
@@ -3394,21 +3419,64 @@ const World = {
       tmp.copy(up ? deck : stone).multiplyScalar(0.94 + hash2(i, 7) * 0.1);
       tb.tri(v[0].toArray(), v[1].toArray(), v[2].toArray(), tmp);
     }
-    // Parapetti
-    for (const side of [-1, 1]) {
-      const box = new THREE.BoxGeometry(L, 1.0, 0.45);
-      const mid = p0.clone().lerp(p1, 0.5);
-      box.applyMatrix4(new THREE.Matrix4().makeBasis(along, new THREE.Vector3(0, 1, 0), across)
-        .setPosition(mid.x + across.x * side * (width / 2 - 0.22), mid.y + CONFIG.road.lift + 0.5, mid.z + across.z * side * (width / 2 - 0.22)));
-      tb.addGeometry(box, stone);
-    }
-    // Lesene sui piloni tra le grandi arcate e due cornici marcapiano su entrambe le fronti.
+    // Colori di dettaglio architettonico e naturale
     const light = new THREE.Color('#ecdcb2');
     const local = (geo, color) => { geo.applyMatrix4(m); tb.addGeometry(geo, color); };
     const slope = Math.atan2(p1.y - p0.y, L);
+
+    // Helper per pilastrino monumentale squadrato con capitello modanato in coordinate locali
+    const pillar = (px, py, pz, h = 1.05) => {
+      const b = new THREE.BoxGeometry(0.82, 0.22, 0.82);
+      b.translate(px, py + 0.11, pz);
+      local(b, light);
+      const f = new THREE.BoxGeometry(0.72, h, 0.72);
+      f.translate(px, py + 0.22 + h / 2, pz);
+      local(f, stone);
+      const c = new THREE.BoxGeometry(0.88, 0.18, 0.88);
+      c.translate(px, py + 0.22 + h + 0.09, pz);
+      local(c, light);
+      const top = new THREE.ConeGeometry(0.52, 0.22, 4).rotateY(Math.PI / 4);
+      top.translate(px, py + 0.22 + h + 0.18 + 0.11, pz);
+      local(top, light);
+    };
+
+    // Parapetti del ponte: da x = 0.9 a x = L - 0.9 (lasciano spazio ai pilastrini di testata)
+    const pLen = L - 1.8;
+    for (const zSide of [0.22, width - 0.22]) {
+      const pWall = new THREE.BoxGeometry(pLen, 1.0, 0.45).rotateZ(slope);
+      pWall.translate(L / 2, deckAt(L / 2) + 0.5, zSide);
+      local(pWall, stone);
+      const pCap = new THREE.BoxGeometry(pLen + 0.05, 0.10, 0.52).rotateZ(slope);
+      pCap.translate(L / 2, deckAt(L / 2) + 1.05, zSide);
+      local(pCap, light);
+    }
+
+    // Pilastri monumentali alle testate (est e ovest)
+    pillar(0.45, deckAt(0), 0.22);
+    pillar(0.45, deckAt(0), width - 0.22);
+    pillar(L - 0.45, deckAt(L), 0.22);
+    pillar(L - 0.45, deckAt(L), width - 0.22);
+
+    // Sponda est: innesti a ventaglio verso Via Fontana la Stella e la scalinata di Via giudice Montea
+    for (const [vSide, angle] of [[0.22, -0.32], [width - 0.22, 0.32]]) {
+      const vLen = 2.8;
+      const vWall = new THREE.BoxGeometry(vLen, 1.0, 0.45).rotateY(angle);
+      const vx = -Math.cos(angle) * (vLen / 2) + 0.1;
+      const vz = vSide - Math.sin(angle) * (vLen / 2);
+      vWall.translate(vx, deckAt(0) + 0.5, vz);
+      local(vWall, stone);
+      const vCap = new THREE.BoxGeometry(vLen + 0.05, 0.10, 0.52).rotateY(angle);
+      vCap.translate(vx, deckAt(0) + 1.05, vz);
+      local(vCap, light);
+      const endX = -Math.cos(angle) * vLen;
+      const endZ = vSide - Math.sin(angle) * vLen;
+      pillar(endX, deckAt(0), endZ, 1.15);
+    }
+
+    // Cornici marcapiano rifinite: si arrestano contro i pilastri terminali e la spalla (senza sporgere nel vuoto)
     for (const z of [-0.18, width + 0.18]) {
       for (const drop of [7.9, 0.75]) {
-        const band = new THREE.BoxGeometry(L, 0.38, 0.4).rotateZ(slope);
+        const band = new THREE.BoxGeometry(pLen, 0.38, 0.4).rotateZ(slope);
         band.translate(L / 2, deckAt(L / 2) - drop, z);
         local(band, light);
       }
@@ -3418,6 +3486,111 @@ const World = {
         const pier = new THREE.BoxGeometry(2.2, y1 - y0, 0.5);
         pier.translate(x, (y0 + y1) / 2, z);
         local(pier, stone);
+      }
+    }
+
+    // Spalla monumentale ovest in tufo e conci di pietra che salda l'impalcato e l'arcata alla falesia
+    const spallaLen = 7.0;
+    const spallaY0 = groundAt(L) - 5.5;
+    const spallaY1 = deckAt(L) - 0.25;
+    const spallaH = Math.max(4.0, spallaY1 - spallaY0);
+    // Posizionata interamente sotto il corpo del ponte prima della testata
+    const spalla = new THREE.BoxGeometry(spallaLen, spallaH, width - 0.1);
+    spalla.translate(L - spallaLen / 2, (spallaY0 + spallaY1) / 2, width / 2);
+    local(spalla, stone);
+    // Basamento a scarpa allargato conficcato nella scarpata rocciosa
+    const scarpa = new THREE.BoxGeometry(spallaLen + 1.0, 4.0, width + 0.8);
+    scarpa.translate(L - spallaLen / 2, spallaY0 + 2.0, width / 2);
+    local(scarpa, new THREE.Color(PALETTE.stoneDark));
+
+    // Sperone naturale di roccia calcarea viva sotto l'arcata ovest e la falesia verso la gravina (PALETTE.strata)
+    const strataCol1 = new THREE.Color('#d8ceb8'), strataCol2 = new THREE.Color('#b8af9c'), strataCol3 = new THREE.Color('#cfc3ab');
+    const bushCol1 = new THREE.Color('#44582c'), bushCol2 = new THREE.Color('#384824');
+    const balze = [
+      { x: 78, y: groundAt(78) - 2.5, z: width + 2.8, w: 10, h: 7.0, d: 7.5, ry: 0.15, col: strataCol1 },
+      { x: 88, y: groundAt(88) - 3.8, z: width + 3.8, w: 12, h: 8.0, d: 8.5, ry: -0.12, col: strataCol2 },
+      { x: 97, y: groundAt(97) - 4.8, z: width + 3.5, w: 14, h: 9.0, d: 9.0, ry: 0.08, col: strataCol3 },
+      { x: 104, y: groundAt(103) - 5.8, z: width + 2.2, w: 11, h: 9.5, d: 8.0, ry: -0.20, col: strataCol1 },
+    ];
+    for (const b of balze) {
+      const rock = new THREE.BoxGeometry(b.w, b.h, b.d).rotateY(b.ry);
+      rock.translate(b.x, b.y, b.z);
+      local(rock, b.col);
+      // Cespugli di macchia mediterranea distribuiti sulle cenge rupestri verso la gravina
+      for (let s = -1; s <= 1; s += 2) {
+        const bush = new THREE.DodecahedronGeometry(0.70 + hash2(b.x + s, 3) * 0.40, 0).scale(1, 0.65, 1);
+        bush.translate(b.x + s * (b.w * 0.25), b.y + b.h / 2 + 0.15, b.z + (s * b.d * 0.22));
+        local(bush, s > 0 ? bushCol1 : bushCol2);
+      }
+    }
+
+    // Muretto continuo di protezione lungo la rampa ovest (Via giudice Montea verso Madonna della Stella)
+    const westNode = edge.a.e < edge.b.e ? edge.a : edge.b;
+    const rampEdge = westNode.edges.find((e) => e !== edge && !e.turn);
+    if (rampEdge) {
+      const RS = rampEdge.samples, rCount = rampEdge.count;
+      const dStart = Math.hypot(RS[0] - westNode.pos.x, RS[2] - westNode.pos.z);
+      const dEnd = Math.hypot(RS[rCount * 3] - westNode.pos.x, RS[rCount * 3 + 2] - westNode.pos.z);
+      const forward = dStart < dEnd;
+      const segs = Math.min(36, rCount);
+      let distAcc = 0;
+      let firstMidPt = null;
+      for (let s = 0; s < segs; s++) {
+        const i0 = forward ? s : rCount - s;
+        const i1 = forward ? s + 1 : rCount - s - 1;
+        const pA = new THREE.Vector3(RS[i0 * 3], RS[i0 * 3 + 1], RS[i0 * 3 + 2]);
+        const pB = new THREE.Vector3(RS[i1 * 3], RS[i1 * 3 + 1], RS[i1 * 3 + 2]);
+        const segVec = new THREE.Vector3().subVectors(pB, pA);
+        const segLen = segVec.length();
+        if (segLen < 0.2) continue;
+        const segDir = segVec.clone().normalize();
+        let nor = new THREE.Vector3(-segDir.z, 0, segDir.x);
+        if (nor.x < 0) nor.negate();
+        const mOff = rampEdge.width / 2 + 0.18;
+        const midPt = pA.clone().lerp(pB, 0.5).addScaledVector(nor, mOff);
+        if (!firstMidPt) firstMidPt = midPt.clone();
+        const groundH = Terrain.heightAt(midPt.x, -midPt.z);
+        const roadH = midPt.y;
+        const wallH = 1.05;
+        const baseDrop = Math.max(0.6, roadH - groundH + 0.4);
+        const rotY = Math.atan2(segVec.x, segVec.z);
+
+        const mBox = new THREE.BoxGeometry(0.44, wallH + baseDrop, segLen + 0.06).rotateY(rotY);
+        mBox.translate(midPt.x, roadH + wallH / 2 - baseDrop / 2, midPt.z);
+        tb.addGeometry(mBox, stone);
+
+        const cBox = new THREE.BoxGeometry(0.54, 0.12, segLen + 0.08).rotateY(rotY);
+        cBox.translate(midPt.x, roadH + wallH + 0.06, midPt.z);
+        tb.addGeometry(cBox, light);
+
+        distAcc += segLen;
+        if (distAcc >= 6.5) {
+          distAcc = 0;
+          const pil = new THREE.BoxGeometry(0.58, wallH + baseDrop + 0.15, 0.58).rotateY(rotY);
+          pil.translate(midPt.x, roadH + wallH / 2 - baseDrop / 2 + 0.08, midPt.z);
+          tb.addGeometry(pil, light);
+        }
+      }
+
+      // Raccordo continuo tra il pilastro della testata ovest del ponte e l'inizio del muretto della rampa
+      if (firstMidPt) {
+        const pillarWestPos = p0.clone().setY(0)
+          .addScaledVector(across, -width / 2)
+          .addScaledVector(along, L - 0.45)
+          .addScaledVector(across, width - 0.22)
+          .setY(deckAt(L));
+        const connVec = new THREE.Vector3().subVectors(firstMidPt, pillarWestPos);
+        const connLen = connVec.length();
+        if (connLen > 0.3) {
+          const connMid = pillarWestPos.clone().lerp(firstMidPt, 0.5);
+          const connRotY = Math.atan2(connVec.x, connVec.z);
+          const rWall = new THREE.BoxGeometry(0.44, 1.05 + 1.2, connLen + 0.1).rotateY(connRotY);
+          rWall.translate(connMid.x, connMid.y + 1.05 / 2 - 0.6, connMid.z);
+          tb.addGeometry(rWall, stone);
+          const rCap = new THREE.BoxGeometry(0.54, 0.12, connLen + 0.12).rotateY(connRotY);
+          rCap.translate(connMid.x, connMid.y + 1.05 + 0.06, connMid.z);
+          tb.addGeometry(rCap, light);
+        }
       }
     }
     const mesh = new THREE.Mesh(tb.build(), vertexColorMaterial({ roughness: 0.85 }));
@@ -10538,7 +10711,7 @@ const Details = {
     f.box(2.5, 3.8, 0.1, door, 0, y, 0.03);
   },
 
-  /** FONTANA DELLA STELLA: vasca e muro con nicchia ad arco, accanto alla testata del ponte, fuori dalla strada. */
+  /** FONTANA DELLA STELLA: monumento settecentesco in tufo con nicchia archivoltata, cannelle gemelle, vasca e muretti d'ala di raccordo al belvedere. */
   fountain([e0, n0]) {
     let best = null;
     for (let r = 3; r <= 16 && !best; r += 1) {
@@ -10556,15 +10729,39 @@ const Details = {
     if (!best) return;
     const l = Math.hypot(...best.n);
     best.n = [best.n[0] / l, best.n[1] / l];
-    const f = this.frame(best), y = Terrain.heightAt(...best.M), { stone, light, water, hole } = this.col;
-    f.box(4.2, 2.8, 0.7, stone, 0, y - 0.3, -0.9);                         // muro di fondo
-    f.box(4.5, 0.3, 0.9, light, 0, y + 2.5, -0.9);                         // cornice
+    const f = this.frame(best), y = Terrain.heightAt(...best.M), { stone, light, water, hole, dark } = this.col;
+    // Zoccolo basamentale
+    f.box(4.2, 0.35, 0.75, dark, 0, y - 0.25, -0.95);
+    // Muro monumentale in conci di tufo
+    f.box(4.0, 2.8, 0.65, stone, 0, y + 0.10, -0.95);
+    // Due lesene laterali di riquadratura
+    for (const side of [-1, 1]) f.box(0.38, 2.9, 0.72, light, side * 1.8, y + 0.10, -0.90);
+    // Trabeazione modanata superiore e fastigio centinato
+    f.box(4.3, 0.32, 0.85, light, 0, y + 2.85, -0.90);
+    f.box(2.0, 0.45, 0.30, light, 0, y + 3.20, -0.90);
+    // Nicchia archivoltata profonda con semicalotta scavata
     const niche = new THREE.Shape();
-    niche.moveTo(-0.7, 0); niche.lineTo(0.7, 0); niche.lineTo(0.7, 0.9); niche.absarc(0, 0.9, 0.7, 0, Math.PI, false); niche.closePath();
-    f.add(new THREE.ExtrudeGeometry(niche, { depth: 0.05, bevelEnabled: false, curveSegments: 6 }), hole, 0, y + 0.8, -0.53);
-    f.box(3.4, 0.75, 1.5, light, 0, y - 0.1, 0.2);                         // vasca
-    f.box(3.0, 0.06, 1.1, water, 0, y + 0.6, 0.2);                         // acqua
-    f.add(new THREE.CylinderGeometry(0.06, 0.06, 0.5, 6).rotateX(Math.PI / 2), light, 0, y + 1.3, -0.3);   // cannella
+    niche.moveTo(-0.75, 0); niche.lineTo(0.75, 0); niche.lineTo(0.75, 0.95); niche.absarc(0, 0.95, 0.75, 0, Math.PI, false); niche.closePath();
+    f.add(new THREE.ExtrudeGeometry(niche, { depth: 0.28, bevelEnabled: false, curveSegments: 6 }), hole, 0, y + 0.75, -0.62);
+    // Cornice modanata della nicchia
+    f.box(0.14, 1.15, 0.10, light, -0.80, y + 0.75, -0.58);
+    f.box(0.14, 1.15, 0.10, light, 0.80, y + 0.75, -0.58);
+    // Cannelle gemelle in ottone con borchie a rilievo
+    const brass = new THREE.Color('#b09568');
+    for (const cSide of [-0.32, 0.32]) {
+      f.add(new THREE.CylinderGeometry(0.04, 0.04, 0.35, 6).rotateX(Math.PI / 2), brass, cSide, y + 1.25, -0.42);
+      f.box(0.18, 0.18, 0.06, light, cSide, y + 1.25, -0.60);
+    }
+    // Vasca monolitica in pietra squadrata con bordo sagomato
+    f.box(3.2, 0.80, 1.15, light, 0, y - 0.1, -0.05);
+    f.box(3.4, 0.12, 1.30, stone, 0, y + 0.68, -0.05);
+    f.box(2.9, 0.06, 0.95, water, 0, y + 0.62, -0.05);
+    // Muretti d'ala laterali compatti di raccordo
+    for (const side of [-1, 1]) {
+      f.box(0.9, 1.05, 0.40, stone, side * 2.35, y - 0.1, -0.92);
+      f.box(0.95, 0.10, 0.45, light, side * 2.35, y + 0.95, -0.92);
+      f.box(0.48, 1.25, 0.48, light, side * 2.85, y - 0.1, -0.92);
+    }
   },
 
   /**
@@ -11874,8 +12071,8 @@ void main() { float a = max(0.0, 1.0 - length(vUv)); gl_FragColor = vec4(vCol * 
         bump += speed * dt;
         const rough = (L.rough ?? 0) * clamp(speed / 4, 0, 1);
         const jolt = rough * (Math.sin(bump * 7.3) * 0.6 + Math.sin(bump * 12.7 + 1.3) * 0.4);
-        body.rotation.set(-pitch + jolt * 0.006, 0, roll + rough * 0.008 * Math.sin(bump * 5.1));
-        body.position.y = Math.sin(time * freq) * shake * (0.3 + 0.7 * clamp(speed / 8, 0, 1)) + jolt * 0.012;
+        body.rotation.set(-pitch + jolt * 0.003, 0, roll + rough * 0.003 * Math.sin(bump * 5.1));
+        body.position.y = Math.sin(time * freq) * shake * (0.3 + 0.7 * clamp(speed / 8, 0, 1)) + jolt * 0.010;
         U.uHead.value = L.head ?? 1;
         U.uBrake.value = L.brake ?? 0;
         U.uBlinkL.value = L.blinkL ?? 0;
@@ -12523,7 +12720,7 @@ class Driver {
     this.sitting = null;
     this.position = new THREE.Vector3();
     this.forward = new THREE.Vector3(0, 0, 1);
-    this.yaw = 0; this.pitch = 0; this.yawRate = 0;
+    this.yaw = 0; this.pitch = 0; this.roll = 0; this.yawRate = 0;
     this.tour = null;                // blocco N8: stato del giro guidato dei monumenti
     this._ahead = new THREE.Vector3();
     this._behind = new THREE.Vector3();
@@ -12837,11 +13034,13 @@ class Driver {
       const rate = dt > 0 ? delta / dt : 0;
       this.yawRate += (rate - this.yawRate) * (snap ? 1 : damp(6, dt));
     }
-    this.#pointAhead(1.3, this._ahead);
-    this.#pointBehind(1.3, this._behind);
+    this.#pointAhead(3.6, this._ahead);
+    this.#pointBehind(3.6, this._behind);
     const run = Math.hypot(this._ahead.x - this._behind.x, this._ahead.z - this._behind.z) || 1;
     const pitch = Math.atan2(this._ahead.y - this._behind.y, run);
-    this.pitch += (pitch - this.pitch) * (snap ? 1 : damp(8, dt));
+    this.pitch += (pitch - this.pitch) * (snap ? 1 : damp(4.2, dt));
+    const targetRoll = snap ? 0 : clamp(this.yawRate * this.speed * 0.0022, -0.035, 0.035);
+    this.roll += (targetRoll - this.roll) * (snap ? 1 : damp(3.5, dt));
     this.forward.set(Math.sin(this.yaw), 0, Math.cos(this.yaw));
   }
 
@@ -13923,6 +14122,7 @@ class UI {
       start: $('start'), startPanel: $('start-panel'), btnStart: $('btn-start'), btnTourStart: $('btn-tour-start'), status: $('status'),
       startPicker: $('start-picker'), controlsHint: $('controls-hint'), lede: $('start-lede'),
       btnFollow: $('btn-follow'), btnBench: $('btn-bench'), btnBenchLabel: $('btn-bench-label'), btnView: $('btn-view'), btnViewLabel: $('btn-view-label'), btnRadio: $('btn-radio'), radioLabel: $('radio-label'), btnNext: $('btn-next'), radioVol: $('radio-vol'),
+      btnEngine: $('btn-engine'), engineLabel: $('engine-label'), engineVol: $('engine-vol'),
       btnPostcard: $('btn-postcard'),
       tourHud: $('tour-hud'), tourHudInfo: $('tour-hud-info'), btnTourSkip: $('btn-tour-skip'), btnTourExit: $('btn-tour-exit'),
       toast: $('toast'),
@@ -14667,8 +14867,259 @@ const Burner = (() => {
         try { setup(); } catch { return; }
       }
       if (ctx.state === 'suspended') ctx.resume();
-      gain.gain.setTargetAtTime(level * 0.1, ctx.currentTime, level > 0 ? 0.06 : 0.3);
+      const masterVol = typeof EngineAudio !== 'undefined' ? (EngineAudio.enabled ? EngineAudio.volume : 0) : 1;
+      gain.gain.setTargetAtTime(level * 0.1 * masterVol, ctx.currentTime, level > 0 ? 0.06 : 0.3);
     },
+  };
+})();
+
+/**
+ * 11e. RUMORE PROCEDURALE DEI MOTORI (blocco 4.2): sintesi audio Web Audio per ciascun veicolo,
+ * senza file audio esterni. Profilo acustico calibrato su regimi, carico, accelerazione e boost:
+ *  - Ferrari Monza SP2: V12 aspirato 8500 rpm (sawtooth + square detunata + sub-bass, filtro risonante e saturatore);
+ *  - Audi RS Q8: V8 biturbo 4.0L (rumble a battimento 1.4 Hz, filtro caldo e turbo spool noise a 2.4 kHz);
+ *  - Fiat Panda 2013: 4 cilindri Fire 1.2 (pulse + triangle da 55 a 320 Hz e filtro medio);
+ *  - John Deere serie 8R: 6 cilindri diesel pesante 9.0L (cadenza a bassi regimi, AM tremolo cilindri e sibilo turbo);
+ *  - Mongolfiera: delega al bruciatore (Burner) coordinato con il volume master del motore.
+ */
+const EngineAudio = (() => {
+  let ctx = null;
+  let masterGain = null;
+  let enabled = true;
+  let userVol = 0.75;
+  let currentModel = 'panda';
+
+  let osc1 = null, osc2 = null, osc3 = null;
+  let lfo = null, lfoGain = null;
+  let turboNoise = null, turboGain = null, turboFilter = null;
+  let mainFilter = null, shaper = null;
+  let synthGain = null;
+  let activeVehicle = null;
+
+  function makeDistortionCurve(k = 14) {
+    const n = 512, curve = new Float32Array(n);
+    const deg = Math.PI / 180;
+    for (let i = 0; i < n; ++i) {
+      const x = (i * 2) / n - 1;
+      curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
+    }
+    return curve;
+  }
+
+  function setup() {
+    if (ctx) return;
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    ctx = new AudioCtx();
+    masterGain = ctx.createGain();
+    masterGain.gain.value = enabled ? userVol : 0;
+    masterGain.connect(ctx.destination);
+  }
+
+  function stopNodes() {
+    try { osc1?.stop(); } catch {}
+    try { osc2?.stop(); } catch {}
+    try { osc3?.stop(); } catch {}
+    try { lfo?.stop(); } catch {}
+    try { turboNoise?.stop(); } catch {}
+    osc1 = osc2 = osc3 = lfo = lfoGain = turboNoise = turboGain = turboFilter = mainFilter = shaper = synthGain = null;
+    activeVehicle = null;
+  }
+
+  function startVehicle(modelId) {
+    if (!ctx) return;
+    stopNodes();
+    activeVehicle = modelId;
+    if (modelId === 'balloon') return;
+
+    synthGain = ctx.createGain();
+    synthGain.gain.value = 0.22;
+
+    mainFilter = ctx.createBiquadFilter();
+
+    if (modelId === 'huracan' || modelId === 'monza') {
+      shaper = ctx.createWaveShaper();
+      shaper.curve = makeDistortionCurve(14);
+      shaper.oversample = '2x';
+
+      mainFilter.type = 'lowpass';
+      mainFilter.frequency.value = 450;
+      mainFilter.Q.value = 2.8;
+
+      osc1 = ctx.createOscillator(); osc1.type = 'sawtooth'; osc1.frequency.value = 78;
+      osc2 = ctx.createOscillator(); osc2.type = 'sawtooth'; osc2.frequency.value = 78.6;
+      osc3 = ctx.createOscillator(); osc3.type = 'sine'; osc3.frequency.value = 39;
+
+      const g1 = ctx.createGain(); g1.gain.value = 0.45;
+      const g2 = ctx.createGain(); g2.gain.value = 0.35;
+      const g3 = ctx.createGain(); g3.gain.value = 0.30;
+
+      osc1.connect(g1).connect(mainFilter);
+      osc2.connect(g2).connect(mainFilter);
+      osc3.connect(g3).connect(mainFilter);
+
+      mainFilter.connect(shaper).connect(synthGain).connect(masterGain);
+      osc1.start(); osc2.start(); osc3.start();
+
+    } else if (modelId === 'rs6' || modelId === 'rsq8') {
+      mainFilter.type = 'lowpass';
+      mainFilter.frequency.value = 380;
+      mainFilter.Q.value = 1.4;
+
+      osc1 = ctx.createOscillator(); osc1.type = 'sawtooth'; osc1.frequency.value = 48;
+      osc2 = ctx.createOscillator(); osc2.type = 'square'; osc2.frequency.value = 49.4;
+
+      const g1 = ctx.createGain(); g1.gain.value = 0.50;
+      const g2 = ctx.createGain(); g2.gain.value = 0.28;
+      osc1.connect(g1).connect(mainFilter);
+      osc2.connect(g2).connect(mainFilter);
+
+      const nLen = ctx.sampleRate * 2;
+      const nBuf = ctx.createBuffer(1, nLen, ctx.sampleRate);
+      const nData = nBuf.getChannelData(0);
+      for (let i = 0; i < nLen; i++) nData[i] = Math.random() * 2 - 1;
+      turboNoise = ctx.createBufferSource();
+      turboNoise.buffer = nBuf; turboNoise.loop = true;
+
+      turboFilter = ctx.createBiquadFilter();
+      turboFilter.type = 'bandpass';
+      turboFilter.frequency.value = 2400;
+      turboFilter.Q.value = 3.5;
+
+      turboGain = ctx.createGain();
+      turboGain.gain.value = 0.0;
+
+      turboNoise.connect(turboFilter).connect(turboGain).connect(synthGain);
+      mainFilter.connect(synthGain).connect(masterGain);
+
+      osc1.start(); osc2.start(); turboNoise.start();
+
+    } else if (modelId === 'deere') {
+      mainFilter.type = 'lowpass';
+      mainFilter.frequency.value = 260;
+      mainFilter.Q.value = 1.8;
+
+      osc1 = ctx.createOscillator(); osc1.type = 'sawtooth'; osc1.frequency.value = 28;
+      osc2 = ctx.createOscillator(); osc2.type = 'triangle'; osc2.frequency.value = 56;
+
+      lfo = ctx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 12;
+      lfoGain = ctx.createGain(); lfoGain.gain.value = 0.35;
+      lfo.connect(lfoGain);
+
+      const g1 = ctx.createGain(); g1.gain.value = 0.60;
+      const g2 = ctx.createGain(); g2.gain.value = 0.40;
+
+      osc1.connect(g1).connect(mainFilter);
+      osc2.connect(g2).connect(mainFilter);
+
+      const turboOsc = ctx.createOscillator();
+      turboOsc.type = 'sine'; turboOsc.frequency.value = 1580;
+      const tWhistleGain = ctx.createGain(); tWhistleGain.gain.value = 0.04;
+      turboOsc.connect(tWhistleGain).connect(synthGain);
+      turboOsc.start();
+      osc3 = turboOsc;
+
+      mainFilter.connect(synthGain).connect(masterGain);
+      osc1.start(); osc2.start(); lfo.start();
+
+    } else {
+      mainFilter.type = 'lowpass';
+      mainFilter.frequency.value = 420;
+      mainFilter.Q.value = 1.2;
+
+      osc1 = ctx.createOscillator(); osc1.type = 'square'; osc1.frequency.value = 58;
+      osc2 = ctx.createOscillator(); osc2.type = 'triangle'; osc2.frequency.value = 116;
+
+      const g1 = ctx.createGain(); g1.gain.value = 0.40;
+      const g2 = ctx.createGain(); g2.gain.value = 0.40;
+
+      osc1.connect(g1).connect(mainFilter);
+      osc2.connect(g2).connect(mainFilter);
+
+      mainFilter.connect(synthGain).connect(masterGain);
+      osc1.start(); osc2.start();
+    }
+  }
+
+  // Lettura iniziale preferenze utente
+  try {
+    const savedOn = localStorage.getItem('gravina_engine_on');
+    if (savedOn !== null) enabled = savedOn === 'true';
+    const savedVol = localStorage.getItem('gravina_engine_vol');
+    if (savedVol !== null) userVol = clamp(parseFloat(savedVol) || 0.75, 0, 1);
+  } catch {}
+
+  return {
+    setup,
+    setVehicle(id) {
+      currentModel = id;
+      if (ctx) startVehicle(id);
+    },
+    toggle() {
+      setup();
+      enabled = !enabled;
+      try { localStorage.setItem('gravina_engine_on', String(enabled)); } catch {}
+      this.updateGain();
+      return enabled;
+    },
+    setVolume(v) {
+      userVol = clamp(v, 0, 1);
+      try { localStorage.setItem('gravina_engine_vol', String(userVol)); } catch {}
+      this.updateGain();
+    },
+    updateGain(duckFactor = 1) {
+      if (!masterGain || !ctx) return;
+      const target = enabled ? userVol * duckFactor : 0;
+      masterGain.gain.setTargetAtTime(target, ctx.currentTime, 0.08);
+    },
+    get enabled() { return enabled; },
+    get volume() { return userVol; },
+    update(speed, maxSpeed, boost, paused, onFoot) {
+      if (!ctx) {
+        if (!navigator.userActivation?.hasBeenActive) return;
+        try { setup(); startVehicle(currentModel || 'panda'); } catch { return; }
+      }
+      if (ctx.state === 'suspended') ctx.resume();
+      if (!activeVehicle && currentModel) startVehicle(currentModel);
+
+      if (activeVehicle === 'balloon') return;
+
+      const now = ctx.currentTime;
+      const isMuted = paused || onFoot;
+      const targetMaster = (enabled && !isMuted) ? userVol : (isMuted && enabled ? userVol * 0.15 : 0);
+      masterGain.gain.setTargetAtTime(targetMaster, now, 0.12);
+
+      const ratio = clamp(speed / Math.max(maxSpeed, 1), 0, 1.4);
+      const load = clamp(boost > 0 ? 0.35 + ratio * 0.65 : ratio, 0, 1.5);
+
+      if (activeVehicle === 'huracan' || activeVehicle === 'monza') {
+        const f0 = 78 + ratio * 580 + (boost ? 80 : 0);
+        if (osc1) osc1.frequency.setTargetAtTime(f0, now, 0.06);
+        if (osc2) osc2.frequency.setTargetAtTime(f0 * 1.008, now, 0.06);
+        if (osc3) osc3.frequency.setTargetAtTime(f0 * 0.5, now, 0.06);
+        if (mainFilter) mainFilter.frequency.setTargetAtTime(450 + load * 3600, now, 0.08);
+
+      } else if (activeVehicle === 'rs6' || activeVehicle === 'rsq8') {
+        const f0 = 48 + ratio * 240 + (boost ? 40 : 0);
+        if (osc1) osc1.frequency.setTargetAtTime(f0, now, 0.08);
+        if (osc2) osc2.frequency.setTargetAtTime(f0 * 1.025, now, 0.08);
+        if (mainFilter) mainFilter.frequency.setTargetAtTime(380 + load * 1800, now, 0.08);
+        if (turboGain) turboGain.gain.setTargetAtTime(boost > 0.1 ? 0.08 * boost : (ratio > 0.5 ? 0.03 * ratio : 0), now, 0.15);
+
+      } else if (activeVehicle === 'deere') {
+        const f0 = 26 + ratio * 85;
+        if (osc1) osc1.frequency.setTargetAtTime(f0, now, 0.1);
+        if (osc2) osc2.frequency.setTargetAtTime(f0 * 2, now, 0.1);
+        if (lfo) lfo.frequency.setTargetAtTime(10 + ratio * 18, now, 0.1);
+        if (mainFilter) mainFilter.frequency.setTargetAtTime(260 + load * 700, now, 0.1);
+
+      } else {
+        const f0 = 55 + ratio * 245;
+        if (osc1) osc1.frequency.setTargetAtTime(f0, now, 0.08);
+        if (osc2) osc2.frequency.setTargetAtTime(f0 * 2, now, 0.08);
+        if (mainFilter) mainFilter.frequency.setTargetAtTime(420 + load * 1400, now, 0.08);
+      }
+    }
   };
 })();
 
@@ -15047,7 +15498,7 @@ async function main() {
     car.root.position.copy(parked ? parked.pos : driver.position).y += CONFIG.road.lift;
     car.root.rotation.set(0, parked ? parked.yaw : driver.yaw, 0);
     const steer = parked ? 0 : clamp(driver.yawRate * 0.3, -0.5, 0.5);
-    const roll = parked ? 0 : clamp(driver.yawRate * driver.speed * 0.004, -0.05, 0.05);
+    const roll = parked ? 0 : driver.roll;
     car.animate(dt, parked ? 0 : driver.speed, steer, parked ? parked.pitch : driver.pitch, roll, elapsed, carLights(dt, parked));
     // La figurina: accanto alla portiera vicino al mezzo, poi sulla mezzeria del percorso.
     const W = Walker.mesh;
@@ -15130,6 +15581,7 @@ async function main() {
     if (car) scene.remove(car.root);
     car = VehicleFactory.get(spec.id);
     scene.add(car.root);
+    EngineAudio.setVehicle(spec.id);
     if (spec.air) {
       mode = 'balloon';
       if (was !== 'balloon') {
@@ -15397,6 +15849,23 @@ async function main() {
   ui.el.btnNext.addEventListener('click', () => Radio.next());
   ui.el.radioVol.addEventListener('input', () => Radio.volume(+ui.el.radioVol.value));
 
+  // Blocco 4.2: audio procedurale motore
+  const engineUi = () => {
+    const on = EngineAudio.enabled;
+    ui.el.btnEngine.setAttribute('aria-pressed', String(on));
+    ui.el.btnEngine.setAttribute('aria-label', on ? 'Disattiva rumore motore (tasto V)' : 'Attiva rumore motore (tasto V)');
+    ui.el.engineVol.hidden = !on;
+    ui.el.engineVol.value = String(EngineAudio.volume);
+  };
+  ui.el.btnEngine.addEventListener('click', () => {
+    EngineAudio.toggle();
+    engineUi();
+  });
+  ui.el.engineVol.addEventListener('input', () => {
+    EngineAudio.setVolume(+ui.el.engineVol.value);
+  });
+  engineUi();
+
   // Blocco N8: cartolina ad alta risoluzione con cornice in stile tufo e crediti
   const takePostcard = async (returnBlob = false) => {
     ui.showToast('Cartolina scattata!');
@@ -15546,6 +16015,12 @@ async function main() {
       if (driver.tour?.active) { driver.stopTour(); return; }
     }
     if ((k === 'm' || k === 'M') && !onControl && phase !== 'menu') { toggleRadio(); return; }
+    if ((k === 'v' || k === 'V') && !onInput && phase !== 'menu') {
+      EngineAudio.toggle();
+      engineUi();
+      ev.preventDefault();
+      return;
+    }
     if (phase !== 'drive') return;
     if (k === 'ArrowLeft' || k === 'a' || k === 'A') { driver.steer(-1); ev.preventDefault(); }
     else if (k === 'ArrowRight' || k === 'd' || k === 'D') { driver.steer(1); ev.preventDefault(); }
@@ -15642,6 +16117,7 @@ async function main() {
     scene.fog.far = lerp(CONFIG.city.fogFar, 640, forestFog);
     ForestSound.update(dt, { inside: forestIn, tetro: meninniIn, onFoot: mode === 'car' && driver.onFoot, speed: S.speed, paused: phase === 'pause' });
     Radio.duck(1 - 0.65 * ForestSound.level);
+    EngineAudio.update(driver.speed, CONFIG.drive.cruiseSpeed * driver.pace, driver.boosting ? 1 : 0, phase === 'pause', mode === 'balloon' || driver.onFoot || driver.sitting);
   };
   let forestTimer = 0, forestIn = 0, forestFog = 0, meninniIn = 0;
 
@@ -15668,7 +16144,7 @@ async function main() {
         driver.place(r.edge, r.dir, Math.max(0, r.s - back));
         return r.edge.name;
       },
-      roadWalls, Balconi, useVehicle, pause, resume, teleport, pauseMap, Radio, Forest, ForestSound, flight, Volo, Burner, VehicleFactory, forestAmount,
+      roadWalls, Balconi, useVehicle, pause, resume, teleport, pauseMap, Radio, EngineAudio, Forest, ForestSound, flight, Volo, Burner, VehicleFactory, forestAmount,
       get mode() { return mode; },
       /** Teletrasporto verso il monumento con quell'id (in pausa). */
       goTo(id) { return teleport({ lm: landmarks.find((l) => l.id === id) }); },
