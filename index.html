@@ -2293,8 +2293,16 @@ const Guida = {
   /** Altopiano lato città a `s` metri oltre il ciglio. */
   plateau(e, n, s) {
     if (!this.ok) return pendioFondovico(n, s, 2.5 * smoothstep(0, 250, s) - rioneDrop(n, s).drop, e);   // senza la guida: come prima di N1
-    const Tr = this.rimTrend(n), d0 = rioneDrop(n, 0).drop, R = Math.min(-d0, Tr);
-    const W = Math.max(150, 11 * d0, 12.5 * (Tr - R));
+    const Tr = this.rimTrend(n), d0 = rioneDrop(n, 0).drop;
+    let R = Math.min(-d0, Tr), W = Math.max(150, 11 * d0, 12.5 * (Tr - R));
+    // Blocco 4.3: lungo Via giudice Montea (dal Ponte Acquedotto verso il Bastione e la città, lato est e > 0)
+    // il profilo è in salita continua dal ponte (y ≈ -4,6 m a n = 287) verso il Bastione (y ≈ -2 m a n = 196) e Via Calderoni (y ≈ -0,5 m a n = 150).
+    if (n > 130 && (e === null || e > -10)) {
+      const wMontea = smoothstep(130, 160, n);
+      const rMontea = lerp(-0.5, -4.6, clamp((n - 150) / (287 - 150), 0, 1));
+      R = lerp(R, rMontea, wMontea);
+      W = lerp(W, 95, wMontea);
+    }
     return pendioFondovico(n, s, this.at(e, n) + (R - Tr) * (1 - smoothstep(0, W, Math.max(0, s))), e);
   },
 };
@@ -2388,7 +2396,7 @@ const Terrain = {
     const F = CONFIG.terrain.floorY;
     const L = Ravine.locate(e, n);
     if (L.side > 0) {
-      if (L.t >= 1) return { y: Guida.plateau(e, n, L.s), zone: ZONE.BANK, rough: 0.3, side: 1 };
+      if (L.t >= 1 || (n > 130 && n < 305 && L.s > -4.5)) return { y: Guida.plateau(e, n, Math.max(0, L.s)), zone: ZONE.BANK, rough: 0.3, side: 1 };
       if (L.dR < 7) return { y: F, zone: ZONE.FLOOR, rough: 0.5, side: 1 };
       // Dove il rione scende molto, la falesia si abbassa: i gradoni restano sotto il ciglio.
       // Blocco N1: dove la guida abbassa il ciglio (a sud del Fondovito) tutto il profilo dei gradoni
@@ -2411,6 +2419,7 @@ const Terrain = {
       const u = (L.t - 0.1) / 0.7;
       return { y: F + (F * -1 - 8) * terrace(u, 3), zone: ZONE.WALL, rough: 1.4, side: -1 };
     }
+    if (n > 295 && n < 320 && L.s > -11) return { y: -4.6, zone: ZONE.SLOPE, rough: 0.3, side: -1 }; // testata ovest Ponte Acquedotto
     return { y: -8 + 5 * smoothstep(0.8, 1, L.t), zone: ZONE.SLOPE, rough: 0.5, side: -1 };
   },
 
@@ -8577,6 +8586,7 @@ const Details = {
     this.piazzaScacchi();
     this.luoghiCultura(tops);                 // blocco N7: cinema, teatri e luoghi della cultura
     this.seminario(tops);                     // blocco 4.3: Seminario Vescovile in Piazza Benedetto XIII
+    this.viaGiudiceMontea(tops);              // blocco 4.3: Via giudice Montea (case storiche, case a pericolo crollo e parapetto)
     if (lm('quattrofontane')) this.quattroFontane(lm('quattrofontane').at);
     for (const [e, n] of GEO.views) this.railing(e, n);
     this.cityPlaces();
@@ -9072,6 +9082,195 @@ const Details = {
       // Secondo piano
       f.box(1.38, 1.75, 0.12, stone, wx, y + 7.95, 0.08);
       f.box(1.08, 1.48, 0.08, C('#4a3728'), wx, y + 8.08, 0.13);
+    }
+  },
+
+  /**
+   * VIA GIUDICE MONTEA (blocco 4.3, dal Ponte Acquedotto verso il Bastione medievale e la città):
+   * 1. Muretto continuo di parapetto in conci di tufo con copertina in pietra calcarea lungo il ciglio ovest verso la gravina;
+   * 2. Cortina di case storiche in tufo a 2 piani sul lato est del primo tratto di salita dal ponte (n = 252..281);
+   * 3. Case a pericolo crollo reali lungo la via (sia nel primo tratto sia sui fronti storici a [31.4, 242], [25.6, 209.3] e [18.4, 165.3]):
+   *    puntellature strutturali inclinate in travi di legno e acciaio contro le facciate, tiranti e capochiave a croce,
+   *    lesioni e crepe diagonali nel tufo, porte e finestre del piano terra murate o sbarrate con assi a X e transenne.
+   * Ogni elemento verifica la distanza di sicurezza dalla carreggiata (`conformerClearance`).
+   */
+  viaGiudiceMontea(tops) {
+    const C = (h) => new THREE.Color(h), { stone, light, iron, door } = this.col;
+    const tufo = C('#d4c39e'), tufoDark = C('#b8a47c'), tufoRaw = C('#a69067'), crack = C('#383028');
+    const beamWood = C('#7d5835'), beamDark = C('#5e4024'), steel = C('#5b6168'), red = C('#cf382e'), white = C('#f2efe8');
+    const shutter = C('#3c6646'), roofCol = C('#c5b28c');
+
+    // 1. Parapetto continuo in conci di tufo lungo il ciglio ovest (lato gravina) di Via giudice Montea (v198 e v1388)
+    for (const id of ['v198', 'v1388']) {
+      const edge = this.net.edges.find((e) => e.id === id);
+      if (!edge) continue;
+      const S = edge.samples, stride = 2;
+      let acc = 0;
+      for (let i = 0; i < edge.count; i += stride) {
+        const j = Math.min(edge.count, i + stride);
+        const e0 = S[i * 3], y0 = S[i * 3 + 1], n0 = -S[i * 3 + 2];
+        const e1 = S[j * 3], y1 = S[j * 3 + 1], n1 = -S[j * 3 + 2];
+        const segL = Math.hypot(e1 - e0, n1 - n0);
+        if (segL < 0.3) continue;
+        let nx = -(n1 - n0) / segL, nn = (e1 - e0) / segL;
+        if (nx > 0) { nx = -nx; nn = -nn; } // normale verso ovest (lato gravina)
+        const off = edge.width / 2 + 0.48;
+        const me = (e0 + e1) / 2 + nx * off, mn = (n0 + n1) / 2 + nn * off, my = (y0 + y1) / 2;
+        if (id === 'v198' && mn > 283.5) continue; // testata monumentale est del Ponte Acquedotto
+        const cs = this.net.closestSample(me, mn);
+        if (!cs || cs.d < cs.edge.width / 2 + 0.42 || this.net.conformerClearance(me, mn) < 0.12 || Buildings.occupied(me, mn)) continue;
+        const tb = this.near([me, mn]), rot = Math.atan2(n1 - n0, e1 - e0);
+        const g = Terrain.heightAt(me, mn), drop = clamp(my - g + 0.6, 0.6, 3.2), hWall = 0.96;
+        tb.addGeometry(new THREE.BoxGeometry(segL + 0.08, hWall + drop, 0.42).rotateY(rot).translate(me, my + (hWall - drop) / 2, -mn), tufoDark);
+        tb.addGeometry(new THREE.BoxGeometry(segL + 0.10, 0.11, 0.50).rotateY(rot).translate(me, my + hWall + 0.05, -mn), light);
+        acc += segL;
+        if (acc >= 6.8) {
+          acc = 0;
+          tb.addGeometry(new THREE.BoxGeometry(0.54, hWall + drop + 0.12, 0.54).rotateY(rot).translate(me, my + (hWall - drop) / 2 + 0.06, -mn), stone);
+        }
+      }
+    }
+
+    // Helper per attrezzare una facciata (o porzione di essa) come "casa a pericolo crollo" con puntellature, tiranti, crepe e transenne
+    const shoreFacade = (f, M, n, y, x0, x1, H, maxZ = 1.65) => {
+      const span = x1 - x0, cx = (x0 + x1) / 2;
+      const t = [-n[1], n[0]];
+      const worldAt = (x, z) => [M[0] + t[0] * x + n[0] * z, M[1] + t[1] * x + n[1] * z];
+      const safeAt = (x, z, gap = 0.32) => this.net.conformerClearance(...worldAt(x, z)) > gap;
+
+      // Toppe di intonaco caduto con conci di tufo erosi a vista e lesioni diagonali a gradini
+      f.box(span - 0.3, Math.min(H - 0.6, 6.6), 0.07, tufoDark, cx, y + 0.2, 0.04);
+      for (let k = 0; k < 5; k++) {
+        const rx = x0 + 0.8 + ((k + 0.4) * (span - 1.6)) / 5, ry = y + 0.9 + (k % 3) * 1.45;
+        f.box(1.15, 0.65, 0.09, tufoRaw, rx, ry, 0.05);
+      }
+      // Crepe diagonali ramificate sul paramento in tufo
+      for (const sx of [-0.28, 0.24]) {
+        const kx = cx + sx * span;
+        for (let s = 0; s < 5; s++) {
+          f.box(0.07, 0.78, 0.10, crack, kx + s * 0.22 * (sx < 0 ? 1 : -1), y + 1.4 + s * 0.68, 0.06, (sx < 0 ? -0.32 : 0.32));
+        }
+      }
+      // Tiranti metallici e capochiave (bolzoni) a croce / a X tra 1° e 2° piano
+      for (let tx = x0 + 1.2; tx <= x1 - 1.1; tx += 3.1) {
+        for (const ty of [y + 3.55, Math.min(y + 6.45, y + H - 0.85)]) {
+          f.box(0.58, 0.08, 0.12, iron, tx, ty, 0.08, 0.65);
+          f.box(0.58, 0.08, 0.12, iron, tx, ty, 0.08, -0.65);
+          f.box(0.14, 0.14, 0.15, iron, tx, ty, 0.09);
+        }
+      }
+      // Aperture al piano terra e primo piano murate in tufo o sbarrate con assi di legno incrociate a X
+      const nBays = Math.max(2, Math.floor(span / 3.4));
+      for (let b = 0; b < nBays; b++) {
+        const bx = x0 + ((b + 0.5) * span) / nBays;
+        // Vano piano terra tamponato/sbarrato
+        f.box(1.36, 2.35, 0.10, stone, bx, y, 0.05);
+        f.box(1.12, 2.15, 0.08, b % 2 === 0 ? tufoRaw : C('#231f1c'), bx, y + 0.05, 0.08);
+        // Assi di legno inchiodate a croce di Sant'Andrea e traversa
+        f.box(1.24, 0.14, 0.06, beamWood, bx, y + 1.05, 0.13, 0.52);
+        f.box(1.24, 0.14, 0.06, beamWood, bx, y + 1.05, 0.13, -0.52);
+        f.box(1.18, 0.15, 0.06, beamDark, bx, y + 0.55, 0.14);
+        f.box(1.18, 0.15, 0.06, beamDark, bx, y + 1.65, 0.14);
+        // Finestra 1° piano con telaio di puntellatura interno a croce
+        if (H > 5.2) {
+          const wy = y + 3.95;
+          f.box(1.26, 1.75, 0.10, stone, bx, wy, 0.05);
+          f.box(0.98, 1.48, 0.08, C('#201d1a'), bx, wy + 0.12, 0.08);
+          f.box(1.10, 0.11, 0.06, beamWood, bx, wy + 0.78, 0.13, 0.58);
+          f.box(1.10, 0.11, 0.06, beamWood, bx, wy + 0.78, 0.13, -0.58);
+        }
+      }
+      // Puntellature strutturali inclinate (ritti verticali a muro, puntoni inclinati in legno/acciaio e dormienti a terra)
+      let zFoot = maxZ;
+      while (zFoot > 0.55 && (!safeAt(x0 + 0.8, zFoot, 0.38) || !safeAt(cx, zFoot, 0.38) || !safeAt(x1 - 0.8, zFoot, 0.38))) zFoot -= 0.2;
+      if (zFoot >= 0.55) {
+        const nShores = Math.max(3, Math.round(span / 2.6));
+        const shoreH = Math.min(H - 0.8, 5.2);
+        // Banchina orizzontale superiore contro la facciata e dormiente al suolo
+        f.box(span - 0.8, 0.20, 0.18, beamDark, cx, y + shoreH - 0.25, 0.14);
+        f.box(span - 0.8, 0.16, 0.24, beamDark, cx, y - 0.05, zFoot - 0.12);
+        const strutLen = Math.hypot(shoreH - 0.2, zFoot - 0.15);
+        const tilt = Math.atan2(zFoot - 0.15, shoreH - 0.2);
+        for (let i = 0; i < nShores; i++) {
+          const sx = x0 + 0.9 + (i * (span - 1.8)) / Math.max(1, nShores - 1);
+          if (!safeAt(sx, zFoot, 0.35)) continue;
+          const colBeam = i % 2 === 0 ? beamWood : steel;
+          // Ritto verticale addossato al muro
+          f.box(0.18, shoreH + 0.2, 0.16, beamDark, sx, y - 0.05, 0.10);
+          // Puntone strutturale inclinato dalla base esterna fino alla banchina sul muro
+          const gStrut = new THREE.BoxGeometry(0.18, strutLen, 0.18);
+          gStrut.rotateX(-tilt);
+          f.add(gStrut, colBeam, sx, y + shoreH / 2 - 0.05, (zFoot + 0.12) / 2);
+          // Saetta secondaria / Rompitratta orizzontale a metà altezza
+          f.box(0.14, 0.14, (zFoot + 0.1) * 0.55, colBeam, sx, y + shoreH * 0.48, (zFoot + 0.1) * 0.28);
+        }
+        // Controvento orizzontale di collegamento tra i puntoni e transenna bianco-rossa di sicurezza
+        f.box(span - 1.4, 0.12, 0.12, steel, cx, y + 1.85, zFoot * 0.58);
+        for (let bx = x0 + 1.4; bx <= x1 - 1.4; bx += 2.6) {
+          if (!safeAt(bx, zFoot + 0.08, 0.38)) continue;
+          // Transenna stradale con piedi, telaio e fascia a strisce bianche e rosse
+          f.box(1.85, 0.95, 0.05, steel, bx, y, zFoot + 0.06);
+          for (let st = -0.75; st <= 0.76; st += 0.30) {
+            f.box(0.15, 0.22, 0.07, Math.round((st + 0.75) / 0.30) % 2 ? red : white, bx + st, y + 0.62, zFoot + 0.06);
+          }
+          // Cartello giallo/rosso di "Pericolo Crollo"
+          f.box(0.46, 0.34, 0.08, C('#e8c438'), bx, y + 0.26, zFoot + 0.07);
+          f.box(0.38, 0.08, 0.09, red, bx, y + 0.48, zFoot + 0.07);
+        }
+      }
+    };
+
+    // 2. Cortina di case storiche in tufo nel primo tratto di salita dal ponte (lato est, n = 252..280)
+    //    con la casa centrale (n = 265.5) in stato di pericolo crollo e puntellata
+    const newHouses = [
+      { c: [34.0, 274.8], L: 8.6, D: 6.0, H: 7.4, deg: 97, shored: false, wall: C('#dfd0b0') },
+      { c: [34.9, 265.8], L: 9.0, D: 6.2, H: 8.2, deg: 95, shored: true,  wall: C('#d2c09a') },
+      { c: [35.0, 256.6], L: 8.6, D: 6.0, H: 7.8, deg: 92, shored: false, wall: C('#e4d6b8') },
+    ];
+    for (const h of newHouses) {
+      const a = (h.deg * Math.PI) / 180, t = [Math.cos(a), Math.sin(a)], n = [-t[1], t[0]]; // n punta a ovest verso Via giudice Montea
+      const M = [h.c[0] + n[0] * (h.D / 2), h.c[1] + n[1] * (h.D / 2)];
+      if (this.net.conformerClearance(...M) < 1.35) continue;
+      const y = Terrain.heightAt(...M), base = y - 1.2, top = y + h.H;
+      const etb = Tiles.builderAt(...h.c, 'edifici'), dtb = this.near(M);
+      // Corpo di fabbrica in tufo nello strato edifici (visibile anche da lontano)
+      etb.addGeometry(new THREE.BoxGeometry(h.L, top - base, h.D).rotateY(a).translate(h.c[0], (top + base) / 2, -h.c[1]), h.wall);
+      etb.addGeometry(new THREE.BoxGeometry(h.L + 0.3, 0.35, h.D + 0.3).rotateY(a).translate(h.c[0], top - 0.18, -h.c[1]), stone);
+      etb.addGeometry(new THREE.BoxGeometry(h.L - 0.3, 0.12, h.D - 0.3).rotateY(a).translate(h.c[0], top + 0.05, -h.c[1]), roofCol);
+      const f = wallFrame(dtb, M, n);
+      f.box(h.L + 0.08, 0.95, 0.14, tufoDark, 0, y - 0.1, 0.05);  // zoccolo in conci di tufo
+      f.box(h.L + 0.16, 0.18, 0.20, light, 0, y + 3.65, 0.08);    // fascia marcapiano
+      if (h.shored) {
+        shoreFacade(f, M, n, y, -h.L / 2 + 0.3, h.L / 2 - 0.3, h.H, 1.25);
+      } else {
+        for (const wx of [-2.4, 0, 2.4]) {
+          if (wx === 0) {
+            f.box(1.38, 2.35, 0.10, light, wx, y, 0.05);
+            f.box(1.12, 2.18, 0.08, door, wx, y, 0.08);
+          } else {
+            f.box(1.15, 1.45, 0.08, light, wx, y + 0.85, 0.05);
+            f.box(0.92, 1.22, 0.08, shutter, wx, y + 0.95, 0.08);
+          }
+          f.box(1.22, 1.65, 0.10, light, wx, y + 4.25, 0.05);
+          f.box(0.96, 1.42, 0.08, shutter, wx, y + 4.36, 0.08);
+        }
+      }
+    }
+
+    // 3. Case a pericolo crollo reali sulle facciate storiche di Via giudice Montea (edificio 37)
+    const realCollapsible = [
+      { pt: [31.4, 242.0], x0: -9.5, x1: 8.5, maxZ: 1.75 },  // grande cortina nord su Via giudice Montea (len = 24.3 m)
+      { pt: [25.6, 209.3], x0: -2.8, x1: 2.8, maxZ: 0.95 },  // fronte intermedio prima del Bastione (len = 6.4 m)
+      { pt: [18.4, 165.3], x0: -8.5, x1: 8.5, maxZ: 1.85 },  // grande cortina sud verso Via Calderoni (len = 23.7 m)
+    ];
+    for (const item of realCollapsible) {
+      const w = this.wallNear(item.pt, 4);
+      if (!w) continue;
+      const tb = this.near(w.M), f = this.frame(w, tb), y = f.ground;
+      const top = tops.get('#' + w.index)?.top ?? y + 9.5;
+      const H = Math.max(6.8, Math.min(10.5, top - y));
+      this.keepOut.push({ M: w.M, n: w.n, half: w.len / 2 + 0.4, top: top + 1.5 });
+      shoreFacade(f, w.M, w.n, y, Math.max(-w.len / 2 + 0.4, item.x0), Math.min(w.len / 2 - 0.4, item.x1), H, item.maxZ);
     }
   },
 
