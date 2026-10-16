@@ -460,10 +460,15 @@ commerciali e protette: il committente ha scelto musica ambient originale, gener
       Aldo Moro, 29–37%): era il raccordo del terreno, allargato nel blocco E. Resta Via Goito (22%).
 
 **Camera e interfaccia**
-- [ ] Dopo il teletrasporto la camera a volte parte troppo vicina a un tetto (screenshot
-      `30-teletrasporto`): controllare l'altezza iniziale in `rig.snap`.
-- [ ] In verticale le schede lunghe (Cattedrale, Santa Sofia, circa 330 caratteri) occupano
-      molto schermo: accorciarle o renderle scorrevoli.
+- [x] Dopo il teletrasporto la camera a volte partiva troppo vicina a un tetto: dal blocco 4.4 `rig.snap`
+      sceglie la direzione più libera e tiene la camera sopra i tetti entro 20 m per 2,5 s (16 luoghi su 42
+      a ridosso di un tetto, ora nessuno).
+- [x] In verticale le schede lunghe (Cattedrale, Santa Sofia, circa 330 caratteri) occupavano
+      molto schermo: dal blocco 4.4 al massimo un terzo dello schermo (da 280 a 248 px a 390 × 844), testo
+      che scala con la larghezza, scorrimento col fondo che sfuma finché c'è altro testo; mentre si legge
+      la scheda resta. Da nascosta non prende più i tocchi sulla scena (prima restava trasparente sopra).
+- [ ] In orizzontale sul telefono il testo delle schede resta tagliato a tre righe: se si vuole, scorrevole
+      come in verticale.
 - [x] Vetrina, campo lungo: sui telefoni il mezzo era piccolo. Rifatte nel blocco M3: in verticale un
       campo medio sul mezzo vicino alla Fontana della Stella (`CONFIG.camera.showroom`, `node vetrina.mjs`).
 - [ ] Prestazioni con la città intera (blocco C, `node prestazioni.mjs`): 543 000 triangoli in

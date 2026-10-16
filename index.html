@@ -341,9 +341,13 @@
     border-radius: 2px; box-shadow: 0 14px 34px rgba(0, 0, 0, 0.3);
     pointer-events: auto;
     opacity: 0; transform: translateY(-8px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
+    /* blocco 4.4: nascosta davvero quando sparisce (non ferma più i tocchi sulla scena, non si raggiunge col Tab) */
+    visibility: hidden;
+    transition: opacity 0.6s ease, transform 0.6s ease, visibility 0s linear 0.6s;
   }
-  .card.is-visible { opacity: 1; transform: none; }
+  .card.is-visible { opacity: 1; transform: none; visibility: visible; transition-delay: 0s; }
+  /* blocco 4.4: se il testo continua sotto, il fondo sfuma (si scorre col dito, la rotella o i tasti) */
+  .card.card--more { -webkit-mask-image: linear-gradient(#000 calc(100% - 2.2rem), transparent); mask-image: linear-gradient(#000 calc(100% - 2.2rem), transparent); }
   .card.card--bench { max-height: min(150px, 25dvh); padding: 0.65rem 0.85rem; font-size: 0.88rem; }
   /* Blocco M2: in panchina davanti al monumento, il pulsante per tornare al mezzo */
   .bench-btn {
@@ -676,9 +680,15 @@
     .hud.is-balloon .follow-btn { top: calc(var(--gutter) + 104px + 24px + 290px + var(--safe-top)); }
     .plaque { max-width: calc(100vw - 2 * var(--gutter) - 116px); padding: 0.45rem 0.8rem 0.5rem; }
     .plaque__street { font-size: 1rem; }
-    .card { top: calc(132px + var(--safe-top)); width: calc(100vw - 2 * var(--gutter) - 116px); padding: 0.75rem 0.9rem 0.85rem; }
-    .card__title { font-size: 1.15rem; }
-    .card__text { font-size: 0.85rem; }
+    /* blocco 4.4: in verticale la scheda sta nella fascia alta (al massimo un terzo dello schermo) e
+       scorre; il mezzo, a metà schermo, resta libero */
+    .card {
+      top: calc(132px + var(--safe-top)); width: calc(100vw - 2 * var(--gutter) - 116px);
+      max-height: min(15.5rem, 32dvh); padding: 0.65rem 0.8rem 0.75rem; gap: 0.25rem;
+    }
+    .card__kicker { font-size: 0.64rem; letter-spacing: 0.12em; }
+    .card__title { font-size: clamp(1rem, 4.4vw, 1.15rem); }
+    .card__text { font-size: clamp(0.8rem, 3.5vw, 0.88rem); line-height: 1.45; }
     /* cartelli affiancati in griglia, freccia sopra e destinazione sotto */
     .signs { display: grid; grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr)); width: 100%; gap: 0.5rem; }
     .sign { min-width: 0; max-width: none; grid-template-columns: 1fr; justify-items: center; text-align: center; padding: 0.5rem 0.4rem 0.55rem; }
@@ -935,7 +945,7 @@
     <span id="btn-bench-label">Esci dalla piazzetta · torna al mezzo</span>
   </button>
 
-  <article class="card" id="card" aria-live="polite">
+  <article class="card" id="card" aria-live="polite" aria-labelledby="card-title" tabindex="0">
     <span class="card__kicker" id="card-kicker"></span>
     <h2 class="card__title" id="card-title"></h2>
     <p class="card__text" id="card-text"></p>
@@ -14603,6 +14613,12 @@ class UI {
     this.cardTimer = 0;
     this.labels = [];
     this.labelsActive = false;
+    // Blocco 4.4: mentre si legge (si scorre o si tocca la scheda) la scheda resta, e il fondo sfuma finché c'è altro
+    const reading = () => { if (this.el.card.classList.contains('is-visible')) this.cardTimer = Math.max(this.cardTimer, 6); };
+    this.el.card.addEventListener('scroll', () => { this.cardMore(); reading(); }, { passive: true });
+    this.el.card.addEventListener('pointerdown', reading);
+    this.el.card.addEventListener('focus', reading);
+    addEventListener('resize', () => this.cardMore());
     this._v = new THREE.Vector3();
     if (this.isTouch) this.el.controlsHint.textContent = 'Agli incroci tocca i cartelli marroni. Con Pausa ti fermi, cambi mezzo o ti teletrasporti.';
   }
@@ -14757,6 +14773,13 @@ class UI {
     card.scrollTop = 0;
     card.classList.add('is-visible');
     this.cardTimer = 10;
+    this.cardMore();
+  }
+
+  /** Blocco 4.4: sfuma il fondo della scheda finché c'è altro testo da scorrere. */
+  cardMore() {
+    const c = this.el.card;
+    c.classList.toggle('card--more', c.scrollHeight - c.clientHeight - c.scrollTop > 4);
   }
 
   tickCard(dt) {
