@@ -442,6 +442,9 @@ commerciali e protette: il committente ha scelto musica ambient originale, gener
         (sono di terzi); prova `node motori.mjs` coi file audio da ascoltare in `tools/test/shots/`;
       - prove: `npm run simula` verde (0 problemi, 0 case e 0 dettagli sulla strada) e `npm run interazioni` 83/83 dopo
         ogni compito.
+- [x] Terza richiesta del committente (16/10/2026): **velocità massime per mezzo** (Deere 50, Panda 80, Audi e Ferrari 180)
+      con l'accelerazione vera, **limiti per tipo di strada** (scelta del committente), frenata prima degli incroci, cambio
+      che a velocità costante mette la marcia lunga, trattore più cattivo sotto sforzo; prova `node velocita.mjs`.
 - [ ] Da sentire con il committente: il rumore dei motori nuovo, sul sito o dai file `motore-*.wav` (volumi e timbri si
       tarano in `MOTORI`).
 - [ ] Da decidere con il committente: un pulsante per lo **schermo intero** (non c'è; su iPhone Safari non funziona fuori dai video).

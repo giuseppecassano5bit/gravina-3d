@@ -1,5 +1,5 @@
 /**
- * Rumore dei motori (blocco 4.4): per ogni mezzo una guida simulata di 16 s (minimo, partenza, crociera,
+ * Rumore dei motori (blocco 4.4): per ogni mezzo una guida simulata (minimo, partenza, crociera, a tavoletta fino alla velocità massima,
  * acceleratore, rilascio, frenata, minimo) resa senza altoparlanti (OfflineAudioContext) e salvata in
  * shots/motore-<mezzo>.wav da ascoltare. Controlla anche che non ci siano valori anomali né saturazione,
  * e stampa giri, marce e carico lungo la prova.

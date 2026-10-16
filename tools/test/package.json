@@ -8,7 +8,8 @@
     "interazioni": "node interazioni.mjs",
     "foto": "node foto.mjs",
     "anteprima": "node anteprima.mjs",
-    "motori": "node motori.mjs"
+    "motori": "node motori.mjs",
+    "velocita": "node velocita.mjs"
   },
   "devDependencies": {
     "playwright": "1.56.1",

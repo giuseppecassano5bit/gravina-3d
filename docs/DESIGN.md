@@ -479,6 +479,15 @@ riga intera.
 
 ## 6. Movimento, incroci e cartelli
 
+* **Velocità massime** (blocco 4.4, decisione del committente del 16/10/2026): con Shift ogni mezzo va verso la sua
+  massima (John Deere 50 km/h, Panda 80, Audi RS Q8 e Ferrari Monza SP2 180) con la sua accelerazione (0–100 km/h:
+  Ferrari 3,2 s, Audi 4 s nel diorama; Panda a 80 in 14,5 s, trattore a 50 in 13 s), ma mai oltre il limite della
+  via (`CONFIG.drive.limits`): centro storico 30 km/h (lì resta l'andatura di crociera), in città 30–70 per classe,
+  fuori città fino alla massima, sterrati 50. Il cartello dell'incrocio si apre anche in base allo spazio di
+  frenata, e il mezzo frena a 4,5 m/s² per arrivare all'incrocio a 20 km/h o alla velocità della via dopo; lasciato
+  Shift rallenta col freno motore (2,2 m/s²). Si arriva alla massima solo sulle strade lunghe fuori città (la strada
+  del Bosco, le provinciali): a 180 km/h si fanno 50 m al secondo.
+
 * Il mezzo segue la spline della via: crociera 8,5 m/s, 5,5 m/s vicino agli incroci, 6 m/s sul ponte, 4,5 m/s nelle inversioni, tutto moltiplicato per il ritmo del mezzo.
 * **Partenza**: 12 m prima della testata est del Ponte Acquedotto, sulla via che vi arriva (Via Fontana la Stella), accanto alla Fontana della Stella e rivolti verso il ponte. Il primo tratto attraversa il ponte.
 * **Pausa**: il mezzo frena a 7 m/s² fino a fermarsi; il menu (riprendi, cambia mezzo, mappa e luoghi) compare solo in pausa. Il viaggio va in pausa da solo se la pagina viene nascosta.
@@ -680,10 +689,12 @@ costruito sui dati reali (fonti nel README), in un `AudioWorklet` creato dal tes
 * **contorno**: aspirazione (l'ululato del V12 ai regimi alti), turbo dell'Audi e del trattore, battito
   del diesel, scoppiettii in rilascio per Audi e Ferrari, un taglio finale degli acuti (a 20 m, dove sta
   la camera, l'aria se li mangia);
-* **cambio** (`Cambio`): giri dalle marce (km/h ogni 1 000 giri), in crociera nella fascia comoda di ogni
-  motore, con l'acceleratore fino in alto e una scalata sola, cambiate col taglio del carico, frizione che
-  slitta alla partenza; il trattore ha la trasmissione continua e tiene 1 450–1 950 giri; il carico viene
-  dall'accelerazione (zero in rilascio);
+* **cambio** (`Cambio`, rifatto con la terza richiesta del committente): giri dalle marce (km/h ogni 1 000 giri).
+  In accelerazione tira le marce (a tavoletta fino in alto, scalando una o due marce se si parte da una marcia
+  lunga); a velocità costante mette la marcia più lunga sopra la fascia comoda (`lo`), così in crociera e alla
+  massima il motore gira basso e regolare (Audi a 180 km/h in ottava a 2 800 giri, Ferrari in settima a 3 400,
+  Panda a 80 in quinta a 2 400); in frenata scala. Il trattore ha la trasmissione continua: 1 500–1 750 giri
+  in crociera, 2 050 sotto sforzo, con lo scarico, il battito e il turbo che crescono col carico (`grit`);
 * in pausa e a piedi il mezzo resta acceso al minimo, più piano.
 * **come lo sente chi sta sul marciapiede** (seconda richiesta del committente: «non come un microfono vicino
   allo scarico»): oltre ai colpi dello scarico, che ora pesano meno, c'è il blocco motore, cioè le armoniche
