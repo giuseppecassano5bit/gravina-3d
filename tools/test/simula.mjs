@@ -61,7 +61,8 @@ const r = await page.evaluate(() => {
     return false;
   };
   // Terreno, vie e alberi (anche del centro storico) sono nei riquadri: lì valgono gli intervalli t.ranges.
-  const skip = new Set(['ponte-acquedotto', 'panda-4x4', 'audi-rs6', 'lamborghini-huracan', 'trattore-john-deere', 'fiat-panda', 'audi-rsq8', 'ferrari-monza', 'john-deere-8r']);
+  // (dal blocco 4.4 anche il ponte: muretti e pilastrini delle testate non devono stare sulle vie che ci arrivano)
+  const skip = new Set(['panda-4x4', 'audi-rs6', 'lamborghini-huracan', 'trattore-john-deere', 'fiat-panda', 'audi-rsq8', 'ferrari-monza', 'john-deere-8r']);
   const esclusa = (o) => { for (let x = o; x; x = x.parent) if (skip.has(x.name) || x.userData?.vehicle) return true; return false; };
   const dettagli = {};
   const v = new g.THREE.Vector3(), m = new g.THREE.Matrix4();

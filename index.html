@@ -3451,9 +3451,33 @@ const World = {
     const light = new THREE.Color('#ecdcb2');
     const local = (geo, color) => { geo.applyMatrix4(m); tb.addGeometry(geo, color); };
     const slope = Math.atan2(p1.y - p0.y, L);
+    // Blocco 4.4: muretti e pilastrini delle testate solo fuori dalla carreggiata delle vie che arrivano al
+    // ponte (prima il raccordo ovest e i ventagli est chiudevano la via e il mezzo ci passava in mezzo).
+    // Punti in coordinate locali (x lungo il ponte da est, z di traverso), mezzo spessore del muro `t`.
+    const origin = p0.clone().setY(0).addScaledVector(across, -width / 2);
+    const freeW = (w, t = 0.3) => {
+      const r = network.closestSample(w.x, -w.z, (x) => x.bridge);
+      return !r || r.d > r.edge.width / 2 + t + 0.35;
+    };
+    const free = (x, z, t) => freeW(origin.clone().addScaledVector(along, x).addScaledVector(across, z), t);
+    /** Tratto libero più lungo di un muro da (x0, z0) a (x1, z1), da `from` (0 = inizio, 1 = fine): [t0, t1] o null. */
+    const freeSpan = (x0, z0, x1, z1, t = 0.3) => {
+      const len = Math.hypot(x1 - x0, z1 - z0), k = Math.max(2, Math.ceil(len / 0.3));
+      const ok = Array.from({ length: k + 1 }, (_, i) => free(lerp(x0, x1, i / k), lerp(z0, z1, i / k), t));
+      let best = null;
+      for (let i = 0; i <= k; i++) {
+        if (!ok[i]) continue;
+        let j = i;
+        while (j < k && ok[j + 1]) j++;
+        if (!best || j - i > best[1] - best[0]) best = [i, j];
+        i = j;
+      }
+      return best && best[1] > best[0] ? [best[0] / k, best[1] / k] : null;
+    };
 
     // Helper per pilastrino monumentale squadrato con capitello modanato in coordinate locali
     const pillar = (px, py, pz, h = 1.05) => {
+      if (!free(px, pz, 0.45)) return;                       // blocco 4.4: mai sulla via
       const b = new THREE.BoxGeometry(0.82, 0.22, 0.82);
       b.translate(px, py + 0.11, pz);
       local(b, light);
@@ -3471,12 +3495,19 @@ const World = {
     // Parapetti del ponte: da x = 0.9 a x = L - 0.9 (lasciano spazio ai pilastrini di testata)
     const pLen = L - 1.8;
     for (const zSide of [0.22, width - 0.22]) {
-      const pWall = new THREE.BoxGeometry(pLen, 1.0, 0.45).rotateZ(slope);
-      pWall.translate(L / 2, deckAt(L / 2) + 0.5, zSide);
+      // blocco 4.4: dove una via lascia il ponte di lato, il parapetto si ferma prima
+      const span = freeSpan(0.9, zSide, L - 0.9, zSide, 0.25);
+      if (!span) continue;
+      const xa = lerp(0.9, L - 0.9, span[0]), xb = lerp(0.9, L - 0.9, span[1]), xm = (xa + xb) / 2, len = xb - xa;
+      const pWall = new THREE.BoxGeometry(len, 1.0, 0.45).rotateZ(slope);
+      pWall.translate(xm, deckAt(xm) + 0.5, zSide);
       local(pWall, stone);
-      const pCap = new THREE.BoxGeometry(pLen + 0.05, 0.10, 0.52).rotateZ(slope);
-      pCap.translate(L / 2, deckAt(L / 2) + 1.05, zSide);
+      const pCap = new THREE.BoxGeometry(len + 0.05, 0.10, 0.52).rotateZ(slope);
+      pCap.translate(xm, deckAt(xm) + 1.05, zSide);
       local(pCap, light);
+      // pilastrino dove il parapetto si ferma prima della testata
+      if (xa > 1.2) pillar(xa - 0.2, deckAt(xa), zSide);
+      if (xb < L - 1.2) pillar(xb + 0.2, deckAt(xb), zSide);
     }
 
     // Pilastri monumentali alle testate (est e ovest)
@@ -3486,19 +3517,20 @@ const World = {
     pillar(L - 0.45, deckAt(L), width - 0.22);
 
     // Sponda est: innesti a ventaglio verso Via Fontana la Stella e la scalinata di Via giudice Montea
+    // (blocco 4.4: solo il tratto fuori dalle vie, e il pilastrino alla fine del tratto)
     for (const [vSide, angle] of [[0.22, -0.32], [width - 0.22, 0.32]]) {
-      const vLen = 2.8;
-      const vWall = new THREE.BoxGeometry(vLen, 1.0, 0.45).rotateY(angle);
-      const vx = -Math.cos(angle) * (vLen / 2) + 0.1;
-      const vz = vSide - Math.sin(angle) * (vLen / 2);
+      const vLen = 2.8, x0 = 0.1, z0 = vSide, x1 = 0.1 - Math.cos(angle) * vLen, z1 = vSide - Math.sin(angle) * vLen;
+      const span = freeSpan(x0, z0, x1, z1);
+      if (!span || (span[1] - span[0]) * vLen < 0.8) continue;
+      const [ta, tz] = span, len = (tz - ta) * vLen;
+      const vx = lerp(x0, x1, (ta + tz) / 2), vz = lerp(z0, z1, (ta + tz) / 2);
+      const vWall = new THREE.BoxGeometry(len, 1.0, 0.45).rotateY(angle);
       vWall.translate(vx, deckAt(0) + 0.5, vz);
       local(vWall, stone);
-      const vCap = new THREE.BoxGeometry(vLen + 0.05, 0.10, 0.52).rotateY(angle);
+      const vCap = new THREE.BoxGeometry(len + 0.05, 0.10, 0.52).rotateY(angle);
       vCap.translate(vx, deckAt(0) + 1.05, vz);
       local(vCap, light);
-      const endX = -Math.cos(angle) * vLen;
-      const endZ = vSide - Math.sin(angle) * vLen;
-      pillar(endX, deckAt(0), endZ, 1.15);
+      pillar(lerp(x0, x1, tz), deckAt(0), lerp(z0, z1, tz), 1.15);
     }
 
     // Cornici marcapiano rifinite: si arrestano contro i pilastri terminali e la spalla (senza sporgere nel vuoto)
@@ -3576,6 +3608,8 @@ const World = {
         if (nor.x < 0) nor.negate();
         const mOff = rampEdge.width / 2 + 0.18;
         const midPt = pA.clone().lerp(pB, 0.5).addScaledVector(nor, mOff);
+        // blocco 4.4: niente tratti di muretto sopra le altre vie
+        if (!freeW(midPt, 0.22) || !freeW(pA.clone().addScaledVector(nor, mOff), 0.22) || !freeW(pB.clone().addScaledVector(nor, mOff), 0.22)) continue;
         if (!firstMidPt) firstMidPt = midPt.clone();
         const groundH = Terrain.heightAt(midPt.x, -midPt.z);
         const roadH = midPt.y;
@@ -3609,7 +3643,9 @@ const World = {
           .setY(deckAt(L));
         const connVec = new THREE.Vector3().subVectors(firstMidPt, pillarWestPos);
         const connLen = connVec.length();
-        if (connLen > 0.3) {
+        let connFree = true;                                   // blocco 4.4: il raccordo non deve tagliare la via
+        for (let k = 0; k <= 12; k++) if (!freeW(pillarWestPos.clone().lerp(firstMidPt, k / 12), 0.22)) connFree = false;
+        if (connLen > 0.3 && connFree) {
           const connMid = pillarWestPos.clone().lerp(firstMidPt, 0.5);
           const connRotY = Math.atan2(connVec.x, connVec.z);
           const rWall = new THREE.BoxGeometry(0.44, 1.05 + 1.2, connLen + 0.1).rotateY(connRotY);
