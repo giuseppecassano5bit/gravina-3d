@@ -15433,6 +15433,7 @@ class Motore extends AudioWorkletProcessor {
       { name: 'load', defaultValue: 0.2, minValue: 0, maxValue: 1, automationRate: 'k-rate' },
       { name: 'spool', defaultValue: 0, minValue: 0, maxValue: 1, automationRate: 'k-rate' },
       { name: 'level', defaultValue: 0, minValue: 0, maxValue: 4, automationRate: 'k-rate' },
+      { name: 'speed', defaultValue: 0, minValue: 0, maxValue: 60, automationRate: 'k-rate' },
     ];
   }
   constructor() {
@@ -15449,6 +15450,12 @@ class Motore extends AudioWorkletProcessor {
     this.intake = new Svf(); this.knock = new Svf(); this.popF = new Svf();
     this.kn = 0; this.pop = 0; this.tph = 0; this.dl = [0, 0]; this.dy = [0, 0]; this.t1 = [0, 0]; this.t2 = [0, 0];
     this.top = 1 - Math.exp(-2 * Math.PI * p.top / sampleRate);   // filtro finale: a 20 m l'aria si mangia gli acuti
+    // blocco motore: armoniche per ordine di giro (quello che si sente da fuori, oltre ai colpi dello scarico)
+    this.ord = p.orders.map(([k, a]) => [2 * k, a]);
+    this.tm = 0; this.tyreF = new Svf(); this.fanF = new Svf();
+    // la via: riflessioni sulle case di fronte e un poco di coda (chi ascolta sta sul marciapiede)
+    const ms = (v) => Math.round(v * 1e-3 * sampleRate);
+    this.rv = new Float32Array(ms(60)); this.rw = 0; this.rlp = 0; this.taps = [ms(11), ms(29), ms(17), ms(41), ms(37)];
   }
   process(_, outputs, P) {
     const out = outputs[0], L = out[0], R = out[1] ?? out[0], n = L.length, p = this.p;
@@ -15464,6 +15471,10 @@ class Motore extends AudioWorkletProcessor {
     this.intake.set(p.intake[0] + p.intake[1] * x, p.intake[2]);
     if (p.knock) this.knock.set(p.knock[0], p.knock[1]);
     this.popF.set(900, 0.9);
+    if (p.tyre) this.tyreF.set(p.tyre[0], 0.8);
+    if (p.fan) this.fanF.set(p.fan[0], 0.7);
+    const sp = Math.min(1.6, P.speed[0] / 14), tyreA = p.tyre ? p.tyre[1] * sp ** 1.6 : 0, fanA = p.fan ? p.fan[1] * (0.4 + 0.6 * x) : 0;
+    const [mx, mt] = p.mix;                                    // quanto scarico, quanto blocco motore
     const dec = (ms) => Math.exp(-1 / (ms * 1e-3 * sampleRate));
     const dF = dec(p.pulse[0]), dS = dec(p.pulse[1]), dN = dec(p.pulse[2]), dK = dec(0.35), dP = dec(4);
     const tf = p.turbo ? p.turbo[0] + p.turbo[1] * spool : 0, ta = p.turbo ? p.turbo[2] * spool * spool * (0.35 + ld) : 0;
@@ -15497,12 +15508,21 @@ class Motore extends AudioWorkletProcessor {
         const s = m + B.body.bp * p.body[3];
         l += s * p.pan[k]; r += s * (1 - p.pan[k]);
       }
+      l *= mx; r *= mx;
+      // il blocco motore: armoniche degli ordini del motore, più brillanti coi giri, che respirano un poco
+      let tone = 0;
+      for (let q = 0; q < this.ord.length; q++) { const o = this.ord[q]; tone += o[1] * (1 + p.bright * x * q) * Math.sin(6.2831853 * ((o[0] * ph) % 1)); }
+      this.tm = (this.tm + (this.rnd() - 0.5) * 0.004) * 0.999;
+      tone *= mt * (0.35 + 0.65 * load) * (0.6 + 0.4 * x) * (1 + this.tm * 8);
       const w = this.rnd() * 2 - 1;
       this.intake.run(w * env);
       let c = this.intake.bp * p.intake[3] * (0.25 + load) * (0.3 + x);
       if (p.knock) { this.kn *= dK; this.knock.run(this.kn * (this.rnd() * 2 - 1)); c += this.knock.bp * p.knock[2]; }
       if (ta > 0) { this.tph += tf / sampleRate; if (this.tph > 1) this.tph -= 1; c += Math.sin(this.tph * 6.2831853) * ta; }
       if (this.pop > 1e-4) { this.pop *= dP; this.popF.run(this.pop * w); c += this.popF.bp * p.crackleGain; }
+      c += tone;
+      if (tyreA > 0) { this.tyreF.run(this.rnd() * 2 - 1); c += this.tyreF.bp * tyreA; }   // gomme sulle chianche
+      if (fanA > 0) { this.fanF.run(this.rnd() * 2 - 1); c += this.fanF.lp * fanA; }        // ventola del radiatore
       l += c; r += c;
       // via la componente continua, poi una saturazione morbida
       const vl = l - this.dl[0] + 0.995 * this.dy[0], vr = r - this.dl[1] + 0.995 * this.dy[1];
@@ -15510,8 +15530,12 @@ class Motore extends AudioWorkletProcessor {
       const g = lev * p.gain, a = this.top, t1 = this.t1, t2 = this.t2;
       t1[0] += (Math.tanh(vl * g * 1.4) / 1.4 - t1[0]) * a; t2[0] += (t1[0] - t2[0]) * a;
       t1[1] += (Math.tanh(vr * g * 1.4) / 1.4 - t1[1]) * a; t2[1] += (t1[1] - t2[1]) * a;
-      L[i] = t2[0];
-      if (R !== L) R[i] = t2[1];
+      const rv = this.rv, N = rv.length, rd = (d) => rv[(this.rw - d + N) % N];
+      this.rlp += (rd(this.taps[4]) - this.rlp) * 0.25;
+      rv[this.rw] = (t2[0] + t2[1]) * 0.5 + this.rlp * 0.3; this.rw = (this.rw + 1) % N;
+      const wet = p.room;
+      L[i] = t2[0] * (1 - wet * 0.3) + wet * (rd(this.taps[0]) + 0.6 * rd(this.taps[1]));
+      if (R !== L) R[i] = t2[1] * (1 - wet * 0.3) + wet * (rd(this.taps[2]) + 0.6 * rd(this.taps[3]));
     }
     return true;
   }
@@ -15524,7 +15548,9 @@ registerProcessor('motore', Motore);
  * bancata (il suo tubo); pipes: lunghezze dei tubi (m); pipe: [riflessione, smorzamento]; pulse: impulso
  * (salita, discesa, rumore, ms); muffler: [Hz al minimo, Hz a pieno, Q]; body: [Hz, +Hz coi giri, Q, quanto];
  * intake: [Hz, +Hz coi giri, Q, quanto]; knock (diesel): [Hz, Q, quanto]; turbo: [Hz, +Hz in pressione, quanto];
- * top: taglio finale degli acuti (Hz).
+ * top: taglio finale degli acuti (Hz). Blocco 4.4, «come lo sente chi sta sul marciapiede»: mix [scarico, blocco
+ * motore]; orders: armoniche del blocco [ordine di giro, quanto]; bright: quanto si schiariscono coi giri; tyre:
+ * gomme [Hz, quanto a 50 km/h]; fan: ventola [Hz, quanto]; room: riflessioni della via.
  * Cambio: gears in km/h ogni 1 000 giri; lo: giri sotto cui si scala; up: giri della cambiata [in crociera,
  * con l'acceleratore].
  */
@@ -15535,29 +15561,42 @@ const MOTORI = (() => {
       idle: 820, red: 6200, gears: [7.4, 13.4, 20.2, 27, 33.5], lo: 1500, up: [2600, 5600],
       fire: even(4), bank: [0, 0, 0, 0], pipes: [2.7], pipe: [0.45, 0.35], pan: [0.5],
       pulse: [0.35, 1.7, 0.8], noise: 0.35, base: 0.32, jitter: 0.12, imbalance: 0.06,
-      muffler: [400, 1300, 0.8], body: [150, 110, 2.2, 0.35], intake: [550, 900, 2, 0.08], crackle: 0, crackleGain: 0, top: 3600, gain: 1.2,
+      muffler: [400, 1300, 0.8], body: [150, 110, 2.2, 0.35], intake: [550, 900, 2, 0.08], crackle: 0, crackleGain: 0, top: 3600, gain: 1.5,
+      // da fuori la Panda è un ronzio un po' nasale del 4 cilindri (2° ordine) e le gomme; lo scarico quasi non si sente
+      mix: [0.2, 0.075], orders: [[2, 1], [4, 0.55], [6, 0.32], [1, 0.1], [8, 0.2], [3, 0.08], [10, 0.1], [12, 0.05]], bright: 0.08,
+      tyre: [750, 0.05], room: 0.35,
     },
     rs6: {
       idle: 650, red: 6800, gears: [8.8, 14.6, 22.5, 29.5, 37.5, 46, 55, 64], lo: 1150, up: [1900, 6000],
       // 1-3-7-2-6-5-4-8, uno ogni 90°: cilindri 1–4 nella prima bancata, 5–8 nella seconda
       fire: even(8), bank: [0, 0, 1, 0, 1, 1, 0, 1], pipes: [1.75, 1.9], pipe: [0.5, 0.3], pan: [0.66, 0.34],
       pulse: [0.45, 2.3, 1.1], noise: 0.4, base: 0.28, jitter: 0.1, imbalance: 0.05,
-      muffler: [230, 1250, 1.1], body: [80, 70, 3, 0.55], intake: [700, 1100, 2, 0.06], turbo: [1900, 4600, 0.01],
-      crackle: 0.04, crackleGain: 0.45, top: 3200, gain: 1,
+      muffler: [200, 1000, 1.1], body: [80, 70, 3, 0.55], intake: [700, 1100, 2, 0.06], turbo: [1900, 4600, 0.01],
+      crackle: 0.04, crackleGain: 0.3, top: 3000, gain: 1.2,
+      // da fuori il V8 è profondo e rotondo: i turbo dentro la V smorzano lo scarico, il borbottio dei
+      // mezzi ordini (scoppi irregolari per bancata) resta sotto il rombo del 4° ordine; gomme da 23"
+      mix: [0.42, 0.075], orders: [[4, 1], [2, 0.5], [1, 0.22], [8, 0.38], [3, 0.15], [6, 0.2], [12, 0.1]], bright: 0.05,
+      tyre: [650, 0.07], room: 0.35,
     },
     huracan: {
       idle: 1000, red: 9000, gears: [11.8, 17.5, 23.8, 30.5, 37.5, 45, 53], lo: 1700, up: [3000, 8500],
       fire: even(12), bank: Array.from({ length: 12 }, (_, i) => i % 2), pipes: [1.05, 1.12], pipe: [0.5, 0.42], pan: [0.62, 0.38],
-      pulse: [0.22, 1.0, 0.45], noise: 0.25, base: 0.3, jitter: 0.06, imbalance: 0.03,
+      pulse: [0.22, 1.0, 0.45], noise: 0.12, base: 0.3, jitter: 0.03, imbalance: 0.02,
       muffler: [650, 2900, 0.9], body: [230, 330, 2, 0.25], intake: [700, 1900, 3, 0.16],
       crackle: 0.025, crackleGain: 0.4, top: 4600, gain: 0.95,
+      // il V12 è liscio e «cantato»: armoniche pulite del 6° ordine che salgono fino all'urlo in alto
+      mix: [0.28, 0.08], orders: [[6, 1], [12, 0.75], [18, 0.5], [3, 0.12], [24, 0.35], [30, 0.2], [9, 0.1], [36, 0.12]], bright: 0.16,
+      tyre: [900, 0.04], room: 0.35,
     },
     deere: {
       idle: 850, red: 2100, ivt: [1450, 1950],
       fire: even(6), bank: [0, 0, 0, 0, 0, 0], pipes: [3.2], pipe: [0.5, 0.3], pan: [0.5],
       pulse: [0.6, 3.2, 2.2], noise: 0.6, base: 0.4, jitter: 0.18, imbalance: 0.1,
-      muffler: [300, 850, 0.9], body: [62, 40, 2.6, 0.6], intake: [500, 400, 1.5, 0.04], knock: [1500, 6, 0.12], turbo: [3100, 5800, 0.007],
+      muffler: [300, 850, 0.9], body: [62, 40, 2.6, 0.6], intake: [500, 400, 1.5, 0.04], knock: [1500, 6, 0.06], turbo: [3100, 5800, 0.009],
       crackle: 0, crackleGain: 0, top: 3000, gain: 1.15,
+      // il diesel moderno: brontolio profondo e costante del 3° ordine, la ventola, il fischio del turbo, il battito leggero
+      mix: [0.25, 0.085], orders: [[3, 1], [6, 0.55], [1.5, 0.25], [9, 0.3], [12, 0.15], [0.5, 0.1]], bright: 0.05,
+      tyre: [320, 0.06], fan: [900, 0.02], room: 0.3,
     },
   };
 })();
@@ -15678,6 +15717,7 @@ const EngineAudio = (() => {
       P.get('rpm').setTargetAtTime(cambio.rpm, now, 0.03);
       P.get('load').setTargetAtTime(cambio.load, now, 0.03);
       P.get('spool').setTargetAtTime(cambio.spool, now, 0.05);
+      P.get('speed').setTargetAtTime(paused || onFoot ? 0 : speed, now, 0.1);
       // a piedi o in pausa il mezzo resta acceso al minimo, più piano (si sente da lontano)
       P.get('level').setTargetAtTime(paused || onFoot ? 0.3 : 1, now, 0.25);
     },
@@ -15700,7 +15740,7 @@ const EngineAudio = (() => {
         const acc = target > v ? (boost ? 4 : 2.2) : t >= 13 ? 6 : 3;
         v = target > v ? Math.min(target, v + acc * dt) : Math.max(target, v - acc * dt);
         box.step(dt, v, cruise, boost);
-        P.get('rpm').setValueAtTime(box.rpm, t); P.get('load').setValueAtTime(box.load, t); P.get('spool').setValueAtTime(box.spool, t);
+        P.get('rpm').setValueAtTime(box.rpm, t); P.get('load').setValueAtTime(box.load, t); P.get('spool').setValueAtTime(box.spool, t); P.get('speed').setValueAtTime(v, t);
         if (Math.round(t * 60) % 30 === 0) log.push([+t.toFixed(1), +(v * 3.6).toFixed(0), Math.round(box.rpm), box.gear + 1, +box.load.toFixed(2)]);
       }
       const b = await c.startRendering();

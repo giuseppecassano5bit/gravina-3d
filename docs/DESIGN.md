@@ -685,6 +685,14 @@ costruito sui dati reali (fonti nel README), in un `AudioWorklet` creato dal tes
   slitta alla partenza; il trattore ha la trasmissione continua e tiene 1 450–1 950 giri; il carico viene
   dall'accelerazione (zero in rilascio);
 * in pausa e a piedi il mezzo resta acceso al minimo, più piano.
+* **come lo sente chi sta sul marciapiede** (seconda richiesta del committente: «non come un microfono vicino
+  allo scarico»): oltre ai colpi dello scarico, che ora pesano meno, c'è il blocco motore, cioè le armoniche
+  degli ordini di giro di ogni motore (`orders`), più brillanti coi giri. Poi le gomme sulle chianche (crescono con la
+  velocità), la ventola del trattore e le riflessioni della via (`room`, due eco sulle case di fronte e un
+  poco di coda). Il carattere: la Panda è un ronzio un po' nasale del 2° ordine con le gomme, lo scarico quasi
+  non si sente; la Ferrari un V12 liscio e «cantato» (6°, 12°, 18° ordine) fino all'urlo in alto; l'Audi un V8
+  profondo e rotondo, smorzato dai turbo dentro la V, col borbottio sotto; il trattore un brontolio costante
+  del 3° ordine con la ventola, il turbo e un battito leggero.
 
 Prova: `node motori.mjs` rende 16 s di guida per mezzo in `shots/motore-<mezzo>.wav`, da ascoltare, e
 controlla saturazione e motore dal vivo. Al minimo le frequenze di scoppio sono quelle vere (27 Hz Panda,
