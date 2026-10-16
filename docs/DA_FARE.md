@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 16 ottobre 2026: fase 3 approvata e online, fase 3.4 completata e unita su `main` con tutti i blocchi da A a N8 (PR #30, commit `caceef6`). **Fase 4 · Rifinitura in corso**, completati il **Blocco 4.1 · Golden hour** (branch `fase-4-1-golden-hour`, PR #31), il **Blocco 4.2 · Sponde del Ponte, stabilità mezzi, rumore motori e boost Shift** (branch `fase-4-2-ponte-motori-stabilita`, PR #32 in bozza) il **Blocco 4.3 · Via giudice Montea (salita, parapetto e case pericolanti), campi sportivi, Seminario Vescovile e posizioni reali cinema** (branch `fase-4-3-montea-cinema-campi`, PR #33), tutti uniti su `main`. **Blocco 4.4 · Camera dopo il teletrasporto, schede sul telefono, accessibilità, licenza, testate del ponte, motori e velocità massime** (branch `fase-4-4-camera-schede-rifinitura`, PR #34), tutti uniti su `main`. Prossimo: **Blocco 4.5**, da pianificare col committente (prompt `riferimenti/PROMPT_FASE_4_5.md`).
+Stato al 16 ottobre 2026: fase 3 approvata e online, fase 3.4 completata e unita su `main` con tutti i blocchi da A a N8 (PR #30, commit `caceef6`). **Fase 4 · Rifinitura in corso**, completati il **Blocco 4.1 · Golden hour** (branch `fase-4-1-golden-hour`, PR #31), il **Blocco 4.2 · Sponde del Ponte, stabilità mezzi, rumore motori e boost Shift** (branch `fase-4-2-ponte-motori-stabilita`, PR #32 in bozza) il **Blocco 4.3 · Via giudice Montea (salita, parapetto e case pericolanti), campi sportivi, Seminario Vescovile e posizioni reali cinema** (branch `fase-4-3-montea-cinema-campi`, PR #33), tutti uniti su `main`. **Blocco 4.4 · Camera dopo il teletrasporto, schede sul telefono, accessibilità, licenza, testate del ponte, motori e velocità massime** (branch `fase-4-4-camera-schede-rifinitura`, PR #34), tutti uniti su `main`. **Blocco 4.5 · La guida** (acceleratore sul telefono e dritto agli incroci, niente tremolio, vie lunghe dritte; branch `fase-4-5-guida`, PR #35) fatto, in attesa del sì del committente. Poi i blocchi 4.6 e 4.7.
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) completata**: piano, dati, budget, rischi e divisione
@@ -446,9 +446,27 @@ commerciali e protette: il committente ha scelto musica ambient originale, gener
       con l'accelerazione vera, **limiti per tipo di strada** (scelta del committente), frenata prima degli incroci, cambio
       che a velocità costante mette la marcia lunga, trattore più cattivo sotto sforzo; prova `node velocita.mjs`.
 - [x] Rumore dei motori approvato dal committente («perfetto ottimo lavoro mi piace», 16/10/2026) dopo tre giri di ascolto.
-- [ ] **Prestazioni dopo il blocco 4.4 da misurare** (`node prestazioni.mjs`, GPU vera): non misurate in questo blocco; da
-      controllare soprattutto a 180 km/h sulla strada del Bosco (i riquadri si costruiscono mentre si corre) e il costo
-      dell'AudioWorklet del motore sul telefono.
+- [x] **Prestazioni dopo il blocco 4.4** (blocco 4.5, `shots/prestazioni-dopo-4-4.json`): tutto nei tetti (PC 352 400
+      triangoli e 59 draw call al massimo, telefono 232 300 e 35; 60 fps in tutte le viste). Corsa a 180 km/h verso il Bosco
+      (Ferrari, 30 s, motore acceso o spento): 60 fps, il 99% dei fotogrammi sotto i 19 ms, nessun blocco lungo (i riquadri sono
+      già tutti costruiti a 2,5 s dall'apertura). Motore: 20–27 µs per blocco audio da 128 campioni (circa 1% del filo audio sul
+      Mac; su un telefono medio 5–10%).
+
+### Blocco 4.5 · La guida (branch `fase-4-5-guida`, PR #35 in bozza; piano approvato il 16/10/2026)
+- [x] **Niente tremolio sull'asfalto** («movimenti parkinsoniani»): la scocca trema solo al minimo, sobbalzi solo su pietre,
+      ciottoli e sterrati (`ROUGH`); a velocità alta sterzo e beccheggio guardano più avanti. Sull'asfalto beccheggio da 0,49 a
+      0,015 mrad per fotogramma², sobbalzo da 1,7 mm a 0; sulle pietre come prima.
+- [x] **Con l'acceleratore si tira dritto agli incroci** (decisione del committente): la via carrabile più dritta, rallentando
+      solo per la svolta (`Driver.cornerSpeed`); una scelta a mano si rispetta. La frenata ora segue la curva (arrivava 15 km/h lunga).
+- [x] **Acceleratore sul telefono**: casella nella schermata iniziale e interruttore nella pausa («almeno 6 GB di memoria; per
+      l'esperienza migliore usa un computer»), pulsante «Accelera» da tenere premuto. Regola aggiornata in `CLAUDE.md`.
+- [x] **Vie lunghe dritte** (Via Tripoli, Via Alcide De Gasperi): `Raddrizza`, vedi `DESIGN.md` § 6. Le residenziali restano
+      come nei dati (case sul filo della via).
+- [x] Prove: `simula` verde, `interazioni` 86/86 (nuove: Shift tira dritto, pulsante «Accelera» sul telefono), `velocita` verde
+      (svolte entro la velocità della curva), `difetti` invariati o migliori; prestazioni `shots/prestazioni-dopo-4-5.json`
+      (60 fps, stessi triangoli e draw call; «Pronto» +0,19 s su PC e +0,26 s sul telefono, di cui 91 ms per `Raddrizza`).
+- [ ] Prossimi: **Blocco 4.6** (altezze degli edifici, sponda opposta del ponte, suoni del bosco con animali veri) e **Blocco 4.7**
+      (restyling, inglese, schermo intero, schede in orizzontale, schermata iniziale in orizzontale).
 - [ ] Da decidere con il committente: un pulsante per lo **schermo intero** (non c'è; su iPhone Safari non funziona fuori dai video).
 - [x] Musica procedurale Web Audio: la radio ambient del blocco G.
 - [x] Camera: giro automatico e camera libera nel blocco G.

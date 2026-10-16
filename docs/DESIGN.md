@@ -499,6 +499,22 @@ riga intera.
   - sotto, il prossimo monumento lungo quella via ("verso Chiesa del Purgatorio"), oppure il rione.
 * **Targa in marmo**: via corrente più rione (Centro storico, Rione Piaggio, Rione Fondovico anche sulla discesa verso il ciglio, Madonna della Stella · Botromagno), e "percorso pedonale" dove serve.
 * Le quote delle strade sono smussate (media mobile di ±6 m), così i gradoni del terreno non si sentono sotto le ruote.
+* **Vie lunghe dritte** (blocco 4.5, richiesta del committente: «Via Tripoli, Via Alcide De Gasperi: quando ci sono le
+  svolte si storce la strada»). Nei dati le vie della città moderna hanno un punto ogni 5–8 m che va a zig-zag di ±10°, e
+  sugli incroci la via si spostava di lato fino a 1,8 m; in più ogni tratto tra due incroci era una curva a sé, e
+  all'incrocio la direzione cambiava di colpo (17° su Via Tripoli). `Raddrizza` (sezione 7, prima della rete), una volta
+  e solo in memoria all'avvio (la costante `GEO` resta quella generata):
+  - unisce in **catene** i tratti delle vie principali (secondarie e terziarie) che proseguono dritti attraverso gli
+    incroci, anche se nei dati cambiano nome o sono senza nome (De Gasperi è spezzata): stesso nome entro 40°, altrimenti
+    il più dritto entro 25°; e li **smussa** (media gaussiana, σ 8 m su ±20 m), lasciando le curve vere (oltre 35° in
+    24 m), il centro storico, il Bosco, ponte e sottopassi; al massimo 2,5 m (oggi 1,46);
+  - controlla **sulla curva vera** di ogni tratto, come `simula.mjs`, che la via non entri nelle case (le facciate nei
+    dati stanno sul filo della via a zig-zag): prima restringe le vie larghe oltre 6,5 m, fino a 1,2 m (35 tratti), poi
+    sposta meno i punti vicini; lo stesso per le vie laterali che arrivano agli incroci spostati;
+  - per tutte le vie che proseguono dritte (914 tratti) la curva di ogni tratto tiene conto del punto del tratto accanto
+    (`Raddrizza.ghosts`, `#buildEdge`): all'incrocio la via resta continua.
+  Le vie residenziali non si smussano: le case stanno troppo vicine (con loro 658 case sulla strada). Costo: 91 ms
+  all'avvio sul Mac.
 * Alla testata est del ponte il **ponte ha la precedenza** sulla scelta "più dritta".
 * **Acceleratore** (blocco E; blocco 4.4 per le velocità; blocco 4.5 per incroci e telefono): tenendo premuto
   **Shift** il mezzo va verso la sua massima con una salita morbida (`boostRate`). Agli incroci il cartello si apre
