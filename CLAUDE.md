@@ -160,10 +160,10 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
 - Le vie cieche reali della città (`GEO.deco`) si disegnano ma **non si percorrono**. La
   sterrata reale del Castello Svevo è percorribile: con la strada di servizio e la vicinale
   chiude un anello (flag 8, `CASTLE_BOX` in `genera_dati.py`).
-- I mezzi sono i **cinque** scelti dal committente: Fiat Panda 4x4 del 1999, Audi RS6 Avant,
-  Lamborghini Huracán, trattore John Deere e, dal blocco M3, la mongolfiera. Le auto sono
-  **realistiche nello stile** (carrozzeria per sezioni, abitacolo col guidatore, luci da uniform,
-  4 mesh per mezzo), sempre low-poly e senza loghi.
+- I mezzi sono i **cinque** scelti dal committente (dal blocco N6): Fiat Panda del 2013, Audi RS Q8, Ferrari
+  Monza SP2, trattore John Deere 8R e, dal blocco M3, la mongolfiera (negli id del codice restano `panda`, `rs6`,
+  `huracan`, `deere`, `balloon`). Le auto sono **realistiche nello stile** (carrozzeria per sezioni, abitacolo col
+  guidatore, luci da uniform, 4 mesh per mezzo), sempre low-poly e senza loghi.
 - **Mongolfiera** (blocco M3): è un'eccezione come il Ponte Acquedotto. Vola su un **giro fisso**
   (`CONFIG.balloon`, sezione 8b) e non segue le vie; resta almeno 30 m sopra tetti, monumenti e
   terreno e dentro la zolla della città. Alla fine del giro si riparte con l'ultima auto dalla via

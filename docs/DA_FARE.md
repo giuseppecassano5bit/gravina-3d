@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 16 ottobre 2026: fase 3 approvata e online, fase 3.4 completata e unita su `main` con tutti i blocchi da A a N8 (PR #30, commit `caceef6`). **Fase 4 · Rifinitura in corso**, completati il **Blocco 4.1 · Golden hour** (branch `fase-4-1-golden-hour`, PR #31), il **Blocco 4.2 · Sponde del Ponte, stabilità mezzi, rumore motori e boost Shift** (branch `fase-4-2-ponte-motori-stabilita`, PR #32 in bozza) il **Blocco 4.3 · Via giudice Montea (salita, parapetto e case pericolanti), campi sportivi, Seminario Vescovile e posizioni reali cinema** (branch `fase-4-3-montea-cinema-campi`, PR #33), tutti uniti su `main`. **Blocco 4.4 · Camera dopo il teletrasporto, schede sul telefono, accessibilità e licenza** pronto per la revisione (branch `fase-4-4-camera-schede-rifinitura`, PR #34 in bozza).
+Stato al 16 ottobre 2026: fase 3 approvata e online, fase 3.4 completata e unita su `main` con tutti i blocchi da A a N8 (PR #30, commit `caceef6`). **Fase 4 · Rifinitura in corso**, completati il **Blocco 4.1 · Golden hour** (branch `fase-4-1-golden-hour`, PR #31), il **Blocco 4.2 · Sponde del Ponte, stabilità mezzi, rumore motori e boost Shift** (branch `fase-4-2-ponte-motori-stabilita`, PR #32 in bozza) il **Blocco 4.3 · Via giudice Montea (salita, parapetto e case pericolanti), campi sportivi, Seminario Vescovile e posizioni reali cinema** (branch `fase-4-3-montea-cinema-campi`, PR #33), tutti uniti su `main`. **Blocco 4.4 · Camera dopo il teletrasporto, schede sul telefono, accessibilità, licenza, testate del ponte, motori e velocità massime** (branch `fase-4-4-camera-schede-rifinitura`, PR #34), tutti uniti su `main`. Prossimo: **Blocco 4.5**, da pianificare col committente (prompt `riferimenti/PROMPT_FASE_4_5.md`).
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) completata**: piano, dati, budget, rischi e divisione
@@ -426,7 +426,7 @@ commerciali e protette: il committente ha scelto musica ambient originale, gener
       - **Campi da calcio e calcetto procedurali della città (senza etichette né schede)**: Campetto parrocchiale SS. Crocifisso "Giuseppe Dipalma" in erba sintetica bicolore, righe, porte da calcetto con rete, recinzione alta e piloni faro; Campetto parrocchiale San Domenico con manto verde smeraldo e porte; campetti oratoriali; esclusione alberi generici dall'interno dei campi da gioco (`Details.insidePitch`);
       - **Via giudice Montea (dal ponte alla città)**: eliminata la buca anomala del DSM Copernicus, salita continua e dolce dal Ponte Acquedotto (`y = -4,62 m` a n = 287) al Bastione medievale (`y = -1,98 m` a n = 196) e verso Via Calderoni e la città; muretto continuo di parapetto in conci di tufo e copertine sagomate sul ciglio della gravina; cortina di case storiche a 2 piani; case a pericolo crollo reali puntellate con robuste travi inclinate in legno e acciaio, tiranti metallici passanti a croce/X, lesioni diagonali a gradini sui conci di tufo, finestre/varchi sbarrati con assi di legno e transenne stradali di sicurezza a bande bianco-rosse con cartelli gialli "Pericolo Crollo"; linea d'occhio panoramica dal belvedere Cattedrale al ponte 100% pulita (0 ostacoli);
       - Verifiche verdi: `npm run simula` (0 problemi, 0 case sulla strada, `dettaglisullastrada: {}`, 0 errori) e `npm run interazioni` (83/83 controlli superati con successo).
-- [x] **4.4 · Camera dopo il teletrasporto, schede sul telefono, accessibilità e licenza** (`fase-4-4-camera-schede-rifinitura`, PR #34 in bozza):
+- [x] **4.4 · Camera dopo il teletrasporto, schede sul telefono, accessibilità e licenza** (`fase-4-4-camera-schede-rifinitura`, PR #34 unita il 16/10/2026 con l'approvazione del committente, che ha ascoltato i motori):
       - **camera** (`Rig.snap`): tra cinque direzioni attorno al mezzo sceglie la più libera e resta sopra i tetti entro 20 m
         per 2,5 s, poi scende piano; sui 42 luoghi con la scheda quelli che partivano a ridosso di un tetto da 16 a 0;
       - **schede** sul telefono in verticale: al massimo un terzo dello schermo, scorrevoli col fondo che sfuma; nascoste,
@@ -445,8 +445,10 @@ commerciali e protette: il committente ha scelto musica ambient originale, gener
 - [x] Terza richiesta del committente (16/10/2026): **velocità massime per mezzo** (Deere 50, Panda 80, Audi e Ferrari 180)
       con l'accelerazione vera, **limiti per tipo di strada** (scelta del committente), frenata prima degli incroci, cambio
       che a velocità costante mette la marcia lunga, trattore più cattivo sotto sforzo; prova `node velocita.mjs`.
-- [ ] Da sentire con il committente: il rumore dei motori nuovo, sul sito o dai file `motore-*.wav` (volumi e timbri si
-      tarano in `MOTORI`).
+- [x] Rumore dei motori approvato dal committente («perfetto ottimo lavoro mi piace», 16/10/2026) dopo tre giri di ascolto.
+- [ ] **Prestazioni dopo il blocco 4.4 da misurare** (`node prestazioni.mjs`, GPU vera): non misurate in questo blocco; da
+      controllare soprattutto a 180 km/h sulla strada del Bosco (i riquadri si costruiscono mentre si corre) e il costo
+      dell'AudioWorklet del motore sul telefono.
 - [ ] Da decidere con il committente: un pulsante per lo **schermo intero** (non c'è; su iPhone Safari non funziona fuori dai video).
 - [x] Musica procedurale Web Audio: la radio ambient del blocco G.
 - [x] Camera: giro automatico e camera libera nel blocco G.
