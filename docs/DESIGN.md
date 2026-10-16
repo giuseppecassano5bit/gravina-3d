@@ -671,6 +671,17 @@ che sale e scende con la fiamma della mongolfiera.
   diorama, cosa si vede, come si usa, da dove vengono dati e fonti, crediti e licenze. È testo
   vero nel DOM, quindi lo leggono anche i motori di ricerca, e ha uno script suo: si apre anche
   se il diorama non parte. Su telefono occupa tutto lo schermo.
+* **Schede durante il viaggio** (blocco 4.4): sul telefono in verticale al massimo un terzo dello schermo,
+  testo che scala con la larghezza (`clamp`), scorrevole (`overscroll-behavior: contain`) col fondo che
+  sfuma finché c'è altro testo (`card--more`); mentre si scorre o si tocca, la scheda resta almeno altri 6 s.
+  Quando sparisce è `visibility: hidden`: non prende i tocchi sulla scena né il Tab. In orizzontale il testo
+  resta di tre righe.
+* **Accessibilità dell'HUD** (blocco 4.4): pulsanti a due stati (musica, motore) con `aria-pressed` e nome
+  fisso; `aria-keyshortcuts` e `title` coi tasti (P pausa, M musica, V motore, C cartolina, Esc esce dal giro
+  guidato); gruppi «Radio» e «Motore», regione «Giro guidato» con l'avanzamento in `aria-live`; scheda col
+  titolo come nome e raggiungibile col Tab per scorrerla; cursori del volume nativi con il valore in
+  percentuale (`aria-valuetext`), e con il fuoco su un cursore le frecce lo spostano invece di sterzare.
+  Sul telefono i pulsanti dell'HUD sono 48 × 48 px. Il diorama non ha un pulsante per lo schermo intero.
 * **Finestre basse** (portatili a 720–880 px d'altezza): la schermata iniziale si compatta
   (titolo, spaziature) perché credito e attribuzione ODbL restino dentro lo schermo.
 * **Metadati** nel `<head>`: titolo e descrizione con «Gravina in Puglia», «centro storico» e
