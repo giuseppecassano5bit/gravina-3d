@@ -44,6 +44,22 @@ node difetti.mjs shots/difetti-dopo.json
 GRAVINA_HTML=tools/test/shots/prima.html node difetti.mjs shots/difetti-prima.json   # git show main:index.html > shots/prima.html
 ```
 
+Rumore dei motori (blocco 4.4): per ogni mezzo una guida simulata (minimo, partenza, crociera, a tavoletta
+fino alla sua velocità massima, rilascio, frenata come prima di un incrocio, frenata fino a fermi) resa senza altoparlanti in `shots/motore-<mezzo>.wav`, da ascoltare;
+controlla anche saturazione e valori anomali e che dal vivo il motore cambi giri e marce:
+
+```bash
+npm run motori              # oppure: node motori.mjs huracan
+```
+
+Velocità massime (blocco 4.4): ogni mezzo con l'acceleratore sulla strada fuori città più lunga e nel
+centro storico; controlla che non superi mai il limite della via né la sua massima e che agli incroci con
+la scelta arrivi sotto i 25 km/h:
+
+```bash
+npm run velocita
+```
+
 Due strumenti per lo sviluppo:
 
 ```bash

@@ -131,6 +131,7 @@ Il file `index.html` è diviso in sezioni numerate e commentate:
 | 10–11 | Interfaccia | minimappa vettoriale, mappa della pausa con zoom e trascinamento, luoghi per gruppi, scelta del mezzo, targa, cartelli, schede, teletrasporto |
 | 11b | Radio | sei brani ambient generati con Web Audio, senza file audio |
 | 11c–11d | Suoni | suoni del bosco (uccelli, grilli, cicale, allocco, picchio, cinghiale, lupi lontani) e soffio del bruciatore della mongolfiera, generati con Web Audio |
+| 11e | Motori | un motore per mezzo in un AudioWorklet: scoppi per cilindro con l'ordine di scoppio, tubi di scarico, silenziatore, aspirazione, turbo, cambio con le marce; nessun file audio |
 | 12–13 | Scena e avvio | cielo al tramonto, luci, ombre agganciate ai texel, qualità adattiva, ciclo principale |
 
 Il documento di progetto completo è in [`docs/DESIGN.md`](docs/DESIGN.md); cosa resta da fare
@@ -298,6 +299,8 @@ sotto il terreno o sospese, dischi sfasati, decorative sovrapposte) con `node di
   database derivato e restano sotto ODbL; l'attribuzione è visibile nella pagina.
 * **Musica**: i sei brani della radio sono composizioni originali generate dal codice (Web Audio),
   senza campioni né brani di terzi.
+* **Rumore dei motori**: generato dal codice (sezione 11e) dai dati dei motori veri, senza
+  registrazioni: le registrazioni dei motori sono di terzi e il diorama resta un file unico.
 * **Quote del terreno** della città e della campagna (`GEO.dem`), e la discesa dei rioni del centro
   storico (`GEO.rioni`): modello di elevazione
   Copernicus DEM GLO-30, distribuito gratuitamente con la
@@ -308,7 +311,9 @@ sotto il terreno o sospese, dischi sfasati, decorative sovrapposte) con `node di
   GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved".
   Come chiede l'art. 6(c): "The organisations in charge of the Copernicus programme by law or
   by delegation do not incur any liability for any use of the Copernicus WorldDEM-30".
-* **Codice**: la licenza è ancora da scegliere (per esempio MIT).
+* **Codice**: licenza [MIT](LICENSE), © 2026 Giuseppe Cassano. Vale per il codice (CSS, HTML e
+  JavaScript di `index.html`, `tools/`); i dati in `GEO` restano sotto le loro licenze (ODbL per
+  quelli derivati da OSM, licenza del Copernicus DEM per le quote), come scritto qui sopra.
 * **Librerie e caratteri**: [Three.js](https://threejs.org) (MIT) da CDN; Marcellus SC, Barlow e
   Barlow Semi Condensed (SIL Open Font License) da Google Fonts.
 * **Fiat** e **Panda**, **Audi** e **RS Q8**, **Ferrari** e **Monza SP2**, **John Deere** (e i
@@ -319,6 +324,8 @@ sotto il terreno o sospese, dischi sfasati, decorative sovrapposte) con `node di
 ## Fonti
 
 Notizie storiche e posizioni dei monumenti da fonti pubbliche, tra cui:
+
+* Motori (rumore, sezione 11e, blocco 4.4): Ferrari Monza SP2, V12 F140 da 6,5 l con potenza massima a 8 500 giri ([Wikipedia](https://en.wikipedia.org/wiki/Ferrari_Monza_SP)) e limitatore a 9 000 ([RM Sotheby's](https://rmsothebys.com/auctions/ad25/lots/r0031-2022-ferrari-monza-sp2/)); Audi RS Q8, V8 4.0 TFSI a 90° con ordine di scoppio 1-3-7-2-6-5-4-8 e 600 CV a 6 000 giri ([Audi MediaCenter](https://audi-mediacenter.com/en/the-new-audi-rs-q8-the-most-sporty-q-12422/engine-12427)); Fiat Panda 1.2 Fire, 4 cilindri da 1 242 cm³, 69 CV a 5 500 giri e coppia a 3 000 ([auto-data.net](https://www.auto-data.net/es/fiat-panda-iii-319-1.2-fire-69hp-18361), [autotijd.be](https://autotijd.be/it/schede-tecniche/fiat/panda/12-69-hp-manual-2134)); John Deere 8R, PowerTech da 9,0 l, 6 cilindri in linea, regime nominale 2 100 giri, due turbo in serie ([Van Wall](https://vanwall.com/shop/agriculture/tractors/row-crop-tractors/john-deere-8r-280-tractor/), [Deere](https://www.deere.com/latin-america/es/tractores/tractores-grandes/8320r-320hp/)). Non verificati, valori tipici: minimo e limitatore di Panda e RS Q8, minimo del trattore, rapporti delle marce. L'ordine di scoppio del V12 non l'ho trovato: scoppi ogni 60° a bancate alterne, come in ogni V12 a scoppi regolari.
 
 * Ponte Acquedotto: [Wikipedia (EN)](https://en.wikipedia.org/wiki/Ponte_Madonna_della_Stella), [GravinaLife](https://www.gravinalife.it/rubriche/passeggiando-con-la-storia-1/il-ponte-acquedotto-settecentesco-orsiniano-della-madonna-della-stella/), [Viaggiamo.it](https://www.viaggiamo.it/ponte-acquedotto-di-gravina-di-puglia-la-storia/)
 * Cattedrale: [Wikipedia](https://it.wikipedia.org/wiki/Concattedrale_di_Santa_Maria_Assunta_(Gravina_in_Puglia)), [Wikipedia (EN)](https://en.wikipedia.org/wiki/Gravina_Cathedral), [Carta dei Beni Culturali della Regione Puglia](https://www.cartapulia.it/en/esplora-la-carta/-/rcp/ricercaCartapulia_INSTANCE_1yi8w0oVRO9u/dettaglio/5990) (orientamento, facciata tripartita con tre portali e rosone a 24 raggi, campanile sul profilo sud, cappellone), [Museo Capitolare, campanile](https://www.museocapitolaregravina.it/campanile-cattedrale/) (quattro ordini, cipollone del 1698), [Visit Puglia](https://www.visit-puglia.it/at/11/luogosacro/786/it/Cattedrale-di-Santa-Maria-Assunta-Gravina-in-Puglia-(Bari)) (portale sud e secondo rosone attiguo al campanile; blocco D: campanile in fondo a est del fianco sud, contro la Curia, e rosone subito a ovest, verificati su Street View e sulle [foto di Piazza Benedetto XIII](https://commons.wikimedia.org/wiki/File:Piazza_Benedetto_XIII_-_Duomo.jpg) di Wikimedia Commons), [Catalogo generale dei Beni Culturali](https://catalogo.beniculturali.it/detail/ArchitecturalOrLandscapeHeritage/1600180859), [GCatholic](https://gcatholic.org/churches/italy/1312.htm), [GravinaOggi, struttura architettonica](https://www.gravinaoggi.it/_la_struttura_architettonica.html)

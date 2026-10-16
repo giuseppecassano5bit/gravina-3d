@@ -341,9 +341,13 @@
     border-radius: 2px; box-shadow: 0 14px 34px rgba(0, 0, 0, 0.3);
     pointer-events: auto;
     opacity: 0; transform: translateY(-8px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
+    /* blocco 4.4: nascosta davvero quando sparisce (non ferma più i tocchi sulla scena, non si raggiunge col Tab) */
+    visibility: hidden;
+    transition: opacity 0.6s ease, transform 0.6s ease, visibility 0s linear 0.6s;
   }
-  .card.is-visible { opacity: 1; transform: none; }
+  .card.is-visible { opacity: 1; transform: none; visibility: visible; transition-delay: 0s; }
+  /* blocco 4.4: se il testo continua sotto, il fondo sfuma (si scorre col dito, la rotella o i tasti) */
+  .card.card--more { -webkit-mask-image: linear-gradient(#000 calc(100% - 2.2rem), transparent); mask-image: linear-gradient(#000 calc(100% - 2.2rem), transparent); }
   .card.card--bench { max-height: min(150px, 25dvh); padding: 0.65rem 0.85rem; font-size: 0.88rem; }
   /* Blocco M2: in panchina davanti al monumento, il pulsante per tornare al mezzo */
   .bench-btn {
@@ -510,7 +514,7 @@
   .engine__toggle[aria-pressed="true"] { border-color: var(--sunset); }
   .engine__toggle[aria-pressed="true"] svg { color: var(--sunset); }
   .engine__toggle[aria-pressed="true"] .engine__label { font: 400 1rem/1 var(--font-display); letter-spacing: 0.04em; text-transform: none; }
-  .engine__vol { width: 88px; height: 6px; accent-color: var(--sunset); cursor: pointer; background: rgba(255, 255, 255, 0.35); border-radius: 99px; }
+  .engine__vol { width: 88px; accent-color: var(--sunset); cursor: pointer; }   /* blocco 4.4: come quello della musica, più facile da prendere */
   .engine__vol[hidden] { display: none; }
   .engine__vol:focus-visible { outline: 3px solid var(--sunset); outline-offset: 2px; }
 
@@ -676,9 +680,15 @@
     .hud.is-balloon .follow-btn { top: calc(var(--gutter) + 104px + 24px + 290px + var(--safe-top)); }
     .plaque { max-width: calc(100vw - 2 * var(--gutter) - 116px); padding: 0.45rem 0.8rem 0.5rem; }
     .plaque__street { font-size: 1rem; }
-    .card { top: calc(132px + var(--safe-top)); width: calc(100vw - 2 * var(--gutter) - 116px); padding: 0.75rem 0.9rem 0.85rem; }
-    .card__title { font-size: 1.15rem; }
-    .card__text { font-size: 0.85rem; }
+    /* blocco 4.4: in verticale la scheda sta nella fascia alta (al massimo un terzo dello schermo) e
+       scorre; il mezzo, a metà schermo, resta libero */
+    .card {
+      top: calc(132px + var(--safe-top)); width: calc(100vw - 2 * var(--gutter) - 116px);
+      max-height: min(15.5rem, 32dvh); padding: 0.65rem 0.8rem 0.75rem; gap: 0.25rem;
+    }
+    .card__kicker { font-size: 0.64rem; letter-spacing: 0.12em; }
+    .card__title { font-size: clamp(1rem, 4.4vw, 1.15rem); }
+    .card__text { font-size: clamp(0.8rem, 3.5vw, 0.88rem); line-height: 1.45; }
     /* cartelli affiancati in griglia, freccia sopra e destinazione sotto */
     .signs { display: grid; grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr)); width: 100%; gap: 0.5rem; }
     .sign { min-width: 0; max-width: none; grid-template-columns: 1fr; justify-items: center; text-align: center; padding: 0.5rem 0.4rem 0.55rem; }
@@ -891,13 +901,13 @@
 
   <p class="attribution attribution--hud">© OpenStreetMap contributors · Copernicus WorldDEM-30 © DLR, Airbus</p>
 
-  <button class="pause-btn" id="btn-pause" type="button" aria-label="Metti in pausa">
+  <button class="pause-btn" id="btn-pause" type="button" aria-label="Metti in pausa" aria-keyshortcuts="P" title="Pausa (tasto P)">
     <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3.6" height="12" rx="1" fill="currentColor"/><rect x="9.4" y="2" width="3.6" height="12" rx="1" fill="currentColor"/></svg>
     <span>Pausa</span>
   </button>
 
-  <div class="radio" id="radio">
-    <button class="pill radio__toggle" id="btn-radio" type="button" aria-pressed="false" aria-label="Accendi la musica">
+  <div class="radio" id="radio" role="group" aria-label="Radio">
+    <button class="pill radio__toggle" id="btn-radio" type="button" aria-pressed="false" aria-label="Musica" aria-keyshortcuts="M" title="Musica (tasto M)">
       <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 2.2 14 .8v10.1a2.3 2.3 0 1 1-1.6-2.2V4.2L7.6 5v7.9A2.3 2.3 0 1 1 6 10.7z" fill="currentColor"/></svg>
       <span class="radio__label" id="radio-label">Musica</span>
     </button>
@@ -907,15 +917,15 @@
     <input class="radio__vol" id="radio-vol" type="range" min="0" max="1" step="0.05" value="0.6" aria-label="Volume della musica" hidden>
   </div>
 
-  <div class="engine" id="engine">
-    <button class="pill engine__toggle" id="btn-engine" type="button" aria-pressed="true" aria-label="Attiva/disattiva rumore motore (tasto V)" title="Attiva/disattiva motore (tasto V)">
+  <div class="engine" id="engine" role="group" aria-label="Motore">
+    <button class="pill engine__toggle" id="btn-engine" type="button" aria-pressed="true" aria-label="Rumore del motore" aria-keyshortcuts="V" title="Rumore del motore (tasto V)">
       <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 8l2.8-2.8M4 11a4.5 4.5 0 0 1 8 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       <span class="engine__label" id="engine-label">Motore</span>
     </button>
     <input class="engine__vol" id="engine-vol" type="range" min="0" max="1" step="0.05" value="0.75" aria-label="Volume del motore" title="Volume del motore">
   </div>
 
-  <button class="pill postcard-btn" id="btn-postcard" type="button" aria-label="Scatta cartolina" title="Scatta cartolina ricordo (tasto C)">
+  <button class="pill postcard-btn" id="btn-postcard" type="button" aria-label="Scatta una cartolina" aria-keyshortcuts="C" title="Scatta una cartolina ricordo (tasto C)">
     <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4A1.5 1.5 0 0 0 1 5.5v7A1.5 1.5 0 0 0 2.5 14h11a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 13.5 4h-2.172a1.5 1.5 0 0 1-1.06-.44l-.828-.828A1.5 1.5 0 0 0 8.38 2.293H7.62a1.5 1.5 0 0 0-1.06.44l-.828.828A1.5 1.5 0 0 1 4.672 4H2.5zm5.5 8a3 3 0 1 1 0-6 3 3 0 0 1 0 6z" fill="currentColor"/></svg>
     <span>Cartolina</span>
   </button>
@@ -935,7 +945,7 @@
     <span id="btn-bench-label">Esci dalla piazzetta · torna al mezzo</span>
   </button>
 
-  <article class="card" id="card" aria-live="polite">
+  <article class="card" id="card" aria-live="polite" aria-labelledby="card-title" tabindex="0">
     <span class="card__kicker" id="card-kicker"></span>
     <h2 class="card__title" id="card-title"></h2>
     <p class="card__text" id="card-text"></p>
@@ -948,18 +958,18 @@
   </div>
 
   <button class="touch-arrow touch-arrow--left" id="touch-left" type="button" aria-label="Scegli la via più a sinistra" hidden>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
   </button>
   <button class="touch-arrow touch-arrow--right" id="touch-right" type="button" aria-label="Scegli la via più a destra" hidden>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
   </button>
 
-  <div class="tour-hud" id="tour-hud" hidden>
+  <div class="tour-hud" id="tour-hud" role="region" aria-label="Giro guidato" hidden>
     <span class="tour-hud__badge"><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 4v4l2.5 2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Giro guidato</span>
-    <span class="tour-hud__info" id="tour-hud-info">Tappa 1 di 14: Ponte Acquedotto</span>
+    <span class="tour-hud__info" id="tour-hud-info" aria-live="polite">Tappa 1 di 14: Ponte Acquedotto</span>
     <div class="tour-hud__actions">
-      <button class="tour-hud__btn" id="btn-tour-skip" type="button" title="Passa alla prossima tappa">Prossima</button>
-      <button class="tour-hud__btn tour-hud__btn--exit" id="btn-tour-exit" type="button" title="Esci dal giro guidato">Esci</button>
+      <button class="tour-hud__btn" id="btn-tour-skip" type="button" aria-label="Passa alla prossima tappa" title="Passa alla prossima tappa">Prossima</button>
+      <button class="tour-hud__btn tour-hud__btn--exit" id="btn-tour-exit" type="button" aria-label="Esci dal giro guidato" aria-keyshortcuts="Escape" title="Esci dal giro guidato (Esc)">Esci</button>
     </div>
   </div>
 
@@ -1062,10 +1072,14 @@ const CONFIG = {
     parkGap: 3.2,           // m: il mezzo si ferma a questa distanza dall'imbocco pedonale, e aspetta così all'uscita
     parkBrake: 2.6,         // m/s² di frenata verso l'imbocco pedonale
     stepOut: 0.9, stepIn: 0.7,   // s per scendere dal mezzo e per risalire
-    // Acceleratore (blocco E, solo su PC): con Shift tenuto premuto la crociera si moltiplica per
-    // `boost`, con una salita morbida (`boostRate`). Agli incroci il cartello si apre prima, in
+    // Acceleratore (blocco E, solo su PC): con Shift tenuto premuto il mezzo va verso la sua velocità
+    // massima (VEHICLES[].top), con una salita morbida (`boostRate`). Agli incroci il cartello si apre prima, in
     // proporzione alla velocità, e il mezzo torna alla crociera: il tempo per scegliere resta quello di sempre.
-    boost: 1.8, boostRate: 1.6,
+    boostRate: 1.6,
+    // Blocco 4.4: ma mai oltre il limite della strada, in km/h: centro storico; in città e fuori città per classe
+    // (secondaria, terziaria, residenziale, living street, pedonale, sentiero, carrareccia); sterrati.
+    limits: { z0: 30, city: [70, 60, 50, 30, 30, 30, 30], country: [Infinity, Infinity, 90, 40, 30, 30, 40], dirt: 50 },
+    brake: 4.5,             // m/s²: frenata prima degli incroci e quando la via dopo è più lenta
   },
 
   road: {
@@ -1113,6 +1127,10 @@ const CONFIG = {
     fov: 45, fovPortrait: 62,
     chaseDistance: 12, chaseHeight: 18, lookAhead: 8,   // vista da plastico, abbastanza dall'alto per i vicoli
     maxLift: 22,             // m: quanto può salire la camera per scavalcare i tetti nei vicoli
+    /** Blocco 4.4, dopo il teletrasporto: direzioni provate attorno al mezzo (gradi, 0 = dietro) e tetti
+     *  controllati attorno alla camera, [raggio, margine sotto la camera] in metri. */
+    snapAims: [0, 25, -25, 50, -50], snapRing: [[0, 6], [4, 6], [8, 5], [12, 4], [16, 2], [20, 0.5]],
+    snapHold: 2.5,           // s in cui, dopo il teletrasporto, la camera tiene l'inquadratura libera prima di scendere
     walk: { distance: 6.5, height: 4.6, lookAhead: 2.5, maxLift: 15 },   // a piedi: più bassa e più vicina alla figurina
     /** Camera libera: si gira attorno al mezzo trascinando; resta dov'è finché non si preme «Segui il mezzo» (blocco M1). */
     orbit: { minDist: 8, maxDist: 70, minElev: 10, maxElev: 80 },
@@ -3437,9 +3455,33 @@ const World = {
     const light = new THREE.Color('#ecdcb2');
     const local = (geo, color) => { geo.applyMatrix4(m); tb.addGeometry(geo, color); };
     const slope = Math.atan2(p1.y - p0.y, L);
+    // Blocco 4.4: muretti e pilastrini delle testate solo fuori dalla carreggiata delle vie che arrivano al
+    // ponte (prima il raccordo ovest e i ventagli est chiudevano la via e il mezzo ci passava in mezzo).
+    // Punti in coordinate locali (x lungo il ponte da est, z di traverso), mezzo spessore del muro `t`.
+    const origin = p0.clone().setY(0).addScaledVector(across, -width / 2);
+    const freeW = (w, t = 0.3) => {
+      const r = network.closestSample(w.x, -w.z, (x) => x.bridge);
+      return !r || r.d > r.edge.width / 2 + t + 0.35;
+    };
+    const free = (x, z, t) => freeW(origin.clone().addScaledVector(along, x).addScaledVector(across, z), t);
+    /** Tratto libero più lungo di un muro da (x0, z0) a (x1, z1), da `from` (0 = inizio, 1 = fine): [t0, t1] o null. */
+    const freeSpan = (x0, z0, x1, z1, t = 0.3) => {
+      const len = Math.hypot(x1 - x0, z1 - z0), k = Math.max(2, Math.ceil(len / 0.3));
+      const ok = Array.from({ length: k + 1 }, (_, i) => free(lerp(x0, x1, i / k), lerp(z0, z1, i / k), t));
+      let best = null;
+      for (let i = 0; i <= k; i++) {
+        if (!ok[i]) continue;
+        let j = i;
+        while (j < k && ok[j + 1]) j++;
+        if (!best || j - i > best[1] - best[0]) best = [i, j];
+        i = j;
+      }
+      return best && best[1] > best[0] ? [best[0] / k, best[1] / k] : null;
+    };
 
     // Helper per pilastrino monumentale squadrato con capitello modanato in coordinate locali
     const pillar = (px, py, pz, h = 1.05) => {
+      if (!free(px, pz, 0.45)) return;                       // blocco 4.4: mai sulla via
       const b = new THREE.BoxGeometry(0.82, 0.22, 0.82);
       b.translate(px, py + 0.11, pz);
       local(b, light);
@@ -3457,12 +3499,19 @@ const World = {
     // Parapetti del ponte: da x = 0.9 a x = L - 0.9 (lasciano spazio ai pilastrini di testata)
     const pLen = L - 1.8;
     for (const zSide of [0.22, width - 0.22]) {
-      const pWall = new THREE.BoxGeometry(pLen, 1.0, 0.45).rotateZ(slope);
-      pWall.translate(L / 2, deckAt(L / 2) + 0.5, zSide);
+      // blocco 4.4: dove una via lascia il ponte di lato, il parapetto si ferma prima
+      const span = freeSpan(0.9, zSide, L - 0.9, zSide, 0.25);
+      if (!span) continue;
+      const xa = lerp(0.9, L - 0.9, span[0]), xb = lerp(0.9, L - 0.9, span[1]), xm = (xa + xb) / 2, len = xb - xa;
+      const pWall = new THREE.BoxGeometry(len, 1.0, 0.45).rotateZ(slope);
+      pWall.translate(xm, deckAt(xm) + 0.5, zSide);
       local(pWall, stone);
-      const pCap = new THREE.BoxGeometry(pLen + 0.05, 0.10, 0.52).rotateZ(slope);
-      pCap.translate(L / 2, deckAt(L / 2) + 1.05, zSide);
+      const pCap = new THREE.BoxGeometry(len + 0.05, 0.10, 0.52).rotateZ(slope);
+      pCap.translate(xm, deckAt(xm) + 1.05, zSide);
       local(pCap, light);
+      // pilastrino dove il parapetto si ferma prima della testata
+      if (xa > 1.2) pillar(xa - 0.2, deckAt(xa), zSide);
+      if (xb < L - 1.2) pillar(xb + 0.2, deckAt(xb), zSide);
     }
 
     // Pilastri monumentali alle testate (est e ovest)
@@ -3472,19 +3521,20 @@ const World = {
     pillar(L - 0.45, deckAt(L), width - 0.22);
 
     // Sponda est: innesti a ventaglio verso Via Fontana la Stella e la scalinata di Via giudice Montea
+    // (blocco 4.4: solo il tratto fuori dalle vie, e il pilastrino alla fine del tratto)
     for (const [vSide, angle] of [[0.22, -0.32], [width - 0.22, 0.32]]) {
-      const vLen = 2.8;
-      const vWall = new THREE.BoxGeometry(vLen, 1.0, 0.45).rotateY(angle);
-      const vx = -Math.cos(angle) * (vLen / 2) + 0.1;
-      const vz = vSide - Math.sin(angle) * (vLen / 2);
+      const vLen = 2.8, x0 = 0.1, z0 = vSide, x1 = 0.1 - Math.cos(angle) * vLen, z1 = vSide - Math.sin(angle) * vLen;
+      const span = freeSpan(x0, z0, x1, z1);
+      if (!span || (span[1] - span[0]) * vLen < 0.8) continue;
+      const [ta, tz] = span, len = (tz - ta) * vLen;
+      const vx = lerp(x0, x1, (ta + tz) / 2), vz = lerp(z0, z1, (ta + tz) / 2);
+      const vWall = new THREE.BoxGeometry(len, 1.0, 0.45).rotateY(angle);
       vWall.translate(vx, deckAt(0) + 0.5, vz);
       local(vWall, stone);
-      const vCap = new THREE.BoxGeometry(vLen + 0.05, 0.10, 0.52).rotateY(angle);
+      const vCap = new THREE.BoxGeometry(len + 0.05, 0.10, 0.52).rotateY(angle);
       vCap.translate(vx, deckAt(0) + 1.05, vz);
       local(vCap, light);
-      const endX = -Math.cos(angle) * vLen;
-      const endZ = vSide - Math.sin(angle) * vLen;
-      pillar(endX, deckAt(0), endZ, 1.15);
+      pillar(lerp(x0, x1, tz), deckAt(0), lerp(z0, z1, tz), 1.15);
     }
 
     // Cornici marcapiano rifinite: si arrestano contro i pilastri terminali e la spalla (senza sporgere nel vuoto)
@@ -3562,6 +3612,8 @@ const World = {
         if (nor.x < 0) nor.negate();
         const mOff = rampEdge.width / 2 + 0.18;
         const midPt = pA.clone().lerp(pB, 0.5).addScaledVector(nor, mOff);
+        // blocco 4.4: niente tratti di muretto sopra le altre vie
+        if (!freeW(midPt, 0.22) || !freeW(pA.clone().addScaledVector(nor, mOff), 0.22) || !freeW(pB.clone().addScaledVector(nor, mOff), 0.22)) continue;
         if (!firstMidPt) firstMidPt = midPt.clone();
         const groundH = Terrain.heightAt(midPt.x, -midPt.z);
         const roadH = midPt.y;
@@ -3595,7 +3647,9 @@ const World = {
           .setY(deckAt(L));
         const connVec = new THREE.Vector3().subVectors(firstMidPt, pillarWestPos);
         const connLen = connVec.length();
-        if (connLen > 0.3) {
+        let connFree = true;                                   // blocco 4.4: il raccordo non deve tagliare la via
+        for (let k = 0; k <= 12; k++) if (!freeW(pillarWestPos.clone().lerp(firstMidPt, k / 12), 0.22)) connFree = false;
+        if (connLen > 0.3 && connFree) {
           const connMid = pillarWestPos.clone().lerp(firstMidPt, 0.5);
           const connRotY = Math.atan2(connVec.x, connVec.z);
           const rWall = new THREE.BoxGeometry(0.44, 1.05 + 1.2, connLen + 0.1).rotateY(connRotY);
@@ -12095,7 +12149,9 @@ function forestAmount(e, n) {
  * ═══════════════════════════════════════════════════════════════════════ */
 
 /**
- * I mezzi tra cui scegliere. `pace` moltiplica le velocità di CONFIG.drive:
+ * I mezzi tra cui scegliere. Blocco 4.4: `top` è la velocità massima con l'acceleratore (km/h, decisa dal
+ * committente) e `accel` l'accelerazione in m/s² [normale, a tavoletta: dallo 0–100 km/h vero, Monza SP2 2,9 s,
+ * RS Q8 3,8 s, Panda 1.2 circa 14 s]. `pace` moltiplica le velocità di CONFIG.drive:
  * il trattore va piano, la Lamborghini è la più svelta (sempre a passo da
  * centro storico). `icon`: sagoma di profilo per i menu (viewBox 64 × 32),
  * dal blocco M3 ricavata dalle sezioni della carrozzeria, in proporzione.
@@ -12103,18 +12159,22 @@ function forestAmount(e, n) {
 const VEHICLES = [
   {
     id: 'panda', name: 'Fiat Panda', short: 'Panda', tag: '2013 · Terza serie “Squircle”', color: '#c4261d', pace: 0.95,
+    top: 80, accel: [1.8, 2.4],
     icon: { body: 'M3 24.5V13.8l2.2-4.2 1.8-1.5 8.2-3.8h21.4l11.2 7.8 11.8 2.2 1.4 2.1v8h-4.3a6.2 6.2 0 0 0-12.3 0H21.4a6.2 6.2 0 0 0-12.3 0z', wheels: [[15.2, 24.8, 4.6], [49.2, 24.8, 4.6]] },
   },
   {
     id: 'rs6', name: 'Audi RS Q8', short: 'RS Q8', tag: 'SUV coupé · V8 biturbo 600 CV', color: '#282c32', pace: 1.1,
+    top: 180, accel: [2.8, 7.5],
     icon: { body: 'M3 24v-9.5l2-3.8 6.5-4.2h19.2l12.8 6.5 14.5 1.8 3 3.2v6h-6.2a6.8 6.8 0 0 0-13.4 0H22.5a6.8 6.8 0 0 0-13.4 0z', wheels: [[15.8, 24, 5.5], [49.4, 24, 5.5]] },
   },
   {
     id: 'huracan', name: 'Ferrari Monza SP2', short: 'Monza SP2', tag: 'Barchetta biposto · V12 aspirato 810 CV', color: '#c81e24', pace: 1.25,
+    top: 180, accel: [3.2, 9.5],
     icon: { body: 'M3 26v-6.2l3.2-2.1 4.5 1.5 5.5-2.2 4.2-3.2 5.5-.2 4.8 3.5 15.5 2.8 14.5 2.8 3.3 3.3v1h-7a5.5 5.5 0 0 0-10.8 0H21.2a5.5 5.5 0 0 0-10.8 0z', wheels: [[15.8, 26, 4.5], [49.5, 26, 4.5]] },
   },
   {
     id: 'deere', name: 'John Deere 8R', short: 'John Deere 8R', tag: 'Trattore da campo aperto coi contropesi', color: '#367c2b', pace: 0.62,
+    top: 50, accel: [1.2, 1.6],
     icon: { body: 'M6 19.5v-3.5h7.5V3.5h18v9.5h19l5.5 2.5 5 1.5v6H55a9 9 0 0 0-17 0H24.5a13.5 13.5 0 0 0-26 0z', wheels: [[11.5, 19.5, 10.5], [46.5, 22.5, 7.5]] },
   },
   // Blocco M3: il quinto mezzo vola su un giro fisso (sezione 8b) e non segue le vie.
@@ -13140,6 +13200,8 @@ class Driver {
     this.running = false;
     this.paused = false;             // in pausa il mezzo frena e resta fermo
     this.pace = 1;                   // ritmo del mezzo scelto (VEHICLES[].pace)
+    this.top = 30 / 3.6;             // blocco 4.4: velocità massima del mezzo (m/s) e accelerazione [normale, a tavoletta]
+    this.accel = [2, 4];
     this.boosting = false;           // acceleratore premuto (Shift, solo su PC)
     this.boost = 0;                  // quanto è inserito, da 0 a 1 (sale e scende piano)
     this.decision = null;            // { node, options[], selected, straight }
@@ -13243,7 +13305,8 @@ class Driver {
     const D = CONFIG.drive;
     if (this.sitting) { this.speed = 0; return; }                 // seduti in panchina: si aspetta il pulsante
     // A velocità più alta il cartello si apre prima, in proporzione: il tempo per scegliere non cambia.
-    if (!this.decision && this.remaining <= D.decisionDistance * Math.max(1, this.speed / (D.cruiseSpeed * this.pace))) this.#openDecision();
+    // (blocco 4.4: e comunque in tempo per frenare fino all'incrocio)
+    if (!this.decision && this.remaining <= Math.max(D.decisionDistance * Math.max(1, this.speed / (D.cruiseSpeed * this.pace)), this.speed ** 2 / (2 * D.brake) + D.slowDistance + 10)) this.#openDecision();
     const next = this.nextChoice;
     // Il prossimo tratto si fa a piedi: il mezzo si ferma a parkGap metri dall'imbocco.
     const parking = !this.onFoot && !this.edge.walk && !!next?.edge.walk;
@@ -13276,16 +13339,32 @@ class Driver {
       }
 
       // Velocità obiettivo: crociera, ponte, rallentamento agli incroci con scelta, passo a piedi.
-      let target = (this.edge.bridge ? D.bridgeSpeed : D.cruiseSpeed) * this.pace;
+      const base = (this.edge.bridge ? D.bridgeSpeed : D.cruiseSpeed) * this.pace;
       // Acceleratore: non a piedi, non nelle gocce; con la scelta aperta si torna alla crociera.
       const boost = this.boosting && !this.onFoot && !this.edge.turn && !parking && !(this.decision?.options.length > 1);
       this.boost += ((boost ? 1 : 0) - this.boost) * damp(D.boostRate, dt);
-      target *= 1 + (D.boost - 1) * this.boost;
+      // blocco 4.4: verso la velocità massima del mezzo, entro il limite della strada
+      let target = base + Math.max(0, Math.min(this.top, Driver.limit(this.edge)) - base) * this.boost;
+      // …e sopra la crociera si frena in tempo per la via dopo (o per l'incrocio con la scelta)
+      let braking = false;
+      if (target > base || this.speed > base + 1) {
+        const next = this.nextChoice?.edge, junction = this.decision?.options.length > 1;
+        const vEnd = junction ? D.junctionSpeed : next ? (next.turn ? 4.5 : Math.max(base, Math.min(this.top, Driver.limit(next)) * (this.boosting ? 1 : 0))) : null;
+        if (vEnd !== null) {
+          const cap = Math.max(base, Math.sqrt(vEnd ** 2 + 2 * D.brake * Math.max(0, this.remaining - (junction ? D.slowDistance : 0))));
+          braking = cap < this.speed;
+          target = Math.min(target, cap);
+        }
+      }
       if (this.edge.turn) target = Math.min(target, 4.5);
       if (this.decision?.options.length > 1 && this.remaining < D.slowDistance) target = Math.min(target, D.junctionSpeed * Math.min(1, this.pace));
       if (this.onFoot) target = D.walkSpeed;
       if (this.tour?.visiting) target = Math.min(target, 2.5);
-      this.speed += (target - this.speed) * damp(D.accelRate * (this.onFoot ? 2 : 1), dt);
+      let dv = (target - this.speed) * damp(D.accelRate * (this.onFoot ? 2 : 1), dt);
+      // blocco 4.4: accelerazione e frenata di un mezzo vero (a tavoletta cala con la velocità)
+      // lasciato l'acceleratore rallenta col freno motore; frena davvero solo per arrivare lento all'incrocio
+      if (!this.onFoot) dv = clamp(dv, -(braking || this.speed < base + 1 ? D.brake * 1.4 : 2.2) * dt, (this.boost > 0.3 ? this.accel[1] * (1 - 0.8 * (this.speed / this.top) ** 2) : this.accel[0]) * dt);
+      this.speed += dv;
       if (parking) this.speed = Math.min(this.speed, Math.sqrt(2 * D.parkBrake * Math.max(0, room)) + 0.3);
     }
 
@@ -13437,6 +13516,14 @@ class Driver {
 
   /** Arco su cui si viaggerà dopo l'incrocio (per minimappa e anticipo di sterzo). */
   get nextChoice() { return this.decision ? this.decision.options[this.decision.selected] : null; }
+
+  /** Blocco 4.4: limite di velocità della via (m/s), dalla zona e dalla classe (CONFIG.drive.limits). */
+  static limit(edge) {
+    if (edge._limit !== undefined) return edge._limit;
+    const L = CONFIG.drive.limits, k = Math.floor(edge.count / 2) * 3, e = edge.samples[k], n = -edge.samples[k + 2];
+    const kmh = edge.bridge ? 30 : Tiles.inZ0(e, n) ? L.z0 : edge.dirt ? L.dirt : (edge.urban ? L.city : L.country)[edge.cls] ?? 50;
+    return (edge._limit = kmh / 3.6);
+  }
 
   /** Punto a `dist` metri più avanti, proseguendo sull'uscita selezionata. */
   #pointAhead(dist, out) {
@@ -13683,6 +13770,8 @@ class CameraRig {
     this.aerialAngle = 0;
     this.lift = 0;                   // m in più sopra i tetti quando le case coprono il mezzo
     this.footMix = 0;                // 0 in auto, 1 a piedi (passaggio morbido)
+    this.aim = 0;                    // blocco 4.4: angolo in più attorno al mezzo scelto dal teletrasporto, poi torna a 0
+    this.wideT = 0;                  // blocco 4.4: s in cui vale ancora il controllo dei tetti allargato del teletrasporto
     // Camera libera (trascinamento, rotella, pizzico): angolo attorno al mezzo, inclinazione, distanza.
     this.orbit = { on: false, w: 0, yaw: 0, elev: 0.98, dist: 22, quick: false };
     this.auto = { yaw: 0, k: 1, t: 0, shot: 0 };   // giro automatico nei rettilinei
@@ -13811,7 +13900,14 @@ class CameraRig {
     this.chaseYaw = driver.yaw;
   }
 
-  /** Porta subito la camera dietro al mezzo (teletrasporto, strumenti di debug). */
+  /**
+   * Porta subito la camera dietro al mezzo (teletrasporto, strumenti di debug).
+   * Blocco 4.4: la camera non parte a ridosso di un tetto o di un cornicione. Tra alcune direzioni
+   * attorno al mezzo (dietro e fino a 50° di lato) sceglie quella che deve salire meno perché nessun
+   * tetto entro 20 m arrivi alla sua quota (`snapRing` in #roofLift), con una piccola penalità per l'angolo.
+   * Il controllo allargato resta per `snapHold` secondi, così la prima inquadratura si tiene mentre compare
+   * la scheda; poi l'inseguimento torna dietro al mezzo e scende piano (`aim` e `lift` si smorzano da soli).
+   */
   snap(driver) {
     this.mode = 'drive';
     Object.assign(this.orbit, { on: false, w: 0 });
@@ -13823,6 +13919,17 @@ class CameraRig {
     this.sitMix = 0;
     this.vista.weight = 0;
     this.vista.active = false;
+    this.wideT = CONFIG.camera.snapHold;
+    let best = { aim: 0, cost: Infinity };
+    for (const deg of CONFIG.camera.snapAims) {
+      this.aim = THREE.MathUtils.degToRad(deg);
+      this.lift = 0;
+      this.update(0, driver);
+      this.update(0, driver);                                   // la seconda passata tiene conto della salita
+      const cost = this.lift + Math.abs(deg) * 0.07;           // 50° di lato valgono 3,5 m di salita
+      if (cost < best.cost - 0.01) best = { aim: this.aim, cost };
+    }
+    this.aim = best.aim;
     this.update(0, driver);
     this.update(0, driver);
     this.pos.copy(this._wantPos);
@@ -13926,7 +14033,9 @@ class CameraRig {
     const O = this.orbit, A = this.auto;
     O.w += ((O.on ? 1 : 0) - O.w) * (dt > 0 ? damp(O.on ? 10 : O.quick ? 4 : 2, dt) : 1);
     const w = smoothstep(0, 1, O.w);
-    const yawOff = A.yaw + angleDiff(A.yaw, O.yaw) * w;
+    this.wideT = Math.max(0, this.wideT - dt);
+    if (this.wideT <= 0) this.aim -= this.aim * damp(0.6, dt);  // blocco 4.4: dopo il teletrasporto torna dietro piano
+    const base = A.yaw + this.aim, yawOff = base + angleDiff(base, O.yaw) * w;
     const elev = lerp(elev0 * A.k, O.elev, w), dist = lerp(dist0, O.dist, w);
     this._current = { yaw: yawOff, elev, dist };
     const yaw = this.chaseYaw + yawOff, sy = Math.sin(yaw), cy = Math.cos(yaw);
@@ -13994,9 +14103,13 @@ class CameraRig {
     }
     // …e che la camera stessa non stia a ridosso di un tetto o di una parete:
     // un tetto a pochi metri, alla stessa quota, riempirebbe mezza inquadratura.
-    for (let a = 0; a < 8; a++) {
-      for (const [r, gap] of [[3, 2.5], [7, 4.5]]) {
-        const roof = Buildings.roofAt(cam.x + Math.cos(a * 0.785) * r, -(cam.z + Math.sin(a * 0.785) * r));
+    // Blocco 4.4: subito dopo il teletrasporto (`wideT`) si guarda più lontano e con più margine,
+    // così la prima inquadratura è libera anche accanto a un campanile o a una casa più alta.
+    const wide = this.wideT > 0, ring = wide ? CONFIG.camera.snapRing : [[3, 2.5], [7, 4.5]], dirs = wide ? 16 : 8;
+    for (let a = 0; a < dirs; a++) {
+      const ca = Math.cos(a * TAU / dirs), sa = Math.sin(a * TAU / dirs);
+      for (const [r, gap] of ring) {
+        const roof = Buildings.roofAt(cam.x + ca * r, -(cam.z + sa * r));
         if (roof + gap > cam.y) need = Math.max(need, roof + gap - cam.y);
       }
     }
@@ -14573,6 +14686,12 @@ class UI {
     this.cardTimer = 0;
     this.labels = [];
     this.labelsActive = false;
+    // Blocco 4.4: mentre si legge (si scorre o si tocca la scheda) la scheda resta, e il fondo sfuma finché c'è altro
+    const reading = () => { if (this.el.card.classList.contains('is-visible')) this.cardTimer = Math.max(this.cardTimer, 6); };
+    this.el.card.addEventListener('scroll', () => { this.cardMore(); reading(); }, { passive: true });
+    this.el.card.addEventListener('pointerdown', reading);
+    this.el.card.addEventListener('focus', reading);
+    addEventListener('resize', () => this.cardMore());
     this._v = new THREE.Vector3();
     if (this.isTouch) this.el.controlsHint.textContent = 'Agli incroci tocca i cartelli marroni. Con Pausa ti fermi, cambi mezzo o ti teletrasporti.';
   }
@@ -14727,6 +14846,13 @@ class UI {
     card.scrollTop = 0;
     card.classList.add('is-visible');
     this.cardTimer = 10;
+    this.cardMore();
+  }
+
+  /** Blocco 4.4: sfuma il fondo della scheda finché c'è altro testo da scorrere. */
+  cardMore() {
+    const c = this.el.card;
+    c.classList.toggle('card--more', c.scrollHeight - c.clientHeight - c.scrollTop > 4);
   }
 
   tickCard(dt) {
@@ -15308,36 +15434,285 @@ const Burner = (() => {
 })();
 
 /**
- * 11e. RUMORE PROCEDURALE DEI MOTORI (blocco 4.2): sintesi audio Web Audio per ciascun veicolo,
- * senza file audio esterni. Profilo acustico calibrato su regimi, carico, accelerazione e boost:
- *  - Ferrari Monza SP2: V12 aspirato 8500 rpm (sawtooth + square detunata + sub-bass, filtro risonante e saturatore);
- *  - Audi RS Q8: V8 biturbo 4.0L (rumble a battimento 1.4 Hz, filtro caldo e turbo spool noise a 2.4 kHz);
- *  - Fiat Panda 2013: 4 cilindri Fire 1.2 (pulse + triangle da 55 a 320 Hz e filtro medio);
- *  - John Deere serie 8R: 6 cilindri diesel pesante 9.0L (cadenza a bassi regimi, AM tremolo cilindri e sibilo turbo);
- *  - Mongolfiera: delega al bruciatore (Burner) coordinato con il volume master del motore.
+ * 11e. RUMORE DEI MOTORI (blocco 4.2, rifatto nel blocco 4.4): niente file audio, niente registrazioni.
+ * Ogni motore è un piccolo motore vero, in un AudioWorklet: i cilindri scoppiano al loro angolo di manovella
+ * secondo l'ordine di scoppio, ogni scoppio è un impulso di pressione che entra nel tubo di scarico della sua
+ * bancata (guida d'onda con la riflessione all'uscita), poi nel silenziatore e nella risonanza della scocca;
+ * in più aspirazione, turbo, battito del diesel e scoppiettii in rilascio. I giri non seguono la velocità
+ * ma un cambio con le marce (`Cambio`): salgono in accelerazione, calano alla cambiata, il minimo da fermi.
+ * Dati dei motori (fonti nel README):
+ *  - Ferrari Monza SP2: V12 aspirato F140 da 6,5 l, potenza massima a 8 500 giri, limitatore a 9 000;
+ *    12 cilindri, uno scoppio ogni 60° di manovella, bancate alternate;
+ *  - Audi RS Q8: V8 biturbo 4.0 TFSI a 90°, ordine di scoppio 1-3-7-2-6-5-4-8 (Audi), 600 CV a 6 000 giri:
+ *    in ogni bancata gli scoppi sono irregolari, da qui il borbottio; turbo dentro la V;
+ *  - Fiat Panda 1.2 Fire: 4 cilindri in linea (ordine 1-3-4-2), 69 CV a 5 500 giri, coppia a 3 000;
+ *  - John Deere 8R: diesel PowerTech da 9,0 l, 6 cilindri in linea (1-5-3-6-2-4), regime nominale 2 100 giri,
+ *    due turbo in serie; trasmissione a variazione continua: i giri restano quasi fermi.
+ *  Minimo e limitatore di Panda e Audi e il minimo del trattore sono valori tipici, non verificati.
  */
-const EngineAudio = (() => {
-  let ctx = null;
-  let masterGain = null;
-  let enabled = true;
-  let userVol = 0.75;
-  let currentModel = 'panda';
-
-  let osc1 = null, osc2 = null, osc3 = null;
-  let lfo = null, lfoGain = null;
-  let turboNoise = null, turboGain = null, turboFilter = null;
-  let mainFilter = null, shaper = null;
-  let synthGain = null;
-  let activeVehicle = null;
-
-  function makeDistortionCurve(k = 14) {
-    const n = 512, curve = new Float32Array(n);
-    const deg = Math.PI / 180;
-    for (let i = 0; i < n; ++i) {
-      const x = (i * 2) / n - 1;
-      curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
+const MOTORE_WORKLET = `
+class Svf {                                   // filtro a variabili di stato (TPT): passa-basso e passa-banda
+  constructor() { this.a = 0; this.b = 0; this.lp = 0; this.bp = 0; this.set(1000, 0.7); }
+  set(f, q) {
+    const g = Math.tan(Math.PI * Math.min(f, sampleRate * 0.45) / sampleRate), k = 1 / q;
+    this.a1 = 1 / (1 + g * (g + k)); this.a2 = g * this.a1; this.a3 = g * this.a2;
+  }
+  run(v0) {
+    const v3 = v0 - this.b, v1 = this.a1 * this.a + this.a2 * v3, v2 = this.b + this.a2 * this.a + this.a3 * v3;
+    this.a = 2 * v1 - this.a; this.b = 2 * v2 - this.b; this.lp = v2; this.bp = v1;
+    return v2;
+  }
+}
+class Motore extends AudioWorkletProcessor {
+  static get parameterDescriptors() {
+    return [
+      { name: 'rpm', defaultValue: 800, minValue: 0, maxValue: 12000, automationRate: 'k-rate' },
+      { name: 'load', defaultValue: 0.2, minValue: 0, maxValue: 1, automationRate: 'k-rate' },
+      { name: 'spool', defaultValue: 0, minValue: 0, maxValue: 1, automationRate: 'k-rate' },
+      { name: 'level', defaultValue: 0, minValue: 0, maxValue: 4, automationRate: 'k-rate' },
+      { name: 'speed', defaultValue: 0, minValue: 0, maxValue: 60, automationRate: 'k-rate' },
+    ];
+  }
+  constructor() {
+    super();
+    this.p = null; this.seed = 22695477; this.phase = 0; this.last = [800, 0.2, 0];
+    this.port.onmessage = (e) => this.profile(e.data);
+  }
+  rnd() { this.seed = (Math.imul(this.seed, 1664525) + 1013904223) >>> 0; return this.seed / 4294967296; }
+  profile(p) {
+    this.p = p;
+    // andata e ritorno nel tubo di scarico, gas caldi a circa 480 m/s
+    this.banks = p.pipes.map((L) => { const d = Math.max(8, Math.round(2 * L / 480 * sampleRate)); return { e1: 0, e2: 0, en: 0, buf: new Float32Array(d), d, w: 0, lp: 0, muff: new Svf(), body: new Svf() }; });
+    this.cyl = p.fire.map((at, i) => ({ at, bank: p.bank[i], trim: 1 + (this.rnd() - 0.5) * p.imbalance }));
+    this.intake = new Svf(); this.knock = new Svf(); this.popF = new Svf();
+    this.kn = 0; this.pop = 0; this.tph = 0; this.dl = [0, 0]; this.dy = [0, 0]; this.t1 = [0, 0]; this.t2 = [0, 0];
+    this.top = 1 - Math.exp(-2 * Math.PI * p.top / sampleRate);   // filtro finale: a 20 m l'aria si mangia gli acuti
+    // blocco motore: armoniche per ordine di giro (quello che si sente da fuori, oltre ai colpi dello scarico)
+    this.ord = p.orders.map(([k, a]) => [2 * k, a]);
+    this.tm = 0; this.tyreF = new Svf(); this.fanF = new Svf();
+    // la via: riflessioni sulle case di fronte e un poco di coda (chi ascolta sta sul marciapiede)
+    const ms = (v) => Math.round(v * 1e-3 * sampleRate);
+    this.rv = new Float32Array(ms(60)); this.rw = 0; this.rlp = 0; this.taps = [ms(11), ms(29), ms(17), ms(41), ms(37)];
+  }
+  process(_, outputs, P) {
+    const out = outputs[0], L = out[0], R = out[1] ?? out[0], n = L.length, p = this.p;
+    const rpm1 = P.rpm[0], load1 = P.load[0], spool = P.spool[0], lev1 = P.level[0];
+    const [rpm0, load0, lev0] = this.last;
+    this.last = [rpm1, load1, lev1];
+    if (!p || (lev0 < 1e-4 && lev1 < 1e-4)) { L.fill(0); if (R !== L) R.fill(0); return true; }
+    const x = Math.min(1.1, (rpm0 + rpm1) / 2 / p.red), ld = (load0 + load1) / 2;
+    for (const B of this.banks) {
+      B.muff.set(p.muffler[0] + (p.muffler[1] - p.muffler[0]) * Math.min(1, x * 0.7 + ld * 0.45), p.muffler[2]);
+      B.body.set(p.body[0] + p.body[1] * x, p.body[2]);
     }
-    return curve;
+    this.intake.set(p.intake[0] + p.intake[1] * x, p.intake[2]);
+    if (p.knock) this.knock.set(p.knock[0], p.knock[1]);
+    this.popF.set(900, 0.9);
+    if (p.tyre) this.tyreF.set(p.tyre[0], 0.8);
+    if (p.fan) this.fanF.set(p.fan[0], 0.7);
+    const sp = Math.min(1.6, P.speed[0] / 14), tyreA = p.tyre ? p.tyre[1] * sp ** 1.6 : 0, fanA = p.fan ? p.fan[1] * (0.4 + 0.6 * x) : 0;
+    const grit = 1 + (p.grit ?? 0) * ld * ld;                  // sotto sforzo il diesel si fa cattivo
+    const mx = p.mix[0] * grit, mt = p.mix[1];                 // quanto scarico, quanto blocco motore
+    const dec = (ms) => Math.exp(-1 / (ms * 1e-3 * sampleRate));
+    const dF = dec(p.pulse[0]), dS = dec(p.pulse[1]), dN = dec(p.pulse[2]), dK = dec(0.35), dP = dec(4);
+    const tf = p.turbo ? p.turbo[0] + p.turbo[1] * spool : 0, ta = p.turbo ? p.turbo[2] * spool * spool * (0.35 + ld) * (1 + (p.grit ?? 0) * ld) : 0;
+    for (let i = 0; i < n; i++) {
+      const t = i / n, rpm = rpm0 + (rpm1 - rpm0) * t, load = load0 + (load1 - load0) * t, lev = lev0 + (lev1 - lev0) * t;
+      const prev = this.phase;
+      let ph = prev + rpm / 120 / sampleRate;                  // un ciclo del motore a 4 tempi = 2 giri
+      if (ph >= 1) ph -= 1;
+      this.phase = ph;
+      for (const c of this.cyl) {
+        if (!(prev <= ph ? c.at > prev && c.at <= ph : c.at > prev || c.at <= ph)) continue;
+        const B = this.banks[c.bank];
+        let A = c.trim * (p.base + (1 - p.base) * load) * (1 + (this.rnd() - 0.5) * p.jitter);
+        if (load < 0.06) A *= 0.35 + 0.4 * this.rnd();          // in rilascio gli scoppi sono deboli e irregolari
+        B.e1 += A; B.e2 += A; B.en += A * p.noise;
+        this.kn += A;
+        if (p.crackle && load < 0.05 && rpm > p.idle * 2 && this.rnd() < p.crackle) this.pop += 0.5 + this.rnd();
+      }
+      let l = 0, r = 0, env = 0;
+      for (let k = 0; k < this.banks.length; k++) {
+        const B = this.banks[k];
+        B.e1 *= dS; B.e2 *= dF; B.en *= dN;
+        env += B.e1;
+        const v = (B.e1 - B.e2) + B.en * (this.rnd() * 2 - 1);
+        const back = B.buf[B.w];                               // quello che torna dall'uscita del tubo
+        B.lp += (back - B.lp) * p.pipe[1];
+        const y = v - p.pipe[0] * B.lp;                         // uscita aperta: l'onda torna rovesciata
+        B.buf[B.w] = y; B.w = B.w + 1 === B.d ? 0 : B.w + 1;
+        const m = B.muff.run(y);
+        B.body.run(m);
+        const s = m + B.body.bp * p.body[3];
+        l += s * p.pan[k]; r += s * (1 - p.pan[k]);
+      }
+      l *= mx; r *= mx;
+      // il blocco motore: armoniche degli ordini del motore, più brillanti coi giri, che respirano un poco
+      let tone = 0;
+      for (let q = 0; q < this.ord.length; q++) { const o = this.ord[q]; tone += o[1] * (1 + p.bright * x * q) * Math.sin(6.2831853 * ((o[0] * ph) % 1)); }
+      this.tm = (this.tm + (this.rnd() - 0.5) * 0.004) * 0.999;
+      tone *= mt * (0.35 + 0.65 * load) * (0.6 + 0.4 * x) * (1 + this.tm * 8);
+      const w = this.rnd() * 2 - 1;
+      this.intake.run(w * env);
+      let c = this.intake.bp * p.intake[3] * (0.25 + load) * (0.3 + x);
+      if (p.knock) { this.kn *= dK; this.knock.run(this.kn * (this.rnd() * 2 - 1)); c += this.knock.bp * p.knock[2] * grit; }
+      if (ta > 0) { this.tph += tf / sampleRate; if (this.tph > 1) this.tph -= 1; c += Math.sin(this.tph * 6.2831853) * ta; }
+      if (this.pop > 1e-4) { this.pop *= dP; this.popF.run(this.pop * w); c += this.popF.bp * p.crackleGain; }
+      c += tone;
+      if (tyreA > 0) { this.tyreF.run(this.rnd() * 2 - 1); c += this.tyreF.bp * tyreA; }   // gomme sulle chianche
+      if (fanA > 0) { this.fanF.run(this.rnd() * 2 - 1); c += this.fanF.lp * fanA; }        // ventola del radiatore
+      l += c; r += c;
+      // via la componente continua, poi una saturazione morbida
+      const vl = l - this.dl[0] + 0.995 * this.dy[0], vr = r - this.dl[1] + 0.995 * this.dy[1];
+      this.dl[0] = l; this.dl[1] = r; this.dy[0] = vl; this.dy[1] = vr;
+      const g = lev * p.gain, a = this.top, t1 = this.t1, t2 = this.t2;
+      t1[0] += (Math.tanh(vl * g * 1.4) / 1.4 - t1[0]) * a; t2[0] += (t1[0] - t2[0]) * a;
+      t1[1] += (Math.tanh(vr * g * 1.4) / 1.4 - t1[1]) * a; t2[1] += (t1[1] - t2[1]) * a;
+      const rv = this.rv, N = rv.length, rd = (d) => rv[(this.rw - d + N) % N];
+      this.rlp += (rd(this.taps[4]) - this.rlp) * 0.25;
+      rv[this.rw] = (t2[0] + t2[1]) * 0.5 + this.rlp * 0.3; this.rw = (this.rw + 1) % N;
+      const wet = p.room;
+      L[i] = t2[0] * (1 - wet * 0.3) + wet * (rd(this.taps[0]) + 0.6 * rd(this.taps[1]));
+      if (R !== L) R[i] = t2[1] * (1 - wet * 0.3) + wet * (rd(this.taps[2]) + 0.6 * rd(this.taps[3]));
+    }
+    return true;
+  }
+}
+registerProcessor('motore', Motore);
+`;
+
+/**
+ * Profili dei motori. fire: angolo di scoppio di ogni cilindro, in frazioni del ciclo (720°); bank: la
+ * bancata (il suo tubo); pipes: lunghezze dei tubi (m); pipe: [riflessione, smorzamento]; pulse: impulso
+ * (salita, discesa, rumore, ms); muffler: [Hz al minimo, Hz a pieno, Q]; body: [Hz, +Hz coi giri, Q, quanto];
+ * intake: [Hz, +Hz coi giri, Q, quanto]; knock (diesel): [Hz, Q, quanto]; turbo: [Hz, +Hz in pressione, quanto];
+ * top: taglio finale degli acuti (Hz). Blocco 4.4, «come lo sente chi sta sul marciapiede»: mix [scarico, blocco
+ * motore]; orders: armoniche del blocco [ordine di giro, quanto]; bright: quanto si schiariscono coi giri; tyre:
+ * gomme [Hz, quanto a 50 km/h]; fan: ventola [Hz, quanto]; room: riflessioni della via; grit: quanto lo scarico, il
+ * battito e il turbo crescono sotto sforzo (il trattore).
+ * Cambio: gears in km/h ogni 1 000 giri; lo: giri sotto cui si scala; up: giri della cambiata [in crociera,
+ * con l'acceleratore].
+ */
+const MOTORI = (() => {
+  const even = (k) => Array.from({ length: k }, (_, i) => i / k);
+  return {
+    panda: {
+      idle: 820, red: 6200, gears: [7.4, 13.4, 20.2, 27, 33.5], lo: 1300, up: [2600, 5600],
+      fire: even(4), bank: [0, 0, 0, 0], pipes: [2.7], pipe: [0.45, 0.35], pan: [0.5],
+      pulse: [0.35, 1.7, 0.8], noise: 0.35, base: 0.32, jitter: 0.12, imbalance: 0.06,
+      muffler: [400, 1300, 0.8], body: [150, 110, 2.2, 0.35], intake: [550, 900, 2, 0.08], crackle: 0, crackleGain: 0, top: 3600, gain: 1.5,
+      // da fuori la Panda è un ronzio un po' nasale del 4 cilindri (2° ordine) e le gomme; lo scarico quasi non si sente
+      mix: [0.2, 0.075], orders: [[2, 1], [4, 0.55], [6, 0.32], [1, 0.1], [8, 0.2], [3, 0.08], [10, 0.1], [12, 0.05]], bright: 0.08,
+      tyre: [750, 0.05], room: 0.35,
+    },
+    rs6: {
+      idle: 650, red: 6800, gears: [8.8, 14.6, 22.5, 29.5, 37.5, 46, 55, 64], lo: 1150, up: [1900, 6000],
+      // 1-3-7-2-6-5-4-8, uno ogni 90°: cilindri 1–4 nella prima bancata, 5–8 nella seconda
+      fire: even(8), bank: [0, 0, 1, 0, 1, 1, 0, 1], pipes: [1.75, 1.9], pipe: [0.5, 0.3], pan: [0.66, 0.34],
+      pulse: [0.45, 2.3, 1.1], noise: 0.4, base: 0.28, jitter: 0.1, imbalance: 0.05,
+      muffler: [200, 1000, 1.1], body: [80, 70, 3, 0.55], intake: [700, 1100, 2, 0.06], turbo: [1900, 4600, 0.01],
+      crackle: 0.04, crackleGain: 0.3, top: 3000, gain: 1.2,
+      // da fuori il V8 è profondo e rotondo: i turbo dentro la V smorzano lo scarico, il borbottio dei
+      // mezzi ordini (scoppi irregolari per bancata) resta sotto il rombo del 4° ordine; gomme da 23"
+      mix: [0.42, 0.075], orders: [[4, 1], [2, 0.5], [1, 0.22], [8, 0.38], [3, 0.15], [6, 0.2], [12, 0.1]], bright: 0.05,
+      tyre: [650, 0.07], room: 0.35,
+    },
+    huracan: {
+      idle: 1000, red: 9000, gears: [11.8, 17.5, 23.8, 30.5, 37.5, 45, 53], lo: 1700, up: [3000, 8500],
+      fire: even(12), bank: Array.from({ length: 12 }, (_, i) => i % 2), pipes: [1.05, 1.12], pipe: [0.5, 0.42], pan: [0.62, 0.38],
+      pulse: [0.22, 1.0, 0.45], noise: 0.12, base: 0.3, jitter: 0.03, imbalance: 0.02,
+      muffler: [650, 2900, 0.9], body: [230, 330, 2, 0.25], intake: [700, 1900, 3, 0.16],
+      crackle: 0.025, crackleGain: 0.4, top: 4600, gain: 0.95,
+      // il V12 è liscio e «cantato»: armoniche pulite del 6° ordine che salgono fino all'urlo in alto
+      mix: [0.28, 0.08], orders: [[6, 1], [12, 0.75], [18, 0.5], [3, 0.12], [24, 0.35], [30, 0.2], [9, 0.1], [36, 0.12]], bright: 0.16,
+      tyre: [900, 0.04], room: 0.35,
+    },
+    deere: {
+      idle: 850, red: 2200, ivt: [1500, 2150], grit: 1.6,
+      fire: even(6), bank: [0, 0, 0, 0, 0, 0], pipes: [3.2], pipe: [0.5, 0.3], pan: [0.5],
+      pulse: [0.6, 3.2, 2.2], noise: 0.6, base: 0.4, jitter: 0.18, imbalance: 0.1,
+      muffler: [300, 850, 0.9], body: [62, 40, 2.6, 0.6], intake: [500, 400, 1.5, 0.04], knock: [1500, 6, 0.06], turbo: [3100, 5800, 0.009],
+      crackle: 0, crackleGain: 0, top: 3000, gain: 1.15,
+      // il diesel moderno: brontolio profondo e costante del 3° ordine, la ventola, il fischio del turbo, il battito leggero
+      mix: [0.25, 0.085], orders: [[3, 1], [6, 0.55], [1.5, 0.25], [9, 0.3], [12, 0.15], [0.5, 0.1]], bright: 0.05,
+      tyre: [320, 0.06], fan: [900, 0.02], room: 0.3,
+    },
+  };
+})();
+
+/**
+ * Cambio e acceleratore: dalla velocità del mezzo (m/s) ricava giri, carico (0 in rilascio, 1 a tavoletta) e
+ * pressione del turbo. Blocco 4.4, come un'auto vera: in accelerazione tira le marce (fino a `up[1]` a
+ * tavoletta, `up[0]` con calma); a velocità costante, dopo un attimo, mette la marcia più lunga che tiene i
+ * giri sopra la fascia comoda (`lo`), così in crociera e alla massima il motore gira basso e regolare; in
+ * frenata scala quando i giri scendono. Il trattore ha la trasmissione continua: giri bassi e regolari in
+ * crociera, al massimo (`ivt[1]`) sotto sforzo. Serve sia dal vivo sia nella prova senza audio (`render`).
+ */
+class Cambio {
+  constructor(m) { this.m = m; this.gear = 0; this.rpm = m.idle; this.load = 0.2; this.spool = 0; this.v = 0; this.acc = 0; this.cut = 0; this.calm = 0; this.kick = 0; this.was = false; }
+  step(dt, speed, top, boost) {
+    const m = this.m, kmh = speed * 3.6;
+    const a = dt > 0 ? (speed - this.v) / dt : 0;
+    this.v = speed;
+    this.acc += (a - this.acc) * Math.min(1, dt * 5);
+    const hard = boost || this.acc > 2.2;                        // si accelera forte
+    // carico: in accelerazione sale con la spinta, in rilascio va a zero, a velocità costante quanto
+    // serve per vincere attrito e aria (che cresce col quadrato della velocità)
+    const steady = Math.abs(this.acc) < 0.35;
+    this.calm = steady ? this.calm + dt : 0;
+    let load = this.acc > 0.35 ? Math.min(1, 0.35 + this.acc / (hard ? 4 : 5)) : this.acc < -0.6 ? 0.02 : 0.14 + 0.5 * (speed / Math.max(top, 1)) ** 2;
+    if (boost && this.acc > 0.35) load = Math.max(load, 0.85);
+    let rpm;
+    if (m.ivt) {
+      rpm = speed < 0.3 ? m.idle : this.acc > 0.35 ? m.ivt[0] + (m.ivt[1] - m.ivt[0]) * load : m.ivt[0] + 250 * (speed / Math.max(top, 1));
+    } else {
+      const g = m.gears, at = (k) => kmh / g[k] * 1000;
+      // a tavoletta da una marcia lunga si scala (al massimo due marce), come chi vuole spinta
+      if (boost && !this.was) this.kick = 2;
+      if (!boost) this.kick = 0;
+      this.was = boost;
+      if (this.cut <= 0 && this.kick > 0 && this.gear > 0 && at(this.gear - 1) < m.up[1] * 0.7) { this.gear--; this.kick--; this.cut = 0.12; }
+      else if (this.cut <= 0) {
+        if (this.acc > 0.35) {
+          // si tirano le marce: più in alto se si accelera forte
+          if (this.gear < g.length - 1 && at(this.gear) > (hard ? m.up[1] : m.up[0])) { this.gear++; this.cut = hard ? 0.14 : 0.09; }
+        } else if (this.calm > 0.6) {
+          // velocità costante: la marcia più lunga che tiene i giri sopra la fascia comoda, una alla volta
+          if (this.gear < g.length - 1 && at(this.gear + 1) > m.lo * 1.1) { this.gear++; this.cut = 0.08; this.calm = 0.3; }
+        }
+        // in frenata, o se i giri scendono troppo, si scala
+        if (this.gear > 0 && at(this.gear) < m.lo * (this.acc < -0.6 ? 0.95 : 0.8)) { this.gear--; this.cut = 0.06; }
+      }
+      if (speed < 0.3) this.gear = 0;
+      rpm = Math.max(at(this.gear), m.idle);
+      if (speed > 0.05 && speed < 3) rpm = Math.max(rpm, m.idle + load * 900 * (1 - speed / 3));   // frizione che slitta alla partenza
+    }
+    if (this.cut > 0) { this.cut -= dt; load = Math.min(load, 0.05); }
+    rpm = Math.min(rpm, m.red);
+    this.rpm += (rpm - this.rpm) * Math.min(1, dt * (rpm < this.rpm ? 9 : 6));
+    this.load += (load - this.load) * Math.min(1, dt * 8);
+    const want = m.turbo ? Math.min(1, this.load * 1.2) * Math.min(1, Math.max(0, (this.rpm - m.idle * 1.3) / (m.red * 0.45))) : 0;
+    this.spool += (want - this.spool) * Math.min(1, dt * (want > this.spool ? 1.6 : 3.5));
+    return this;
+  }
+}
+
+const EngineAudio = (() => {
+  let ctx = null, masterGain = null, node = null, loading = null;
+  let enabled = true, userVol = 0.75, currentModel = 'panda', cambio = null;
+
+  try {
+    const savedOn = localStorage.getItem('gravina_engine_on');
+    if (savedOn !== null) enabled = savedOn === 'true';
+    const savedVol = localStorage.getItem('gravina_engine_vol');
+    if (savedVol !== null) userVol = clamp(parseFloat(savedVol) || 0.75, 0, 1);
+  } catch { /* pazienza */ }
+
+  /** Carica il worklet (dal testo qui sopra, come file in memoria) e crea il motore nel contesto `c`. */
+  async function makeNode(c) {
+    const url = URL.createObjectURL(new Blob([MOTORE_WORKLET], { type: 'application/javascript' }));
+    try { await c.audioWorklet.addModule(url); } finally { URL.revokeObjectURL(url); }
+    return new AudioWorkletNode(c, 'motore', { numberOfInputs: 0, outputChannelCount: [2] });
   }
 
   function setup() {
@@ -15346,214 +15721,100 @@ const EngineAudio = (() => {
     if (!AudioCtx) return;
     ctx = new AudioCtx();
     masterGain = ctx.createGain();
-    masterGain.gain.value = enabled ? userVol : 0;
+    masterGain.gain.value = 0;
     masterGain.connect(ctx.destination);
+    if (!ctx.audioWorklet) return;                                // browser troppo vecchio: niente rumore del motore
+    loading = makeNode(ctx).then((n) => { node = n; node.connect(masterGain); startVehicle(currentModel); }).catch(() => { node = null; });
   }
 
-  function stopNodes() {
-    try { osc1?.stop(); } catch {}
-    try { osc2?.stop(); } catch {}
-    try { osc3?.stop(); } catch {}
-    try { lfo?.stop(); } catch {}
-    try { turboNoise?.stop(); } catch {}
-    osc1 = osc2 = osc3 = lfo = lfoGain = turboNoise = turboGain = turboFilter = mainFilter = shaper = synthGain = null;
-    activeVehicle = null;
+  function startVehicle(id) {
+    const m = MOTORI[id];
+    cambio = m ? new Cambio(m) : null;
+    if (node && m) node.port.postMessage(m);
   }
-
-  function startVehicle(modelId) {
-    if (!ctx) return;
-    stopNodes();
-    activeVehicle = modelId;
-    if (modelId === 'balloon') return;
-
-    synthGain = ctx.createGain();
-    synthGain.gain.value = 0.22;
-
-    mainFilter = ctx.createBiquadFilter();
-
-    if (modelId === 'huracan' || modelId === 'monza') {
-      shaper = ctx.createWaveShaper();
-      shaper.curve = makeDistortionCurve(14);
-      shaper.oversample = '2x';
-
-      mainFilter.type = 'lowpass';
-      mainFilter.frequency.value = 450;
-      mainFilter.Q.value = 2.8;
-
-      osc1 = ctx.createOscillator(); osc1.type = 'sawtooth'; osc1.frequency.value = 78;
-      osc2 = ctx.createOscillator(); osc2.type = 'sawtooth'; osc2.frequency.value = 78.6;
-      osc3 = ctx.createOscillator(); osc3.type = 'sine'; osc3.frequency.value = 39;
-
-      const g1 = ctx.createGain(); g1.gain.value = 0.45;
-      const g2 = ctx.createGain(); g2.gain.value = 0.35;
-      const g3 = ctx.createGain(); g3.gain.value = 0.30;
-
-      osc1.connect(g1).connect(mainFilter);
-      osc2.connect(g2).connect(mainFilter);
-      osc3.connect(g3).connect(mainFilter);
-
-      mainFilter.connect(shaper).connect(synthGain).connect(masterGain);
-      osc1.start(); osc2.start(); osc3.start();
-
-    } else if (modelId === 'rs6' || modelId === 'rsq8') {
-      mainFilter.type = 'lowpass';
-      mainFilter.frequency.value = 380;
-      mainFilter.Q.value = 1.4;
-
-      osc1 = ctx.createOscillator(); osc1.type = 'sawtooth'; osc1.frequency.value = 48;
-      osc2 = ctx.createOscillator(); osc2.type = 'square'; osc2.frequency.value = 49.4;
-
-      const g1 = ctx.createGain(); g1.gain.value = 0.50;
-      const g2 = ctx.createGain(); g2.gain.value = 0.28;
-      osc1.connect(g1).connect(mainFilter);
-      osc2.connect(g2).connect(mainFilter);
-
-      const nLen = ctx.sampleRate * 2;
-      const nBuf = ctx.createBuffer(1, nLen, ctx.sampleRate);
-      const nData = nBuf.getChannelData(0);
-      for (let i = 0; i < nLen; i++) nData[i] = Math.random() * 2 - 1;
-      turboNoise = ctx.createBufferSource();
-      turboNoise.buffer = nBuf; turboNoise.loop = true;
-
-      turboFilter = ctx.createBiquadFilter();
-      turboFilter.type = 'bandpass';
-      turboFilter.frequency.value = 2400;
-      turboFilter.Q.value = 3.5;
-
-      turboGain = ctx.createGain();
-      turboGain.gain.value = 0.0;
-
-      turboNoise.connect(turboFilter).connect(turboGain).connect(synthGain);
-      mainFilter.connect(synthGain).connect(masterGain);
-
-      osc1.start(); osc2.start(); turboNoise.start();
-
-    } else if (modelId === 'deere') {
-      mainFilter.type = 'lowpass';
-      mainFilter.frequency.value = 260;
-      mainFilter.Q.value = 1.8;
-
-      osc1 = ctx.createOscillator(); osc1.type = 'sawtooth'; osc1.frequency.value = 28;
-      osc2 = ctx.createOscillator(); osc2.type = 'triangle'; osc2.frequency.value = 56;
-
-      lfo = ctx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 12;
-      lfoGain = ctx.createGain(); lfoGain.gain.value = 0.35;
-      lfo.connect(lfoGain);
-
-      const g1 = ctx.createGain(); g1.gain.value = 0.60;
-      const g2 = ctx.createGain(); g2.gain.value = 0.40;
-
-      osc1.connect(g1).connect(mainFilter);
-      osc2.connect(g2).connect(mainFilter);
-
-      const turboOsc = ctx.createOscillator();
-      turboOsc.type = 'sine'; turboOsc.frequency.value = 1580;
-      const tWhistleGain = ctx.createGain(); tWhistleGain.gain.value = 0.04;
-      turboOsc.connect(tWhistleGain).connect(synthGain);
-      turboOsc.start();
-      osc3 = turboOsc;
-
-      mainFilter.connect(synthGain).connect(masterGain);
-      osc1.start(); osc2.start(); lfo.start();
-
-    } else {
-      mainFilter.type = 'lowpass';
-      mainFilter.frequency.value = 420;
-      mainFilter.Q.value = 1.2;
-
-      osc1 = ctx.createOscillator(); osc1.type = 'square'; osc1.frequency.value = 58;
-      osc2 = ctx.createOscillator(); osc2.type = 'triangle'; osc2.frequency.value = 116;
-
-      const g1 = ctx.createGain(); g1.gain.value = 0.40;
-      const g2 = ctx.createGain(); g2.gain.value = 0.40;
-
-      osc1.connect(g1).connect(mainFilter);
-      osc2.connect(g2).connect(mainFilter);
-
-      mainFilter.connect(synthGain).connect(masterGain);
-      osc1.start(); osc2.start();
-    }
-  }
-
-  // Lettura iniziale preferenze utente
-  try {
-    const savedOn = localStorage.getItem('gravina_engine_on');
-    if (savedOn !== null) enabled = savedOn === 'true';
-    const savedVol = localStorage.getItem('gravina_engine_vol');
-    if (savedVol !== null) userVol = clamp(parseFloat(savedVol) || 0.75, 0, 1);
-  } catch {}
 
   return {
     setup,
-    setVehicle(id) {
-      currentModel = id;
-      if (ctx) startVehicle(id);
-    },
+    setVehicle(id) { currentModel = id; startVehicle(id); },
     toggle() {
       setup();
       enabled = !enabled;
-      try { localStorage.setItem('gravina_engine_on', String(enabled)); } catch {}
+      try { localStorage.setItem('gravina_engine_on', String(enabled)); } catch { /* pazienza */ }
       this.updateGain();
       return enabled;
     },
     setVolume(v) {
       userVol = clamp(v, 0, 1);
-      try { localStorage.setItem('gravina_engine_vol', String(userVol)); } catch {}
+      try { localStorage.setItem('gravina_engine_vol', String(userVol)); } catch { /* pazienza */ }
       this.updateGain();
     },
-    updateGain(duckFactor = 1) {
+    updateGain() {
       if (!masterGain || !ctx) return;
-      const target = enabled ? userVol * duckFactor : 0;
-      masterGain.gain.setTargetAtTime(target, ctx.currentTime, 0.08);
+      masterGain.gain.setTargetAtTime(enabled ? userVol * 0.55 : 0, ctx.currentTime, 0.08);
     },
     get enabled() { return enabled; },
     get volume() { return userVol; },
+    /** Ultimo stato del cambio (prove): giri, marcia, carico. */
+    get state() { return cambio && { rpm: Math.round(cambio.rpm), gear: cambio.gear + 1, load: +cambio.load.toFixed(2), spool: +cambio.spool.toFixed(2) }; },
     update(speed, maxSpeed, boost, paused, onFoot) {
       if (!ctx) {
         if (!navigator.userActivation?.hasBeenActive) return;
-        try { setup(); startVehicle(currentModel || 'panda'); } catch { return; }
+        try { setup(); } catch { return; }
       }
       if (ctx.state === 'suspended') ctx.resume();
-      if (!activeVehicle && currentModel) startVehicle(currentModel);
-
-      if (activeVehicle === 'balloon') return;
-
-      const now = ctx.currentTime;
-      const isMuted = paused || onFoot;
-      const targetMaster = (enabled && !isMuted) ? userVol : (isMuted && enabled ? userVol * 0.15 : 0);
-      masterGain.gain.setTargetAtTime(targetMaster, now, 0.12);
-
-      const ratio = clamp(speed / Math.max(maxSpeed, 1), 0, 1.4);
-      const load = clamp(boost > 0 ? 0.35 + ratio * 0.65 : ratio, 0, 1.5);
-
-      if (activeVehicle === 'huracan' || activeVehicle === 'monza') {
-        const f0 = 78 + ratio * 580 + (boost ? 80 : 0);
-        if (osc1) osc1.frequency.setTargetAtTime(f0, now, 0.06);
-        if (osc2) osc2.frequency.setTargetAtTime(f0 * 1.008, now, 0.06);
-        if (osc3) osc3.frequency.setTargetAtTime(f0 * 0.5, now, 0.06);
-        if (mainFilter) mainFilter.frequency.setTargetAtTime(450 + load * 3600, now, 0.08);
-
-      } else if (activeVehicle === 'rs6' || activeVehicle === 'rsq8') {
-        const f0 = 48 + ratio * 240 + (boost ? 40 : 0);
-        if (osc1) osc1.frequency.setTargetAtTime(f0, now, 0.08);
-        if (osc2) osc2.frequency.setTargetAtTime(f0 * 1.025, now, 0.08);
-        if (mainFilter) mainFilter.frequency.setTargetAtTime(380 + load * 1800, now, 0.08);
-        if (turboGain) turboGain.gain.setTargetAtTime(boost > 0.1 ? 0.08 * boost : (ratio > 0.5 ? 0.03 * ratio : 0), now, 0.15);
-
-      } else if (activeVehicle === 'deere') {
-        const f0 = 26 + ratio * 85;
-        if (osc1) osc1.frequency.setTargetAtTime(f0, now, 0.1);
-        if (osc2) osc2.frequency.setTargetAtTime(f0 * 2, now, 0.1);
-        if (lfo) lfo.frequency.setTargetAtTime(10 + ratio * 18, now, 0.1);
-        if (mainFilter) mainFilter.frequency.setTargetAtTime(260 + load * 700, now, 0.1);
-
-      } else {
-        const f0 = 55 + ratio * 245;
-        if (osc1) osc1.frequency.setTargetAtTime(f0, now, 0.08);
-        if (osc2) osc2.frequency.setTargetAtTime(f0 * 2, now, 0.08);
-        if (mainFilter) mainFilter.frequency.setTargetAtTime(420 + load * 1400, now, 0.08);
-      }
-    }
+      if (!cambio) return;                                         // mongolfiera: c'è il bruciatore
+      const t = performance.now() / 1000, dt = clamp(t - (this._t ?? t), 0, 0.1);
+      this._t = t;
+      cambio.step(dt, paused || onFoot ? 0 : speed, maxSpeed, !!boost && !paused);
+      this.updateGain();
+      if (!node) return;
+      const now = ctx.currentTime, P = node.parameters;
+      P.get('rpm').setTargetAtTime(cambio.rpm, now, 0.03);
+      P.get('load').setTargetAtTime(cambio.load, now, 0.03);
+      P.get('spool').setTargetAtTime(cambio.spool, now, 0.05);
+      P.get('speed').setTargetAtTime(paused || onFoot ? 0 : speed, now, 0.1);
+      // a piedi o in pausa il mezzo resta acceso al minimo, più piano (si sente da lontano)
+      P.get('level').setTargetAtTime(paused || onFoot ? 0.3 : 1, now, 0.25);
+    },
+    /**
+     * Prova senza altoparlanti (blocco 4.4): una guida simulata col modello del Driver, resa in un
+     * OfflineAudioContext. Minimo; partenza con calma fino alla crociera; a tavoletta fino alla velocità massima
+     * del mezzo (coi suoi tempi); 3 s alla massima; rilascio; frenata fino a 20 km/h come prima di un incrocio;
+     * di nuovo alla crociera; frenata fino a fermi; minimo. Restituisce i due canali e i giri, per `tools/test`.
+     */
+    async render(id, sr = 44100) {
+      const m = MOTORI[id], spec = VEHICLES.find((x) => x.id === id), D = CONFIG.drive, dt = 1 / 60;
+      const top = spec.top / 3.6, cruise = D.cruiseSpeed * spec.pace, plan = [];
+      let v = 0;
+      const hold = (sec, boost = false) => { for (let t = 0; t < sec; t += dt) plan.push([v, boost]); };
+      const go = (to, a, boost = false) => {
+        while (Math.abs(v - to) > 0.05) {
+          const acc = typeof a === 'function' ? a(v) : a;
+          v = to > v ? Math.min(to, v + acc * dt) : Math.max(to, v - acc * dt);
+          plan.push([v, boost]);
+          if (plan.length > 60 * 120) break;
+        }
+      };
+      hold(1.5);
+      go(cruise, spec.accel[0]); hold(3);
+      go(top, (x) => spec.accel[1] * (1 - 0.8 * (x / top) ** 2), true); hold(3, true);
+      go(Math.max(cruise, top - 2.2 * 2), 2.2); go(D.junctionSpeed, D.brake * 1.4); hold(2);
+      go(cruise, spec.accel[0]); hold(2);
+      go(0, D.brake * 1.4); hold(1.5);
+      const seconds = plan.length * dt, c = new OfflineAudioContext(2, Math.round(seconds * sr), sr), n = await makeNode(c);
+      n.connect(c.destination);
+      n.port.postMessage(m);
+      const box = new Cambio(m), P = n.parameters, log = [];
+      P.get('level').setValueAtTime(1, 0);
+      plan.forEach(([sp, boost], k) => {
+        const t = k * dt;
+        box.step(dt, sp, top, boost);
+        P.get('rpm').setValueAtTime(box.rpm, t); P.get('load').setValueAtTime(box.load, t); P.get('spool').setValueAtTime(box.spool, t); P.get('speed').setValueAtTime(sp, t);
+        if (k % 30 === 0) log.push([+t.toFixed(1), Math.round(sp * 3.6), Math.round(box.rpm), box.gear + 1, +box.load.toFixed(2)]);
+      });
+      const b = await c.startRendering();
+      return { left: b.getChannelData(0), right: b.getChannelData(1), sr, log };
+    },
   };
 })();
 
@@ -16038,6 +16299,8 @@ async function main() {
       }
       mode = 'car';
       driver.pace = spec.pace;
+      driver.top = spec.top / 3.6;                                      // blocco 4.4
+      driver.accel = spec.accel;
     }
     ui.el.hud.classList.toggle('is-balloon', mode === 'balloon');
     ui.el.btnView.hidden = mode !== 'balloon';
@@ -16267,7 +16530,7 @@ async function main() {
   const radioUi = () => {
     const on = Radio.on;
     ui.el.btnRadio.setAttribute('aria-pressed', String(on));
-    ui.el.btnRadio.setAttribute('aria-label', on ? `Spegni la musica (${Radio.title})` : 'Accendi la musica');
+    ui.el.btnRadio.setAttribute('aria-label', on ? `Musica: ${Radio.title}` : 'Musica');   // blocco 4.4: lo stato lo dice aria-pressed
     ui.el.radioLabel.textContent = on ? Radio.title : 'Musica';
     ui.el.btnNext.hidden = ui.el.radioVol.hidden = !on;
   };
@@ -16281,15 +16544,18 @@ async function main() {
   const toggleRadio = () => { Radio.toggle(); try { localStorage.setItem('gravina3d.radio', Radio.on ? '1' : '0'); } catch { /* pazienza */ } };
   ui.el.btnRadio.addEventListener('click', toggleRadio);
   ui.el.btnNext.addEventListener('click', () => Radio.next());
-  ui.el.radioVol.addEventListener('input', () => Radio.volume(+ui.el.radioVol.value));
+  // blocco 4.4: i lettori di schermo dicono il volume in percentuale
+  const volText = (el) => el.setAttribute('aria-valuetext', `${Math.round(+el.value * 100)}%`);
+  ui.el.radioVol.addEventListener('input', () => { Radio.volume(+ui.el.radioVol.value); volText(ui.el.radioVol); });
+  volText(ui.el.radioVol);
 
   // Blocco 4.2: audio procedurale motore
   const engineUi = () => {
     const on = EngineAudio.enabled;
     ui.el.btnEngine.setAttribute('aria-pressed', String(on));
-    ui.el.btnEngine.setAttribute('aria-label', on ? 'Disattiva rumore motore (tasto V)' : 'Attiva rumore motore (tasto V)');
     ui.el.engineVol.hidden = !on;
     ui.el.engineVol.value = String(EngineAudio.volume);
+    volText(ui.el.engineVol);
   };
   ui.el.btnEngine.addEventListener('click', () => {
     EngineAudio.toggle();
@@ -16297,6 +16563,7 @@ async function main() {
   });
   ui.el.engineVol.addEventListener('input', () => {
     EngineAudio.setVolume(+ui.el.engineVol.value);
+    volText(ui.el.engineVol);
   });
   engineUi();
 
@@ -16455,7 +16722,7 @@ async function main() {
       ev.preventDefault();
       return;
     }
-    if (phase !== 'drive') return;
+    if (phase !== 'drive' || onInput) return;           // blocco 4.4: sui cursori del volume le frecce li spostano
     if (k === 'ArrowLeft' || k === 'a' || k === 'A') { driver.steer(-1); ev.preventDefault(); }
     else if (k === 'ArrowRight' || k === 'd' || k === 'D') { driver.steer(1); ev.preventDefault(); }
     else if (k === 'ArrowUp' || k === 'w' || k === 'W') { driver.chooseStraight(); ev.preventDefault(); }
@@ -16551,7 +16818,7 @@ async function main() {
     scene.fog.far = lerp(CONFIG.city.fogFar, 640, forestFog);
     ForestSound.update(dt, { inside: forestIn, tetro: meninniIn, onFoot: mode === 'car' && driver.onFoot, speed: S.speed, paused: phase === 'pause' });
     Radio.duck(1 - 0.65 * ForestSound.level);
-    EngineAudio.update(driver.speed, CONFIG.drive.cruiseSpeed * driver.pace, driver.boosting ? 1 : 0, phase === 'pause', mode === 'balloon' || driver.onFoot || driver.sitting);
+    EngineAudio.update(driver.speed, driver.top, driver.boost > 0.3 ? 1 : 0, phase === 'pause', mode === 'balloon' || driver.onFoot || driver.sitting);
   };
   let forestTimer = 0, forestIn = 0, forestFog = 0, meninniIn = 0;
 

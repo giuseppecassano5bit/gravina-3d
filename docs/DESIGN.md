@@ -479,6 +479,15 @@ riga intera.
 
 ## 6. Movimento, incroci e cartelli
 
+* **Velocità massime** (blocco 4.4, decisione del committente del 16/10/2026): con Shift ogni mezzo va verso la sua
+  massima (John Deere 50 km/h, Panda 80, Audi RS Q8 e Ferrari Monza SP2 180) con la sua accelerazione (0–100 km/h:
+  Ferrari 3,2 s, Audi 4 s nel diorama; Panda a 80 in 14,5 s, trattore a 50 in 13 s), ma mai oltre il limite della
+  via (`CONFIG.drive.limits`): centro storico 30 km/h (lì resta l'andatura di crociera), in città 30–70 per classe,
+  fuori città fino alla massima, sterrati 50. Il cartello dell'incrocio si apre anche in base allo spazio di
+  frenata, e il mezzo frena a 4,5 m/s² per arrivare all'incrocio a 20 km/h o alla velocità della via dopo; lasciato
+  Shift rallenta col freno motore (2,2 m/s²). Si arriva alla massima solo sulle strade lunghe fuori città (la strada
+  del Bosco, le provinciali): a 180 km/h si fanno 50 m al secondo.
+
 * Il mezzo segue la spline della via: crociera 8,5 m/s, 5,5 m/s vicino agli incroci, 6 m/s sul ponte, 4,5 m/s nelle inversioni, tutto moltiplicato per il ritmo del mezzo.
 * **Partenza**: 12 m prima della testata est del Ponte Acquedotto, sulla via che vi arriva (Via Fontana la Stella), accanto alla Fontana della Stella e rivolti verso il ponte. Il primo tratto attraversa il ponte.
 * **Pausa**: il mezzo frena a 7 m/s² fino a fermarsi; il menu (riprendi, cambia mezzo, mappa e luoghi) compare solo in pausa. Il viaggio va in pausa da solo se la pagina viene nascosta.
@@ -617,6 +626,12 @@ riquadri). A Via Spinazzola i binari passano su un viadotto con le pile.
   mezzo** (visibile solo con la camera libera, anche sul telefono), che la riporta dietro in circa
   1,5 s: niente ritorno automatico. Tetti e terreno valgono anche qui; le panoramiche si sospendono.
 * **A piedi**: più bassa e vicina (6,5 m dietro, 4,6 m sopra), sale al massimo di 15 m sui tetti.
+* **Dopo il teletrasporto** (blocco 4.4, `Rig.snap`): la camera prova cinque direzioni attorno al mezzo
+  (dietro e fino a 50° di lato, `CONFIG.camera.snapAims`) e prende quella che deve salire meno perché nessun
+  tetto entro 20 m arrivi alla sua quota (`snapRing`: 6 m di margine sopra la camera e vicino, mezzo metro a
+  20 m), con una piccola penalità per l'angolo. Il controllo allargato resta 2,5 s (`snapHold`), mentre compare
+  la scheda; poi la camera torna dietro al mezzo e scende piano col controllo normale dei vicoli. Sui 42 luoghi
+  con la scheda, quelli che partivano con un tetto a ridosso della camera sono passati da 16 a 0.
 * **Pausa**: vista dall'alto che gira piano sopra il mezzo; si gira trascinando e si zooma. Non
   entra più nei tetti delle palazzine (stesso `#roofLift` dell'inseguimento).
 * **Pannelli**: l'inquadratura si sposta (view offset) nella parte di schermo libera dal pannello iniziale o dal menu di pausa.
@@ -656,6 +671,46 @@ che sale e scende con la fiamma della mongolfiera.
 
 ---
 
+### 7c. Rumore dei motori (blocco 4.2, rifatto nel blocco 4.4)
+
+Il committente voleva il suono vero di ogni mezzo («il suono attuale è fastidioso e ridicolo»): erano
+oscillatori fissi col tono legato alla velocità. Le registrazioni vere non si possono usare (sono di
+terzi e il diorama è un file unico senza file audio), quindi ogni motore è un **piccolo motore vero**
+costruito sui dati reali (fonti nel README), in un `AudioWorklet` creato dal testo `MOTORE_WORKLET`:
+
+* **scoppi**: ogni cilindro scoppia al suo angolo di manovella (frazioni del ciclo di 720°): V12 della
+  Ferrari ogni 60° a bancate alterne, V8 dell'Audi con l'ordine 1-3-7-2-6-5-4-8 (in ogni bancata gli
+  scoppi sono irregolari: il borbottio), 4 cilindri della Panda ogni 180°, 6 cilindri del trattore ogni
+  120°; ogni scoppio è un impulso di pressione, con un po' di rumore e piccole differenze da un ciclo
+  all'altro e da un cilindro all'altro (il minimo non è mai perfetto);
+* **scarico**: un tubo per bancata come guida d'onda (andata e ritorno a 480 m/s, l'onda torna rovesciata
+  dall'uscita aperta), poi il silenziatore (passa-basso che si apre con giri e carico) e la risonanza
+  della scocca; le due bancate a sinistra e a destra;
+* **contorno**: aspirazione (l'ululato del V12 ai regimi alti), turbo dell'Audi e del trattore, battito
+  del diesel, scoppiettii in rilascio per Audi e Ferrari, un taglio finale degli acuti (a 20 m, dove sta
+  la camera, l'aria se li mangia);
+* **cambio** (`Cambio`, rifatto con la terza richiesta del committente): giri dalle marce (km/h ogni 1 000 giri).
+  In accelerazione tira le marce (a tavoletta fino in alto, scalando una o due marce se si parte da una marcia
+  lunga); a velocità costante mette la marcia più lunga sopra la fascia comoda (`lo`), così in crociera e alla
+  massima il motore gira basso e regolare (Audi a 180 km/h in ottava a 2 800 giri, Ferrari in settima a 3 400,
+  Panda a 80 in quinta a 2 400); in frenata scala. Il trattore ha la trasmissione continua: 1 500–1 750 giri
+  in crociera, 2 050 sotto sforzo, con lo scarico, il battito e il turbo che crescono col carico (`grit`);
+* in pausa e a piedi il mezzo resta acceso al minimo, più piano.
+* **come lo sente chi sta sul marciapiede** (seconda richiesta del committente: «non come un microfono vicino
+  allo scarico»): oltre ai colpi dello scarico, che ora pesano meno, c'è il blocco motore, cioè le armoniche
+  degli ordini di giro di ogni motore (`orders`), più brillanti coi giri. Poi le gomme sulle chianche (crescono con la
+  velocità), la ventola del trattore e le riflessioni della via (`room`, due eco sulle case di fronte e un
+  poco di coda). Il carattere: la Panda è un ronzio un po' nasale del 2° ordine con le gomme, lo scarico quasi
+  non si sente; la Ferrari un V12 liscio e «cantato» (6°, 12°, 18° ordine) fino all'urlo in alto; l'Audi un V8
+  profondo e rotondo, smorzato dai turbo dentro la V, col borbottio sotto; il trattore un brontolio costante
+  del 3° ordine con la ventola, il turbo e un battito leggero.
+
+Prova: `node motori.mjs` rende 16 s di guida per mezzo in `shots/motore-<mezzo>.wav`, da ascoltare, e
+controlla saturazione e motore dal vivo. Al minimo le frequenze di scoppio sono quelle vere (27 Hz Panda,
+43 Hz Audi, 100 Hz Ferrari, 42 Hz trattore); in crociera il baricentro dello spettro sta tra 400 e 1 100 Hz.
+`AudioWorklet` vuole una pagina sicura: sul sito (https) e in locale (localhost) c'è; nelle prove con
+`http://local` il motore tace senza errori.
+
 ## 7b. Schermata iniziale, crediti e ricerca su Google
 
 * **Credito**: uno solo, «Un progetto di Giuseppe Cassano», in fondo alla schermata iniziale,
@@ -665,6 +720,17 @@ che sale e scende con la fiamma della mongolfiera.
   diorama, cosa si vede, come si usa, da dove vengono dati e fonti, crediti e licenze. È testo
   vero nel DOM, quindi lo leggono anche i motori di ricerca, e ha uno script suo: si apre anche
   se il diorama non parte. Su telefono occupa tutto lo schermo.
+* **Schede durante il viaggio** (blocco 4.4): sul telefono in verticale al massimo un terzo dello schermo,
+  testo che scala con la larghezza (`clamp`), scorrevole (`overscroll-behavior: contain`) col fondo che
+  sfuma finché c'è altro testo (`card--more`); mentre si scorre o si tocca, la scheda resta almeno altri 6 s.
+  Quando sparisce è `visibility: hidden`: non prende i tocchi sulla scena né il Tab. In orizzontale il testo
+  resta di tre righe.
+* **Accessibilità dell'HUD** (blocco 4.4): pulsanti a due stati (musica, motore) con `aria-pressed` e nome
+  fisso; `aria-keyshortcuts` e `title` coi tasti (P pausa, M musica, V motore, C cartolina, Esc esce dal giro
+  guidato); gruppi «Radio» e «Motore», regione «Giro guidato» con l'avanzamento in `aria-live`; scheda col
+  titolo come nome e raggiungibile col Tab per scorrerla; cursori del volume nativi con il valore in
+  percentuale (`aria-valuetext`), e con il fuoco su un cursore le frecce lo spostano invece di sterzare.
+  Sul telefono i pulsanti dell'HUD sono 48 × 48 px. Il diorama non ha un pulsante per lo schermo intero.
 * **Finestre basse** (portatili a 720–880 px d'altezza): la schermata iniziale si compatta
   (titolo, spaziature) perché credito e attribuzione ODbL restino dentro lo schermo.
 * **Metadati** nel `<head>`: titolo e descrizione con «Gravina in Puglia», «centro storico» e
