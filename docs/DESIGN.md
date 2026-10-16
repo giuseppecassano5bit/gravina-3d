@@ -499,14 +499,46 @@ riga intera.
   - sotto, il prossimo monumento lungo quella via ("verso Chiesa del Purgatorio"), oppure il rione.
 * **Targa in marmo**: via corrente più rione (Centro storico, Rione Piaggio, Rione Fondovico anche sulla discesa verso il ciglio, Madonna della Stella · Botromagno), e "percorso pedonale" dove serve.
 * Le quote delle strade sono smussate (media mobile di ±6 m), così i gradoni del terreno non si sentono sotto le ruote.
+* **Vie lunghe dritte** (blocco 4.5, richiesta del committente: «Via Tripoli, Via Alcide De Gasperi: quando ci sono le
+  svolte si storce la strada»). Nei dati le vie della città moderna hanno un punto ogni 5–8 m che va a zig-zag di ±10°, e
+  sugli incroci la via si spostava di lato fino a 1,8 m; in più ogni tratto tra due incroci era una curva a sé, e
+  all'incrocio la direzione cambiava di colpo (17° su Via Tripoli). `Raddrizza` (sezione 7, prima della rete), una volta
+  e solo in memoria all'avvio (la costante `GEO` resta quella generata):
+  - unisce in **catene** i tratti delle vie principali (secondarie e terziarie) che proseguono dritti attraverso gli
+    incroci, anche se nei dati cambiano nome o sono senza nome (De Gasperi è spezzata): stesso nome entro 40°, altrimenti
+    il più dritto entro 25°; e li **smussa** (media gaussiana, σ 8 m su ±20 m), lasciando le curve vere (oltre 35° in
+    24 m), il centro storico, il Bosco, ponte e sottopassi; al massimo 2,5 m (oggi 1,46);
+  - controlla **sulla curva vera** di ogni tratto, come `simula.mjs`, che la via non entri nelle case (le facciate nei
+    dati stanno sul filo della via a zig-zag): prima restringe le vie larghe oltre 6,5 m, fino a 1,2 m (35 tratti), poi
+    sposta meno i punti vicini; lo stesso per le vie laterali che arrivano agli incroci spostati;
+  - per tutte le vie che proseguono dritte (914 tratti) la curva di ogni tratto tiene conto del punto del tratto accanto
+    (`Raddrizza.ghosts`, `#buildEdge`): all'incrocio la via resta continua.
+  Le vie residenziali non si smussano: le case stanno troppo vicine (con loro 658 case sulla strada). Costo: 91 ms
+  all'avvio sul Mac.
 * Alla testata est del ponte il **ponte ha la precedenza** sulla scelta "più dritta".
-* **Acceleratore** (blocco E, solo su PC): tenendo premuto **Shift** la crociera si moltiplica per
-  1,8 (`CONFIG.drive.boost`), con una salita e una discesa morbide (`boostRate`). Agli incroci il
-  cartello si apre prima, in proporzione alla velocità (38 m × velocità / crociera, circa 68 m), e
-  quando la scelta è aperta il mezzo torna alla crociera: il tempo per scegliere resta quello di
-  sempre. Non vale a piedi, in pausa, nelle gocce e prima di un tratto a piedi. Sul telefono non
-  c'è: il committente ha preferito non rischiare rallentamenti. Misure: vista «accelerata» di
-  `prestazioni.mjs` subito dopo Parti (60 fps, fotogramma peggiore come senza acceleratore).
+* **Acceleratore** (blocco E; blocco 4.4 per le velocità; blocco 4.5 per incroci e telefono): tenendo premuto
+  **Shift** il mezzo va verso la sua massima con una salita morbida (`boostRate`). Agli incroci il cartello si apre
+  prima, in proporzione alla velocità e allo spazio di frenata. **Dal blocco 4.5** (decisione del committente: «se
+  continua a frenare a ogni incrocio l'acceleratore perde senso») con l'acceleratore il mezzo **tira dritto**: la
+  selezione va da sola sulla via carrabile più dritta (`decision.fast`, mai gocce o tratti a piedi) e il mezzo
+  arriva all'incrocio alla velocità della svolta, `Driver.cornerSpeed`: quasi dritto nessun limite, altrimenti
+  √(`lateral` × R) con R = 8 m / tan(angolo/2) (90° ≈ 20 km/h, 30° ≈ 40, 10° ≈ 70), mai sotto la crociera; se
+  si sceglie a mano un'altra uscita (`decision.manual`) la prende, frenando quanto serve. La frenata segue la curva
+  di frenata (prima la inseguiva in ritardo e arrivava 15 km/h lungo). Non vale a piedi, in pausa, nelle gocce,
+  prima di un tratto a piedi e nel giro guidato.
+  **Sul telefono** (blocco 4.5, prima non c'era): si attiva con la casella sotto la scelta del mezzo o con
+  l'interruttore «Acceleratore» nella pausa (ricordato in `localStorage`, `gravina_acceleratore`), col consiglio
+  «almeno 6 GB di memoria; per l'esperienza migliore usa un computer» (la memoria non si legge: Safari non la dice
+  e Chrome la arrotonda); poi in guida compare il pulsante «Accelera» da tenere premuto, in basso a destra in
+  verticale e in basso a sinistra in orizzontale, nascosto a piedi, in mongolfiera, in pausa e nel giro guidato.
+  Misure: vista «accelerata» di `prestazioni.mjs` e la corsa a 180 km/h verso il Bosco (60 fps).
+* **Sobbalzi** (blocco 4.5, richiesta del committente: «movimenti parkinsoniani»): sull'asfalto il mezzo resta
+  piantato. La vibrazione del motore c'è solo al minimo; le sospensioni lavorano solo dove la via non è d'asfalto
+  (`ROUGH`: lastre, ciottoli e rombi del centro storico come prima, terra 0,7, sterrati 0,7). Ad alta velocità
+  sterzo e beccheggio guardano più avanti (`yawLookahead` + 0,22 s, ±3,6 m + 0,15 s oltre la crociera), così i
+  piccoli angoli tra un campione e l'altro della via non fanno sbandare. Misure per fotogramma (RMS della
+  differenza seconda) sull'asfalto: beccheggio da 0,49 a 0,015 mrad, rollio da 0,24 a 0,003, sobbalzo da 1,7 mm
+  a 0; sulle pietre invariati.
 * **Pendenze**: dal blocco E il limite del 18% vale per tutte le vie del mezzo; il raccordo tra il
   terreno disegnato del centro storico e le quote reali è largo 230 m anche a nord e a est
   (prima 110 m: lì c'erano vie al 29–37%). Resta sopra il 20% solo un tratto di Via Goito (22%).

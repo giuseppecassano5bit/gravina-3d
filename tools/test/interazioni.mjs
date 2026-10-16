@@ -146,8 +146,9 @@ if (freeSign) {
 await page.click('#btn-follow');
 await advance(0.3);
 check('«Segui il mezzo» riporta subito dietro', !(await cam()).free && await page.isHidden('#btn-follow'));
-// Acceleratore (blocco E, solo su PC): con Shift tenuto il mezzo va più veloce e lasciando torna al
-// suo passo; all'incrocio con scelta il cartello si apre prima e il tempo per scegliere non si accorcia.
+// Acceleratore (blocco E): con Shift tenuto il mezzo va più veloce e lasciando torna al suo passo; all'incrocio
+// con scelta il cartello si apre prima e, dal blocco 4.5, il mezzo tira dritto (la via più dritta), rallentando
+// solo quanto chiede la svolta (Driver.cornerSpeed), non fino al passo d'incrocio.
 const drv = () => page.evaluate(() => { const d = window.gravina.driver; return { v: d.speed, open: !!d.decision && d.decision.options.length > 1, rem: d.remaining, edge: d.edge.id, cruise: window.gravina.CONFIG.drive.cruiseSpeed * d.pace }; });
 await page.evaluate(() => { const g = window.gravina; g.placeAt(760, -120, [1, 0]); g.rig.snap(g.driver); g.driver.decision = null; });
 await advance(4);
@@ -159,10 +160,18 @@ check('con Shift tenuto il mezzo accelera', top > calm.cruise * 1.4, `crociera $
 // il cartello si guarda quando la scelta si apre (dopo l'incrocio il prossimo può non essere ancora aperto)
 let opened = null, t = 0, signShown = false;
 for (; t < 40 && !opened; t += 0.1) { const x = await drv(); if (x.open) { opened = x; signShown = await page.isVisible('.sign'); } else await advance(0.1); }
-let told = 0;
-if (opened) { const e0 = opened.edge; for (; told < 20 && (await drv()).edge === e0; told += 0.1) await advance(0.1); }
-check('all’incrocio il cartello si apre prima e c’è tempo per scegliere', !!opened && opened.rem > 45 && told > 3.5 && signShown,
-  opened ? `cartello a ${opened.rem.toFixed(0)} m, ${told.toFixed(1)} s per scegliere` : 'nessun incrocio');
+let told = 0, cross = null;
+if (opened) {
+  const e0 = opened.edge;
+  for (; told < 20 && (await drv()).edge === e0; told += 0.1) {
+    cross = await page.evaluate(() => { const d = window.gravina.driver, o = d.nextChoice; return o && { v: d.speed, fast: d.decision.selected === d.decision.fast, corner: Math.min(d.constructor.cornerSpeed(o.angle), d.constructor.limit(o.edge), d.top) }; }) ?? cross;
+    await advance(0.1);
+  }
+}
+const junctionSpeed = await page.evaluate(() => window.gravina.CONFIG.drive.junctionSpeed);
+check('all’incrocio con Shift il cartello si apre e il mezzo tira dritto senza frenare', !!opened && signShown && told > 1.5 && cross?.fast
+  && (cross.v > junctionSpeed + 2 || cross.corner < junctionSpeed + 2),
+  opened ? `cartello a ${opened.rem.toFixed(0)} m, ${told.toFixed(1)} s per scegliere, incrocio a ${(cross?.v * 3.6).toFixed(0)} km/h (svolta fino a ${Math.min(999, cross?.corner * 3.6).toFixed(0)})` : 'nessun incrocio');
 await page.keyboard.up('Shift');
 await advance(4);
 const calmAgain = await drv();
@@ -629,7 +638,21 @@ await browser.close();
   const two = await view();
   check('telefono: due dita allontanano la camera', two.dist > one.dist + 1, `${one.dist.toFixed(0)} → ${two.dist.toFixed(0)} m`);
   await page.keyboard.down('Shift');
-  check('telefono: niente acceleratore', !(await page.evaluate(() => window.gravina.driver.boosting)));
+  check('telefono: Shift non accelera', !(await page.evaluate(() => window.gravina.driver.boosting)));
+  await page.keyboard.up('Shift');
+  check('telefono: senza la casella il pulsante «Accelera» non c’è', await page.isHidden('#btn-boost'));
+  // Blocco 4.5: acceso dall'interruttore della pausa, il pulsante compare; tenuto premuto il mezzo accelera
+  await page.evaluate(() => { const g = window.gravina; g.pause(); g.advance(2); document.getElementById('btn-pause-boost').click(); g.resume(); g.placeAt(760, -120, [1, 0]); g.rig.follow(); g.rig.snap(g.driver); g.advance(3); });
+  const shown = await page.isVisible('#btn-boost');
+  const box = await page.locator('#btn-boost').boundingBox();
+  const calmV = await page.evaluate(() => window.gravina.driver.speed);
+  if (box) await touch('touchStart', [[box.x + box.width / 2, box.y + box.height / 2]]);
+  const held = await page.evaluate(() => { const g = window.gravina, b = g.driver.boosting; let top = 0; for (let k = 0; k < 25; k++) { g.advance(0.2); top = Math.max(top, g.driver.speed); } return { b, top, on: document.getElementById('btn-boost').classList.contains('is-on') }; });
+  await touch('touchEnd', []);
+  const released = await page.evaluate(() => window.gravina.driver.boosting);
+  check('telefono: col pulsante «Accelera» tenuto premuto il mezzo accelera, lasciato smette', shown && held.b && held.on && held.top > calmV * 1.4 && !released,
+    `da ${calmV.toFixed(1)} a ${held.top.toFixed(1)} m/s`);
+  check('telefono: l’acceleratore resta acceso alla visita dopo', await page.evaluate(() => localStorage.getItem('gravina_acceleratore') === 'true'));
   await browser.close();
 }
 process.exit(failures ? 1 : 0);
