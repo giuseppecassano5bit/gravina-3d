@@ -662,6 +662,36 @@ che sale e scende con la fiamma della mongolfiera.
 
 ---
 
+### 7c. Rumore dei motori (blocco 4.2, rifatto nel blocco 4.4)
+
+Il committente voleva il suono vero di ogni mezzo («il suono attuale è fastidioso e ridicolo»): erano
+oscillatori fissi col tono legato alla velocità. Le registrazioni vere non si possono usare (sono di
+terzi e il diorama è un file unico senza file audio), quindi ogni motore è un **piccolo motore vero**
+costruito sui dati reali (fonti nel README), in un `AudioWorklet` creato dal testo `MOTORE_WORKLET`:
+
+* **scoppi**: ogni cilindro scoppia al suo angolo di manovella (frazioni del ciclo di 720°): V12 della
+  Ferrari ogni 60° a bancate alterne, V8 dell'Audi con l'ordine 1-3-7-2-6-5-4-8 (in ogni bancata gli
+  scoppi sono irregolari: il borbottio), 4 cilindri della Panda ogni 180°, 6 cilindri del trattore ogni
+  120°; ogni scoppio è un impulso di pressione, con un po' di rumore e piccole differenze da un ciclo
+  all'altro e da un cilindro all'altro (il minimo non è mai perfetto);
+* **scarico**: un tubo per bancata come guida d'onda (andata e ritorno a 480 m/s, l'onda torna rovesciata
+  dall'uscita aperta), poi il silenziatore (passa-basso che si apre con giri e carico) e la risonanza
+  della scocca; le due bancate a sinistra e a destra;
+* **contorno**: aspirazione (l'ululato del V12 ai regimi alti), turbo dell'Audi e del trattore, battito
+  del diesel, scoppiettii in rilascio per Audi e Ferrari, un taglio finale degli acuti (a 20 m, dove sta
+  la camera, l'aria se li mangia);
+* **cambio** (`Cambio`): giri dalle marce (km/h ogni 1 000 giri), in crociera nella fascia comoda di ogni
+  motore, con l'acceleratore fino in alto e una scalata sola, cambiate col taglio del carico, frizione che
+  slitta alla partenza; il trattore ha la trasmissione continua e tiene 1 450–1 950 giri; il carico viene
+  dall'accelerazione (zero in rilascio);
+* in pausa e a piedi il mezzo resta acceso al minimo, più piano.
+
+Prova: `node motori.mjs` rende 16 s di guida per mezzo in `shots/motore-<mezzo>.wav`, da ascoltare, e
+controlla saturazione e motore dal vivo. Al minimo le frequenze di scoppio sono quelle vere (27 Hz Panda,
+43 Hz Audi, 100 Hz Ferrari, 42 Hz trattore); in crociera il baricentro dello spettro sta tra 400 e 1 100 Hz.
+`AudioWorklet` vuole una pagina sicura: sul sito (https) e in locale (localhost) c'è; nelle prove con
+`http://local` il motore tace senza errori.
+
 ## 7b. Schermata iniziale, crediti e ricerca su Google
 
 * **Credito**: uno solo, «Un progetto di Giuseppe Cassano», in fondo alla schermata iniziale,

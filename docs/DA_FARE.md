@@ -434,8 +434,16 @@ commerciali e protette: il committente ha scelto musica ambient originale, gener
       - **accessibilità dell'HUD**: `aria-pressed` con nome fisso, `aria-keyshortcuts`, gruppi e regioni, cursori del volume
         con la percentuale; con il fuoco su un cursore le frecce lo spostano (prima sterzavano);
       - **licenza MIT** nel file `LICENSE`;
+      - **Ponte Acquedotto, testate** (richiesta del committente): i pilastrini d'angolo e i muretti a ventaglio di est
+        stavano dentro la carreggiata di Via giudice Montea e Via Fontana la Stella, il raccordo ovest chiudeva Via giudice
+        Montea; ora muretti e pilastrini solo fuori dalla carreggiata, e `simula` controlla anche il ponte (prima escluso);
+      - **rumore dei motori rifatto** (richiesta del committente: «fastidioso e ridicolo»): modello a scoppi per cilindro
+        sui dati veri dei motori, tubi di scarico, silenziatore, aspirazione, turbo e cambio con le marce, senza registrazioni
+        (sono di terzi); prova `node motori.mjs` coi file audio da ascoltare in `tools/test/shots/`;
       - prove: `npm run simula` verde (0 problemi, 0 case e 0 dettagli sulla strada) e `npm run interazioni` 83/83 dopo
         ogni compito.
+- [ ] Da sentire con il committente: il rumore dei motori nuovo, sul sito o dai file `motore-*.wav` (volumi e timbri si
+      tarano in `MOTORI`).
 - [ ] Da decidere con il committente: un pulsante per lo **schermo intero** (non c'è; su iPhone Safari non funziona fuori dai video).
 - [x] Musica procedurale Web Audio: la radio ambient del blocco G.
 - [x] Camera: giro automatico e camera libera nel blocco G.

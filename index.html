@@ -15397,36 +15397,228 @@ const Burner = (() => {
 })();
 
 /**
- * 11e. RUMORE PROCEDURALE DEI MOTORI (blocco 4.2): sintesi audio Web Audio per ciascun veicolo,
- * senza file audio esterni. Profilo acustico calibrato su regimi, carico, accelerazione e boost:
- *  - Ferrari Monza SP2: V12 aspirato 8500 rpm (sawtooth + square detunata + sub-bass, filtro risonante e saturatore);
- *  - Audi RS Q8: V8 biturbo 4.0L (rumble a battimento 1.4 Hz, filtro caldo e turbo spool noise a 2.4 kHz);
- *  - Fiat Panda 2013: 4 cilindri Fire 1.2 (pulse + triangle da 55 a 320 Hz e filtro medio);
- *  - John Deere serie 8R: 6 cilindri diesel pesante 9.0L (cadenza a bassi regimi, AM tremolo cilindri e sibilo turbo);
- *  - Mongolfiera: delega al bruciatore (Burner) coordinato con il volume master del motore.
+ * 11e. RUMORE DEI MOTORI (blocco 4.2, rifatto nel blocco 4.4): niente file audio, niente registrazioni.
+ * Ogni motore è un piccolo motore vero, in un AudioWorklet: i cilindri scoppiano al loro angolo di manovella
+ * secondo l'ordine di scoppio, ogni scoppio è un impulso di pressione che entra nel tubo di scarico della sua
+ * bancata (guida d'onda con la riflessione all'uscita), poi nel silenziatore e nella risonanza della scocca;
+ * in più aspirazione, turbo, battito del diesel e scoppiettii in rilascio. I giri non seguono la velocità
+ * ma un cambio con le marce (`Cambio`): salgono in accelerazione, calano alla cambiata, il minimo da fermi.
+ * Dati dei motori (fonti nel README):
+ *  - Ferrari Monza SP2: V12 aspirato F140 da 6,5 l, potenza massima a 8 500 giri, limitatore a 9 000;
+ *    12 cilindri, uno scoppio ogni 60° di manovella, bancate alternate;
+ *  - Audi RS Q8: V8 biturbo 4.0 TFSI a 90°, ordine di scoppio 1-3-7-2-6-5-4-8 (Audi), 600 CV a 6 000 giri:
+ *    in ogni bancata gli scoppi sono irregolari, da qui il borbottio; turbo dentro la V;
+ *  - Fiat Panda 1.2 Fire: 4 cilindri in linea (ordine 1-3-4-2), 69 CV a 5 500 giri, coppia a 3 000;
+ *  - John Deere 8R: diesel PowerTech da 9,0 l, 6 cilindri in linea (1-5-3-6-2-4), regime nominale 2 100 giri,
+ *    due turbo in serie; trasmissione a variazione continua: i giri restano quasi fermi.
+ *  Minimo e limitatore di Panda e Audi e il minimo del trattore sono valori tipici, non verificati.
  */
-const EngineAudio = (() => {
-  let ctx = null;
-  let masterGain = null;
-  let enabled = true;
-  let userVol = 0.75;
-  let currentModel = 'panda';
-
-  let osc1 = null, osc2 = null, osc3 = null;
-  let lfo = null, lfoGain = null;
-  let turboNoise = null, turboGain = null, turboFilter = null;
-  let mainFilter = null, shaper = null;
-  let synthGain = null;
-  let activeVehicle = null;
-
-  function makeDistortionCurve(k = 14) {
-    const n = 512, curve = new Float32Array(n);
-    const deg = Math.PI / 180;
-    for (let i = 0; i < n; ++i) {
-      const x = (i * 2) / n - 1;
-      curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
+const MOTORE_WORKLET = `
+class Svf {                                   // filtro a variabili di stato (TPT): passa-basso e passa-banda
+  constructor() { this.a = 0; this.b = 0; this.lp = 0; this.bp = 0; this.set(1000, 0.7); }
+  set(f, q) {
+    const g = Math.tan(Math.PI * Math.min(f, sampleRate * 0.45) / sampleRate), k = 1 / q;
+    this.a1 = 1 / (1 + g * (g + k)); this.a2 = g * this.a1; this.a3 = g * this.a2;
+  }
+  run(v0) {
+    const v3 = v0 - this.b, v1 = this.a1 * this.a + this.a2 * v3, v2 = this.b + this.a2 * this.a + this.a3 * v3;
+    this.a = 2 * v1 - this.a; this.b = 2 * v2 - this.b; this.lp = v2; this.bp = v1;
+    return v2;
+  }
+}
+class Motore extends AudioWorkletProcessor {
+  static get parameterDescriptors() {
+    return [
+      { name: 'rpm', defaultValue: 800, minValue: 0, maxValue: 12000, automationRate: 'k-rate' },
+      { name: 'load', defaultValue: 0.2, minValue: 0, maxValue: 1, automationRate: 'k-rate' },
+      { name: 'spool', defaultValue: 0, minValue: 0, maxValue: 1, automationRate: 'k-rate' },
+      { name: 'level', defaultValue: 0, minValue: 0, maxValue: 4, automationRate: 'k-rate' },
+    ];
+  }
+  constructor() {
+    super();
+    this.p = null; this.seed = 22695477; this.phase = 0; this.last = [800, 0.2, 0];
+    this.port.onmessage = (e) => this.profile(e.data);
+  }
+  rnd() { this.seed = (Math.imul(this.seed, 1664525) + 1013904223) >>> 0; return this.seed / 4294967296; }
+  profile(p) {
+    this.p = p;
+    // andata e ritorno nel tubo di scarico, gas caldi a circa 480 m/s
+    this.banks = p.pipes.map((L) => { const d = Math.max(8, Math.round(2 * L / 480 * sampleRate)); return { e1: 0, e2: 0, en: 0, buf: new Float32Array(d), d, w: 0, lp: 0, muff: new Svf(), body: new Svf() }; });
+    this.cyl = p.fire.map((at, i) => ({ at, bank: p.bank[i], trim: 1 + (this.rnd() - 0.5) * p.imbalance }));
+    this.intake = new Svf(); this.knock = new Svf(); this.popF = new Svf();
+    this.kn = 0; this.pop = 0; this.tph = 0; this.dl = [0, 0]; this.dy = [0, 0]; this.t1 = [0, 0]; this.t2 = [0, 0];
+    this.top = 1 - Math.exp(-2 * Math.PI * p.top / sampleRate);   // filtro finale: a 20 m l'aria si mangia gli acuti
+  }
+  process(_, outputs, P) {
+    const out = outputs[0], L = out[0], R = out[1] ?? out[0], n = L.length, p = this.p;
+    const rpm1 = P.rpm[0], load1 = P.load[0], spool = P.spool[0], lev1 = P.level[0];
+    const [rpm0, load0, lev0] = this.last;
+    this.last = [rpm1, load1, lev1];
+    if (!p || (lev0 < 1e-4 && lev1 < 1e-4)) { L.fill(0); if (R !== L) R.fill(0); return true; }
+    const x = Math.min(1.1, (rpm0 + rpm1) / 2 / p.red), ld = (load0 + load1) / 2;
+    for (const B of this.banks) {
+      B.muff.set(p.muffler[0] + (p.muffler[1] - p.muffler[0]) * Math.min(1, x * 0.7 + ld * 0.45), p.muffler[2]);
+      B.body.set(p.body[0] + p.body[1] * x, p.body[2]);
     }
-    return curve;
+    this.intake.set(p.intake[0] + p.intake[1] * x, p.intake[2]);
+    if (p.knock) this.knock.set(p.knock[0], p.knock[1]);
+    this.popF.set(900, 0.9);
+    const dec = (ms) => Math.exp(-1 / (ms * 1e-3 * sampleRate));
+    const dF = dec(p.pulse[0]), dS = dec(p.pulse[1]), dN = dec(p.pulse[2]), dK = dec(0.35), dP = dec(4);
+    const tf = p.turbo ? p.turbo[0] + p.turbo[1] * spool : 0, ta = p.turbo ? p.turbo[2] * spool * spool * (0.35 + ld) : 0;
+    for (let i = 0; i < n; i++) {
+      const t = i / n, rpm = rpm0 + (rpm1 - rpm0) * t, load = load0 + (load1 - load0) * t, lev = lev0 + (lev1 - lev0) * t;
+      const prev = this.phase;
+      let ph = prev + rpm / 120 / sampleRate;                  // un ciclo del motore a 4 tempi = 2 giri
+      if (ph >= 1) ph -= 1;
+      this.phase = ph;
+      for (const c of this.cyl) {
+        if (!(prev <= ph ? c.at > prev && c.at <= ph : c.at > prev || c.at <= ph)) continue;
+        const B = this.banks[c.bank];
+        let A = c.trim * (p.base + (1 - p.base) * load) * (1 + (this.rnd() - 0.5) * p.jitter);
+        if (load < 0.06) A *= 0.35 + 0.4 * this.rnd();          // in rilascio gli scoppi sono deboli e irregolari
+        B.e1 += A; B.e2 += A; B.en += A * p.noise;
+        this.kn += A;
+        if (p.crackle && load < 0.05 && rpm > p.idle * 2 && this.rnd() < p.crackle) this.pop += 0.5 + this.rnd();
+      }
+      let l = 0, r = 0, env = 0;
+      for (let k = 0; k < this.banks.length; k++) {
+        const B = this.banks[k];
+        B.e1 *= dS; B.e2 *= dF; B.en *= dN;
+        env += B.e1;
+        const v = (B.e1 - B.e2) + B.en * (this.rnd() * 2 - 1);
+        const back = B.buf[B.w];                               // quello che torna dall'uscita del tubo
+        B.lp += (back - B.lp) * p.pipe[1];
+        const y = v - p.pipe[0] * B.lp;                         // uscita aperta: l'onda torna rovesciata
+        B.buf[B.w] = y; B.w = B.w + 1 === B.d ? 0 : B.w + 1;
+        const m = B.muff.run(y);
+        B.body.run(m);
+        const s = m + B.body.bp * p.body[3];
+        l += s * p.pan[k]; r += s * (1 - p.pan[k]);
+      }
+      const w = this.rnd() * 2 - 1;
+      this.intake.run(w * env);
+      let c = this.intake.bp * p.intake[3] * (0.25 + load) * (0.3 + x);
+      if (p.knock) { this.kn *= dK; this.knock.run(this.kn * (this.rnd() * 2 - 1)); c += this.knock.bp * p.knock[2]; }
+      if (ta > 0) { this.tph += tf / sampleRate; if (this.tph > 1) this.tph -= 1; c += Math.sin(this.tph * 6.2831853) * ta; }
+      if (this.pop > 1e-4) { this.pop *= dP; this.popF.run(this.pop * w); c += this.popF.bp * p.crackleGain; }
+      l += c; r += c;
+      // via la componente continua, poi una saturazione morbida
+      const vl = l - this.dl[0] + 0.995 * this.dy[0], vr = r - this.dl[1] + 0.995 * this.dy[1];
+      this.dl[0] = l; this.dl[1] = r; this.dy[0] = vl; this.dy[1] = vr;
+      const g = lev * p.gain, a = this.top, t1 = this.t1, t2 = this.t2;
+      t1[0] += (Math.tanh(vl * g * 1.4) / 1.4 - t1[0]) * a; t2[0] += (t1[0] - t2[0]) * a;
+      t1[1] += (Math.tanh(vr * g * 1.4) / 1.4 - t1[1]) * a; t2[1] += (t1[1] - t2[1]) * a;
+      L[i] = t2[0];
+      if (R !== L) R[i] = t2[1];
+    }
+    return true;
+  }
+}
+registerProcessor('motore', Motore);
+`;
+
+/**
+ * Profili dei motori. fire: angolo di scoppio di ogni cilindro, in frazioni del ciclo (720°); bank: la
+ * bancata (il suo tubo); pipes: lunghezze dei tubi (m); pipe: [riflessione, smorzamento]; pulse: impulso
+ * (salita, discesa, rumore, ms); muffler: [Hz al minimo, Hz a pieno, Q]; body: [Hz, +Hz coi giri, Q, quanto];
+ * intake: [Hz, +Hz coi giri, Q, quanto]; knock (diesel): [Hz, Q, quanto]; turbo: [Hz, +Hz in pressione, quanto];
+ * top: taglio finale degli acuti (Hz).
+ * Cambio: gears in km/h ogni 1 000 giri; lo: giri sotto cui si scala; up: giri della cambiata [in crociera,
+ * con l'acceleratore].
+ */
+const MOTORI = (() => {
+  const even = (k) => Array.from({ length: k }, (_, i) => i / k);
+  return {
+    panda: {
+      idle: 820, red: 6200, gears: [7.4, 13.4, 20.2, 27, 33.5], lo: 1500, up: [2600, 5600],
+      fire: even(4), bank: [0, 0, 0, 0], pipes: [2.7], pipe: [0.45, 0.35], pan: [0.5],
+      pulse: [0.35, 1.7, 0.8], noise: 0.35, base: 0.32, jitter: 0.12, imbalance: 0.06,
+      muffler: [400, 1300, 0.8], body: [150, 110, 2.2, 0.35], intake: [550, 900, 2, 0.08], crackle: 0, crackleGain: 0, top: 3600, gain: 1.2,
+    },
+    rs6: {
+      idle: 650, red: 6800, gears: [8.8, 14.6, 22.5, 29.5, 37.5, 46, 55, 64], lo: 1150, up: [1900, 6000],
+      // 1-3-7-2-6-5-4-8, uno ogni 90°: cilindri 1–4 nella prima bancata, 5–8 nella seconda
+      fire: even(8), bank: [0, 0, 1, 0, 1, 1, 0, 1], pipes: [1.75, 1.9], pipe: [0.5, 0.3], pan: [0.66, 0.34],
+      pulse: [0.45, 2.3, 1.1], noise: 0.4, base: 0.28, jitter: 0.1, imbalance: 0.05,
+      muffler: [230, 1250, 1.1], body: [80, 70, 3, 0.55], intake: [700, 1100, 2, 0.06], turbo: [1900, 4600, 0.01],
+      crackle: 0.04, crackleGain: 0.45, top: 3200, gain: 1,
+    },
+    huracan: {
+      idle: 1000, red: 9000, gears: [11.8, 17.5, 23.8, 30.5, 37.5, 45, 53], lo: 1700, up: [3000, 8500],
+      fire: even(12), bank: Array.from({ length: 12 }, (_, i) => i % 2), pipes: [1.05, 1.12], pipe: [0.5, 0.42], pan: [0.62, 0.38],
+      pulse: [0.22, 1.0, 0.45], noise: 0.25, base: 0.3, jitter: 0.06, imbalance: 0.03,
+      muffler: [650, 2900, 0.9], body: [230, 330, 2, 0.25], intake: [700, 1900, 3, 0.16],
+      crackle: 0.025, crackleGain: 0.4, top: 4600, gain: 0.95,
+    },
+    deere: {
+      idle: 850, red: 2100, ivt: [1450, 1950],
+      fire: even(6), bank: [0, 0, 0, 0, 0, 0], pipes: [3.2], pipe: [0.5, 0.3], pan: [0.5],
+      pulse: [0.6, 3.2, 2.2], noise: 0.6, base: 0.4, jitter: 0.18, imbalance: 0.1,
+      muffler: [300, 850, 0.9], body: [62, 40, 2.6, 0.6], intake: [500, 400, 1.5, 0.04], knock: [1500, 6, 0.12], turbo: [3100, 5800, 0.007],
+      crackle: 0, crackleGain: 0, top: 3000, gain: 1.15,
+    },
+  };
+})();
+
+/**
+ * Cambio e acceleratore: dalla velocità del mezzo (m/s) e dal tasto dell'acceleratore ricava giri, carico
+ * (0 in rilascio, 1 a tavoletta) e pressione del turbo. Cambio automatico con le marce; il trattore ha la
+ * trasmissione continua e tiene i giri quasi fermi. Serve sia dal vivo sia nella prova senza audio (`render`).
+ */
+class Cambio {
+  constructor(m) { this.m = m; this.gear = 0; this.rpm = m.idle; this.load = 0.2; this.spool = 0; this.v = 0; this.acc = 0; this.cut = 0; this.kick = 0; this.boost = false; }
+  step(dt, speed, cruise, boost) {
+    const m = this.m, kmh = speed * 3.6;
+    const a = dt > 0 ? (speed - this.v) / dt : 0;
+    this.v = speed;
+    this.acc += (a - this.acc) * Math.min(1, dt * 6);
+    // carico: in accelerazione sale, in frenata va a zero (rilascio), in crociera un filo
+    let load = this.acc > 0.15 ? 0.3 + this.acc * (boost ? 0.32 : 0.22) : this.acc < -0.4 ? 0.02 : 0.2 + 0.12 * Math.min(1, speed / Math.max(cruise, 1));
+    if (boost && this.acc > -0.2) load = Math.max(load, 0.75);
+    load = Math.min(1, load);
+    let rpm;
+    if (m.ivt) {
+      rpm = speed < 0.3 ? m.idle : m.ivt[0] + (m.ivt[1] - m.ivt[0]) * load;
+    } else {
+      const g = m.gears, at = (k) => kmh / g[k] * 1000, up = boost ? m.up[1] : m.up[0];
+      this.kick = Math.max(0, this.kick - dt);
+      // con l'acceleratore appena premuto si scala una marcia (una sola), se i giri lo permettono
+      if (boost && !this.boost && this.gear > 0 && at(this.gear - 1) < m.up[1] * 0.75) { this.gear--; this.kick = 1.2; }
+      else if (this.gear < g.length - 1 && at(this.gear) > up && at(this.gear + 1) > m.lo) { this.gear++; this.cut = boost ? 0.15 : 0.09; }
+      else if (this.gear > 0 && !this.kick && at(this.gear) < m.lo * 0.85) this.gear--;
+      if (speed < 0.3) this.gear = 0;
+      rpm = Math.max(at(this.gear), m.idle);
+      if (speed > 0.05 && speed < 3) rpm = Math.max(rpm, m.idle + load * 900 * (1 - speed / 3));   // frizione che slitta alla partenza
+    }
+    this.boost = boost;
+    if (this.cut > 0) { this.cut -= dt; load = 0.03; }
+    rpm = Math.min(rpm, m.red);
+    this.rpm += (rpm - this.rpm) * Math.min(1, dt * (rpm < this.rpm ? 9 : 6));
+    this.load += (load - this.load) * Math.min(1, dt * 8);
+    const want = m.turbo ? Math.min(1, this.load * 1.2) * Math.min(1, Math.max(0, (this.rpm - m.idle * 1.4) / (m.red * 0.5))) : 0;
+    this.spool += (want - this.spool) * Math.min(1, dt * (want > this.spool ? 1.6 : 3.5));
+    return this;
+  }
+}
+
+const EngineAudio = (() => {
+  let ctx = null, masterGain = null, node = null, loading = null;
+  let enabled = true, userVol = 0.75, currentModel = 'panda', cambio = null;
+
+  try {
+    const savedOn = localStorage.getItem('gravina_engine_on');
+    if (savedOn !== null) enabled = savedOn === 'true';
+    const savedVol = localStorage.getItem('gravina_engine_vol');
+    if (savedVol !== null) userVol = clamp(parseFloat(savedVol) || 0.75, 0, 1);
+  } catch { /* pazienza */ }
+
+  /** Carica il worklet (dal testo qui sopra, come file in memoria) e crea il motore nel contesto `c`. */
+  async function makeNode(c) {
+    const url = URL.createObjectURL(new Blob([MOTORE_WORKLET], { type: 'application/javascript' }));
+    try { await c.audioWorklet.addModule(url); } finally { URL.revokeObjectURL(url); }
+    return new AudioWorkletNode(c, 'motore', { numberOfInputs: 0, outputChannelCount: [2] });
   }
 
   function setup() {
@@ -15435,214 +15627,85 @@ const EngineAudio = (() => {
     if (!AudioCtx) return;
     ctx = new AudioCtx();
     masterGain = ctx.createGain();
-    masterGain.gain.value = enabled ? userVol : 0;
+    masterGain.gain.value = 0;
     masterGain.connect(ctx.destination);
+    if (!ctx.audioWorklet) return;                                // browser troppo vecchio: niente rumore del motore
+    loading = makeNode(ctx).then((n) => { node = n; node.connect(masterGain); startVehicle(currentModel); }).catch(() => { node = null; });
   }
 
-  function stopNodes() {
-    try { osc1?.stop(); } catch {}
-    try { osc2?.stop(); } catch {}
-    try { osc3?.stop(); } catch {}
-    try { lfo?.stop(); } catch {}
-    try { turboNoise?.stop(); } catch {}
-    osc1 = osc2 = osc3 = lfo = lfoGain = turboNoise = turboGain = turboFilter = mainFilter = shaper = synthGain = null;
-    activeVehicle = null;
+  function startVehicle(id) {
+    const m = MOTORI[id];
+    cambio = m ? new Cambio(m) : null;
+    if (node && m) node.port.postMessage(m);
   }
-
-  function startVehicle(modelId) {
-    if (!ctx) return;
-    stopNodes();
-    activeVehicle = modelId;
-    if (modelId === 'balloon') return;
-
-    synthGain = ctx.createGain();
-    synthGain.gain.value = 0.22;
-
-    mainFilter = ctx.createBiquadFilter();
-
-    if (modelId === 'huracan' || modelId === 'monza') {
-      shaper = ctx.createWaveShaper();
-      shaper.curve = makeDistortionCurve(14);
-      shaper.oversample = '2x';
-
-      mainFilter.type = 'lowpass';
-      mainFilter.frequency.value = 450;
-      mainFilter.Q.value = 2.8;
-
-      osc1 = ctx.createOscillator(); osc1.type = 'sawtooth'; osc1.frequency.value = 78;
-      osc2 = ctx.createOscillator(); osc2.type = 'sawtooth'; osc2.frequency.value = 78.6;
-      osc3 = ctx.createOscillator(); osc3.type = 'sine'; osc3.frequency.value = 39;
-
-      const g1 = ctx.createGain(); g1.gain.value = 0.45;
-      const g2 = ctx.createGain(); g2.gain.value = 0.35;
-      const g3 = ctx.createGain(); g3.gain.value = 0.30;
-
-      osc1.connect(g1).connect(mainFilter);
-      osc2.connect(g2).connect(mainFilter);
-      osc3.connect(g3).connect(mainFilter);
-
-      mainFilter.connect(shaper).connect(synthGain).connect(masterGain);
-      osc1.start(); osc2.start(); osc3.start();
-
-    } else if (modelId === 'rs6' || modelId === 'rsq8') {
-      mainFilter.type = 'lowpass';
-      mainFilter.frequency.value = 380;
-      mainFilter.Q.value = 1.4;
-
-      osc1 = ctx.createOscillator(); osc1.type = 'sawtooth'; osc1.frequency.value = 48;
-      osc2 = ctx.createOscillator(); osc2.type = 'square'; osc2.frequency.value = 49.4;
-
-      const g1 = ctx.createGain(); g1.gain.value = 0.50;
-      const g2 = ctx.createGain(); g2.gain.value = 0.28;
-      osc1.connect(g1).connect(mainFilter);
-      osc2.connect(g2).connect(mainFilter);
-
-      const nLen = ctx.sampleRate * 2;
-      const nBuf = ctx.createBuffer(1, nLen, ctx.sampleRate);
-      const nData = nBuf.getChannelData(0);
-      for (let i = 0; i < nLen; i++) nData[i] = Math.random() * 2 - 1;
-      turboNoise = ctx.createBufferSource();
-      turboNoise.buffer = nBuf; turboNoise.loop = true;
-
-      turboFilter = ctx.createBiquadFilter();
-      turboFilter.type = 'bandpass';
-      turboFilter.frequency.value = 2400;
-      turboFilter.Q.value = 3.5;
-
-      turboGain = ctx.createGain();
-      turboGain.gain.value = 0.0;
-
-      turboNoise.connect(turboFilter).connect(turboGain).connect(synthGain);
-      mainFilter.connect(synthGain).connect(masterGain);
-
-      osc1.start(); osc2.start(); turboNoise.start();
-
-    } else if (modelId === 'deere') {
-      mainFilter.type = 'lowpass';
-      mainFilter.frequency.value = 260;
-      mainFilter.Q.value = 1.8;
-
-      osc1 = ctx.createOscillator(); osc1.type = 'sawtooth'; osc1.frequency.value = 28;
-      osc2 = ctx.createOscillator(); osc2.type = 'triangle'; osc2.frequency.value = 56;
-
-      lfo = ctx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 12;
-      lfoGain = ctx.createGain(); lfoGain.gain.value = 0.35;
-      lfo.connect(lfoGain);
-
-      const g1 = ctx.createGain(); g1.gain.value = 0.60;
-      const g2 = ctx.createGain(); g2.gain.value = 0.40;
-
-      osc1.connect(g1).connect(mainFilter);
-      osc2.connect(g2).connect(mainFilter);
-
-      const turboOsc = ctx.createOscillator();
-      turboOsc.type = 'sine'; turboOsc.frequency.value = 1580;
-      const tWhistleGain = ctx.createGain(); tWhistleGain.gain.value = 0.04;
-      turboOsc.connect(tWhistleGain).connect(synthGain);
-      turboOsc.start();
-      osc3 = turboOsc;
-
-      mainFilter.connect(synthGain).connect(masterGain);
-      osc1.start(); osc2.start(); lfo.start();
-
-    } else {
-      mainFilter.type = 'lowpass';
-      mainFilter.frequency.value = 420;
-      mainFilter.Q.value = 1.2;
-
-      osc1 = ctx.createOscillator(); osc1.type = 'square'; osc1.frequency.value = 58;
-      osc2 = ctx.createOscillator(); osc2.type = 'triangle'; osc2.frequency.value = 116;
-
-      const g1 = ctx.createGain(); g1.gain.value = 0.40;
-      const g2 = ctx.createGain(); g2.gain.value = 0.40;
-
-      osc1.connect(g1).connect(mainFilter);
-      osc2.connect(g2).connect(mainFilter);
-
-      mainFilter.connect(synthGain).connect(masterGain);
-      osc1.start(); osc2.start();
-    }
-  }
-
-  // Lettura iniziale preferenze utente
-  try {
-    const savedOn = localStorage.getItem('gravina_engine_on');
-    if (savedOn !== null) enabled = savedOn === 'true';
-    const savedVol = localStorage.getItem('gravina_engine_vol');
-    if (savedVol !== null) userVol = clamp(parseFloat(savedVol) || 0.75, 0, 1);
-  } catch {}
 
   return {
     setup,
-    setVehicle(id) {
-      currentModel = id;
-      if (ctx) startVehicle(id);
-    },
+    setVehicle(id) { currentModel = id; startVehicle(id); },
     toggle() {
       setup();
       enabled = !enabled;
-      try { localStorage.setItem('gravina_engine_on', String(enabled)); } catch {}
+      try { localStorage.setItem('gravina_engine_on', String(enabled)); } catch { /* pazienza */ }
       this.updateGain();
       return enabled;
     },
     setVolume(v) {
       userVol = clamp(v, 0, 1);
-      try { localStorage.setItem('gravina_engine_vol', String(userVol)); } catch {}
+      try { localStorage.setItem('gravina_engine_vol', String(userVol)); } catch { /* pazienza */ }
       this.updateGain();
     },
-    updateGain(duckFactor = 1) {
+    updateGain() {
       if (!masterGain || !ctx) return;
-      const target = enabled ? userVol * duckFactor : 0;
-      masterGain.gain.setTargetAtTime(target, ctx.currentTime, 0.08);
+      masterGain.gain.setTargetAtTime(enabled ? userVol * 0.55 : 0, ctx.currentTime, 0.08);
     },
     get enabled() { return enabled; },
     get volume() { return userVol; },
+    /** Ultimo stato del cambio (prove): giri, marcia, carico. */
+    get state() { return cambio && { rpm: Math.round(cambio.rpm), gear: cambio.gear + 1, load: +cambio.load.toFixed(2), spool: +cambio.spool.toFixed(2) }; },
     update(speed, maxSpeed, boost, paused, onFoot) {
       if (!ctx) {
         if (!navigator.userActivation?.hasBeenActive) return;
-        try { setup(); startVehicle(currentModel || 'panda'); } catch { return; }
+        try { setup(); } catch { return; }
       }
       if (ctx.state === 'suspended') ctx.resume();
-      if (!activeVehicle && currentModel) startVehicle(currentModel);
-
-      if (activeVehicle === 'balloon') return;
-
-      const now = ctx.currentTime;
-      const isMuted = paused || onFoot;
-      const targetMaster = (enabled && !isMuted) ? userVol : (isMuted && enabled ? userVol * 0.15 : 0);
-      masterGain.gain.setTargetAtTime(targetMaster, now, 0.12);
-
-      const ratio = clamp(speed / Math.max(maxSpeed, 1), 0, 1.4);
-      const load = clamp(boost > 0 ? 0.35 + ratio * 0.65 : ratio, 0, 1.5);
-
-      if (activeVehicle === 'huracan' || activeVehicle === 'monza') {
-        const f0 = 78 + ratio * 580 + (boost ? 80 : 0);
-        if (osc1) osc1.frequency.setTargetAtTime(f0, now, 0.06);
-        if (osc2) osc2.frequency.setTargetAtTime(f0 * 1.008, now, 0.06);
-        if (osc3) osc3.frequency.setTargetAtTime(f0 * 0.5, now, 0.06);
-        if (mainFilter) mainFilter.frequency.setTargetAtTime(450 + load * 3600, now, 0.08);
-
-      } else if (activeVehicle === 'rs6' || activeVehicle === 'rsq8') {
-        const f0 = 48 + ratio * 240 + (boost ? 40 : 0);
-        if (osc1) osc1.frequency.setTargetAtTime(f0, now, 0.08);
-        if (osc2) osc2.frequency.setTargetAtTime(f0 * 1.025, now, 0.08);
-        if (mainFilter) mainFilter.frequency.setTargetAtTime(380 + load * 1800, now, 0.08);
-        if (turboGain) turboGain.gain.setTargetAtTime(boost > 0.1 ? 0.08 * boost : (ratio > 0.5 ? 0.03 * ratio : 0), now, 0.15);
-
-      } else if (activeVehicle === 'deere') {
-        const f0 = 26 + ratio * 85;
-        if (osc1) osc1.frequency.setTargetAtTime(f0, now, 0.1);
-        if (osc2) osc2.frequency.setTargetAtTime(f0 * 2, now, 0.1);
-        if (lfo) lfo.frequency.setTargetAtTime(10 + ratio * 18, now, 0.1);
-        if (mainFilter) mainFilter.frequency.setTargetAtTime(260 + load * 700, now, 0.1);
-
-      } else {
-        const f0 = 55 + ratio * 245;
-        if (osc1) osc1.frequency.setTargetAtTime(f0, now, 0.08);
-        if (osc2) osc2.frequency.setTargetAtTime(f0 * 2, now, 0.08);
-        if (mainFilter) mainFilter.frequency.setTargetAtTime(420 + load * 1400, now, 0.08);
+      if (!cambio) return;                                         // mongolfiera: c'è il bruciatore
+      const t = performance.now() / 1000, dt = clamp(t - (this._t ?? t), 0, 0.1);
+      this._t = t;
+      cambio.step(dt, paused || onFoot ? 0 : speed, maxSpeed, !!boost && !paused);
+      this.updateGain();
+      if (!node) return;
+      const now = ctx.currentTime, P = node.parameters;
+      P.get('rpm').setTargetAtTime(cambio.rpm, now, 0.03);
+      P.get('load').setTargetAtTime(cambio.load, now, 0.03);
+      P.get('spool').setTargetAtTime(cambio.spool, now, 0.05);
+      // a piedi o in pausa il mezzo resta acceso al minimo, più piano (si sente da lontano)
+      P.get('level').setTargetAtTime(paused || onFoot ? 0.3 : 1, now, 0.25);
+    },
+    /**
+     * Prova senza altoparlanti: guida simulata (minimo, partenza, crociera, acceleratore, rilascio, frenata,
+     * minimo) resa in un OfflineAudioContext. Restituisce i due canali e i giri, per `tools/test`.
+     */
+    async render(id, seconds = 16, sr = 44100) {
+      const m = MOTORI[id], c = new OfflineAudioContext(2, Math.round(seconds * sr), sr), n = await makeNode(c);
+      n.connect(c.destination);
+      n.port.postMessage(m);
+      const box = new Cambio(m), cruise = CONFIG.drive.cruiseSpeed * (VEHICLES.find((v) => v.id === id)?.pace ?? 1), log = [];
+      let v = 0;
+      const P = n.parameters;
+      P.get('level').setValueAtTime(1, 0);
+      for (let t = 0, dt = 1 / 60; t < seconds; t += dt) {
+        // 0–1,5 s minimo; poi su fino alla crociera; dal 6° s l'acceleratore fino al doppio; dal 10° rilascio; dal 13° fermi
+        const target = t < 1.5 ? 0 : t < 6 ? cruise : t < 10 ? cruise * CONFIG.drive.boost : t < 13 ? cruise : 0;
+        const boost = t >= 6 && t < 10;
+        const acc = target > v ? (boost ? 4 : 2.2) : t >= 13 ? 6 : 3;
+        v = target > v ? Math.min(target, v + acc * dt) : Math.max(target, v - acc * dt);
+        box.step(dt, v, cruise, boost);
+        P.get('rpm').setValueAtTime(box.rpm, t); P.get('load').setValueAtTime(box.load, t); P.get('spool').setValueAtTime(box.spool, t);
+        if (Math.round(t * 60) % 30 === 0) log.push([+t.toFixed(1), +(v * 3.6).toFixed(0), Math.round(box.rpm), box.gear + 1, +box.load.toFixed(2)]);
       }
-    }
+      const b = await c.startRendering();
+      return { left: b.getChannelData(0), right: b.getChannelData(1), sr, log };
+    },
   };
 })();
 
