@@ -210,9 +210,11 @@ via è compressa, e la strada del P.I.P. resta a scala reale. La scheda del Bosc
 visitatore. Il parcheggio «Terra Rossa», 700 m più giù lungo la strada, resta a lato della strada
 compressa, ritagliato fuori dall'area dei campi.
 
-**Acceleratore.** Sul computer, tenendo premuto **Shift** il mezzo va 1,8 volte più veloce; agli
-incroci rallenta da solo e il cartello compare prima. Sul telefono non c'è, per non rischiare
-rallentamenti.
+**Acceleratore.** Sul computer, tenendo premuto **Shift** il mezzo va verso la sua velocità massima
+(Panda 80 km/h, Audi RS Q8 e Ferrari Monza SP2 180, John Deere 50), sempre entro il limite della via;
+agli incroci tira dritto e rallenta solo per le curve (blocco 4.5). Sul telefono si attiva con la casella
+della schermata iniziale o dalla pausa (consigliato con almeno 6 GB di memoria; il computer resta
+l'esperienza migliore) e poi si tiene premuto il pulsante «Accelera».
 
 Per rigenerarli (per esempio dopo aver migliorato la mappa di Gravina su OpenStreetMap):
 

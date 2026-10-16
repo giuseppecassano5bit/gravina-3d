@@ -638,7 +638,21 @@ await browser.close();
   const two = await view();
   check('telefono: due dita allontanano la camera', two.dist > one.dist + 1, `${one.dist.toFixed(0)} → ${two.dist.toFixed(0)} m`);
   await page.keyboard.down('Shift');
-  check('telefono: niente acceleratore', !(await page.evaluate(() => window.gravina.driver.boosting)));
+  check('telefono: Shift non accelera', !(await page.evaluate(() => window.gravina.driver.boosting)));
+  await page.keyboard.up('Shift');
+  check('telefono: senza la casella il pulsante «Accelera» non c’è', await page.isHidden('#btn-boost'));
+  // Blocco 4.5: acceso dall'interruttore della pausa, il pulsante compare; tenuto premuto il mezzo accelera
+  await page.evaluate(() => { const g = window.gravina; g.pause(); g.advance(2); document.getElementById('btn-pause-boost').click(); g.resume(); g.placeAt(760, -120, [1, 0]); g.rig.follow(); g.rig.snap(g.driver); g.advance(3); });
+  const shown = await page.isVisible('#btn-boost');
+  const box = await page.locator('#btn-boost').boundingBox();
+  const calmV = await page.evaluate(() => window.gravina.driver.speed);
+  if (box) await touch('touchStart', [[box.x + box.width / 2, box.y + box.height / 2]]);
+  const held = await page.evaluate(() => { const g = window.gravina, b = g.driver.boosting; let top = 0; for (let k = 0; k < 25; k++) { g.advance(0.2); top = Math.max(top, g.driver.speed); } return { b, top, on: document.getElementById('btn-boost').classList.contains('is-on') }; });
+  await touch('touchEnd', []);
+  const released = await page.evaluate(() => window.gravina.driver.boosting);
+  check('telefono: col pulsante «Accelera» tenuto premuto il mezzo accelera, lasciato smette', shown && held.b && held.on && held.top > calmV * 1.4 && !released,
+    `da ${calmV.toFixed(1)} a ${held.top.toFixed(1)} m/s`);
+  check('telefono: l’acceleratore resta acceso alla visita dopo', await page.evaluate(() => localStorage.getItem('gravina_acceleratore') === 'true'));
   await browser.close();
 }
 process.exit(failures ? 1 : 0);

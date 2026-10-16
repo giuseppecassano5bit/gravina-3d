@@ -412,6 +412,25 @@
   .touch-arrow--left { left: calc(var(--gutter) + var(--safe-left)); }
   .touch-arrow--right { right: calc(var(--gutter) + var(--safe-right)); }
   .touch-arrow:active { background: var(--sign-brown); }
+  /* Blocco 4.5: acceleratore sul telefono, da tenere premuto (sopra i cartelli, a portata di pollice) */
+  .boost-btn {
+    position: absolute; right: calc(var(--gutter) + var(--safe-right)); bottom: calc(196px + var(--safe-bottom));
+    width: 68px; height: 68px; display: grid; place-items: center; align-content: center; gap: 1px;
+    color: #fff; background: var(--dusk-glass); border: 2px solid var(--sunset); border-radius: 50%;
+    cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+    transition: transform 0.12s ease, background 0.12s ease;
+  }
+  .boost-btn svg { width: 26px; height: 26px; }
+  .boost-btn span { font: 700 0.56rem/1 var(--font-sign); letter-spacing: 0.08em; text-transform: uppercase; }
+  .boost-btn.is-on { background: var(--sunset); color: #1a1f2e; transform: scale(0.93); }
+  .boost-btn[hidden], .hud.is-paused .boost-btn { display: none; }
+  @media (prefers-reduced-motion: reduce) { .boost-btn { transition: none; } }
+  .boost-opt { display: flex; gap: 0.6rem; align-items: flex-start; margin: 0.65rem 0 0; font: 400 0.78rem/1.35 var(--font-ui); color: #D9CCB4; cursor: pointer; }
+  .boost-opt[hidden] { display: none; }
+  .boost-opt input { flex: none; width: 20px; height: 20px; margin: 0; accent-color: var(--sunset); }
+  .boost-opt strong { color: #f4eee2; font-weight: 600; margin-right: 0.2em; }
+  .boost-opt__short { display: none; }
+  @media (max-height: 520px) { .boost-opt { margin-top: 0.45rem; } .boost-opt input { width: 18px; height: 18px; } .boost-opt__long { display: none; } .boost-opt__short { display: inline; } }
 
   /* Etichette 3D dei monumenti (proiettate ogni frame) */
   .labels { position: fixed; inset: 0; pointer-events: none; overflow: hidden; opacity: 0; transition: opacity 1.5s ease 1s; }
@@ -747,6 +766,7 @@
     .junction { bottom: calc(10px + var(--safe-bottom)); gap: 0.35rem; }
     .sign { padding: 0.4rem 0.75rem 0.45rem 0.6rem; }
     .touch-arrow { display: none !important; }   /* in orizzontale bastano i cartelli */
+    .boost-btn { right: auto; left: calc(var(--gutter) + var(--safe-left)); bottom: calc(var(--gutter) + var(--safe-bottom)); }
     .pause__sheet { width: min(400px, 58vw); }
   }
 
@@ -805,6 +825,11 @@
     <div>
       <p class="picker__legend" id="start-picker-label">Scegli il mezzo</p>
       <div class="picker" id="start-picker" role="radiogroup" aria-labelledby="start-picker-label" aria-disabled="true"></div>
+      <!-- Blocco 4.5: l'acceleratore sul telefono si accende qui (o nella pausa), col consiglio di usare il computer -->
+      <label class="boost-opt" id="boost-opt" hidden>
+        <input type="checkbox" id="boost-check">
+        <span><strong>Acceleratore</strong> <span class="boost-opt__long">Se il telefono ha almeno 6&nbsp;GB di memoria, attivalo e porta i mezzi alla loro velocità massima. Per l’esperienza migliore usa un computer.</span><span class="boost-opt__short">con almeno 6&nbsp;GB di memoria · meglio un computer</span></span>
+      </label>
     </div>
     <div class="start__actions">
       <button class="btn-primary" id="btn-start" type="button" disabled>Parti</button>
@@ -850,7 +875,7 @@
         <dt>Agli incroci</dt>
         <dd>Scegli la via con <kbd>←</kbd> <kbd>→</kbd> o toccando i cartelli marroni. Se non scegli, prosegue dritto.</dd>
         <dt>Acceleratore</dt>
-        <dd>Sul computer, tieni premuto <kbd>Shift</kbd>: il mezzo va quasi al doppio della velocità e, lasciando, torna al suo passo. Agli incroci rallenta da solo e il cartello compare prima.</dd>
+        <dd>Sul computer, tieni premuto <kbd>Shift</kbd>: il mezzo va verso la sua velocità massima, sempre entro il limite della via, e agli incroci tira dritto (rallenta solo per le curve; se scegli un’altra via, la prende). Lasciando, torna al suo passo. Sul telefono si attiva nella schermata iniziale o nella pausa (meglio con almeno 6 GB di memoria) e si tiene premuto il pulsante «Accelera».</dd>
         <dt>A piedi</dt>
         <dd>I cartelli col pedone portano su passaggi e scalinate del centro storico: il mezzo si ferma, prosegui a piedi e lo ritrovi al tratto carrabile successivo.</dd>
         <dt>Camera</dt>
@@ -964,6 +989,12 @@
     <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
   </button>
 
+  <!-- Blocco 4.5: acceleratore sul telefono, da tenere premuto (compare se è attivo nella schermata iniziale o nella pausa) -->
+  <button class="boost-btn" id="btn-boost" type="button" hidden aria-label="Accelera: tieni premuto">
+    <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13l6-6 6 6M6 19l6-6 6 6"/></svg>
+    <span>Accelera</span>
+  </button>
+
   <div class="tour-hud" id="tour-hud" role="region" aria-label="Giro guidato" hidden>
     <span class="tour-hud__badge"><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 4v4l2.5 2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Giro guidato</span>
     <span class="tour-hud__info" id="tour-hud-info" aria-live="polite">Tappa 1 di 14: Ponte Acquedotto</span>
@@ -1000,6 +1031,14 @@
       <button class="sound-switch" id="btn-pause-tour" type="button" role="switch" aria-checked="false">
         <span class="sound-switch__track" aria-hidden="true"><span class="sound-switch__dot"></span></span>
         <span class="sound-switch__text"><strong>Giro dei monumenti</strong><small id="pause-tour-status">Percorso guidato tra le 14 tappe storiche e culturali</small></span>
+      </button>
+    </section>
+
+    <section aria-labelledby="pause-boost-label" id="pause-boost" hidden>
+      <h3 class="pause__h" id="pause-boost-label">Guida</h3>
+      <button class="sound-switch" id="btn-pause-boost" type="button" role="switch" aria-checked="false">
+        <span class="sound-switch__track" aria-hidden="true"><span class="sound-switch__dot"></span></span>
+        <span class="sound-switch__text"><strong>Acceleratore</strong><small>Con almeno 6&nbsp;GB di memoria: un pulsante da tenere premuto porta i mezzi alla loro velocità massima. Per l’esperienza migliore usa un computer.</small></span>
       </button>
     </section>
 
@@ -14705,6 +14744,7 @@ class UI {
       card: $('card'), cardKicker: $('card-kicker'), cardTitle: $('card-title'), cardText: $('card-text'),
       junction: $('junction'), junctionHead: $('junction-head'), signs: $('signs'),
       touchLeft: $('touch-left'), touchRight: $('touch-right'),
+      boostOpt: $('boost-opt'), boostCheck: $('boost-check'), btnBoost: $('btn-boost'), pauseBoost: $('pause-boost'), btnPauseBoost: $('btn-pause-boost'),
       labels: $('labels'),
       pause: $('pause'), pauseSheet: $('pause-sheet'), pauseTitle: $('pause-title'), btnResume: $('btn-resume'), btnPauseTour: $('btn-pause-tour'), pauseTourStatus: $('pause-tour-status'),
       pausePicker: $('pause-picker'), bigmap: $('bigmap'), mapPickName: $('map-pick-name'), mapGo: $('map-go'), poiList: $('poi-list'),
@@ -16717,7 +16757,30 @@ async function main() {
     resume();
   });
 
-  // Acceleratore: Shift tenuto premuto, solo su PC (sul telefono no, per non rischiare rallentamenti).
+  // Blocco 4.5 (decisione del committente): sul telefono l'acceleratore c'è se lo si attiva (casella nella schermata
+  // iniziale o interruttore nella pausa, ricordato), con un pulsante da tenere premuto; il consiglio resta il computer.
+  let touchBoost = null;                   // ogni fotogramma: mostra o nasconde il pulsante
+  if (ui.isTouch) {
+    let on = false;
+    try { on = localStorage.getItem('gravina_acceleratore') === 'true'; } catch { /* pazienza */ }
+    const sync = () => { ui.el.boostCheck.checked = on; ui.el.btnPauseBoost.setAttribute('aria-checked', String(on)); };
+    const set = (v) => { on = v; sync(); try { localStorage.setItem('gravina_acceleratore', String(on)); } catch { /* pazienza */ } };
+    ui.el.boostOpt.hidden = ui.el.pauseBoost.hidden = false;
+    sync();
+    ui.el.boostCheck.addEventListener('change', () => set(ui.el.boostCheck.checked));
+    ui.el.btnPauseBoost.addEventListener('click', () => set(!on));
+    const B = ui.el.btnBoost, press = (v) => { driver.boosting = v; B.classList.toggle('is-on', v); };
+    B.addEventListener('pointerdown', (ev) => { ev.preventDefault(); B.setPointerCapture?.(ev.pointerId); press(true); });
+    for (const t of ['pointerup', 'pointercancel', 'lostpointercapture']) B.addEventListener(t, () => press(false));
+    B.addEventListener('contextmenu', (ev) => ev.preventDefault());
+    addEventListener('blur', () => press(false));
+    /** Ogni fotogramma: il pulsante c'è solo in guida col mezzo (non a piedi, in mongolfiera, nel giro guidato). */
+    touchBoost = () => {
+      const show = on && phase === 'drive' && mode !== 'balloon' && !driver.onFoot && !driver.sitting && !driver.tour?.active;
+      if (B.hidden === show) { B.hidden = !show; if (!show) press(false); }
+    };
+  }
+  // Acceleratore: Shift tenuto premuto, su PC.
   if (!ui.isTouch) {
     addEventListener('keydown', (ev) => { if (ev.key === 'Shift') driver.boosting = true; });
     addEventListener('keyup', (ev) => { if (ev.key === 'Shift') driver.boosting = false; });
@@ -16818,6 +16881,7 @@ async function main() {
     if (phase === 'menu') return;
     minimap.draw(S);
     ui.tickDecision(driver);
+    touchBoost?.();
     if (ui.el.btnFollow.hidden === rig.free) ui.el.btnFollow.hidden = !rig.free;
     ui.tickCard(dt);
     if (mode === 'balloon' && (plateTimer -= dt) <= 0) { plateTimer = 0.5; showPlate(); }
