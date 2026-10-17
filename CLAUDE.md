@@ -119,15 +119,19 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
   3. Ferrari Monza SP2 (barchetta biposto aperta senza parabrezza, 4,66 × 1,99 × 1,15 m, Virtual Wind Shield, twin buttresses, fascia continua LED a tutta larghezza e 4 scarichi);
   4. Trattore John Deere serie 8R coi contropesi anteriori (6,65 × 2,55 × 3,45 m, castello zavorre in ghisa a sbalzo, ruote posteriori giganti da 2,16 m, cabina CommandView IV e fumo alto).
   La mongolfiera (quinto mezzo volante introdotto nel blocco M3) resta invariata.
-- **Cinema, teatri e luoghi della cultura (blocco N7)**:
+- **Cinema, teatri e luoghi della cultura (blocchi N7 e 4.7)**:
   Modellazione delle facciate e dei portali dei luoghi storici della cultura in `Details.luoghiCultura(tops)` (0 draw call aggiuntive, geometrie nello strato `dettagli` dei riquadri vicini):
-  1. *Cinema Teatro Mastrogiacomo* (Piazza Arcangelo Scacchi 16): portale in tufo, trabeazione, insegna a sbalzo con fascia oro e bacheche locandine a giorno;
+  1. *Cinema Teatro Mastrogiacomo* (Piazza Arcangelo Scacchi 16): facciata razionalista anni '30-'40 con bow-window a sbalzo, finestra a nastro orizzontale a losanghe, cornice a "L" di feritoie traforate, tondi in bassorilievo, atrio d'ingresso cinema e bacheche locandine a giorno;
   2. *Cinema Teatro Centrone* (Via Alcide De Gasperi 14): facciata monumentale tardo-liberty con loggia a colonne doriche, balconata, grande rosone radiale, avancorpi laterali e insegna dorata;
-  3. *Teatro Vida* (Via Giardini 72): portale d'ingresso moderno con vetrata, insegna stilizzata rossa, bacheca locandina illuminata a giorno e lanterna a muro;
+  3. *Teatro Vida* (Corso Aldo Moro, edificio 494 / Palazzo Gramegna-Spada): portale d'ingresso moderno con vetrata, insegna stilizzata rossa, bacheca locandina illuminata a giorno e lanterna a muro;
   4. *Fondazione Museo Pomarici Santomasi* (Via Museo 20): portale ad arco a tutto sesto in bugnato con stemma nobiliare in chiave di volta e balconata con ringhiera in ferro;
   5. *Gravina Sotterranea* (Rione Piaggio / Via Meucci): portale d'accesso all'ipogeo ad arco con cancello in ferro e lanterna antica a braccio;
-  6. *Biblioteca Capitolare Finia* (Piazza Benedetto XIII): portale monumentale in pietra a colonne binate doriche, timpano triangolare spezzato e targa dedicatoria.
+  6. *Biblioteca Capitolare Finia* (Piazza Notar Domenico / Piazza Benedetto XIII): prospetto tardo-barocco con fastigio mistilineo a volute, campanile a vela centrale sommitale con campana in bronzo, grande orologio circolare con lancette, 3 finestre centinate con conchiglie barocche scolpite sotto i davanzali, portale con stemma prelatizio in rilievo e gradinata in pietra calcarea.
   Schede curate in `LANDMARKS` con fonti storiche e gruppo dedicato `Cinema, teatri e cultura` in `POI_GROUPS` nella pausa.
+- **Correzioni dei luoghi e percorsi pedonali (blocco 4.7)**:
+  - *Scuola primaria Santomasi*: ricollocata al civico 6 di Corso Aldo Moro (edificio r6148683@1);
+  - *Larghetto San Francesco*: percorso pedonale (OSM way 600751157) da Via San Francesco alla facciata della chiesa di San Francesco con goccia pedonale d'inversione nello slargo;
+  - *Santa Cecilia*: rimossa la finta chiesa in Via Santa Cecilia (l'edificio OSM w411148976 è una normale casa residenziale).
 - **Cartolina e giro guidato dei monumenti (blocco N8)**:
   Cartolina ad alta risoluzione con cornice color tufo/oro e crediti (tasto C e pulsante `#btn-postcard`); giro guidato di 14 tappe con banner HUD dedicato e navigazione automatica agli incroci; schede descrittive scrollabili con classe `.card--bench` per non occludere la vista nelle soste in panchina; convergenza istantanea della camera post-teletrasporto.
 - **Golden hour (blocco 4.1)**:

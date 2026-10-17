@@ -144,7 +144,7 @@ PEDONALI_NO = {'Corso Vittorio Emanuele'}     # resta carrabile
 # Blocco N2 (piano approvato dal committente il 05/10/2026): nel Fondovito le vie che nella realtà non si fanno
 # in auto per i dislivelli sono pedonali anche dove OSM segna residential. Su Street View l'auto di Google non è
 # passata sulla Calata Grotte San Michele (solo foto a 360° di utenti); Via Civita resta carrabile.
-PEDONALI_FONDOVITO = {76151641, 385174951, 1384781495}    # Calata Grotte San Michele, tutta; blocco N5c: Via Giacomo Leopardi fino al cancello di Hortus
+PEDONALI_FONDOVITO = {76151641, 385174951, 1384781495, 600751157}    # Calata Grotte San Michele, tutta; blocco N5c: Via Giacomo Leopardi fino al cancello di Hortus; blocco 4.7: Larghetto San Francesco (w600751157)
 # Il ponticello in fondo alla terrazza di San Michele delle Grotte (richiesta del committente, 05/10/2026): una
 # passerella di pietra col parapetto che scavalca la testa del canalone e porta al promontorio delle mura (OSM
 # w1512581512). Non è in OSM: punti scelti sul satellite e sulla foto da drone (solo come riferimento) tra la fine
@@ -162,6 +162,7 @@ GOCCE_PIEDI = [
     (-550.5, 1294.2),             # blocco N5: oltre il guado di Capotenda, sul greto dell'altra sponda (GUADO)
     (-4.5, 107.6),                # blocco N2b: il footway OSM w1195336380 («Calata S. Lucia») finisce davanti alla chiesa di Santa Lucia
     (1590, -572),                 # blocco N4: il giardino del Casino di Meninni finisce nella radura dietro il Casino (GIARDINO_MENINNI)
+    (200.3, 242.2),               # blocco 4.7: Larghetto San Francesco (OSM w600751157), goccia davanti alla facciata della chiesa
 ]
 # Raccordi a piedi attraverso un'area pedonale reale, tra due vertici del suo contorno (blocco N2, approvato il
 # 05/10/2026 come le aree pedonali della Villa): nome, punti, superficie (SUPERFICI).
@@ -932,7 +933,9 @@ WALK_NOMI = {578892844: 'Sentiero degli scavi', 682777030: 'Sentiero degli scavi
              # blocco N5: in OSM non hanno nome
              682777028: 'Sentiero di Capotenda', 682777027: 'Sentiero di Capotenda', 682777029: 'Sentiero di Capotenda',
              682777031: 'Sentiero di Capotenda', 578916724: 'Sentiero di Capotenda', 578916725: 'Sentiero di Capotenda',
-             578916726: 'Sentiero di Capotenda', 578916727: 'Sentiero di Capotenda', 578916728: 'Sentiero di Capotenda'}
+             578916726: 'Sentiero di Capotenda', 578916727: 'Sentiero di Capotenda', 578916728: 'Sentiero di Capotenda',
+             # blocco 4.7
+             600751157: 'Larghetto San Francesco'}
 
 
 def luoghi_m2(elements):
@@ -1356,8 +1359,14 @@ def build_buildings(raw):
             p = p.simplify(0.3 if inside(p.centroid.coords[0], Z0) else 0.5, preserve_topology=True)
             if p.is_empty or p.area < 8:
                 continue
-            out.append({'poly': p, 'kind': building_kind(b.get('class')), 'cls': b.get('class'),
-                        'name': (b.get('names') or {}).get('primary'), 'height': reliable_height(b),
+            b_name = (b.get('names') or {}).get('primary')
+            b_kind = building_kind(b.get('class'))
+            # Blocco 4.7: in Via Santa Cecilia non c'è alcuna chiesa, l'edificio è una casa normale
+            if osm == 411148976 or b_name == 'Chiesa di Santa Cecilia':
+                b_name = None
+                b_kind = KIND['house']
+            out.append({'poly': p, 'kind': b_kind, 'cls': b.get('class'),
+                        'name': b_name, 'height': reliable_height(b),
                         'level': b.get('level') or 0, 'osm': osm})
     print(f'  edifici: {len(out)}')
     return out
@@ -2043,7 +2052,7 @@ SCHOOLS = [
     ('Scuola primaria Tommaso Fiore', (837, 351), 2),           # Overture, Via Fratelli Cervi
     ('Circolo didattico Savio-Fiore', (545, 1052), 2),          # Overture, Via Fratelli Cervi
     ('Scuola primaria Michele Soranno', (1748, 266), 2),        # Overture, Via Michele Soranno
-    ('Scuola primaria Santomasi', (387, 596), 2),               # Overture, Corso Aldo Moro
+    ('Scuola primaria Santomasi', (345, 335), 2),               # blocco 4.7: Corso Aldo Moro 6
 ]
 CHURCHES = [
     ('Chiesa Gesù Buon Pastore', (1055, -176)),                 # OSM w328013129 (edificio senza nome)
@@ -2755,6 +2764,9 @@ def city_pois(elements):
         t = el.get('tags') or {}
         c = el.get('center') or ({'lat': el['lat'], 'lon': el['lon']} if 'lat' in el else None)
         if not t.get('name') or not c:
+            continue
+        # Blocco 4.7: in Via Santa Cecilia non c'è alcuna chiesa di Santa Cecilia
+        if el.get('id') == 411148976 or t.get('name') == 'Chiesa di Santa Cecilia':
             continue
         e, n = to_local(c['lon'], c['lat'])
         if not CITY_ZONE.contains(Point(e, n)):
