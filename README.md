@@ -290,7 +290,7 @@ sotto il terreno o sospese, dischi sfasati, decorative sovrapposte) con `node di
 | 2c | Vie libere dagli edifici e archi reali; quattro mezzi a scelta; partenza dal ponte; pausa con cambio mezzo, mappa e teletrasporto; camera che scavalca i tetti; dettagli dei monumenti; versione mobile | ✅ |
 | 3 | Architettura e fedeltà: Cattedrale e Purgatorio sulle fonti, chiese rupestri scavate, rioni a gradoni con scalinate e abitazioni rupestri, altezze per zona, schede di altre cinque chiese, vetrina sulle arcate | ✅ in revisione |
 | 3.4 | Gravina oltre il centro storico: città intera (C), strade per il Bosco e il P.I.P. (F), percorsi a piedi, quote reali del centro storico, camera attorno al mezzo e radio ambient (G), spazio sul telefono (I), centro storico (D), luoghi della città, scuole e chiese (E), il Bosco da vicino (L) e acceleratore su PC; Botromagno, strade, stadio e Fiera (M1); percorsi a piedi, zone pedonali, sottopassi, parchi, Monumento ai Caduti, Cola Cola e suoni del bosco (M2); auto realistiche nello stile e mongolfiera (M3); centro storico vero, Fondovito, ruderi e piani, facciate di chiese e scuole, Casino di Meninni e villette del Liceo Tarantino (N1–N4b); Capotenda a piedi fino al guado, la gola e la vigna di Botromagno (N5) | ⏳ |
-| 4 | Rifinitura: luci, prove su telefoni reali, restyling | ⏳ |
+| 4 | Rifinitura: luci (4.1), ponte, motori e guida (4.2–4.5), piani delle vie principali, sponda ovest del ponte e suoni del bosco con animali verificati (4.6), prove su telefoni reali, restyling | ⏳ |
 
 ## Crediti, licenze e marchi
 

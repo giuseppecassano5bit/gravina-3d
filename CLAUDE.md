@@ -75,6 +75,10 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
   la città; dal blocco N1 c'è anche il limitatore sulle quote degli incroci, `#limitNodes`).
 - **Musica**: solo brani originali generati dal codice (sezione 11b). Niente canzoni o campioni di
   terzi, anche se richiesti: sono protetti e pesano più dell'intero diorama.
+- **Suoni del bosco** (sezione 11c, blocco 4.6): generati dal codice, mai registrazioni; solo animali che le fonti danno
+  nel Bosco Difesa Grande (formulario Natura 2000 IT9120008 e AGESCI Gravina 1, fonti nel README). Niente ululato del lupo
+  (il committente: «spaventoso»); i serpenti non hanno un verso, solo un fruscio e, molto di rado, il soffio della vipera.
+  Prova: `node bosco.mjs` (file `.wav` da far ascoltare in `tools/test/shots`).
 - **Eccezioni approvate dal committente il 01/10/2026 (blocco M2)**: i percorsi a piedi dentro la
   Fiera di San Giorgio e fino alla Base Scout non sono in OSM (`PERCORSI` in `genera_dati.py`) e si
   disegnano solo perché chiudono un anello con vie reali; Villa Comunale e Piazza della Repubblica sono
