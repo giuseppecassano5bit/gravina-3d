@@ -2245,6 +2245,51 @@ def chiese_aree(buildings):
             b['poly'] = u.simplify(0.3, preserve_topology=True)
             print(f"  chiesa w{b['osm']} unita all'area del luogo di culto: {b['poly'].area:.0f} m²")
     return buildings
+
+
+def taglio_torri_4_8a(buildings):
+    """Blocco 4.8a · Separazione delle due torri isolate da 8 piani (Corso Aldo Moro 8 e Via Matteotti 18)
+    e della Scuola primaria Santomasi (Corso Aldo Moro 6) dai rispettivi isolati monolitici OSM/Overture.
+    Elimina la finta chiesa w411148157 unendola alla torre di Corso Aldo Moro."""
+    # 1. Corso Aldo Moro: isolato w/r6148683 (civici 6–14) + finta chiesa w411148157
+    b_rel = next((b for b in buildings if b['poly'].area > 4000 and 350 < b['poly'].centroid.x < 380), None)
+    b_ch = next((b for b in buildings if b.get('osm') == 411148157), None)
+    if b_rel and b_ch:
+        buildings = [b for b in buildings if b is not b_rel and b is not b_ch]
+        isolato = b_rel['poly'].union(b_ch['poly'])
+        # Taglio della torre (civico 8): ricalca i vertici fino al passaggio cortilizio
+        cut_torre = Polygon([
+            (300, 355),
+            (375.1, 355),
+            (375.1, 391.35),
+            (371.67, 392.82),
+            (352.91, 396.59),
+            (300, 396.59),
+        ])
+        box_scuola = box(300, 300, 420, 355)
+        p_scuola = isolato.intersection(box_scuola)
+        p_torre = isolato.intersection(cut_torre)
+        p_nord = isolato.difference(box_scuola).difference(cut_torre)
+        buildings.append({'poly': p_scuola, 'kind': KIND['public'], 'cls': 'school', 'name': 'Scuola primaria Santomasi', 'height': None, 'level': 0, 'osm': None})
+        buildings.append({'poly': p_torre, 'kind': KIND['apartments'], 'cls': 'apartments', 'name': None, 'height': None, 'level': 0, 'osm': None})
+        buildings.append({'poly': p_nord, 'kind': KIND['apartments'], 'cls': 'apartments', 'name': None, 'height': None, 'level': 0, 'osm': None})
+        print(f'  blocco 4.8a: isolato Corso Aldo Moro tagliato in 3 edifici (scuola {p_scuola.area:.0f} m², torre {p_torre.area:.0f} m², cortina nord {p_nord.area:.0f} m²)')
+
+    # 2. Via Matteotti: isolato r6148644 (civici 14–18)
+    p_mat_pt = Point(241.4, -7.2)
+    b_mat = next((b for b in buildings if b['poly'].contains(p_mat_pt)), None)
+    if b_mat:
+        buildings = [b for b in buildings if b is not b_mat]
+        box_torre_mat = box(200, -30, 252, 20)
+        p_torre_mat = b_mat['poly'].intersection(box_torre_mat)
+        p_est_mat = b_mat['poly'].difference(box_torre_mat)
+        buildings.append({'poly': p_torre_mat, 'kind': KIND['apartments'], 'cls': 'apartments', 'name': None, 'height': None, 'level': 0, 'osm': None})
+        buildings.append({'poly': p_est_mat, 'kind': KIND['apartments'], 'cls': 'apartments', 'name': None, 'height': None, 'level': 0, 'osm': None})
+        print(f'  blocco 4.8a: isolato Via Matteotti tagliato in 2 edifici (torre {p_torre_mat.area:.0f} m², palazzina est {p_est_mat.area:.0f} m²)')
+
+    return buildings
+
+
 CASE_ROSA = 'Case rosa'
 # Tra Via Guardialto (SP201) e Via Guardialto Piccolo, dove si separano (indicazione del committente)
 CASE_ROSA_ZONE = [(1142, -177), (1301, -295), (1470, -500), (1360, -250), (1323, -193), (1146, -155)]
@@ -2630,6 +2675,16 @@ LIVELLI = [
         (None, 335.1, -407.7, 3),          # Via De Gasperi 87: case in tufo a tre livelli
         (None, 346.9, -418.9, 2),          # di fronte: casa in tufo a due livelli
     ]),
+    ('Street View e satellite, Corso Aldo Moro 1–14, Via Matteotti 14–18, Piazza Scacchi (ott 2025; blocco 4.8a)', [
+        (None, 355.0, 375.0, 8),          # Corso Aldo Moro 8: torre residenziale di 8 livelli (taglio dell'isolato)
+        (None, 345.0, 335.0, 2),          # Corso Aldo Moro 6: Scuola primaria Santomasi (2 livelli scolastici)
+        (None, 380.0, 410.0, 4),          # Corso Aldo Moro 10–14: cortina residenziale a 4 livelli
+        (None, 375.0, 290.0, 4),          # Corso Aldo Moro 2–4 e Via Giardini: palazzina a 4 livelli
+        (None, 391.6, 453.5, 3),          # Corso Aldo Moro (Palazzo Gramegna-Spada / Teatro Vida): 3 livelli
+        (None, 241.4, -7.2, 8),           # Via Matteotti 18: torre residenziale di 8 livelli (taglio dell'isolato)
+        (None, 265.0, -7.0, 3),           # Via Matteotti 14–16: palazzina residenziale a 3 livelli
+        (None, 414.2, 327.0, 3),          # Corso Aldo Moro 1–3 / Piazza Scacchi est: palazzina a 3 livelli
+    ]),
 ]
 
 
@@ -2655,8 +2710,8 @@ def livelli(old, city):
                 b['height'] = round(piani * (VILLETTA_PIANO if villa else FLOOR_H) + (VILLETTA_PARAPETTO if villa else 0.6), 1)
                 done['città'] += 1
                 continue
-            if b['kind'] not in (KIND['house'], KIND['apartments']):       # blocco 4.6: anche i condomini
-                sys.exit(f'LIVELLI: in ({e}, {n}) l\'edificio non è una casa (tipo {b["kind"]}) [{fonte}]')
+            if b['kind'] not in (KIND['house'], KIND['apartments'], KIND['public']):       # blocco 4.6/4.8a: anche condomini e scuole
+                sys.exit(f'LIVELLI: in ({e}, {n}) l\'edificio non è una casa o scuola (tipo {b["kind"]}) [{fonte}]')
             # piani negativi = «almeno»: la cima non si vede in foto; l'altezza si codifica come 100 m + il minimo
             # e il diorama prende il più alto tra il minimo e la regola (Buildings.height)
             b['height'] = round(abs(piani) * FLOOR_H + 0.6, 1) + (100 if piani < 0 else 0)
@@ -3262,6 +3317,7 @@ def main():
     # Blocco L: edifici reali attorno all'area Quercus e al vivaio (al posto della capanna generica)
     bosco_osm = overpass_bosco()
     buildings += bosco_buildings(bosco_osm)
+    buildings = taglio_torri_4_8a(buildings)    # Blocco 4.8a: torri isolate e scuola di Corso Aldo Moro e Via Matteotti
     print('3. Rete stradale')
     edges, deco, pos = build_network(data, [b['poly'] for b in buildings], bosco_osm)
     buildings, arches = free_roads(edges + deco, pos, buildings)
