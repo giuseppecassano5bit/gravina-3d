@@ -10,7 +10,7 @@ import { open, report, SHOTS } from './common.mjs';
 
 const { browser, page, logs } = await open({ w: 800, h: 600 });
 let ok = true;
-for (const [mode, seconds] of [['passeggiata', 90], ['versi', 160]]) {
+for (const [mode, seconds] of [['passeggiata', 90], ['versi', 66]]) {
   const r = await page.evaluate(async ([mode, seconds]) => {
     const { left, right, sr, log } = await window.gravina.ForestSound.render(seconds, mode);
     let peak = 0, sum = 0, bad = 0;
@@ -28,7 +28,7 @@ for (const [mode, seconds] of [['passeggiata', 90], ['versi', 160]]) {
   h.writeUInt32LE(16, 16); h.writeUInt16LE(1, 20); h.writeUInt16LE(2, 22); h.writeUInt32LE(r.sr, 24);
   h.writeUInt32LE(r.sr * 4, 28); h.writeUInt16LE(4, 32); h.writeUInt16LE(16, 34); h.write('data', 36); h.writeUInt32LE(pcm.length, 40);
   fs.writeFileSync(`${SHOTS}/bosco-${mode}.wav`, Buffer.concat([h, pcm]));
-  const good = r.bad === 0 && r.peak < 0.98 && r.rms > 0.001;
+  const good = r.bad === 0 && r.peak < 0.98 && r.rms > 0.0005;
   ok &&= good;
   console.log(`${good ? '✓' : '✗'} ${mode}: picco ${r.peak.toFixed(2)}, rms ${(20 * Math.log10(r.rms)).toFixed(1)} dB${r.bad ? `, ${r.bad} valori anomali` : ''} · shots/bosco-${mode}.wav`);
   console.log('   ' + r.log.map(([t, k]) => `${t}s ${k}`).join(' · '));

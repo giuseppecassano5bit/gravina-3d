@@ -15656,23 +15656,15 @@ const Radio = (() => {
  * 11c. SUONI DEL BOSCO (blocco L, rifatti nei blocchi M2 e 4.6): generati con
  *      Web Audio, nessun file né registrazione. Solo quando si è davvero dentro
  *      il bosco (forestAmount), con 3 s di dissolvenza all'entrata e all'uscita.
- *      Blocco 4.6 (richiesta del committente: «spaventosi e non tipici»): niente
- *      ululato del lupo, vento appena accennato; solo animali che le fonti danno
- *      nel Bosco Difesa Grande (formulario Natura 2000 IT9120008 della Regione
- *      Puglia, agg. 12/2023; «Il nostro bosco» del gruppo AGESCI Gravina 1;
- *      fonti nel README):
- *       - uccelli: merlo e capinera (frasi intonate sulla scala della radio),
- *         tottavilla, cuculo, colombaccio, upupa, picchio rosso maggiore (il
- *         tamburo) e picchio verde (la «risata»), nibbio reale dall'alto, i
- *         gruccioni che passano; al tramonto succiacapre, assiolo, allocco e
- *         gufo comune;
- *       - cinghiale (grugniti lontani), rospo smeraldino (il trillo), geco
- *         (tarantola dei muri, i «tic»); i serpenti (biacco, cervone, vipera
- *         aspide) non hanno un verso: un fruscio tra le foglie ogni tanto e,
- *         molto di rado, il soffio della vipera;
- *       - grilli al tramonto (insetti: non nelle schede, comuni ovunque).
- *      Passi morbidi solo a piedi. Interruttore «Suoni del bosco» nella pausa
- *      (ricordato); se la radio è accesa, nel bosco scende al 35%.
+ *      Blocco 4.6, seconda versione (il committente, che il bosco lo conosce: i
+ *      canti di prima «non sono tipici», «meno cupa»): il coro dei grilli che non
+ *      smette mai, le cicale a frasi, ogni tanto un gufo comune o una civetta, di
+ *      rado i grugniti lontani di un cinghiale; niente vento, niente lupo. Fonti
+ *      nel README (formulario Natura 2000 IT9120008 per il gufo comune, il Parco
+ *      dell'Alta Murgia per la civetta, il Corpo forestale per il cinghiale).
+ *      Passi morbidi solo a piedi, più fitti e decisi di corsa. Interruttore
+ *      «Suoni del bosco» nella pausa (ricordato); se la radio è accesa, nel bosco
+ *      scende al 35%.
  *      Blocco N4 (sì del committente): vicino al Casino di Meninni (Meninni.amount),
  *      con lo stesso interruttore, il bosco tace e restano il vento che sale e
  *      scende, con un ululato sottile (più basso dal blocco 4.6), e i corvi.
@@ -15682,8 +15674,7 @@ const ForestSound = (() => {
   let ctx = null, master, wind, windLp, howl, howlBp, near, far, noise, white, on = true, unlocked = false, level = 0, stride = 0;
   const due = {};
   try { on = localStorage.getItem('gravina3d.bosco') !== '0'; } catch { /* pazienza */ }
-  const R = Math.random, pick = (a) => a[Math.floor(R() * a.length)];
-  const hz = (m) => 440 * 2 ** ((m - 69) / 12);
+  const R = Math.random;
 
   /** Il contesto (dal vivo un AudioContext; per le prove un OfflineAudioContext) e i suoi nodi fissi. */
   function setup(c = new AudioContext()) {
@@ -15714,11 +15705,6 @@ const ForestSound = (() => {
     far.connect(master); far.connect(dly); dly.connect(fb).connect(dly); dly.connect(wet).connect(master);
   }
 
-  /** Scala pentatonica del brano della radio (anche spenta: l'ultimo brano scelto). */
-  const scale = () => {
-    const { root, minor } = Radio.scale, P = minor ? [0, 3, 5, 7, 10] : [0, 2, 4, 7, 9];
-    return (oct, deg) => root + oct * 12 + P[((deg % 5) + 5) % 5] + Math.floor(deg / 5) * 12;
-  };
   /** Distanza a caso: [uscita, volume relativo, panorama]. */
   const where = (farFrom = 0.55) => { const dist = R(); return [dist > farFrom ? far : near, 1 - dist * 0.6, R() * 1.6 - 0.8]; };
 
@@ -15737,146 +15723,59 @@ const ForestSound = (() => {
     for (const x of [o, o2, v]) { x.start(t); x.stop(t + len + 0.05); }
   }
 
-  /** Un trillo: una nota tenuta interrotta `rate` volte al secondo (gruccioni, succiacapre, rospo smeraldino). */
-  function trill(t, f0, f1, len, rate, amp, pan, out, { type = 'sine', lfo = 'square', attack = 0.02 } = {}) {
-    const o = ctx.createOscillator(), l = ctx.createOscillator(), lg = ctx.createGain(), am = ctx.createGain(), g = ctx.createGain(), p = ctx.createStereoPanner();
-    o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.linearRampToValueAtTime(f1, t + len);
-    l.type = lfo; l.frequency.value = rate; lg.gain.value = 0.5; am.gain.value = 0.5; l.connect(lg).connect(am.gain);
-    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(amp, t + attack);
-    g.gain.setValueAtTime(amp, t + Math.max(attack, len - 0.08)); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
-    p.pan.value = pan; o.connect(am).connect(g).connect(p).connect(out);
-    for (const x of [o, l]) { x.start(t); x.stop(t + len + 0.05); }
-  }
-
-  /** Un colpo di rumore bianco filtrato (fruscii, soffio, «tic»). */
-  function burst(t, len, f, q, amp, pan, out, attack = 0.004) {
-    const src = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain(), p = ctx.createStereoPanner();
-    src.buffer = white; bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = q;
-    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(amp, t + attack); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
-    p.pan.value = pan; src.connect(bp).connect(g).connect(p).connect(out); src.start(t, R() * 1.5, len + 0.02);
-  }
-
-  // ── Uccelli canori (formulario Natura 2000 e AGESCI Gravina 1) ──────────
-  /** Merlo: frase flautata, note lunghe legate, sulla scala del brano. */
-  function merlo(t) {
-    const [out, k, pan] = where(), S = scale(), amp = 0.045 * k;
-    let tt = t, deg = Math.floor(R() * 5);
-    for (let q = 4 + Math.floor(R() * 4); q > 0; q--) {
-      const f = hz(S(2, deg)), l = 0.16 + R() * 0.22, nd = deg + pick([-2, -1, 1, 1, 2]);
-      tone(tt, f, hz(S(2, nd)) * 0.98, l, amp, pan, out, { vib: 0.008, harm: 0.2 });
-      tt += l + 0.04 + R() * 0.06; deg = nd;
+  // ── Blocco 4.6, seconda versione (il committente, che il bosco lo conosce: «solo grilli e cicale, ogni tanto qualche
+  //    gufo o civetta e qualche cinghiale»; i canti di prima «non sono tipici») ─────────────────────────────────────
+  /** Un grillo: treni di tre-quattro impulsi acuti e brevi, per qualche secondo, a una distanza a caso. */
+  function grillo(t0, dur = 6 + R() * 8) {
+    const [out, k, pan] = where(0.5), f = 4200 + R() * 700, pulses = 3 + Math.floor(R() * 2), gap = 0.5 + R() * 0.35, amp = 0.013 * k;
+    for (let tt = t0; tt < t0 + dur; tt += gap + R() * 0.06) {
+      for (let q = 0; q < pulses; q++) {
+        const s0 = tt + q * 0.042, o = ctx.createOscillator(), g = ctx.createGain(), p = ctx.createStereoPanner();
+        o.frequency.value = f; g.gain.setValueAtTime(0.0001, s0); g.gain.exponentialRampToValueAtTime(amp, s0 + 0.005); g.gain.exponentialRampToValueAtTime(0.0001, s0 + 0.03);
+        p.pan.value = pan; o.connect(g).connect(p).connect(out); o.start(s0); o.stop(s0 + 0.04);
+      }
     }
   }
-  /** Capinera: un borbottio sommesso, poi la frase squillante. */
-  function capinera(t) {
-    const [out, k, pan] = where(), S = scale(), amp = 0.045 * k;
-    let tt = t;
-    for (let q = 0; q < 6; q++) { tone(tt, hz(S(3, 2 + (q % 3))), hz(S(3, 1 + (q % 2))), 0.05, amp * 0.45, pan, out); tt += 0.07; }
-    for (const deg of [4, 6, 5, 7]) { tone(tt, hz(S(2, deg)), hz(S(2, deg)) * 1.01, 0.18, amp, pan, out, { harm: 0.18 }); tt += 0.21; }
-  }
-  /** Tottavilla: una serie di «lu-lu-lu» fischiati che scendono e accelerano. */
-  function tottavilla(t) {
-    const [out, k, pan] = where(0.4), amp = 0.032 * k;
-    let f = 2700 + R() * 400, tt = t, gap = 0.17;
-    for (let q = 10 + Math.floor(R() * 6); q > 0; q--) { tone(tt, f * 1.07, f * 0.9, 0.09, amp, pan, out, { harm: 0.04, vib: 0.004 }); tt += gap; gap = Math.max(0.085, gap * 0.93); f *= 0.985; }
-  }
-  /** Il canto di fondo: merlo, capinera e tottavilla. */
-  const canto = (t) => (R() < 0.42 ? merlo : R() < 0.55 ? capinera : tottavilla)(t);
-
-  /** Cuculo, lontano: «cu-cù», la seconda nota una terza sotto. */
-  function cuculo(t) {
-    const pan = R() * 1.4 - 0.7, f = 640 + R() * 40;
-    for (let q = 0; q < 3 + Math.floor(R() * 3); q++) {
-      tone(t + q * 0.95, f, f * 0.98, 0.2, 0.03, pan, far, { harm: 0.04, vib: 0.004 });
-      tone(t + q * 0.95 + 0.32, f * 0.84, f * 0.81, 0.32, 0.03, pan, far, { harm: 0.04, vib: 0.004 });
+  /** Il coro dei grilli: tre o quattro grilli insieme, ognuno col suo tono e il suo ritmo (sempre, al tramonto). */
+  function grilli(t) { for (let q = 0, n = 3 + Math.floor(R() * 2); q < n; q++) grillo(t + R() * 2, 8 + R() * 6); }
+  /**
+   * Cicale: un frinire brillante e ritmato, rumore tra 4 e 7 kHz battuto una trentina di volte al secondo, che cresce,
+   * pulsa a frasi e si spegne; una o due cicale da lati diversi.
+   */
+  function cicale(t) {
+    for (let v = 0, n = 1 + (R() < 0.5 ? 1 : 0); v < n; v++) {
+      const t0 = t + v * (1 + R() * 2), dur = 7 + R() * 7, pan = (R() * 1.2 - 0.6) || 0.3, f = 4800 + R() * 1200;
+      const src = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), am = ctx.createGain(), lfo = ctx.createOscillator(), lg = ctx.createGain();
+      const phr = ctx.createGain(), g = ctx.createGain(), p = ctx.createStereoPanner();
+      src.buffer = white; src.loop = true; bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = 3;
+      const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 3400; hp.Q.value = 0.8;   // niente bassi: solo il frinire
+      lfo.type = 'square'; lfo.frequency.value = 28 + R() * 10; lg.gain.value = 0.5; am.gain.value = 0.5; lfo.connect(lg).connect(am.gain);
+      // le frasi: «zi-zi-zi» che salgono e calano piano, quattro o cinque al secondo dentro un respiro di un paio di secondi
+      phr.gain.setValueAtTime(0.25, t0);
+      for (let tt = t0; tt < t0 + dur; tt += 0.22 + R() * 0.05) { phr.gain.setTargetAtTime(1, tt, 0.02); phr.gain.setTargetAtTime(0.35, tt + 0.12, 0.03); }
+      const amp = 0.03 * (0.7 + R() * 0.3);
+      g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(amp, t0 + 1.5);
+      g.gain.setValueAtTime(amp, t0 + dur - 1.8); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      p.pan.value = pan;
+      src.connect(bp).connect(am).connect(hp).connect(phr).connect(g).connect(p).connect(near);
+      src.start(t0, R() * 1.5); src.stop(t0 + dur + 0.05); lfo.start(t0); lfo.stop(t0 + dur + 0.05);
     }
   }
-  /** Colombaccio: «ruu-RUU-ru, ru-ru», tubato basso e morbido, due o tre volte. */
-  function colombaccio(t) {
-    const pan = R() * 1.4 - 0.7, f = 330 + R() * 40;
-    for (let r = 0, n = 2 + Math.floor(R() * 2); r < n; r++) {
-      const t0 = t + r * 2.6;
-      [[0, 0.32, 0.8], [0.42, 0.55, 1], [1.05, 0.26, 0.8], [1.5, 0.24, 0.75], [1.82, 0.24, 0.75]].forEach(([d, l, a]) =>
-        tone(t0 + d, f * 1.04, f * 0.95, l, 0.03 * a, pan, far, { harm: 0.12, vib: 0.01 }));
-    }
-  }
-  /** Upupa: «pu-pu-pu», tre note cave e basse, ripetute. */
-  function upupa(t) {
-    const pan = R() * 1.4 - 0.7, f = 470 + R() * 40;
-    for (let r = 0, n = 3 + Math.floor(R() * 3); r < n; r++) for (let q = 0; q < 3; q++) tone(t + r * 1.15 + q * 0.14, f * 1.02, f * 0.97, 0.09, 0.03, pan, far, { harm: 0.22, vib: 0.004 });
-  }
-  /** Picchio rosso maggiore: il tamburo sul legno, colpi secchi e veloci che rallentano; ogni tanto il «kik». */
-  function tamburo(t) {
-    const pan = R() * 1.6 - 0.8, f = 700 + R() * 300;
-    for (let q = 0; q < 16; q++) {
-      const tt = t + q * (0.045 + q * 0.0012), o = ctx.createOscillator(), g = ctx.createGain(), p = ctx.createStereoPanner();
-      o.type = 'triangle'; o.frequency.setValueAtTime(f, tt); o.frequency.exponentialRampToValueAtTime(f * 0.6, tt + 0.03);
-      g.gain.setValueAtTime(0.0001, tt); g.gain.exponentialRampToValueAtTime(0.05, tt + 0.002); g.gain.exponentialRampToValueAtTime(0.0001, tt + 0.035);
-      p.pan.value = pan; o.connect(g).connect(p).connect(far); o.start(tt); o.stop(tt + 0.04);
-    }
-    if (R() < 0.5) for (let q = 0; q < 2; q++) tone(t + 1.6 + q * 0.7, 1750, 1500, 0.05, 0.03, pan, far, { harm: 0.1 });
-  }
-  /** Picchio verde: la «risata», una dozzina di «kliü» che calano piano. */
-  function picchioVerde(t) {
-    const [out, k, pan] = where(0.45), amp = 0.03 * k;
-    let f = 1900 + R() * 150, tt = t, gap = 0.13;
-    for (let q = 12 + Math.floor(R() * 5); q > 0; q--) { tone(tt, f * 0.94, f * 1.04, 0.08, amp, pan, out, { harm: 0.1 }); tt += gap; gap = Math.max(0.105, gap * 0.985); f *= 0.99; }
-  }
-  const picchio = (t) => (R() < 0.6 ? tamburo : picchioVerde)(t);
-  /** Nibbio reale, dall'alto e lontano: un fischio lamentoso che scende, poi un tremolo. */
-  function nibbio(t) {
-    const pan = R() * 1.2 - 0.6;
-    tone(t, 2500, 1900, 0.6, 0.022, pan, far, { vib: 0.02, harm: 0.05 });
-    for (let q = 0; q < 4; q++) tone(t + 0.75 + q * 0.14, q % 2 ? 2000 : 2250, q % 2 ? 2150 : 2050, 0.12, 0.02, pan, far, { vib: 0.03, harm: 0.05 });
-  }
-  /** Gruccioni che passano: «prruip» liquidi da due-quattro uccelli, il gruppo che va da un lato all'altro. */
-  function gruccioni(t) {
-    const birds = 2 + Math.floor(R() * 3), dir = R() < 0.5 ? -1 : 1;
-    for (let q = 0, n = 8 + Math.floor(R() * 6); q < n; q++) {
-      const tt = t + q * (0.28 + R() * 0.2), f = 2650 + (q % birds) * 120 + R() * 80, pan = dir * (-0.8 + 1.6 * q / n);
-      trill(tt, f, f * 1.08, 0.13, 55, 0.022, pan, far, { lfo: 'sine', attack: 0.01 });
-    }
-  }
-
-  // ── Al tramonto ────────────────────────────────────────────────────────
-  /** Allocco: «huu…» e, dopo una pausa, «hu, hu-hu-huuuu» col tremolo. */
-  function allocco(t) {
-    const f = 560 + R() * 40, pan = R() * 1.2 - 0.6;
-    tone(t, f, f * 0.97, 0.85, 0.035, pan, far, { vib: 0.015, harm: 0.03 });
-    tone(t + 2.6, f * 1.02, f, 0.14, 0.03, pan, far, { harm: 0.03 });
-    tone(t + 2.95, f * 1.02, f * 0.95, 1.1, 0.032, pan, far, { vib: 0.045, harm: 0.03 });
-  }
-  /** Assiolo: un «chiù» fischiato, puro, ripetuto ogni due secondi e mezzo. */
-  function assiolo(t) {
-    const [out, k, pan] = where(0.5), f = 1200 + R() * 120;
-    for (let q = 0, n = 5 + Math.floor(R() * 4); q < n; q++) tone(t + q * (2.4 + R() * 0.3), f * 1.03, f * 0.98, 0.2, 0.035 * k, pan, out, { harm: 0.02, vib: 0.003 });
-  }
-  /** Gufo comune: «huu» bassi e radi. */
+  /** Gufo comune (formulario Natura 2000): «huu» bassi, morbidi e radi, lontani. */
   function gufo(t) {
     const pan = R() * 1.2 - 0.6, f = 370 + R() * 30;
     for (let q = 0, n = 4 + Math.floor(R() * 3); q < n; q++) tone(t + q * 2.5, f, f * 0.96, 0.32, 0.03, pan, far, { harm: 0.05, vib: 0.006 });
   }
-  const notturni = (t) => (R() < 0.4 ? assiolo : R() < 0.6 ? allocco : gufo)(t);
-  /** Succiacapre: il «ronzio» meccanico, un trillo fittissimo che ogni tanto cambia tono. */
-  function succiacapre(t) {
-    const pan = R() * 1.2 - 0.6, len = 6 + R() * 5, f = 1300 + R() * 100;
-    let tt = t;
-    while (tt < t + len) { const l = 1.2 + R() * 2.2, ff = R() < 0.5 ? f : f * 0.86; trill(tt, ff, ff, Math.min(l, t + len - tt) + 0.05, 38, 0.016, pan, far, { lfo: 'triangle', attack: 0.08 }); tt += l; }
+  /** Civetta: il «chiùu» lamentoso che sale e ricade, due o tre volte, a qualche secondo l'uno dall'altro. */
+  function civetta(t) {
+    const [out, k, pan] = where(0.45), f = 1050 + R() * 120;
+    for (let q = 0, n = 2 + Math.floor(R() * 2); q < n; q++) {
+      const tt = t + q * (3 + R() * 1.5);
+      tone(tt, f * 0.82, f * 1.08, 0.18, 0.034 * k, pan, out, { harm: 0.06, vib: 0.006 });
+      tone(tt + 0.18, f * 1.08, f * 0.9, 0.32, 0.03 * k, pan, out, { harm: 0.06, vib: 0.01 });
+    }
   }
-  /** Rospo smeraldino: un trillo lungo e musicale, lontano. */
-  function rospo(t) { const f = 1180 + R() * 120; trill(t, f, f * 0.99, 4 + R() * 4, 26, 0.016, R() * 1.4 - 0.7, far, { lfo: 'sine', attack: 0.2 }); }
-  /** Geco (tarantola dei muri): quattro-otto «tic» secchi. */
-  function geco(t) { const pan = R() * 1.4 - 0.7; for (let q = 0, n = 4 + Math.floor(R() * 5); q < n; q++) burst(t + q * (0.1 + R() * 0.03), 0.018, 2900, 7, 0.06, pan, near, 0.002); }
-
-  // ── Rettili: niente versi, solo il fruscio tra le foglie ────────────────
-  /** Un serpente o un ramarro che scivola tra le foglie secche: crepitii radi e sottili per un secondo. */
-  function fruscio(t) {
-    let tt = t, pan = R() * 1.4 - 0.7;
-    const dir = (R() - 0.5) * 0.04;
-    for (let q = 0, n = 8 + Math.floor(R() * 10); q < n; q++) { burst(tt, 0.015 + R() * 0.03, 3200 + R() * 2200, 1.4, 0.022 + R() * 0.02, pan, near, 0.003); tt += 0.03 + R() * 0.08; pan = Math.max(-1, Math.min(1, pan + dir)); }
-  }
-  /** Vipera aspide, molto di rado: un soffio breve e sommesso. */
-  function vipera(t) { burst(t, 0.9, 5200, 0.9, 0.012, R() * 1.2 - 0.6, near, 0.08); }
+  const notturni = (t) => (R() < 0.5 ? gufo : civetta)(t);
 
   /** Cinghiale: tre o quattro grugniti bassi e morbidi, lontani. */
   function cinghiale(t) {
@@ -15887,17 +15786,6 @@ const ForestSound = (() => {
       lp.type = 'lowpass'; lp.frequency.value = 380; lp.Q.value = 2;
       g.gain.setValueAtTime(0.0001, tt); g.gain.exponentialRampToValueAtTime(0.07, tt + 0.03); g.gain.exponentialRampToValueAtTime(0.0001, tt + 0.22);
       p.pan.value = pan; o.connect(lp).connect(g).connect(p).connect(far); o.start(tt); o.stop(tt + 0.25);
-    }
-  }
-  /** Grilli al tramonto: treni di tre impulsi acuti e brevi, per una decina di secondi. */
-  function grilli(t0) {
-    const pan = R() * 1.6 - 0.8, f = 4100 + R() * 600, dur = 6 + R() * 8;
-    for (let tt = t0; tt < t0 + dur; tt += 0.7 + R() * 0.15) {
-      for (let q = 0; q < 3; q++) {
-        const s = tt + q * 0.045, o = ctx.createOscillator(), g = ctx.createGain(), p = ctx.createStereoPanner();
-        o.frequency.value = f; g.gain.setValueAtTime(0.0001, s); g.gain.exponentialRampToValueAtTime(0.012, s + 0.006); g.gain.exponentialRampToValueAtTime(0.0001, s + 0.032);
-        p.pan.value = pan; o.connect(g).connect(p).connect(far); o.start(s); o.stop(s + 0.04);
-      }
     }
   }
 
@@ -15945,15 +15833,9 @@ const ForestSound = (() => {
   document.addEventListener('visibilitychange', () => { if (ctx && !(ctx instanceof OfflineAudioContext)) (document.hidden ? ctx.suspend() : level > 0 && ctx.resume()); });
 
   /** Ogni verso da solo, col suo nome (prove e catalogo dei .wav) e quanto dura più o meno (s). */
-  const SPECIE = { merlo: [merlo, 3], capinera: [capinera, 2.5], tottavilla: [tottavilla, 3], cuculo: [cuculo, 5], colombaccio: [colombaccio, 6.5],
-    upupa: [upupa, 6], tamburo: [tamburo, 3.5], picchioVerde: [picchioVerde, 3], nibbio: [nibbio, 2], gruccioni: [gruccioni, 5],
-    allocco: [allocco, 5], assiolo: [assiolo, 18], gufo: [gufo, 15], succiacapre: [succiacapre, 12], rospo: [rospo, 9], geco: [geco, 2],
-    fruscio: [fruscio, 2], vipera: [vipera, 2], cinghiale: [cinghiale, 2.5], grilli: [grilli, 15] };
-  // Ritmo dei versi: [funzione, secondi tra uno e l'altro (minimo, in più a caso)]
-  const CALLS = { canto: [canto, 2, 4.5], cuculo: [cuculo, 30, 40], colombaccio: [colombaccio, 22, 30], upupa: [upupa, 35, 45],
-    notturni: [notturni, 30, 40], picchio: [picchio, 26, 36], nibbio: [nibbio, 70, 90], gruccioni: [gruccioni, 80, 100],
-    succiacapre: [succiacapre, 55, 70], rospo: [rospo, 60, 80], geco: [geco, 45, 60], fruscio: [fruscio, 22, 30],
-    vipera: [vipera, 300, 300], cinghiale: [cinghiale, 120, 140], grilli: [grilli, 9, 12] };
+  const SPECIE = { grilli: [grilli, 14], cicale: [cicale, 16], gufo: [gufo, 15], civetta: [civetta, 9], cinghiale: [cinghiale, 2.5] };
+  // Ritmo dei versi: [funzione, secondi tra uno e l'altro (minimo, in più a caso)]. I grilli non smettono mai.
+  const CALLS = { grilli: [grilli, 7, 4], cicale: [cicale, 14, 12], notturni: [notturni, 35, 30], cinghiale: [cinghiale, 90, 60] };
 
   return {
     onChange: null,
@@ -15980,18 +15862,17 @@ const ForestSound = (() => {
       const oc = new OfflineAudioContext(2, Math.round(sr * seconds), sr);
       setup(oc);
       master.gain.value = 0.8;
-      wind.gain.value = 0.012; windLp.frequency.value = 200;
       if (mode === 'versi') {
         let t = 0.5;
         for (const [k, [fn, len]] of Object.entries(SPECIE)) { if (t + len > seconds) break; fn(t); log.push([+t.toFixed(1), k]); t += len + 1; }
       } else {
         const next = {};
-        for (const [k, [, a, b]] of Object.entries(CALLS)) next[k] = 0.5 + (k === 'canto' ? 0 : R() * (a + b) * 0.2);
+        for (const [k, [, a, b]] of Object.entries(CALLS)) next[k] = 0.5 + (k === 'grilli' ? 0 : R() * (a + b) * 0.2);
         for (let t = 0; t < seconds - 3; t += 0.25) {
           for (const [k, [fn, a, b]] of Object.entries(CALLS)) {
             if (t < next[k]) continue;
             fn(t); log.push([+t.toFixed(1), k]);
-            next[k] = t + (a + R() * b) * (k === 'canto' || k === 'grilli' ? 1 : 0.3);
+            next[k] = t + (a + R() * b) * (k === 'grilli' || k === 'cicale' ? 1 : 0.4);
           }
           if (Math.floor(t / 0.75) !== Math.floor((t - 0.25) / 0.75) && t > 40 && t < 50) step(t);   // qualche passo a piedi
         }
@@ -16018,14 +15899,12 @@ const ForestSound = (() => {
       if (!ctx) {
         setup();
         const t = ctx.currentTime;                         // i versi rari non arrivano tutti appena si entra
-        for (const [k, [, a, b]] of Object.entries(CALLS)) due[k] = t + (k === 'canto' ? 0.5 : a * 0.3 + R() * b);
+        for (const [k, [, a, b]] of Object.entries(CALLS)) due[k] = t + (k === 'grilli' ? 0.5 : a * 0.3 + R() * b);
         due.crow = t + 1.5;
       }
       if (ctx.state !== 'running') ctx.resume();
       const t = ctx.currentTime;
       master.gain.setTargetAtTime(level * 0.8, t, 0.1);
-      // blocco 4.6: la brezza appena accennata, a raffiche rare (prima un soffio che spaventava)
-      const gust = Math.max(0, Math.sin(t * 0.07) * Math.sin(t * 0.031 + 1.3) - 0.35) / 0.65;
       if (casino) {
         // blocco N4: al Casino il vento sale e scende di più, con l'ululato sottile (dimezzato nel blocco 4.6); poi i corvi
         const rise = 0.5 + 0.5 * Math.sin(t * 0.21) * Math.sin(t * 0.083 + 0.7);
@@ -16035,8 +15914,7 @@ const ForestSound = (() => {
         howlBp.frequency.setTargetAtTime(300 + 170 * rise + 30 * Math.sin(t * 0.9), t, 0.8);
         if (!paused && t > due.crow) { crow(t + 0.05); due.crow = t + 3 + R() * 8; }
       } else {
-        wind.gain.setTargetAtTime(0.006 + 0.025 * gust, t, 1.5);
-        windLp.frequency.setTargetAtTime(170 + 90 * gust, t, 1.5);
+        wind.gain.setTargetAtTime(0, t, 1.5);                      // seconda versione del blocco 4.6: niente brezza, era cupa
         howl.gain.setTargetAtTime(0, t, 1);
         if (!paused) for (const [k, [fn, a, b]] of Object.entries(CALLS)) if (t > due[k]) { fn(t + 0.05); due[k] = t + a + R() * b; }
       }
