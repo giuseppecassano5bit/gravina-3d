@@ -2411,6 +2411,235 @@ function pendioFondovico(n, s, y, e = null) {
   return Math.min(y, lerp(y, target, along));
 }
 
+/**
+ * Blocco 4.6 (richiesta del committente, con la foto da drone di Street View, febbraio 2019): la sponda ovest del Ponte
+ * Acquedotto. Il ponte arriva su uno slargo lastricato alla sua quota; la via (Via giudice Montea, tracciato OSM) sale
+ * verso nord dentro una tagliata nella roccia fino al tornante, e torna verso sud sul pianoro, più alto di oltre 4 m,
+ * di calcare bianco a lastre con chiazze d'erba. Qui il terreno disegnato a mano si alza e si incide; pareti, grotte,
+ * muretti e torre li costruisce World.buildBridge.
+ */
+const SpondaOvest = {
+  END: [-74.6, 306.7], DECK: -4.6, TOP: -0.2,
+  /** Il pianoro (contorno indicativo dalla foto, attorno al tracciato OSM). */
+  PLAT: [[-69, 314], [-66, 352], [-100, 364], [-116, 332], [-110, 296], [-98, 291], [-88, 296], [-86, 299]],
+  /** Lo slargo lastricato alla quota del ponte, oltre la testata. */
+  LANDING: [[-73, 300.5], [-73.5, 313.5], [-79, 315], [-85, 311], [-86, 302], [-80, 298.5]],
+  _ramp: null,
+  /** La rampa della tagliata: il tratto di Via giudice Montea dalla testata al tornante, [[e, n, s]]. */
+  ramp() {
+    if (this._ramp) return this._ramp;
+    let best = [];
+    for (const row of GEO.edges) {
+      const L = row[5], k = L.length - 2;
+      for (const [i0, dir] of [[0, 2], [k, -2]]) {
+        if (Math.hypot(L[i0] - this.END[0], L[i0 + 1] - this.END[1]) > 3) continue;
+        const pts = [];
+        for (let i = i0; i >= 0 && i <= k; i += dir) pts.push([L[i], L[i + 1]]);
+        if (pts.length < 3 || pts[Math.min(3, pts.length - 1)][1] < this.END[1] + 2) continue;   // la via che va a nord
+        let top = 0;
+        pts.forEach((p, j) => { if (p[1] > pts[top][1]) top = j; });
+        if (top > best.length) { best = pts.slice(0, top + 1); this._back = pts.slice(top); }
+      }
+    }
+    let acc = 0;
+    this._ramp = best.map((p, j) => { if (j) acc += Math.hypot(p[0] - best[j - 1][0], p[1] - best[j - 1][1]); return [p[0], p[1], acc]; });
+    return this._ramp;
+  },
+  /** Distanza dalla rampa e quota della carreggiata in quel punto: { d, y, s, t } (t = frazione 0–1 della salita). */
+  onRamp(e, n) {
+    const R = this.ramp();
+    let best = { d: Infinity, y: this.DECK, s: 0, t: 0 };
+    if (R.length < 2) return best;
+    const len = R[R.length - 1][2];
+    for (let i = 0; i + 1 < R.length; i++) {
+      const [ae, an, as] = R[i], [be, bn, bs] = R[i + 1], ve = be - ae, vn = bn - an, l2 = ve * ve + vn * vn || 1;
+      const u = clamp(((e - ae) * ve + (n - an) * vn) / l2, 0, 1), d = Math.hypot(e - ae - ve * u, n - an - vn * u);
+      if (d < best.d) { const sAt = lerp(as, bs, u), t = clamp(sAt / len, 0, 1); best = { d, s: sAt, t, y: lerp(this.DECK, this.TOP, t) }; }   // pendenza costante, entro il 18%
+    }
+    return best;
+  },
+  /** Peso del pianoro (1 dentro il contorno; sfuma in 44 m verso sud-ovest, dove la via scende, e in 10 m verso il ponte). */
+  plateau(e, n) {
+    if (e < -170 || e > -40 || n < 220 || n > 400) return 0;
+    if (Plane.contains(this.PLAT, e, n)) return 1;
+    let d = Infinity;
+    for (let i = 0; i < this.PLAT.length; i++) {
+      const [ae, an] = this.PLAT[i], [be, bn] = this.PLAT[(i + 1) % this.PLAT.length], ve = be - ae, vn = bn - an;
+      const u = clamp(((e - ae) * ve + (n - an) * vn) / (ve * ve + vn * vn), 0, 1);
+      d = Math.min(d, Math.hypot(e - ae - ve * u, n - an - vn * u));
+    }
+    return 1 - smoothstep(0, n < 292 && e < -88 ? 44 : 10, d);
+  },
+  /**
+   * Pareti di roccia della tagliata e dello slargo (strati di calcarenite con le cenge e le bocche delle grotte alla base),
+   * muretti a secco lungo la via sul pianoro e la torre sopra la Madonna della Stella (foto da drone; la torre non è in OSM:
+   * posizione indicativa). Nel TriBuilder del ponte: nessuna draw call in più. Tutto fuori dalle carreggiate.
+   */
+  build(tb, network) {
+    const rr = rng(4613), R = this.ramp();
+    if (R.length < 2) return;
+    const rock = ['#d8d2c4', '#cdc6b5', '#e2ddd1', '#c3bba8', '#d2cbb9'].map((c) => new THREE.Color(c));
+    const caveCol = new THREE.Color('#3a332b'), dry = [new THREE.Color('#c4bba6'), new THREE.Color('#b8ae98')], cap = new THREE.Color('#ddd5c3');
+    const free = (e, n, t) => { const r = network.closestSample(e, n, () => false); return !r || r.d > r.edge.width / 2 + t; };
+    /** Una lastra lunga `len` lungo (te, tn), spessa `th`, da y0 a y1, centrata in (e, n). */
+    const slab = (e, n, te, tn, len, th, y0, y1, col) => {
+      const g = new THREE.BoxGeometry(len, y1 - y0, th).rotateY(Math.atan2(tn, te));
+      g.translate(e, (y0 + y1) / 2, -n);
+      tb.addGeometry(g, col);
+    };
+    /** Parete a strati con la faccia in (e, n) che guarda verso (oe, on), da `foot` a `top`. */
+    const face = (e, n, te, tn, oe, on, len, foot, top, caves) => {
+      if (top - foot < 0.9) return;
+      let y = foot - 0.4, k = 0;
+      while (y < top - 0.05) {
+        const h = Math.min(top - y, 0.7 + rr() * 0.6), out = rr() * 0.3 * (k % 2 ? 1 : 0.4), th = 1.0;
+        slab(e - oe * (th / 2 - out), n - on * (th / 2 - out), te, tn, len + 0.08, th, y, y + h, rock[Math.floor(rr() * rock.length)]);
+        y += h; k++;
+      }
+      if (caves && top - foot > 2.6 && rr() < 0.18) {
+        // la bocca di una grotta alla base: un rettangolo scuro con l'arco sopra, appena fuori dalla faccia
+        const cw = 0.9 + rr() * 0.4, ch = 0.9;
+        for (const g of [new THREE.BoxGeometry(cw, ch, 0.12), new THREE.CylinderGeometry(cw / 2, cw / 2, 0.12, 7, 1, false, -Math.PI / 2, Math.PI).rotateX(Math.PI / 2).translate(0, ch / 2, 0)]) {
+          g.rotateY(Math.atan2(oe, -on));
+          g.translate(e + oe * 0.36, foot + ch / 2 + 0.05, -(n + on * 0.36));
+          tb.addGeometry(g, caveCol);
+        }
+      }
+    };
+    /** Un blocco di roccia: la sagoma (e, n) estrusa da y0 a y1, coi fianchi chiari e il pianoro sopra a lastre ed erba. */
+    const block = (pts, y0, y1) => {
+      if (pts.length < 3) return;
+      const sh = new THREE.Shape(pts.map(([e, n]) => new THREE.Vector2(e, n)));
+      const g = new THREE.ExtrudeGeometry(sh, { depth: y1 - y0, bevelEnabled: false }).rotateX(-Math.PI / 2).translate(0, y0, 0);
+      tb.addGeometry(g, rock[3]);
+      const topG = new THREE.ShapeGeometry(sh).rotateX(-Math.PI / 2).translate(0, y1 + 0.03, 0);
+      tb.addGeometry(topG, new THREE.Color('#d6d0c1'));
+      // chiazze d'erba sul pianoro (foto da drone)
+      const bb = Plane.bbox(pts);
+      for (let k = 0; k < 14; k++) {
+        const e = lerp(bb[0], bb[1], rr()), n = lerp(bb[2], bb[3], rr());
+        if (!Plane.contains(pts, e, n)) continue;
+        const tuft = new THREE.CircleGeometry(0.8 + rr() * 1.4, 6).rotateX(-Math.PI / 2).translate(e, y1 + 0.06, -n);
+        tb.addGeometry(tuft, rr() < 0.5 ? new THREE.Color('#8a9654') : new THREE.Color('#77834a'));
+      }
+      this.roofs.push({ pts, top: y1 + 0.5, wall: y1 });
+    };
+    /** Il ritorno (o la rampa) spostato di lato di `off` metri: [[e, n]]. */
+    const offset = (P, off) => P.map((p, i) => {
+      const q = P[Math.min(i + 1, P.length - 1)], o = P[Math.max(i - 1, 0)], te = q[0] - o[0], tn = q[1] - o[1], l = Math.hypot(te, tn) || 1;
+      return [p[0] + (tn / l) * off, p[1] - (te / l) * off];
+    });
+    const resample = (P, step) => {
+      const out = [P[0]];
+      for (let i = 0; i + 1 < P.length; i++) {
+        const l = Math.hypot(P[i + 1][0] - P[i][0], P[i + 1][1] - P[i][1]), k = Math.max(1, Math.round(l / step));
+        for (let j = 1; j <= k; j++) out.push([lerp(P[i][0], P[i + 1][0], j / k), lerp(P[i][1], P[i + 1][1], j / k)]);
+      }
+      return out;
+    };
+    this.roofs = [];
+    const len = R[R.length - 1][2], ramp = resample(R.filter(([, , sAt]) => sAt <= len).map(([e, n]) => [e, n]), 2);
+    const rampS = (k) => { let acc = 0; for (let i = 1; i <= k; i++) acc += Math.hypot(ramp[i][0] - ramp[i - 1][0], ramp[i][1] - ramp[i - 1][1]); return acc; };
+    const back = resample(this.returnPath().map(([e, n]) => [e, n]), 2);
+    const top = this.TOP + 0.1, foot = this.DECK - 1.2;
+    // da che parte della rampa sta il ritorno (a ovest): il segno del lato
+    const mid = ramp[Math.floor(ramp.length / 2)], nx = ramp[Math.floor(ramp.length / 2) + 1];
+    /** +1 se `to` sta a destra di P (nel verso di P), −1 se a sinistra: offset(P, d * lato) va verso `to`. */
+    const lato = (P, to) => { const k = Math.floor(P.length / 2), [ae, an] = P[k], [be, bn] = P[Math.min(k + 1, P.length - 1)]; return Math.sign((bn - an) * (to[0] - ae) - (be - ae) * (to[1] - an)) || 1; };
+    const sideW = lato(ramp, back[Math.floor(back.length / 2)]), sideB = lato(back, ramp[Math.floor(ramp.length / 2)]);
+    const first = ramp.findIndex((p, k) => rampS(k) > 6), last = ramp.length - 3;
+    // 1. il blocco tra la rampa e la via in alto (lato ovest), fino allo slargo
+    const wRamp = offset(ramp, 2.4 * sideW).slice(first, last + 1);
+    const wBack = offset(back, 2.3 * sideB).filter(([e, n]) => n > this.LANDING[5][1] + 1);
+    const A = [...wRamp, ...wBack, [this.LANDING[4][0] - 0.6, this.LANDING[4][1]], [this.LANDING[3][0] - 0.6, this.LANDING[3][1] + 1.5]];
+    block(A, foot, top);
+    // 2. il blocco dall'altra parte della rampa, verso la gravina (la grande rupe a destra nella foto)
+    const eRamp = offset(ramp, -2.4 * sideW).slice(first, last + 1), eOut = offset(ramp, -11 * sideW).slice(first, last + 1).reverse();
+    const lowB = Math.min(foot - 2, ...eOut.map(([e, n]) => Terrain.heightAt(e, n) - 1.5));
+    block([...eRamp, ...eOut], lowB, top);
+    // il fianco esterno della rupe, verso la gravina: strati e grotte anche qui
+    const outer = [...eOut].reverse();
+    for (let k = 0; k + 1 < outer.length; k++) {
+      const [ae, an] = outer[k], [be, bn] = outer[k + 1], l = Math.hypot(be - ae, bn - an);
+      if (l < 0.05) continue;
+      const te = (be - ae) / l, tn = (bn - an) / l, oe = -sideW * tn, on = sideW * te;
+      const e = (ae + be) / 2 + oe * 0.02, n = (an + bn) / 2 + on * 0.02;
+      if (!free(e, n, 0.6)) continue;
+      face(e, n, te, tn, oe, on, l, Math.max(lowB, Terrain.heightAt(e + oe * 1.5, n + on * 1.5)), top, true);
+    }
+    // 3. le pareti a strati sui due fianchi della tagliata, con le grotte alla base
+    for (let k = first; k < last; k++) {
+      const [ae, an] = ramp[k], [be, bn] = ramp[k + 1], l = Math.hypot(be - ae, bn - an);
+      if (l < 0.05) continue;
+      const te = (be - ae) / l, tn = (bn - an) / l, sAt = rampS(k) + l / 2, f = lerp(this.DECK, this.TOP, clamp(sAt / len, 0, 1));
+      for (const side of [-1, 1]) {
+        const oe = tn * side, on = -te * side, e = (ae + be) / 2 - oe * 2.45, n = (an + bn) / 2 - on * 2.45;   // (oe, on) guarda verso la via
+        if (!free(e, n, 0.6)) continue;
+        face(e, n, te, tn, oe, on, l, f, top, true);
+      }
+    }
+    // 3. i muretti a secco lungo la via sul pianoro, dal tornante verso la Madonna della Stella (foto da drone)
+    const ret = this.returnPath();
+    for (let i = 0; i + 1 < ret.length; i++) {
+      const [ae, an] = ret[i], [be, bn] = ret[i + 1], l = Math.hypot(be - ae, bn - an);
+      if (l < 0.05) continue;
+      const te = (be - ae) / l, tn = (bn - an) / l;
+      for (let u = 0.8; u < l; u += 1.6) {
+        for (const side of [-1, 1]) {
+          const e = ae + te * u + tn * side * 2.2, n = an + tn * u - te * side * 2.2;
+          if (this.plateau(e, n) < 0.3 || !free(e, n, 0.35)) continue;
+          const g = Terrain.heightAt(e, n);
+          slab(e, n, te, tn, 1.62, 0.5, g - 0.3, g + 0.8 + rr() * 0.2, dry[Math.floor(rr() * 2)]);
+        }
+      }
+    }
+    // 4. la torre sopra la chiesa rupestre (campanile della Madonna della Stella nelle foto dal ponte; non in OSM)
+    const [te0, tn0] = [-88.5, 284];
+    if (free(te0, tn0, 2.6)) {
+      const g = Terrain.heightAt(te0, tn0) - 0.4, st = new THREE.Color('#d9d0bc'), dk = new THREE.Color('#cfc5ae');
+      slab(te0, tn0, 1, 0, 2.8, 2.8, g, g + 8.4, st);
+      slab(te0, tn0, 1, 0, 3.1, 3.1, g + 8.4, g + 8.7, cap);
+      for (const [dx, dn] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) slab(te0 + dx * 1.1, tn0 + dn * 1.1, 1, 0, 0.6, 0.6, g + 8.7, g + 10.6, dk);
+      slab(te0, tn0, 1, 0, 3.0, 3.0, g + 10.6, g + 10.9, cap);
+      const cone = new THREE.ConeGeometry(1.8, 1.2, 4).rotateY(Math.PI / 4);
+      cone.translate(te0, g + 11.5, -tn0);
+      tb.addGeometry(cone, dk);
+      // le finestrelle ad arco sul fusto, scure
+      for (const [oe, on] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const w = new THREE.BoxGeometry(0.5, 1.1, 0.1).rotateY(Math.atan2(oe, -on));
+        w.translate(te0 + oe * 1.42, g + 5.6, -(tn0 + on * 1.42));
+        tb.addGeometry(w, caveCol);
+      }
+    }
+  },
+  /** Il ritorno della via sul pianoro: dal tornante fino a dove la via lascia il pianoro. */
+  returnPath() {
+    if (this._ret) return this._ret;
+    this.ramp();
+    return (this._ret = this._back ?? []);
+  },
+  inLanding(e, n) { return e > -90 && e < -70 && n > 295 && n < 318 && Plane.contains(this.LANDING, e, n); },
+  /** Quota del terreno disegnato a mano sulla sponda ovest, con il pianoro, lo slargo e la tagliata. */
+  ground(e, n, y) {
+    const w = this.plateau(e, n);
+    if (w <= 0) return y;
+    let out = lerp(y, Math.max(y, this.TOP), w);
+    if (this.inLanding(e, n)) return this.DECK;
+    const r = this.onRamp(e, n);
+    if (r.d < 6) out = lerp(r.y, out, smoothstep(2.6, 4.4, r.d));
+    // lo slargo: fuori dal contorno sale alla quota del pianoro in 2 m (lì le pareti di roccia)
+    const L = this.LANDING;
+    let dl = Infinity;
+    for (let i = 0; i < L.length; i++) {
+      const [ae, an] = L[i], [be, bn] = L[(i + 1) % L.length], ve = be - ae, vn = bn - an;
+      const u = clamp(((e - ae) * ve + (n - an) * vn) / (ve * ve + vn * vn), 0, 1);
+      dl = Math.min(dl, Math.hypot(e - ae - ve * u, n - an - vn * u));
+    }
+    if (dl < 3) out = lerp(this.DECK, out, smoothstep(0.4, 2.2, dl));
+    return out;
+  },
+};
+
 const Terrain = {
   /** Adattatore alle strade: impostato dopo la costruzione della rete. */
   conformer: null,
@@ -2471,15 +2700,16 @@ const Terrain = {
     }
     if (L.t >= 1) {                                        // altopiano verso Botromagno
       const hill = 14 * Math.exp(-((e + 380) ** 2 + (n + 200) ** 2) / 200 ** 2);
-      return { y: -3 + 10 * smoothstep(0, 280, L.s) + hill, zone: ZONE.BANK, rough: 0.45, side: -1 };
+      const y0 = -3 + 10 * smoothstep(0, 280, L.s) + hill, y1 = SpondaOvest.ground(e, n, y0);   // blocco 4.6
+      return { y: y1, zone: ZONE.BANK, rough: y1 !== y0 ? 0.12 : 0.45, side: -1 };
     }
     if (L.dR < 7) return { y: F, zone: ZONE.FLOOR, rough: 0.5, side: -1 };
     if (L.t < 0.8) {                                       // parete ripida a tre salti
       const u = (L.t - 0.1) / 0.7;
       return { y: F + (F * -1 - 8) * terrace(u, 3), zone: ZONE.WALL, rough: 1.4, side: -1 };
     }
-    if (n > 295 && n < 320 && L.s > -11) return { y: -4.6, zone: ZONE.SLOPE, rough: 0.3, side: -1 }; // testata ovest Ponte Acquedotto
-    return { y: -8 + 5 * smoothstep(0.8, 1, L.t), zone: ZONE.SLOPE, rough: 0.5, side: -1 };
+    if (n > 295 && n < 320 && L.s > -11) { const y1 = SpondaOvest.ground(e, n, -4.6); return { y: y1, zone: ZONE.SLOPE, rough: 0.12, side: -1 }; } // testata ovest Ponte Acquedotto
+    { const y0 = -8 + 5 * smoothstep(0.8, 1, L.t), y1 = SpondaOvest.ground(e, n, y0); return { y: y1, zone: ZONE.SLOPE, rough: y1 !== y0 ? 0.15 : 0.5, side: -1 }; }
   },
 
   /** Quota liscia usata per le strade. */
@@ -3490,7 +3720,16 @@ const World = {
   faceColor(c, pal, { cy, slope, zone, side, ce, cn, areas }) {
     const T = CONFIG.terrain;
     const r = hash2(Math.round(ce * 3), Math.round(cn * 3));
-    if (zone === ZONE.FLOOR && slope > 0.7) {
+    const plat = side < 0 ? SpondaOvest.plateau(ce, cn) : 0;
+    if (plat > 0 && SpondaOvest.inLanding(ce, cn)) {
+      c.set(r > 0.5 ? '#bdb5a3' : '#b3ab98');                              // blocco 4.6: lo slargo lastricato oltre il ponte
+    } else if (plat > 0.5) {
+      // blocco 4.6: il pianoro della sponda ovest, calcare bianco a lastre con le crepe e le chiazze d'erba (foto da drone)
+      const f = fbm(ce * 0.05, cn * 0.05, 2);
+      c.set(r > 0.75 ? '#e4e0d5' : r > 0.45 ? '#d9d4c7' : r > 0.15 ? '#cec8b8' : '#bfb8a6');
+      if (f > 0.16) c.lerp(this._grass ??= new THREE.Color('#8a9654'), 0.55 + (f - 0.16));
+      if (slope < 0.85) c.lerp(this._cliff ??= new THREE.Color('#b8b09d'), 0.5);
+    } else if (zone === ZONE.FLOOR && slope > 0.7) {
       c.copy(r > 0.35 ? pal.scrub : pal.scrubDark);
     } else if (zone === ZONE.WALL || slope < 0.6) {
       const band = Math.floor((cy - T.floorY) / 3.2);          // strati di tufo per quota
@@ -3892,107 +4131,36 @@ const World = {
       pillar(lerp(x0, x1, tz), deckAt(L), lerp(z0, z1, tz), 1.15);
     }
 
-    // Ruderi delle case rupestri accanto alla rampa (foto dal ponte verso ovest): celle in conci senza tetto, a U, con la
-    // porta; solo dove il terreno è quasi in piano, lontano dalle vie e dalla Chiesa Rupestre Madonna della Stella.
+    // Ruderi delle case rupestri sulle terrazze a sud dello slargo, verso la Madonna della Stella (foto da drone e viste
+    // dal ponte): celle in conci senza tetto, a U, con la porta; lontano dalle vie, dal pianoro e dalla chiesa.
     const chiesa = DATA.building('Chiesa Rupestre Madonna della Stella');
     const cc = chiesa ? Plane.centroid(DATA.pairs(chiesa[3][0])) : [1e9, 1e9];
     const ruin = [new THREE.Color('#d9cfb9'), new THREE.Color('#cbbfa5')];
+    const freeE = (e, n, t) => { const r = network.closestSample(e, n, () => false); return !r || r.d > r.edge.width / 2 + t; };
     let ruins = 0;
-    for (let tries = 0; tries < 80 && ruins < 6; tries++) {
-      const x = L + 4 + rr() * 26, z = -18 + rr() * (width + 36);
-      const w0 = atL(x, z), e = w0.x, n = -w0.z;
-      if (Math.hypot(e - cc[0], n - cc[1]) < 14) continue;
-      const W = 3.2 + rr() * 1.6, D = 2.8 + rr() * 1.2, rot = (rr() - 0.5) * 0.6;
-      const corners = [[-W / 2, -D / 2], [W / 2, -D / 2], [-W / 2, D / 2], [W / 2, D / 2]].map(([dx, dz]) => [x + dx * Math.cos(rot) - dz * Math.sin(rot), z + dx * Math.sin(rot) + dz * Math.cos(rot)]);
-      const gs = corners.map(([cx, cz]) => gAt(cx, cz));
-      if (Math.max(...gs) - Math.min(...gs) > 1.6) continue;
-      if (!corners.every(([cx, cz]) => free(cx, cz, 1.4)) || !free(x, z, 1.4)) continue;
-      const base = Math.min(...gs) - 0.3, col = ruin[ruins % 2];
-      const H = [1.0 + rr() * 0.9, 0.5 + rr() * 0.8, 0.8 + rr() * 1.0];
-      // fondo e due fianchi (il fronte resta aperto: la porta crollata), muri spessi 0.45 a quote diverse (crolli)
-      const walls = [[0, -D / 2, W, H[0]], [-W / 2, 0, D, H[1]], [W / 2, 0, D, H[2]]];
-      for (const [k, [mx, mz, len, h]] of walls.entries()) {
-        const g = new THREE.BoxGeometry(k === 0 ? len : 0.45, h + (Math.max(...gs) - base), k === 0 ? 0.45 : len);
-        g.translate(mx, base + (h + Math.max(...gs) - base) / 2, mz).rotateY(-rot);
-        g.translate(x, 0, z);
-        local(g, col);
+    for (let tries = 0; tries < 120 && ruins < 7; tries++) {
+      const e = -100 + rr() * 30, n = 280 + rr() * 20, x = 0, z = 0;
+      if (Math.hypot(e - cc[0], n - cc[1]) < 7 || SpondaOvest.plateau(e, n) > 0.4 || SpondaOvest.inLanding(e, n)) continue;
+      const W = 3.0 + rr() * 1.8, D = 2.6 + rr() * 1.2, rot = rr() * Math.PI;
+      const corners = [[-W / 2, -D / 2], [W / 2, -D / 2], [-W / 2, D / 2], [W / 2, D / 2]].map(([dx, dz]) => [e + dx * Math.cos(rot) - dz * Math.sin(rot), n + dx * Math.sin(rot) + dz * Math.cos(rot)]);
+      const gs = corners.map(([ce, cn]) => Terrain.heightAt(ce, cn));
+      if (Math.max(...gs) - Math.min(...gs) > 2.2) continue;
+      if (!corners.every(([ce, cn]) => freeE(ce, cn, 1.4)) || !freeE(e, n, 1.4)) continue;
+      const base = Math.min(...gs) - 0.3, hi = Math.max(...gs), col = ruin[ruins % 2];
+      const H = [1.0 + rr() * 1.2, 0.6 + rr() * 0.9, 0.9 + rr() * 1.2];
+      // fondo e due fianchi (il fronte resta aperto: la porta crollata), a quote diverse (crolli)
+      for (const [k, [mx, mz, len, h]] of [[0, -D / 2, W, H[0]], [-W / 2, 0, D, H[1]], [W / 2, 0, D, H[2]]].entries()) {
+        const g = new THREE.BoxGeometry(k === 0 ? len : 0.45, h + hi - base, k === 0 ? 0.45 : len);
+        g.translate(mx, base + (h + hi - base) / 2, mz).rotateY(rot);
+        g.translate(e, 0, -n);
+        tb.addGeometry(g, col);
       }
       ruins++;
     }
 
-    // Muretto continuo di protezione lungo la rampa ovest (Via giudice Montea verso Madonna della Stella)
-    const westNode = edge.a.e < edge.b.e ? edge.a : edge.b;
-    const rampEdge = westNode.edges.find((e) => e !== edge && !e.turn);
-    if (rampEdge) {
-      const RS = rampEdge.samples, rCount = rampEdge.count;
-      const dStart = Math.hypot(RS[0] - westNode.pos.x, RS[2] - westNode.pos.z);
-      const dEnd = Math.hypot(RS[rCount * 3] - westNode.pos.x, RS[rCount * 3 + 2] - westNode.pos.z);
-      const forward = dStart < dEnd;
-      const segs = Math.min(36, rCount);
-      let distAcc = 0;
-      let firstMidPt = null;
-      for (let s = 0; s < segs; s++) {
-        const i0 = forward ? s : rCount - s;
-        const i1 = forward ? s + 1 : rCount - s - 1;
-        const pA = new THREE.Vector3(RS[i0 * 3], RS[i0 * 3 + 1], RS[i0 * 3 + 2]);
-        const pB = new THREE.Vector3(RS[i1 * 3], RS[i1 * 3 + 1], RS[i1 * 3 + 2]);
-        const segVec = new THREE.Vector3().subVectors(pB, pA);
-        const segLen = segVec.length();
-        if (segLen < 0.2) continue;
-        const segDir = segVec.clone().normalize();
-        let nor = new THREE.Vector3(-segDir.z, 0, segDir.x);
-        if (nor.x < 0) nor.negate();
-        const mOff = rampEdge.width / 2 + 0.18;
-        const midPt = pA.clone().lerp(pB, 0.5).addScaledVector(nor, mOff);
-        // blocco 4.4: niente tratti di muretto sopra le altre vie
-        if (!freeW(midPt, 0.22) || !freeW(pA.clone().addScaledVector(nor, mOff), 0.22) || !freeW(pB.clone().addScaledVector(nor, mOff), 0.22)) continue;
-        if (!firstMidPt) firstMidPt = midPt.clone();
-        const groundH = Terrain.heightAt(midPt.x, -midPt.z);
-        const roadH = midPt.y;
-        const wallH = 1.05;
-        const baseDrop = Math.max(0.6, roadH - groundH + 0.4);
-        const rotY = Math.atan2(segVec.x, segVec.z);
+    // Blocco 4.6: la tagliata, lo slargo, i muretti a secco e la torre (SpondaOvest)
+    SpondaOvest.build(tb, network);
 
-        const mBox = new THREE.BoxGeometry(0.44, wallH + baseDrop, segLen + 0.06).rotateY(rotY);
-        mBox.translate(midPt.x, roadH + wallH / 2 - baseDrop / 2, midPt.z);
-        tb.addGeometry(mBox, stone);
-
-        const cBox = new THREE.BoxGeometry(0.54, 0.12, segLen + 0.08).rotateY(rotY);
-        cBox.translate(midPt.x, roadH + wallH + 0.06, midPt.z);
-        tb.addGeometry(cBox, light);
-
-        distAcc += segLen;
-        if (distAcc >= 6.5) {
-          distAcc = 0;
-          const pil = new THREE.BoxGeometry(0.58, wallH + baseDrop + 0.15, 0.58).rotateY(rotY);
-          pil.translate(midPt.x, roadH + wallH / 2 - baseDrop / 2 + 0.08, midPt.z);
-          tb.addGeometry(pil, light);
-        }
-      }
-
-      // Raccordo continuo tra il pilastro della testata ovest del ponte e l'inizio del muretto della rampa
-      if (firstMidPt) {
-        const pillarWestPos = p0.clone().setY(0)
-          .addScaledVector(across, -width / 2)
-          .addScaledVector(along, L - 0.45)
-          .addScaledVector(across, width - 0.22)
-          .setY(deckAt(L));
-        const connVec = new THREE.Vector3().subVectors(firstMidPt, pillarWestPos);
-        const connLen = connVec.length();
-        let connFree = true;                                   // blocco 4.4: il raccordo non deve tagliare la via
-        for (let k = 0; k <= 12; k++) if (!freeW(pillarWestPos.clone().lerp(firstMidPt, k / 12), 0.22)) connFree = false;
-        if (connLen > 0.3 && connFree) {
-          const connMid = pillarWestPos.clone().lerp(firstMidPt, 0.5);
-          const connRotY = Math.atan2(connVec.x, connVec.z);
-          const rWall = new THREE.BoxGeometry(0.44, 1.05 + 1.2, connLen + 0.1).rotateY(connRotY);
-          rWall.translate(connMid.x, connMid.y + 1.05 / 2 - 0.6, connMid.z);
-          tb.addGeometry(rWall, stone);
-          const rCap = new THREE.BoxGeometry(0.54, 0.12, connLen + 0.12).rotateY(connRotY);
-          rCap.translate(connMid.x, connMid.y + 1.05 + 0.06, connMid.z);
-          tb.addGeometry(rCap, light);
-        }
-      }
-    }
     const mesh = new THREE.Mesh(tb.build(), vertexColorMaterial({ roughness: 0.85 }));
     mesh.castShadow = mesh.receiveShadow = true;
     mesh.name = 'ponte-acquedotto';
@@ -4295,8 +4463,9 @@ const Buildings = {
       }
 
       const old = this.isOld(ce, cn), rural = kind === 6;   // blocco M1: il versante di Botromagno, uno o due piani coi coppi
+      const hut = rural && SpondaOvest.plateau(ce, cn) > 0.5;   // blocco 4.6: la casetta di pietra in cima alla tagliata (foto da drone)
       const wall = kind === 1 ? stone : SCUOLE[name]?.muro ? new THREE.Color(SCUOLE[name].muro)   // blocco N3: San Giovanni Bosco è rosa
-        : rural ? facadesNew[[0, 1, 3][Math.floor(seed * 3)]] : (old ? facadesOld : facadesNew)[Math.floor(seed * 7) % (old ? 7 : 6)];
+        : hut ? new THREE.Color('#d2cab7') : rural ? facadesNew[[0, 1, 3][Math.floor(seed * 3)]] : (old ? facadesOld : facadesNew)[Math.floor(seed * 7) % (old ? 7 : 6)];
       const rect = Plane.orientedRect(outer);
       // Rioni sul pendio: la casa scende a gradoni, a strisce parallele al ciglio, ognuna
       // alta `height` sopra il suo terreno; i tetti piani fanno da terrazza a quelle sotto.
@@ -4306,7 +4475,7 @@ const Buildings = {
       const strips = steep && gMax - gMin > 1.2 && this.inRioni(ce, cn) ? this.stepStrips(outer, ce, cn, height)
         : steep && gMax - gMin > 2.5 ? this.stepStrips(outer, ce, cn, height, this.downhill(outer, outer.map(([e, n]) => Terrain.heightAt(e, n))), gMax - gMin) : null;
       const tiled = !strips && ((kind === 1 && !holes.length && facade?.tetto !== 'piano') || (rural && !holes.length) || (kind === 0 && !holes.length && rect.fill > 0.86 && area < 280 && seed < (old ? 0.3 : 0.15)));
-      const roof = tiled ? roofTiles[Math.floor(seed * 13) % 4] : roofFlat[Math.floor(seed * 11) % 4];
+      const roof = hut ? new THREE.Color('#a39b8c') : tiled ? roofTiles[Math.floor(seed * 13) % 4] : roofFlat[Math.floor(seed * 11) % 4];
       const rise = tiled ? facade?.falda ?? Math.min(rural ? 2.4 : 4.5, rect.hw * (kind === 1 ? 0.7 : rural ? 0.45 : 0.55)) : 0;
       /** Quota del tetto nel punto (e, n): con i gradoni dipende dalla striscia. */
       const topAt = (e, n) => (strips ? strips.at(e, n) : top);
@@ -16496,6 +16665,7 @@ async function main() {
   scene.add(Buildings.arches(network));
   // Blocco N2: la rupe del portico di San Michele delle Grotte conta come un tetto (camera, alberi)
   Buildings.roofs.push(...SAN_MICHELE.roofs(Terrain.heightAt(...SAN_MICHELE.at(0, 1.5))));
+  Buildings.roofs.push(...(SpondaOvest.roofs ?? []));   // blocco 4.6: i blocchi di roccia della tagliata contano come tetti (camera)
 
   // Griglia dei tetti (celle da 10 m): dice se un punto è occupato da un edificio
   // e a che quota arriva il tetto. La usano alberi, vetrina e camera nei vicoli.
@@ -17348,7 +17518,7 @@ async function main() {
         driver.place(r.edge, r.dir, Math.max(0, r.s - back));
         return r.edge.name;
       },
-      roadWalls, Balconi, Raddrizza, useVehicle, pause, resume, teleport, pauseMap, Radio, EngineAudio, Forest, ForestSound, flight, Volo, Burner, VehicleFactory, forestAmount,
+      roadWalls, Balconi, Raddrizza, SpondaOvest, useVehicle, pause, resume, teleport, pauseMap, Radio, EngineAudio, Forest, ForestSound, flight, Volo, Burner, VehicleFactory, forestAmount,
       get mode() { return mode; },
       /** Il mezzo disegnato (root, body, animate): per le prove sul tremolio (blocco 4.5). */
       get vehicle() { return car; },
