@@ -96,6 +96,13 @@ const parked = f.car;
 await advance(4);
 f = await foot();
 check('la figurina percorre il tratto pedonale, il mezzo resta fermo', f.onFoot && f.walk && f.speed > 2 && f.car[0] === parked[0] && /percorso pedonale/.test(f.plate), `${f.street} · ${f.plate}`);
+// Blocco 4.6: con l'acceleratore a piedi la figurina corre, e i passi si sentono a ogni piede che tocca terra
+await page.evaluate(() => { const g = window.gravina; window._passi = []; const o = g.Passi.step; g.Passi.step = (x, at) => { window._passi.push(x); return o(x, at); }; g.driver.boosting = true; });
+await advance(1.6);
+const corsa = await page.evaluate(() => ({ v: window.gravina.driver.speed, run: window._passi.filter((p) => p.run).length, n: window._passi.length, onFoot: window.gravina.driver.onFoot }));
+await page.evaluate(() => { window.gravina.driver.boosting = false; });
+check('a piedi con l’acceleratore la figurina corre, coi passi di corsa', corsa.onFoot && corsa.v > 4.5 && corsa.run >= 2, `${corsa.v.toFixed(1)} m/s, ${corsa.n} passi di cui ${corsa.run} di corsa`);
+await advance(1);
 await page.keyboard.press('p');
 await advance(1.5);
 f = await foot();

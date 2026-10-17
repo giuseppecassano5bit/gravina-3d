@@ -62,7 +62,9 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
   ricordato in `localStorage`), col consiglio «almeno 6 GB di memoria, per l'esperienza migliore usa un computer»; poi un
   pulsante «Accelera» da tenere premuto (`#btn-boost`). Con l'acceleratore agli incroci il mezzo **tira dritto** sulla via
   carrabile più dritta e rallenta solo quanto chiede la svolta (`Driver.cornerSpeed`, `CONFIG.drive.lateral`); una scelta
-  fatta a mano si rispetta. Gocce, tratti a piedi e giro guidato come prima.
+  fatta a mano si rispetta. Gocce e giro guidato come prima. **A piedi** (blocco 4.6, richiesta del committente) lo stesso
+  acceleratore fa **correre** la figurina (`CONFIG.drive.runSpeed`; sul telefono il pulsante diventa «Corri»), e i passi
+  (`Passi`, sezione 11d-bis) suonano a ogni piede che tocca terra, su pietra o su terra, camminando o di corsa.
 - **A piedi** (blocco G): marciapiedi, passaggi e scalinate reali del centro storico (flag 32,
   `WALK` in `genera_dati.py`) si percorrono con la figurina, solo se chiudono un anello con altre
   vie reali. Il mezzo si ferma all'imbocco e aspetta al tratto carrabile d'uscita (eccezione: ci

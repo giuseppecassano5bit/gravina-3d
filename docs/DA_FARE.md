@@ -488,8 +488,21 @@ commerciali e protette: il committente ha scelto musica ambient originale, gener
       rospo smeraldino, geco, cinghiale, fruscio dei serpenti e raro soffio della vipera, grilli; merlo e capinera restano. Tolti il
       lupo, pettirosso, fringuello, cinciallegra, tortora e cicale; brezza appena accennata; al Casino di Meninni ululato del vento
       dimezzato. Prova `node bosco.mjs` (`shots/bosco-passeggiata.wav`, `shots/bosco-versi.wav`). **Da far ascoltare al committente.**
-- [x] Prove: `simula` verde (0 problemi, 0 case, 0 dettagli sulla strada), `interazioni` 86/86, `bosco.mjs` senza saturazione;
-      prestazioni `shots/prestazioni-dopo-4-6.json` (60 fps; PC al massimo 353 600 triangoli e 55 draw call, telefono 231 400 e 35).
+- [x] **Ritocchi chiesti dal committente il 17/10/2026** (con la foto da drone di Street View, febbraio 2019):
+      - **sponda ovest come nella foto**: lo slargo lastricato alla quota del ponte, la rampa (Via giudice Montea, tracciato
+        OSM) che sale dentro la **tagliata** tra due rupi di calcarenite a strati con le grotte alla base, il **pianoro** di
+        calcare bianco con le chiazze d'erba più alto di oltre 4 m (`SpondaOvest`, pendenza massima 16,4%), i muretti a secco
+        lungo la via in alto, la **torre** sopra la Madonna della Stella (non in OSM: posizione indicativa dalla foto), la
+        casetta di pietra al posto di quella col tetto rosso, i ruderi sulle terrazze a sud;
+      - **suoni del bosco, seconda versione** («meno cupa», «non sono suoni tipici»): solo il coro dei grilli, le cicale, ogni
+        tanto un gufo comune o una civetta e qualche cinghiale lontano; niente canti di uccelli né vento (`bosco-v2-*.wav`);
+      - **di corsa a piedi**: con l'acceleratore (Shift, o il pulsante che a piedi dice «Corri») la figurina corre a 5,4 m/s,
+        con la falcata lunga, le braccia piegate e il busto in avanti; i **passi** (`Passi`) suonano a ogni piede che tocca
+        terra, su pietra o su terra, 2 al secondo camminando e 3 di corsa (`shots/passi.wav`); nuova prova in `interazioni`.
+- [ ] Da verificare col committente: i colori del paesaggio lontano (Botromagno e i campi) restano quelli del tramonto del
+      diorama; la foto da drone è di febbraio, coi campi verdi.
+- [x] Prove: `simula` verde (0 problemi, 0 case, 0 dettagli sulla strada), `interazioni` 87/87, `bosco.mjs` senza saturazione;
+      prestazioni `shots/prestazioni-dopo-4-6.json` (60 fps; PC al massimo 357 300 triangoli e 55 draw call, telefono 231 600 e 35).
 - [ ] Da decidere con il committente: un pulsante per lo **schermo intero** (non c'è; su iPhone Safari non funziona fuori dai video).
 - [x] Musica procedurale Web Audio: la radio ambient del blocco G.
 - [x] Camera: giro automatico e camera libera nel blocco G.

@@ -381,7 +381,7 @@ Nel bosco la nebbia si avvicina (foschia) e la targa dice «Bosco Difesa Grande�
 | Santa Lucia (blocco N2b) | Il footway OSM **w1195336380** («Calata S. Lucia» su Google, 60 m, 14% di pendenza media) scende da Via Michelangelo Calderoni (nodo OSM [48,6; 85,8]) alla chiesa **w411139356** («Ipogeo Santa Lucia» su Google): tratto a piedi cieco che finisce con la **goccia della figurina** nello slargo davanti alla chiesa (`GOCCE_PIEDI`, eccezione scritta in `CLAUDE.md`); la scheda «Santa Lucia» si apre lungo il passaggio. Via Calderoni resta una sola via fino al nodo, poi si divide. L'anello con «Via Santa Lucia» (w1512581502) non c'è: 9 m senza collegamento in OSM e nessuna foto. |
 | Madonna della Stella | Chiesetta **imbiancata** con la facciata a capanna rivolta alla gravina, **campanile a vela in mattoni** sul vertice, **corpo basso con tetto a una falda** e finestra, la **roccia** alle spalle in cui è scavata la chiesa vera. |
 | Palazzi | Palazzo Ducale Orsini e Museo Pomarici Santomasi: **cornicione**, fascia marcapiano e **portale in bugnato**. |
-| Ponte Acquedotto | Prospetto estruso con **archi su due ordini**: 4 grandi arcate sul canyon più una fila di archetti sotto l'impalcato, circa 25 archi come l'originale. **Lesene** sui piloni, **due cornici** marcapiano, parapetti, larghezza reale 5,5 m. **Sponda ovest** (blocco 4.6, dalle foto di Wikimedia Commons: «viadotto Madonna della Stella» e le viste dal ponte verso ovest): niente spalla squadrata; sul pendio ripido attorno alla testata le **cenge chiare a strati** lungo le curve di livello, con qua e là la **bocca ad arco di una grotta** del villaggio rupestre e i ciuffi di macchia; alla testata i **parapetti si aprono a ventaglio** sullo slargo, col pilastrino; accanto alla rampa i **ruderi delle case rupestri** senza tetto (celle a U di conci, coi muri crollati a quote diverse), lontano dalle vie e dalla Chiesa Rupestre Madonna della Stella. Il campanile della Madonna della Stella che si vede nelle foto non è nei dati OSM: non c'è. |
+| Ponte Acquedotto | Prospetto estruso con **archi su due ordini**: 4 grandi arcate sul canyon più una fila di archetti sotto l'impalcato, circa 25 archi come l'originale. **Lesene** sui piloni, **due cornici** marcapiano, parapetti, larghezza reale 5,5 m. **Sponda ovest** (blocco 4.6, dalla foto da drone di Street View del febbraio 2019, su richiesta del committente: «esattamente così»): lo **slargo lastricato** alla quota del ponte; la via (Via giudice Montea, tracciato OSM) sale verso nord dentro una **tagliata** fra due rupi di calcarenite (blocchi estrusi con le pareti a strati e le bocche delle grotte alla base, `SpondaOvest.build`), fino al tornante, e torna a sud sul **pianoro** di calcare bianco a lastre con le chiazze d'erba, più alto di oltre 4 m (`SpondaOvest.ground` nel terreno disegnato a mano: rampa a pendenza costante, al massimo 16,4%), fra i **muretti a secco**; sopra la Madonna della Stella la **torre** (non in OSM: posizione indicativa dalla foto), in cima la **casetta di pietra** (OSM, prima col tetto rosso); sulle terrazze a sud i ruderi delle case rupestri e sul pendio verso la gola le cenge a strati con le grotte. I blocchi contano come tetti per la camera. |
 | Fontana della Stella | Muro con nicchia ad arco, cornice, vasca con l'acqua, accanto alla testata est del ponte e fuori dalla strada (forma stilizzata). |
 | Belvederi | Parapetti in ferro sul ciglio, nei tre belvederi dei dati, solo dove non c'è la strada. |
 | Scalinate | Le 7 scalinate reali: gradini di tufo con alzate da 16 cm che seguono il terreno e parapetti bassi, e si fermano prima delle vie. Due si percorrono a piedi (blocco G): quella di Via giudice Montea (32 gradini) e quella tra Via Lettieri e Via Fontana la Stella. Le altre cinque nei dati finiscono nel vuoto e si guardano soltanto. |
@@ -688,21 +688,18 @@ rilassante, alla Minecraft**, generata dal codice (sezione 11b, `Radio`), senza 
   Se era accesa, si riaccende premendo Parti. Tace quando la scheda è nascosta.
 
 **Suoni del bosco** (blocco L, rifatti nei blocchi M2 e 4.6; sezione 11c, `ForestSound`): generati con Web
-Audio, senza file né registrazioni. Dal blocco 4.6 (il committente: «spaventosi e non tipici del bosco») solo
-animali che le fonti danno nel Bosco Difesa Grande (formulario Natura 2000 IT9120008 e AGESCI Gravina 1, fonti
-nel README): **merlo** e **capinera** (frasi intonate sulla scala pentatonica del brano della radio),
-**tottavilla** (i «lu-lu-lu» che scendono), **cuculo**, **colombaccio**, **upupa**, il tamburo del **picchio
-rosso maggiore** e la «risata» del **picchio verde**, il **nibbio reale** dall'alto, i **gruccioni** che
-passano; al tramonto **succiacapre**, **assiolo**, **allocco** e **gufo comune**, il trillo del **rospo
-smeraldino**, i «tic» del **geco**, i **grilli**; di rado i grugniti lontani del **cinghiale**. I serpenti non
-hanno un verso: un **fruscio tra le foglie** ogni tanto e, molto di rado, il **soffio della vipera**. Tolti
-l'ululato del lupo (era il verso che spaventava), pettirosso, fringuello, cinciallegra, tortora e cicale
-(nessuna fonte); il vento è una brezza appena accennata. Passi morbidi solo a piedi. Partono solo **dentro il
-bosco vero**: `forestAmount` conta le celle di querce in un raggio di 25 m, con 3 s di dissolvenza; uscendo si
-spengono e il contesto audio si sospende. Nel bosco la radio, se accesa, scende al 35%. Si spengono dalla
-pausa con l'interruttore **Suoni del bosco** (ricordato nel browser). In debug si ascoltano uno per uno con
-`gravina.ForestSound.play('assiolo')` (una specie, o un gruppo come `'notturni'`); `ForestSound.render()`
-li rende senza altoparlanti e `node bosco.mjs` ne fa due file `.wav` da ascoltare (passeggiata e catalogo).
+Audio, senza file né registrazioni. Dal blocco 4.6, seconda versione, su indicazione del committente che il bosco lo
+conosce («meno cupa», «solo grilli e cicale, ogni tanto qualche gufo o civetta e qualche cinghiale»): il **coro dei
+grilli** che non smette, le **cicale** a frasi (rumore tra 4 e 7 kHz battuto una trentina di volte al secondo), ogni
+tanto un **gufo comune** o una **civetta**, di rado i grugniti lontani di un **cinghiale**; niente canti di uccelli,
+niente vento, niente lupo. Fonti nel README. Partono solo **dentro il bosco vero** (`forestAmount`), con 3 s di
+dissolvenza; nel bosco la radio, se accesa, scende al 35%; interruttore **Suoni del bosco** nella pausa. In debug
+`gravina.ForestSound.play('civetta')`; `node bosco.mjs` ne fa i file `.wav` da ascoltare.
+
+**Passi** (blocco 4.6, sezione 11d-bis, `Passi`): un suono per ogni piede della figurina che tocca terra
+(`Walker.animate` lo segnala), dovunque si cammini: su terra, foglie e sterrati un tonfo morbido col fruscio, su
+lastre, ciottoli e asfalto il colpo del tacco. Di corsa (l'acceleratore a piedi: 5,4 m/s, falcata più lunga, braccia
+piegate, busto in avanti) i passi sono più fitti, più forti e più brevi. Volume e interruttore dei rumori dei mezzi.
 
 **Soffio del bruciatore** (blocco M3, sezione 11d, `Burner`): rumore filtrato, generato dal codice,
 che sale e scende con la fiamma della mongolfiera.
