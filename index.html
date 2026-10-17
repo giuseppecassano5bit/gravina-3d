@@ -3831,39 +3831,93 @@ const World = {
       }
     }
 
-    // Spalla monumentale ovest in tufo e conci di pietra che salda l'impalcato e l'arcata alla falesia
-    const spallaLen = 7.0;
-    const spallaY0 = groundAt(L) - 5.5;
-    const spallaY1 = deckAt(L) - 0.25;
-    const spallaH = Math.max(4.0, spallaY1 - spallaY0);
-    // Posizionata interamente sotto il corpo del ponte prima della testata
-    const spalla = new THREE.BoxGeometry(spallaLen, spallaH, width - 0.1);
-    spalla.translate(L - spallaLen / 2, (spallaY0 + spallaY1) / 2, width / 2);
-    local(spalla, stone);
-    // Basamento a scarpa allargato conficcato nella scarpata rocciosa
-    const scarpa = new THREE.BoxGeometry(spallaLen + 1.0, 4.0, width + 0.8);
-    scarpa.translate(L - spallaLen / 2, spallaY0 + 2.0, width / 2);
-    local(scarpa, new THREE.Color(PALETTE.stoneDark));
-
-    // Sperone naturale di roccia calcarea viva sotto l'arcata ovest e la falesia verso la gravina (PALETTE.strata)
-    const strataCol1 = new THREE.Color('#d8ceb8'), strataCol2 = new THREE.Color('#b8af9c'), strataCol3 = new THREE.Color('#cfc3ab');
-    const bushCol1 = new THREE.Color('#44582c'), bushCol2 = new THREE.Color('#384824');
-    const balze = [
-      { x: 78, y: groundAt(78) - 2.5, z: width + 2.8, w: 10, h: 7.0, d: 7.5, ry: 0.15, col: strataCol1 },
-      { x: 88, y: groundAt(88) - 3.8, z: width + 3.8, w: 12, h: 8.0, d: 8.5, ry: -0.12, col: strataCol2 },
-      { x: 97, y: groundAt(97) - 4.8, z: width + 3.5, w: 14, h: 9.0, d: 9.0, ry: 0.08, col: strataCol3 },
-      { x: 104, y: groundAt(103) - 5.8, z: width + 2.2, w: 11, h: 9.5, d: 8.0, ry: -0.20, col: strataCol1 },
-    ];
-    for (const b of balze) {
-      const rock = new THREE.BoxGeometry(b.w, b.h, b.d).rotateY(b.ry);
-      rock.translate(b.x, b.y, b.z);
-      local(rock, b.col);
-      // Cespugli di macchia mediterranea distribuiti sulle cenge rupestri verso la gravina
-      for (let s = -1; s <= 1; s += 2) {
-        const bush = new THREE.DodecahedronGeometry(0.70 + hash2(b.x + s, 3) * 0.40, 0).scale(1, 0.65, 1);
-        bush.translate(b.x + s * (b.w * 0.25), b.y + b.h / 2 + 0.15, b.z + (s * b.d * 0.22));
-        local(bush, s > 0 ? bushCol1 : bushCol2);
+    // Blocco 4.6: la sponda ovest come nelle foto (Wikimedia Commons, «viadotto Madonna della Stella» e le viste dal ponte):
+    // niente spalla squadrata. L'ultima arcata nasce dalla rupe di calcarenite chiara a strati, con le bocche delle grotte
+    // del villaggio rupestre; alla testata i parapetti si aprono a ventaglio; accanto alla rampa i ruderi delle case
+    // rupestri senza tetto. Tutto fuori dalle vie (free) e sotto la quota della carreggiata.
+    const atL = (x, z) => origin.clone().addScaledVector(along, x).addScaledVector(across, z);
+    const gAt = (x, z) => { const w = atL(x, z); return Terrain.heightAt(w.x, -w.z); };
+    const rockCols = ['#ddd5c3', '#cfc6b2', '#e4ddcc', '#c6bda8'].map((c) => new THREE.Color(c));
+    const caveCol = new THREE.Color('#3b342c'), bushA = new THREE.Color('#4a5c30'), bushB = new THREE.Color('#3a4a26');
+    const rr = rng(4602);
+    const xr0 = Math.max(0, (xb ?? L - 24) - 6);
+    // cenge a strati sul pendio ripido attorno alla testata: lastre chiare lungo le curve di livello (la stratificazione
+    // delle foto), qua e là la bocca ad arco di una grotta che guarda a valle
+    for (let x = xr0; x < L + 14; x += 2.4) {
+      for (let z = -26; z < width + 26; z += 2.4) {
+        const jx = x + (rr() - 0.5) * 2, jz = z + (rr() - 0.5) * 2;
+        const w0 = atL(jx, jz), e = w0.x, n = -w0.z, g = Terrain.heightAt(e, n);
+        const ge = (Terrain.heightAt(e + 1, n) - Terrain.heightAt(e - 1, n)) / 2, gn = (Terrain.heightAt(e, n + 1) - Terrain.heightAt(e, n - 1)) / 2;
+        const slope = Math.hypot(ge, gn);
+        if (slope < 0.45 || slope > 3 || g > deckAt(Math.min(jx, L)) - 1.2 || rr() > 0.6) continue;
+        if (!free(jx, jz, 1.2)) continue;
+        // asse lungo la curva di livello (perpendicolare alla pendenza), in coordinate del mondo (z = -nord)
+        const ang = Math.atan2(gn, ge);                        // direzione di salita nel piano est-nord
+        const w = 3.0 + rr() * 3.0, h = 0.8 + rr() * 0.6, d = 1.8 + rr() * 0.8;
+        const slab = new THREE.BoxGeometry(w, h, d);
+        slab.rotateY(ang + Math.PI / 2);                     // lato lungo lungo la curva di livello
+        slab.translate(e, g + h * 0.12, -n);
+        tb.addGeometry(slab, rockCols[Math.floor(rr() * rockCols.length)]);
+        if (slope > 0.8 && rr() < 0.16) {
+          // la grotta: un arco scuro sul fronte che guarda a valle
+          const de = -ge / slope, dn = -gn / slope, cw = 0.8 + rr() * 0.5, ch = 0.55;
+          const cave = new THREE.BoxGeometry(cw, ch, 0.25), arch = new THREE.CylinderGeometry(cw / 2, cw / 2, 0.25, 7, 1, false, -Math.PI / 2, Math.PI).rotateX(Math.PI / 2);
+          arch.translate(0, ch / 2, 0);
+          for (const geo of [cave, arch]) {
+            geo.rotateY(Math.atan2(de, -dn));                    // il fronte (asse z) guarda a valle
+            geo.translate(e + de * 0.9, g + 0.1 + ch / 2, -(n + dn * 0.9));
+            tb.addGeometry(geo, caveCol);
+          }
+        } else if (rr() < 0.2) {
+          const bush = new THREE.DodecahedronGeometry(0.45 + rr() * 0.35, 0).scale(1, 0.65, 1);
+          bush.translate(e, g + h * 0.12 + h / 2 + 0.1, -n);
+          tb.addGeometry(bush, rr() < 0.5 ? bushA : bushB);
+        }
       }
+    }
+
+    // Testata ovest: i parapetti si aprono a ventaglio sullo slargo lastricato (foto dal ponte), col pilastrino in fondo
+    for (const [vSide, angle] of [[0.22, 0.38], [width - 0.22, -0.38]]) {
+      const vLen = 3.4, x0 = L - 0.1, z0 = vSide, x1 = x0 + Math.cos(angle) * vLen, z1 = vSide - Math.sin(angle) * vLen;
+      const span = freeSpan(x0, z0, x1, z1);
+      if (!span || (span[1] - span[0]) * vLen < 0.8) continue;
+      const [ta, tz] = span, len = (tz - ta) * vLen;
+      const vx = lerp(x0, x1, (ta + tz) / 2), vz = lerp(z0, z1, (ta + tz) / 2);
+      const vWall = new THREE.BoxGeometry(len, 1.0, 0.45).rotateY(angle);
+      vWall.translate(vx, deckAt(L) + 0.5, vz);
+      local(vWall, stone);
+      const vCap = new THREE.BoxGeometry(len + 0.05, 0.10, 0.52).rotateY(angle);
+      vCap.translate(vx, deckAt(L) + 1.05, vz);
+      local(vCap, light);
+      pillar(lerp(x0, x1, tz), deckAt(L), lerp(z0, z1, tz), 1.15);
+    }
+
+    // Ruderi delle case rupestri accanto alla rampa (foto dal ponte verso ovest): celle in conci senza tetto, a U, con la
+    // porta; solo dove il terreno è quasi in piano, lontano dalle vie e dalla Chiesa Rupestre Madonna della Stella.
+    const chiesa = DATA.building('Chiesa Rupestre Madonna della Stella');
+    const cc = chiesa ? Plane.centroid(DATA.pairs(chiesa[3][0])) : [1e9, 1e9];
+    const ruin = [new THREE.Color('#d9cfb9'), new THREE.Color('#cbbfa5')];
+    let ruins = 0;
+    for (let tries = 0; tries < 80 && ruins < 6; tries++) {
+      const x = L + 4 + rr() * 26, z = -18 + rr() * (width + 36);
+      const w0 = atL(x, z), e = w0.x, n = -w0.z;
+      if (Math.hypot(e - cc[0], n - cc[1]) < 14) continue;
+      const W = 3.2 + rr() * 1.6, D = 2.8 + rr() * 1.2, rot = (rr() - 0.5) * 0.6;
+      const corners = [[-W / 2, -D / 2], [W / 2, -D / 2], [-W / 2, D / 2], [W / 2, D / 2]].map(([dx, dz]) => [x + dx * Math.cos(rot) - dz * Math.sin(rot), z + dx * Math.sin(rot) + dz * Math.cos(rot)]);
+      const gs = corners.map(([cx, cz]) => gAt(cx, cz));
+      if (Math.max(...gs) - Math.min(...gs) > 1.6) continue;
+      if (!corners.every(([cx, cz]) => free(cx, cz, 1.4)) || !free(x, z, 1.4)) continue;
+      const base = Math.min(...gs) - 0.3, col = ruin[ruins % 2];
+      const H = [1.0 + rr() * 0.9, 0.5 + rr() * 0.8, 0.8 + rr() * 1.0];
+      // fondo e due fianchi (il fronte resta aperto: la porta crollata), muri spessi 0.45 a quote diverse (crolli)
+      const walls = [[0, -D / 2, W, H[0]], [-W / 2, 0, D, H[1]], [W / 2, 0, D, H[2]]];
+      for (const [k, [mx, mz, len, h]] of walls.entries()) {
+        const g = new THREE.BoxGeometry(k === 0 ? len : 0.45, h + (Math.max(...gs) - base), k === 0 ? 0.45 : len);
+        g.translate(mx, base + (h + Math.max(...gs) - base) / 2, mz).rotateY(-rot);
+        g.translate(x, 0, z);
+        local(g, col);
+      }
+      ruins++;
     }
 
     // Muretto continuo di protezione lungo la rampa ovest (Via giudice Montea verso Madonna della Stella)
