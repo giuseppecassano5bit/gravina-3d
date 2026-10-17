@@ -2558,12 +2558,13 @@ LIVELLI = [
         (411148009, 273.9, 201.7, -3),
         (None, 214.9, 317.2, -5),
     ]),
-    ('Street View, Via Alcide De Gasperi 16 e 47, Corso Vittorio Emanuele 10 e 32, Corso Aldo Moro 8 (ott 2025; blocco 4.6)', [
+    ('Street View, Via Alcide De Gasperi 16 e 47, Corso Vittorio Emanuele 10 e 32, Corso Aldo Moro 8, Viale Orsini 69 (mag–ott 2025; blocco 4.6)', [
         (None, 371.8, -290.4, 3),          # angolo Via Firenze: palazzo dell'Ottocento a due piani alti (circa 10 m)
         (None, 388.6, -194.0, 3),          # palazzi col portale a due piani alti e tre
         (None, 266.2, -131.4, 6),          # palazzina bianca coi portici (OSM w411143607)
         (None, 366.8, -92.9, 3),           # la scuola: due piani alti sul seminterrato
         (None, 336.6, 342.4, 3),           # palazzo signorile a due piani alti, accanto alla casa rossa
+        (None, 296.0, -65.0, 7),           # Viale Orsini 69, angolo Via Libertà: palazzina moderna di sette livelli
     ]),
     # @@LIVELLI-FINE@@
     # Blocco N4b: le villette del triangolo Via Montale – Via Quasimodo – Via Bertocchi (edifici della città). I livelli si
