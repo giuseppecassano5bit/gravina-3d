@@ -1972,7 +1972,7 @@ def city_height(b, dense, industrial):
     """
     Altezza (m) di un edificio della città moderna. OpenStreetMap non ha quasi mai i piani,
     e le stime di Microsoft sono troppo basse (6-7 m per un condominio): si stima per tipo
-    e superficie. Palazzine da 2 a 6 piani nei quartieri, capannoni da 7 a 9 m, case di
+    e superficie. Palazzine da 2 a 5 piani nei quartieri, capannoni da 7 a 9 m, case di
     campagna da 1 a 2 piani.
     """
     if b['height']:
@@ -1997,7 +1997,9 @@ def city_height(b, dense, industrial):
     elif area < 400:
         floors = 3 + int(seed * 2.99)
     else:
-        floors = 4 + int(seed * 2.99)
+        # blocco 4.6: in OSM gli isolati grandi sono spesso una sagoma sola, e su Street View (Via Tripoli, Via De Gasperi)
+        # stanno in media su quattro livelli: da 4–6 a 3–5
+        floors = 3 + int(seed * 2.99)
     return floors * 3.3 + 0.6
 
 
@@ -2556,6 +2558,14 @@ LIVELLI = [
         (411148009, 273.9, 201.7, -3),
         (None, 214.9, 317.2, -5),
     ]),
+    ('Street View, Via Alcide De Gasperi 16 e 47, Corso Vittorio Emanuele 10 e 32, Corso Aldo Moro 8, Viale Orsini 69 (mag–ott 2025; blocco 4.6)', [
+        (None, 371.8, -290.4, 3),          # angolo Via Firenze: palazzo dell'Ottocento a due piani alti (circa 10 m)
+        (None, 388.6, -194.0, 3),          # palazzi col portale a due piani alti e tre
+        (None, 266.2, -131.4, 6),          # palazzina bianca coi portici (OSM w411143607)
+        (None, 366.8, -92.9, 3),           # la scuola: due piani alti sul seminterrato
+        (None, 336.6, 342.4, 3),           # palazzo signorile a due piani alti, accanto alla casa rossa
+        (None, 296.0, -65.0, 7),           # Viale Orsini 69, angolo Via Libertà: palazzina moderna di sette livelli
+    ]),
     # @@LIVELLI-FINE@@
     # Blocco N4b: le villette del triangolo Via Montale – Via Quasimodo – Via Bertocchi (edifici della città). I livelli si
     # contano sul lato più alto della sagoma (in città il tetto sta a gMax + altezza, Tiles.placeBuildings): sul lato basso
@@ -2586,6 +2596,31 @@ LIVELLI = [
         (411146069, 614.0, -442.1, 5),
         (411148728, 620.2, -434.2, 4),
     ]),
+    # Blocco 4.6: isolati della città sulle vie principali (in OSM un isolato è spesso una sagoma sola): i livelli della
+    # facciata sulla via, contati su Street View; dove l'isolato mescola case basse e palazzine conta la facciata più lunga.
+    ('Street View, Via Tripoli 14–109 (ott 2025; blocco 4.6)', [
+        (None, 358.2, -463.2, 4),
+        (None, 398.7, -456.8, 5),          # Via Tripoli 3: palazzina gialla di cinque livelli
+        (None, 581.0, -316.4, 4),          # Via Tripoli 56, angolo: palazzina bianca di quattro livelli
+        (None, 648.4, -273.4, 5),          # Via Tripoli 83: palazzine moderne
+        (None, 684.8, -248.4, 5),          # Via Tripoli 91
+        (None, 427.1, -417.9, 3),          # case vecchie a tre livelli (dietro, una palazzina di cinque)
+        (None, 458.0, -419.4, 3),          # Via Tripoli 29, angolo
+        (None, 462.0, -393.4, 3),          # Via Tripoli 54: case in tufo di due e tre livelli
+        (None, 509.9, -386.3, 4),          # Via Tripoli 33, angolo Via Trieste
+        (None, 742.6, -208.7, 4),
+        (None, 800.5, -170.8, 4),          # Via Tripoli 109
+        (None, 828.0, -143.1, 3),          # Via Tripoli 80, angolo Via Tagliamento
+        (None, 846.8, -151.5, 4),          # Via Tripoli 80, angolo opposto
+    ]),
+    ('Street View, Via Alcide De Gasperi 87–133 (ott 2025; blocco 4.6)', [
+        (None, 267.1, -666.8, 2),          # Via De Gasperi 133: casa a due livelli
+        (None, 302.3, -576.6, 3),          # Via De Gasperi 111: case in tufo a tre livelli
+        (None, 311.0, -538.4, 3),
+        (None, 333.3, -538.5, 4),
+        (None, 335.1, -407.7, 3),          # Via De Gasperi 87: case in tufo a tre livelli
+        (None, 346.9, -418.9, 2),          # di fronte: casa in tufo a due livelli
+    ]),
 ]
 
 
@@ -2611,7 +2646,7 @@ def livelli(old, city):
                 b['height'] = round(piani * (VILLETTA_PIANO if villa else FLOOR_H) + (VILLETTA_PARAPETTO if villa else 0.6), 1)
                 done['città'] += 1
                 continue
-            if b['kind'] != KIND['house']:
+            if b['kind'] not in (KIND['house'], KIND['apartments']):       # blocco 4.6: anche i condomini
                 sys.exit(f'LIVELLI: in ({e}, {n}) l\'edificio non è una casa (tipo {b["kind"]}) [{fonte}]')
             # piani negativi = «almeno»: la cima non si vede in foto; l'altezza si codifica come 100 m + il minimo
             # e il diorama prende il più alto tra il minimo e la regola (Buildings.height)

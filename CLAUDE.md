@@ -62,7 +62,9 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
   ricordato in `localStorage`), col consiglio «almeno 6 GB di memoria, per l'esperienza migliore usa un computer»; poi un
   pulsante «Accelera» da tenere premuto (`#btn-boost`). Con l'acceleratore agli incroci il mezzo **tira dritto** sulla via
   carrabile più dritta e rallenta solo quanto chiede la svolta (`Driver.cornerSpeed`, `CONFIG.drive.lateral`); una scelta
-  fatta a mano si rispetta. Gocce, tratti a piedi e giro guidato come prima.
+  fatta a mano si rispetta. Gocce e giro guidato come prima. **A piedi** (blocco 4.6, richiesta del committente) lo stesso
+  acceleratore fa **correre** la figurina (`CONFIG.drive.runSpeed`; sul telefono il pulsante diventa «Corri»), e i passi
+  (`Passi`, sezione 11d-bis) suonano a ogni piede che tocca terra, su pietra o su terra, camminando o di corsa.
 - **A piedi** (blocco G): marciapiedi, passaggi e scalinate reali del centro storico (flag 32,
   `WALK` in `genera_dati.py`) si percorrono con la figurina, solo se chiudono un anello con altre
   vie reali. Il mezzo si ferma all'imbocco e aspetta al tratto carrabile d'uscita (eccezione: ci
@@ -75,6 +77,10 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
   la città; dal blocco N1 c'è anche il limitatore sulle quote degli incroci, `#limitNodes`).
 - **Musica**: solo brani originali generati dal codice (sezione 11b). Niente canzoni o campioni di
   terzi, anche se richiesti: sono protetti e pesano più dell'intero diorama.
+- **Suoni del bosco** (sezione 11c, blocco 4.6): generati dal codice, mai registrazioni. Decisione del committente, che il
+  bosco lo conosce: solo il coro dei grilli, le cicale, ogni tanto un gufo comune o una civetta e qualche cinghiale lontano;
+  niente canti di uccelli, niente vento, niente lupo («spaventoso»). Fonti nel README.
+  Prova: `node bosco.mjs` (file `.wav` da far ascoltare in `tools/test/shots`).
 - **Eccezioni approvate dal committente il 01/10/2026 (blocco M2)**: i percorsi a piedi dentro la
   Fiera di San Giorgio e fino alla Base Scout non sono in OSM (`PERCORSI` in `genera_dati.py`) e si
   disegnano solo perché chiudono un anello con vie reali; Villa Comunale e Piazza della Repubblica sono

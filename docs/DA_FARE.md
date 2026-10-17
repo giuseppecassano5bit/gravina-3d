@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 16 ottobre 2026: fase 3 approvata e online, fase 3.4 completata e unita su `main` con tutti i blocchi da A a N8 (PR #30, commit `caceef6`). **Fase 4 · Rifinitura in corso**, completati il **Blocco 4.1 · Golden hour** (branch `fase-4-1-golden-hour`, PR #31), il **Blocco 4.2 · Sponde del Ponte, stabilità mezzi, rumore motori e boost Shift** (branch `fase-4-2-ponte-motori-stabilita`, PR #32 in bozza) il **Blocco 4.3 · Via giudice Montea (salita, parapetto e case pericolanti), campi sportivi, Seminario Vescovile e posizioni reali cinema** (branch `fase-4-3-montea-cinema-campi`, PR #33), tutti uniti su `main`. **Blocco 4.4 · Camera dopo il teletrasporto, schede sul telefono, accessibilità, licenza, testate del ponte, motori e velocità massime** (branch `fase-4-4-camera-schede-rifinitura`, PR #34), tutti uniti su `main`. **Blocco 4.5 · La guida** (acceleratore sul telefono e dritto agli incroci, niente tremolio, vie lunghe dritte; branch `fase-4-5-guida`, PR #35) unito su `main` il 17/10/2026. Prossimo: **Blocco 4.6** (prompt `riferimenti/PROMPT_FASE_4_6.md`), poi il 4.7.
+Stato al 16 ottobre 2026: fase 3 approvata e online, fase 3.4 completata e unita su `main` con tutti i blocchi da A a N8 (PR #30, commit `caceef6`). **Fase 4 · Rifinitura in corso**, completati il **Blocco 4.1 · Golden hour** (branch `fase-4-1-golden-hour`, PR #31), il **Blocco 4.2 · Sponde del Ponte, stabilità mezzi, rumore motori e boost Shift** (branch `fase-4-2-ponte-motori-stabilita`, PR #32 in bozza) il **Blocco 4.3 · Via giudice Montea (salita, parapetto e case pericolanti), campi sportivi, Seminario Vescovile e posizioni reali cinema** (branch `fase-4-3-montea-cinema-campi`, PR #33), tutti uniti su `main`. **Blocco 4.4 · Camera dopo il teletrasporto, schede sul telefono, accessibilità, licenza, testate del ponte, motori e velocità massime** (branch `fase-4-4-camera-schede-rifinitura`, PR #34), tutti uniti su `main`. **Blocco 4.5 · La guida** (acceleratore sul telefono e dritto agli incroci, niente tremolio, vie lunghe dritte; branch `fase-4-5-guida`, PR #35) unito su `main` il 17/10/2026. **Blocco 4.6 · Città e bosco** in corso (branch `fase-4-6-citta-bosco`, PR in bozza), poi il 4.7.
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) completata**: piano, dati, budget, rischi e divisione
@@ -465,8 +465,44 @@ commerciali e protette: il committente ha scelto musica ambient originale, gener
 - [x] Prove: `simula` verde, `interazioni` 86/86 (nuove: Shift tira dritto, pulsante «Accelera» sul telefono), `velocita` verde
       (svolte entro la velocità della curva), `difetti` invariati o migliori; prestazioni `shots/prestazioni-dopo-4-5.json`
       (60 fps, stessi triangoli e draw call; «Pronto» +0,19 s su PC e +0,26 s sul telefono, di cui 91 ms per `Raddrizza`).
-- [ ] Prossimi: **Blocco 4.6** (altezze degli edifici, sponda opposta del ponte, suoni del bosco con animali veri) e **Blocco 4.7**
-      (restyling, inglese, schermo intero, schede in orizzontale, schermata iniziale in orizzontale).
+- [x] Blocco 4.6 fatto (vedi sotto, in attesa del sì del committente). Prossimo: **Blocco 4.7** (restyling, inglese, schermo
+      intero, schede in orizzontale, schermata iniziale in orizzontale).
+
+### Blocco 4.6 · Città e bosco (branch `fase-4-6-citta-bosco`; piano approvato il 16/10/2026, proposte approvate il 17/10/2026)
+- [x] **Altezze degli edifici** (richiesta: «verificare che tutti gli edifici siano alla giusta altezza»): confronto su Street View
+      (ottobre 2025) di Via Tripoli, Via De Gasperi, Corso Vittorio Emanuele, Corso Aldo Moro, Piazza della Repubblica e Viale
+      Orsini. In OSM gli isolati della città sono spesso una sagoma sola e la regola per superficie dava 4–6 piani a palazzi di 2–3:
+      isolati grandi della città da 4–6 a 3–5 piani, condomini del centro da 4–6 a 3–5, 26 righe nuove in `LIVELLI` (anche i condomini).
+      Via Tripoli 14–54 da 6 a 3–4 piani, Via De Gasperi 87–133 da 4–5 a 2–3, i palazzi ottocenteschi di Via De Gasperi e Corso Aldo
+      Moro da 5 a 3, la palazzina di Corso Vittorio Emanuele 32 da 3 a 6, Viale Orsini 69 (angolo Via Libertà) da 2 a 7.
+- [ ] Altezze, ancora aperto: le **torri di 8–9 livelli dentro un isolato unico** (Corso Aldo Moro 8, Via Matteotti 18 accanto a
+      Piazza della Repubblica) restano basse: alzarle alzerebbe tutto l'isolato; servirebbe tagliare la sagoma (un contorno
+      indicativo dal satellite, da decidere col committente). E le altre **236 case del centro storico** con la regola: molte sono
+      pezzetti di 20–40 m² dello stesso isolato e l'abbinamento foto–sagoma non è sicuro; le vie con più case: Viale Orsini, Via
+      Matteotti, Via Ingannamorte, Via Fornaci, Via Borgo, Via San Nicola, Via Cassese.
+- [x] **Sponda ovest del Ponte Acquedotto** (opposta alla partenza) dalle foto di Wikimedia Commons: via la spalla squadrata e i
+      blocchi sotto l'arcata; cenge chiare a strati sul pendio con le grotte del villaggio rupestre, parapetti a ventaglio sullo
+      slargo, ruderi delle case rupestri accanto alla rampa. Il campanile della Madonna della Stella non è in OSM: non c'è.
+- [x] **Suoni del bosco** con gli animali del formulario Natura 2000 IT9120008 (Regione Puglia, 12/2023) e della pagina AGESCI
+      Gravina 1: tottavilla, cuculo, colombaccio, upupa, picchi, nibbio reale, gruccioni, succiacapre, assiolo, allocco, gufo comune,
+      rospo smeraldino, geco, cinghiale, fruscio dei serpenti e raro soffio della vipera, grilli; merlo e capinera restano. Tolti il
+      lupo, pettirosso, fringuello, cinciallegra, tortora e cicale; brezza appena accennata; al Casino di Meninni ululato del vento
+      dimezzato. Prova `node bosco.mjs` (`shots/bosco-passeggiata.wav`, `shots/bosco-versi.wav`). **Da far ascoltare al committente.**
+- [x] **Ritocchi chiesti dal committente il 17/10/2026** (con la foto da drone di Street View, febbraio 2019):
+      - **sponda ovest come nella foto**: lo slargo lastricato alla quota del ponte, la rampa (Via giudice Montea, tracciato
+        OSM) che sale dentro la **tagliata** tra due rupi di calcarenite a strati con le grotte alla base, il **pianoro** di
+        calcare bianco con le chiazze d'erba più alto di oltre 4 m (`SpondaOvest`, pendenza massima 16,4%), i muretti a secco
+        lungo la via in alto, la **torre** sopra la Madonna della Stella (non in OSM: posizione indicativa dalla foto), la
+        casetta di pietra al posto di quella col tetto rosso, i ruderi sulle terrazze a sud;
+      - **suoni del bosco, seconda versione** («meno cupa», «non sono suoni tipici»): solo il coro dei grilli, le cicale, ogni
+        tanto un gufo comune o una civetta e qualche cinghiale lontano; niente canti di uccelli né vento (`bosco-v2-*.wav`);
+      - **di corsa a piedi**: con l'acceleratore (Shift, o il pulsante che a piedi dice «Corri») la figurina corre a 5,4 m/s,
+        con la falcata lunga, le braccia piegate e il busto in avanti; i **passi** (`Passi`) suonano a ogni piede che tocca
+        terra, su pietra o su terra, 2 al secondo camminando e 3 di corsa (`shots/passi.wav`); nuova prova in `interazioni`.
+- [ ] Da verificare col committente: i colori del paesaggio lontano (Botromagno e i campi) restano quelli del tramonto del
+      diorama; la foto da drone è di febbraio, coi campi verdi.
+- [x] Prove: `simula` verde (0 problemi, 0 case, 0 dettagli sulla strada), `interazioni` 87/87, `bosco.mjs` senza saturazione;
+      prestazioni `shots/prestazioni-dopo-4-6.json` (60 fps; PC al massimo 357 300 triangoli e 55 draw call, telefono 231 600 e 35).
 - [ ] Da decidere con il committente: un pulsante per lo **schermo intero** (non c'è; su iPhone Safari non funziona fuori dai video).
 - [x] Musica procedurale Web Audio: la radio ambient del blocco G.
 - [x] Camera: giro automatico e camera libera nel blocco G.
