@@ -832,7 +832,7 @@ edifici del centro storico ora usano il `CODEC` (a 0,1 m, senza perdite), da 90 
 | 3.4 M3 | **Mezzi realistici e mongolfiera**, con il resto di M2 | ✅ (PR #18) |
 | 3.4 N1–N8 | **Centro storico vero, Fondovito, facciate, Meninni, villette, Capotenda, uliveti, Hortus, mezzi nuovi, luoghi cultura, cartolina e giro guidato** | ✅ (PR #19–#30) |
 | 4.1 | **Golden hour**: luci radenti calde, cielo crepuscolare murgiano, nebbia coordinata e ombre | ✅ (PR #31) |
-| 4.6 | **Città e bosco**: piani delle vie principali da Street View, sponda ovest del ponte dalle foto, suoni del bosco con animali verificati | ⏳ (branch `fase-4-6-citta-bosco`) |
+| 4.6 | **Città e bosco**: piani delle vie principali da Street View, sponda ovest del ponte dalla foto da drone, suoni del bosco (grilli, cicale, gufo, civetta, cinghiale), corsa a piedi coi passi | ✅ (PR #36) |
 | 4.2 | Licenza open source (`LICENSE`), note ODbL e Copernicus | ⏳ |
 | 4.3 | Rifinitura interfaccia e accessibilità | ⏳ |
 

@@ -1,6 +1,6 @@
 # Cosa resta da fare
 
-Stato al 16 ottobre 2026: fase 3 approvata e online, fase 3.4 completata e unita su `main` con tutti i blocchi da A a N8 (PR #30, commit `caceef6`). **Fase 4 · Rifinitura in corso**, completati il **Blocco 4.1 · Golden hour** (branch `fase-4-1-golden-hour`, PR #31), il **Blocco 4.2 · Sponde del Ponte, stabilità mezzi, rumore motori e boost Shift** (branch `fase-4-2-ponte-motori-stabilita`, PR #32 in bozza) il **Blocco 4.3 · Via giudice Montea (salita, parapetto e case pericolanti), campi sportivi, Seminario Vescovile e posizioni reali cinema** (branch `fase-4-3-montea-cinema-campi`, PR #33), tutti uniti su `main`. **Blocco 4.4 · Camera dopo il teletrasporto, schede sul telefono, accessibilità, licenza, testate del ponte, motori e velocità massime** (branch `fase-4-4-camera-schede-rifinitura`, PR #34), tutti uniti su `main`. **Blocco 4.5 · La guida** (acceleratore sul telefono e dritto agli incroci, niente tremolio, vie lunghe dritte; branch `fase-4-5-guida`, PR #35) unito su `main` il 17/10/2026. **Blocco 4.6 · Città e bosco** in corso (branch `fase-4-6-citta-bosco`, PR in bozza), poi il 4.7.
+Stato al 16 ottobre 2026: fase 3 approvata e online, fase 3.4 completata e unita su `main` con tutti i blocchi da A a N8 (PR #30, commit `caceef6`). **Fase 4 · Rifinitura in corso**, completati il **Blocco 4.1 · Golden hour** (branch `fase-4-1-golden-hour`, PR #31), il **Blocco 4.2 · Sponde del Ponte, stabilità mezzi, rumore motori e boost Shift** (branch `fase-4-2-ponte-motori-stabilita`, PR #32 in bozza) il **Blocco 4.3 · Via giudice Montea (salita, parapetto e case pericolanti), campi sportivi, Seminario Vescovile e posizioni reali cinema** (branch `fase-4-3-montea-cinema-campi`, PR #33), tutti uniti su `main`. **Blocco 4.4 · Camera dopo il teletrasporto, schede sul telefono, accessibilità, licenza, testate del ponte, motori e velocità massime** (branch `fase-4-4-camera-schede-rifinitura`, PR #34), tutti uniti su `main`. **Blocco 4.5 · La guida** (acceleratore sul telefono e dritto agli incroci, niente tremolio, vie lunghe dritte; branch `fase-4-5-guida`, PR #35) unito su `main` il 17/10/2026. **Blocco 4.6 · Città e bosco** (altezze, sponda ovest del ponte, suoni del bosco, corsa a piedi; PR #36) unito su `main` il 17/10/2026. Prossimo: **Blocco 4.7 · Interfaccia**.
 Aggiornare questo file a ogni fase.
 
 **Fase 3.4 (Gravina oltre il centro storico) completata**: piano, dati, budget, rischi e divisione
@@ -465,10 +465,10 @@ commerciali e protette: il committente ha scelto musica ambient originale, gener
 - [x] Prove: `simula` verde, `interazioni` 86/86 (nuove: Shift tira dritto, pulsante «Accelera» sul telefono), `velocita` verde
       (svolte entro la velocità della curva), `difetti` invariati o migliori; prestazioni `shots/prestazioni-dopo-4-5.json`
       (60 fps, stessi triangoli e draw call; «Pronto» +0,19 s su PC e +0,26 s sul telefono, di cui 91 ms per `Raddrizza`).
-- [x] Blocco 4.6 fatto (vedi sotto, in attesa del sì del committente). Prossimo: **Blocco 4.7** (restyling, inglese, schermo
+- [x] Blocco 4.6 unito su `main` il 17/10/2026 (PR #36, col sì del committente). Prossimo: **Blocco 4.7** (restyling, inglese, schermo
       intero, schede in orizzontale, schermata iniziale in orizzontale).
 
-### Blocco 4.6 · Città e bosco (branch `fase-4-6-citta-bosco`; piano approvato il 16/10/2026, proposte approvate il 17/10/2026)
+### Blocco 4.6 · Città e bosco (PR #36, unito su `main` il 17/10/2026; piano approvato il 16/10/2026, proposte approvate il 17/10/2026)
 - [x] **Altezze degli edifici** (richiesta: «verificare che tutti gli edifici siano alla giusta altezza»): confronto su Street View
       (ottobre 2025) di Via Tripoli, Via De Gasperi, Corso Vittorio Emanuele, Corso Aldo Moro, Piazza della Repubblica e Viale
       Orsini. In OSM gli isolati della città sono spesso una sagoma sola e la regola per superficie dava 4–6 piani a palazzi di 2–3:
