@@ -432,6 +432,26 @@
   .boost-opt__short { display: none; }
   @media (max-height: 520px) { .boost-opt { margin-top: 0.45rem; } .boost-opt input { width: 18px; height: 18px; } .boost-opt__long { display: none; } .boost-opt__short { display: inline; } }
 
+  /* Volo libero V-22 Osprey: comandi touch per smartphone */
+  .heli-touch {
+    position: absolute; left: 0; right: 0; bottom: calc(18px + var(--safe-bottom));
+    display: flex; justify-content: space-between; align-items: flex-end;
+    padding: 0 calc(var(--gutter) + var(--safe-left)) 0 calc(var(--gutter) + var(--safe-right));
+    pointer-events: none; z-index: 10;
+  }
+  .heli-touch[hidden], .hud.is-paused .heli-touch { display: none !important; }
+  .heli-dpad, .heli-altitude { display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: auto; }
+  .heli-dpad__row { display: flex; gap: 6px; }
+  .heli-btn {
+    background: var(--dusk-glass); border: 1.5px solid var(--sunset); border-radius: 8px;
+    color: #fff; font: 700 0.8rem/1 var(--font-sign); text-transform: uppercase;
+    min-width: 44px; height: 44px; display: grid; place-items: center;
+    cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35); transition: transform 0.1s ease, background 0.1s ease;
+  }
+  .heli-btn:active, .heli-btn.is-active { background: var(--sunset); color: #1a1f2e; transform: scale(0.92); }
+  .heli-btn--climb, .heli-btn--descend { width: 72px; font-size: 0.72rem; }
+
   /* Etichette 3D dei monumenti (proiettate ogni frame) */
   .labels { position: fixed; inset: 0; pointer-events: none; overflow: hidden; opacity: 0; transition: opacity 1.5s ease 1s; }
   .labels.is-visible { opacity: 1; }
@@ -483,8 +503,8 @@
   .vcard__name { font: 700 0.95rem/1.15 var(--font-sign); color: var(--marble); }
   .vcard__tag { font: 500 0.74rem/1.25 var(--font-sign); color: #CDBB98; }
   .vcard__short { display: none; }
-  /* blocco M3: la mongolfiera non è un'auto, ha una riga tutta per sé */
-  .vcard--air { grid-column: 1 / -1; }
+  /* Con due velivoli (mongolfiera e Osprey) stanno affiancati a due colonne come le auto */
+  .vcard--air { grid-column: auto; }
 
   /* ── Pausa ──────────────────────────────────────────────────────────── */
   .pause-btn {
@@ -730,11 +750,13 @@
   /* ── Portatili e finestre basse: la schermata iniziale deve entrare tutta,
    *    credito e attribuzione compresi (a 1280×720 finivano sotto il bordo). */
   @media (min-width: 641px) and (max-height: 880px) {
-    .start { padding-bottom: calc(clamp(16px, 3vh, 32px) + var(--safe-bottom)); }
-    .start__panel { gap: 0.8rem; }
-    .start h1 { font-size: clamp(2.3rem, 8.2vh, 4.8rem); }
-    .lede { font-size: 1rem; line-height: 1.5; }
-    .credit { padding-top: 0.7rem; margin-top: 0; }
+    .start { padding-bottom: calc(clamp(12px, 2vh, 24px) + var(--safe-bottom)); }
+    .start__panel { gap: 0.62rem; }
+    .start h1 { font-size: clamp(2.1rem, 7vh, 4rem); }
+    .lede { font-size: 0.95rem; line-height: 1.4; }
+    .picker { gap: 0.42rem; }
+    .vcard { min-height: 52px; padding: 0.35rem 0.55rem; }
+    .credit { padding-top: 0.45rem; margin-top: 0; }
   }
 
   /* ── Schermi bassi (telefono in orizzontale) ────────────────────────── */
@@ -774,7 +796,8 @@
    *    tessere su una sola riga, sagoma sopra e nome breve sotto; il nome intero resta per
    *    i lettori di schermo. Il pannello iniziale si abbassa e il mezzo resta in vista. */
   @media (max-width: 640px), (max-height: 520px) {
-    .picker { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.4rem; }
+    .picker { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.28rem; }
+    @media (max-width: 440px) and (orientation: portrait) { .picker { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.35rem; } }
     .picker__legend { margin-bottom: 0.45rem; }
     .vcard {
       grid-template-columns: minmax(0, 1fr); justify-items: center; row-gap: 0.3rem;
@@ -869,7 +892,9 @@
       <h3>Come si usa</h3>
       <dl class="about__keys">
         <dt>Partenza</dt>
-        <dd>Scegli il mezzo (Fiat Panda 4x4 del 1999, Audi RS6 Avant, Lamborghini Huracán, trattore John Deere o la mongolfiera) e premi Parti: il mezzo va avanti da solo.</dd>
+        <dd>Scegli il mezzo (Fiat Panda 4x4 del 1999, Audi RS6 Avant, Lamborghini Huracán, trattore John Deere, la mongolfiera o il convertiplano militare V-22 Osprey) e premi Parti.</dd>
+        <dt>In convertiplano V-22 Osprey</dt>
+        <dd>Volo libero in 3D sopra tutta Gravina senza percorsi fissi: con <kbd>W</kbd>/<kbd>S</kbd> o <kbd>↑</kbd>/<kbd>↓</kbd> acceleri avanti/indietro, con <kbd>A</kbd>/<kbd>D</kbd> viri, con <kbd>Spazio</kbd> sali di quota e con <kbd>C</kbd> scendi; con <kbd>Shift</kbd> acceleratore turbo. Sul telefono compaiono i comandi touch direzionali e di quota a schermo.</dd>
         <dt>In mongolfiera</dt>
         <dd>Si decolla da Botromagno per un giro di circa sette minuti sopra la necropoli, il Ponte Acquedotto e il centro storico, sempre ben sopra i tetti. Il pulsante Vista dalla cesta passa dalla vista esterna a quella del visitatore, e viceversa. Alla fine si atterra e si riparte in auto.</dd>
         <dt>Agli incroci</dt>
@@ -897,7 +922,7 @@
       <ul>
         <li>Dati cartografici © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors, con licenza <a href="https://opendatacommons.org/licenses/odbl/" target="_blank" rel="noopener">ODbL 1.0</a>, tramite <a href="https://overturemaps.org" target="_blank" rel="noopener">Overture Maps</a>.</li>
         <li>Grafica 3D con <a href="https://threejs.org" target="_blank" rel="noopener">Three.js</a> (licenza MIT). Caratteri Marcellus SC e Barlow (SIL Open Font License), da Google Fonts.</li>
-        <li>Fiat, Panda, Audi, RS6, Lamborghini, Huracán e John Deere sono marchi dei rispettivi proprietari. I mezzi del diorama sono interpretazioni stilizzate e non ufficiali, senza loghi.</li>
+        <li>Fiat, Panda, Audi, RS6, Lamborghini, Huracán, John Deere e Bell Boeing V-22 Osprey sono marchi dei rispettivi proprietari. I mezzi del diorama sono interpretazioni stilizzate e non ufficiali, senza loghi.</li>
       </ul>
     </div>
   </div>
@@ -994,6 +1019,22 @@
     <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13l6-6 6 6M6 19l6-6 6 6"/></svg>
     <span>Accelera</span>
   </button>
+
+  <!-- Volo libero V-22 Osprey: comandi touch smartphone -->
+  <div class="heli-touch" id="heli-touch" hidden>
+    <div class="heli-dpad">
+      <button class="heli-btn heli-btn--up" id="btn-heli-up" type="button" aria-label="Spinta avanti">▲</button>
+      <div class="heli-dpad__row">
+        <button class="heli-btn heli-btn--left" id="btn-heli-left" type="button" aria-label="Vira a sinistra">◀</button>
+        <button class="heli-btn heli-btn--down" id="btn-heli-down" type="button" aria-label="Frena o retromarcia">▼</button>
+        <button class="heli-btn heli-btn--right" id="btn-heli-right" type="button" aria-label="Vira a destra">▶</button>
+      </div>
+    </div>
+    <div class="heli-altitude">
+      <button class="heli-btn heli-btn--climb" id="btn-heli-climb" type="button" aria-label="Sali di quota">▲ Quota</button>
+      <button class="heli-btn heli-btn--descend" id="btn-heli-descend" type="button" aria-label="Scendi di quota">▼ Quota</button>
+    </div>
+  </div>
 
   <div class="tour-hud" id="tour-hud" role="region" aria-label="Giro guidato" hidden>
     <span class="tour-hud__badge"><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 4v4l2.5 2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Giro guidato</span>
@@ -12787,8 +12828,14 @@ const VEHICLES = [
   },
   // Blocco M3: il quinto mezzo vola su un giro fisso (sezione 8b) e non segue le vie.
   {
-    id: 'balloon', name: 'Mongolfiera', short: 'Mongolfiera', tag: 'Il giro da Botromagno sopra il centro storico', color: '#b5552f', pace: 1, air: true,
+    id: 'balloon', name: 'Mongolfiera', short: 'Mongolfiera', tag: 'Giro panoramico da Botromagno', color: '#b5552f', pace: 1, air: true,
     icon: { body: 'M32 1.5c-7.2 0-12.5 4.6-12.5 10.6 0 4.6 3.4 8.3 8.5 11.4h8c5.1-3.1 8.5-6.8 8.5-11.4C44.5 6.1 39.2 1.5 32 1.5zM28.6 24.6h6.8l-.5 1.2h-5.8zM28.8 26.8h6.4v4.4h-6.4z', wheels: [] },
+  },
+  // Mezzo aereo militare: Bell Boeing V-22 Osprey convertiplano VTOL con volo libero senza vincoli né percorsi preimpostati.
+  {
+    id: 'osprey', name: 'V-22 Osprey', short: 'Osprey', tag: 'Volo libero · Convertiplano VTOL', color: '#4a5056', pace: 1.8, air: true, freeFlight: true,
+    top: 250, accel: [4.0, 10.0],
+    icon: { body: 'M2 19.5l4.5-4 17.5-.8 11.2-2.7 11.8.8 12.5 3.5 3.5 2-4.5 2.8H26l-13.5 2.5-7.5-.8z M27 9h7.5v8.5H27z M14 4h34v2.5H14z M56 10h4v12h-4z', wheels: [] },
   },
 ];
 
@@ -13654,6 +13701,155 @@ VehicleFactory.register('balloon', () => {
 });
 
 /**
+ * 7d. IL V-22 OSPREY (convertiplano militare VTOL):
+ * Fusoliera militare aerodinamica cargo in grigio avionico mimetico, abitacolo sfaccettato con vetratura fumé
+ * e sonda di rifornimento anteriore, sponson laterali per serbatoi e carrelli tricicli, impennaggio di coda ad H
+ * con doppie derive verticali e ali alte con due gondole motore (nacelles) orientabili e due grandi rotori
+ * tripala controrotanti che girano veloci in volo.
+ */
+VehicleFactory.register('osprey', () => {
+  const { Shop, F, fin, M4 } = VehicleFactory;
+  const k = new Shop('osprey');
+  const G_DARK = fin('#363b42', 0.25, 0.75), G_BODY = fin('#4a5057', 0.2, 0.72), G_BELLY = fin('#5b6169', 0.15, 0.8), G_TRIM = fin('#24272c', 0.15, 0.85);
+  const G_GLASS = fin('#14171a', 0.6, 0.15);
+
+  // 1. Fusoliera principale cargo (da z = -3.8 a z = 3.6)
+  k.box(2.4, 2.2, 7.4, G_BODY, [0, 1.8, -0.1]);
+  // Ventre inferiore rastremato
+  k.box(2.2, 0.4, 7.0, G_BELLY, [0, 0.7, -0.1]);
+
+  // 2. Rampa posteriore di carico (da z = -3.8 a z = -7.2, rastremata verso l'alto)
+  k.geo(new THREE.BoxGeometry(2.38, 2.18, 3.4), G_BODY, M4([0, 2.4, -5.5], [-0.18, 0, 0], [0.92, 0.68, 1]));
+
+  // 3. Trave di coda (da z = -7.2 a -9.8) e impennaggio
+  k.box(1.2, 1.1, 2.8, G_BODY, [0, 3.2, -8.5]);
+  // Piano orizzontale di coda a H (largo 6.8 m a y = 4.4, z = -9.6)
+  k.box(6.8, 0.18, 1.3, G_BODY, [0, 4.4, -9.6]);
+  // Due derive verticali gemelle ad H alle estremità del piano di coda (x = ±3.4, y = 4.4, z = -9.6)
+  k.both((s) => {
+    k.box(0.16, 2.8, 1.6, G_BODY, [3.4 * s, 4.4, -9.6], [0, 0, -s * 0.05]);
+    // Timoni verticali posteriori
+    k.box(0.14, 2.6, 0.45, G_TRIM, [3.4 * s, 4.4, -10.3], [0, 0, -s * 0.05]);
+    // Pinnette inferiori di stabilizzazione
+    k.box(0.12, 0.9, 0.9, G_TRIM, [3.4 * s, 2.6, -9.6]);
+  });
+
+  // 4. Muso e cabina di pilotaggio (da z = 3.6 a 7.2)
+  k.geo(new THREE.BoxGeometry(2.36, 2.1, 3.2), G_BODY, M4([0, 1.65, 5.0], [0.15, 0, 0], [0.82, 0.85, 1]));
+  // Radome anteriore a punta arrotondata
+  k.cyl(0.25, 0.7, 1.4, 8, G_DARK, [0, 1.35, 7.1], [Math.PI / 2, 0, 0]);
+  // Vetrature cockpit fumé sfaccettate
+  k.box(1.9, 0.85, 1.5, G_GLASS, [0, 2.05, 5.2], [0.38, 0, 0]);
+  k.both((s) => {
+    k.box(0.1, 0.7, 1.4, G_GLASS, [0.95 * s, 1.95, 4.8], [0.1, 0, 0]);
+  });
+  // Sonda di rifornimento anteriore sul lato destro del muso (come nella foto)
+  k.cyl(0.045, 0.045, 2.4, 6, F.graphite, [0.88, 1.45, 7.4], [Math.PI / 2, 0, 0]);
+  k.cyl(0.02, 0.06, 0.25, 6, F.steel, [0.88, 1.45, 8.65], [Math.PI / 2, 0, 0]);
+
+  // 5. Sponson laterali (pod aerodinamici per vani carrello e serbatoi sui fianchi bassi)
+  k.both((s) => {
+    k.box(0.65, 0.95, 5.6, G_DARK, [1.45 * s, 1.25, 0.2]);
+    k.geo(new THREE.BoxGeometry(0.65, 0.95, 1.2), G_DARK, M4([1.45 * s, 1.25, 3.2], [0.25, 0, 0]));
+    k.geo(new THREE.BoxGeometry(0.65, 0.95, 1.2), G_DARK, M4([1.45 * s, 1.25, -2.8], [-0.25, 0, 0]));
+  });
+
+  // 6. Carrelli tricicli (poggiano a terra a y = 0)
+  k.cyl(0.05, 0.05, 0.95, 6, F.steel, [0, 0.55, 5.2]);
+  k.both((s) => {
+    k.geo(new THREE.CylinderGeometry(0.24, 0.24, 0.12, 10), F.rubber, M4([0.16 * s, 0.24, 5.2], [0, 0, Math.PI / 2]));
+  });
+  k.both((s) => {
+    k.cyl(0.06, 0.06, 1.0, 6, F.steel, [1.45 * s, 0.65, -0.4]);
+    for (const dz of [-0.25, 0.25]) {
+      k.geo(new THREE.CylinderGeometry(0.32, 0.32, 0.16, 10), F.rubber, M4([1.45 * s, 0.32, -0.4 + dz], [0, 0, Math.PI / 2]));
+    }
+  });
+
+  // 7. Ali ad ala alta montate sopra la fusoliera a y = 2.95, z = 0.5 (apertura 15.2 m)
+  k.box(15.2, 0.36, 2.5, G_BODY, [0, 2.95, 0.5]);
+  k.box(2.4, 0.45, 3.4, G_DARK, [0, 3.05, 0.5]);
+
+  // Luci alari di navigazione
+  k.box(0.12, 0.08, 0.2, F.blinkL, [-7.6, 2.95, 0.5]); // Sinistra rossa
+  k.box(0.12, 0.08, 0.2, F.blinkR, [7.6, 2.95, 0.5]);  // Destra verde
+  k.box(0.12, 0.15, 0.15, F.drl, [-3.4, 5.8, -9.6]);   // Stroboscopica bianca
+
+  // 8. Gondole motore basculanti (Nacelles) e rotori mobili
+  const nacelles = [], rotors = [];
+  const makeNacelle = (side) => {
+    const nacRoot = new THREE.Group();
+    nacRoot.position.set(7.6 * side, 2.95, 0.5);
+
+    // Corpo della gondola cilindrico aerodinamico
+    const nacMat = new THREE.MeshStandardMaterial({ color: 0x43494f, roughness: 0.72, metalness: 0.25, flatShading: true });
+    const nacGeom = new THREE.CylinderGeometry(0.56, 0.56, 3.8, 10);
+    nacGeom.rotateX(Math.PI / 2);
+    const nacMesh = new THREE.Mesh(nacGeom, nacMat);
+    nacMesh.position.set(0, 0, 0.3);
+    nacMesh.castShadow = true;
+    nacRoot.add(nacMesh);
+
+    // Presa d'aria frontale
+    const rimGeom = new THREE.TorusGeometry(0.52, 0.08, 4, 10);
+    const rimMesh = new THREE.Mesh(rimGeom, new THREE.MeshStandardMaterial({ color: 0x222528, roughness: 0.8, flatShading: true }));
+    rimMesh.position.set(0, 0, 2.2);
+    nacRoot.add(rimMesh);
+
+    // Mozzo centrale ogivale del rotore
+    const hubGeom = new THREE.CylinderGeometry(0.12, 0.46, 1.1, 8);
+    hubGeom.rotateX(Math.PI / 2);
+    const hubMesh = new THREE.Mesh(hubGeom, new THREE.MeshStandardMaterial({ color: 0x1a1c1e, roughness: 0.6, metalness: 0.4, flatShading: true }));
+    hubMesh.position.set(0, 0, 2.65);
+    nacRoot.add(hubMesh);
+
+    // Gruppo rotore tripala
+    const rotorGroup = new THREE.Group();
+    rotorGroup.position.set(0, 0, 2.85);
+
+    const bladeMat = new THREE.MeshStandardMaterial({ color: 0x181a1d, roughness: 0.7, flatShading: true });
+    const tipMat = new THREE.MeshStandardMaterial({ color: 0xc49a2a, roughness: 0.5, flatShading: true });
+    for (let i = 0; i < 3; i++) {
+      const bladeArm = new THREE.Group();
+      bladeArm.rotation.z = (i / 3) * TAU;
+
+      const bladeGeom = new THREE.BoxGeometry(0.48, 5.2, 0.05);
+      bladeGeom.translate(0, 2.7, 0);
+      const bladeMesh = new THREE.Mesh(bladeGeom, bladeMat);
+      bladeMesh.castShadow = true;
+      bladeArm.add(bladeMesh);
+
+      const tipGeom = new THREE.BoxGeometry(0.48, 0.5, 0.06);
+      tipGeom.translate(0, 5.2, 0);
+      const tipMesh = new THREE.Mesh(tipGeom, tipMat);
+      bladeArm.add(tipMesh);
+
+      rotorGroup.add(bladeArm);
+    }
+    nacRoot.add(rotorGroup);
+
+    k.extra.push(nacRoot);
+    nacelles.push(nacRoot);
+    rotors.push({ group: rotorGroup, dir: side });
+  };
+
+  makeNacelle(1);
+  makeNacelle(-1);
+
+  return k.build({
+    dims: { length: 18, width: 26, height: 6.8 },
+    shake: 0.003,
+    freq: 16,
+    extra: (dt, speed, time, L) => {
+      const tilt = L.tilt !== undefined ? L.tilt : Math.PI / 2;
+      for (const n of nacelles) n.rotation.x = -tilt;
+      const rAngle = L.rotorAngle !== undefined ? L.rotorAngle : (time * 28);
+      for (const r of rotors) r.group.rotation.z = rAngle * r.dir;
+    }
+  });
+});
+
+/**
  * La figurina che percorre i tratti a piedi (blocco G): un visitatore stilizzato con cappello
  * di paglia e zaino, circa 200 triangoli in una mesh sola (una draw call). Gambe e braccia
  * oscillano spostando i vertici attorno ad anca e spalla: nessuna mesh in più. Guarda verso +z.
@@ -14387,6 +14583,141 @@ class Flight {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
+ * 8c. V-22 OSPREY: volo libero senza vincoli né percorsi preimpostati.
+ *     Controllabile con tastiera su PC (WASD o frecce, Spazio/C per la quota,
+ *     Shift per l'acceleratore boost) e con comandi touch dedicati su smartphone.
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+class OspreyFlight {
+  constructor(events) {
+    this.events = events;
+    this.position = new THREE.Vector3(-680, 52, 720); // Pianoro di Botromagno con vista aperta sul ponte
+    this.forward = new THREE.Vector3(0.85, 0, -0.52).normalize();
+    this.velocity = new THREE.Vector3();
+    this.yaw = Math.atan2(this.forward.x, this.forward.z);
+    this.pitch = 0;
+    this.roll = 0;
+    this.speed = 0;
+    this.vy = 0;
+    this.tilt = Math.PI / 2; // Verticale VTOL
+    this.rotorAngle = 0;
+    this.rpm = 80;
+    this.audioLevel = 0;
+    this.running = false;
+    this.paused = false;
+    this.done = false;
+    this.grounded = true;
+    this.freeFlight = true;
+    this.onFoot = false;
+    this.car = null;
+    this.decision = null;
+    this.nextChoice = null;
+    this.edge = null;
+    this.sitting = null;
+    this.title = 'V-22 Osprey · Volo libero';
+    this.input = { throttle: 0, turn: 0, climb: 0, boost: false };
+  }
+
+  place(e, n, y = null) {
+    const g = Terrain.heightAt(e, n);
+    const roof = Buildings.roofAt ? Buildings.roofAt(e, n) : -Infinity;
+    const floor = Math.max(g, roof) + 0.9;
+    this.position.set(e, y ?? (floor + 35), -n);
+    this.velocity.set(0, 0, 0);
+    this.speed = 0;
+    this.vy = 0;
+    this.grounded = (this.position.y <= floor + 1.2);
+    this.tilt = this.grounded ? Math.PI / 2 : 0.35;
+  }
+
+  start() {
+    this.running = true;
+    this.paused = false;
+    if (this.grounded) {
+      this.vy = 5; // Salita immediata di decollo
+      this.grounded = false;
+    }
+  }
+
+  pause() { this.paused = true; }
+  resume() { this.paused = false; }
+  get stopped() { return this.speed < 0.1 && Math.abs(this.vy) < 0.1; }
+
+  update(dt, time = 0) {
+    if (this.paused || dt <= 0) return;
+
+    const g = Terrain.heightAt(this.position.x, -this.position.z);
+    const roof = Buildings.roofAt ? Buildings.roofAt(this.position.x, -this.position.z) : -Infinity;
+    const floor = Math.max(g, roof) + 0.9;
+
+    // Regime rotori
+    const targetRpm = this.grounded && !this.running ? 25 : this.input.boost ? 140 : 100;
+    this.rpm += (targetRpm - this.rpm) * damp(3, dt);
+    this.rotorAngle = (this.rotorAngle + this.rpm * dt) % TAU;
+
+    if (this.running) {
+      // 1. Virata (Yaw)
+      const turnRate = this.input.turn !== 0 ? this.input.turn * 1.5 : 0;
+      this.yaw += turnRate * dt;
+      this.forward.set(Math.sin(this.yaw), 0, Math.cos(this.yaw));
+
+      // 2. Rollio dinamico inclinato in virata
+      const targetRoll = -turnRate * Math.min(1, Math.max(0.2, this.speed / 10)) * 0.45;
+      this.roll += (targetRoll - this.roll) * damp(4, dt);
+
+      // 3. Velocità e spinta orizzontale
+      const maxSpd = this.input.boost ? 68 : 28;
+      let targetSpd = this.speed;
+      if (this.input.throttle > 0) {
+        targetSpd = this.input.boost ? maxSpd : 28;
+      } else if (this.input.throttle < 0) {
+        targetSpd = -8;
+      } else {
+        // Se non si preme la spinta, decelera verso l'hovering
+        targetSpd = Math.max(0, this.speed - 3.5 * dt);
+      }
+      this.speed += (targetSpd - this.speed) * damp(this.input.throttle !== 0 ? 2.2 : 1.1, dt);
+
+      // Beccheggio dinamico (muso che si abbassa in spinta)
+      const targetPitch = clamp(-this.speed * 0.012 - this.input.throttle * 0.08, -0.3, 0.2);
+      this.pitch += (targetPitch - this.pitch) * damp(3.5, dt);
+
+      // Inclinazione gondole (VTOL -> Crociera aereo)
+      const targetTilt = clamp(Math.PI / 2 - (this.speed / 50) * (Math.PI * 0.38), 0.15, Math.PI / 2);
+      this.tilt += (targetTilt - this.tilt) * damp(2.5, dt);
+
+      // 4. Quota e velocità verticale
+      let targetVy = 0;
+      if (this.input.climb > 0) targetVy = this.input.boost ? 14 : 7;
+      else if (this.input.climb < 0) targetVy = -7;
+      else targetVy = (this.grounded ? 0 : Math.sin(time * 1.5) * 0.15);
+      this.vy += (targetVy - this.vy) * damp(3, dt);
+
+      // Spostamento libero nello spazio 3D
+      this.position.x += this.forward.x * this.speed * dt;
+      this.position.z += this.forward.z * this.speed * dt;
+      this.position.y += this.vy * dt;
+
+      // Limiti altitudine dal suolo e tetti
+      if (this.position.y <= floor + 0.1) {
+        this.position.y = floor;
+        if (this.vy < 0) this.vy = 0;
+        this.grounded = true;
+        this.speed *= damp(5, dt);
+      } else {
+        this.grounded = false;
+      }
+      if (this.position.y > 380) {
+        this.position.y = 380;
+        this.vy = Math.min(0, this.vy);
+      }
+    }
+
+    this.audioLevel = this.grounded && !this.running ? 0.2 : (0.45 + (this.speed / 68) * 0.45 + (this.input.boost ? 0.2 : 0));
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
  * 9. CAMERA CINEMATOGRAFICA
  *    Vetrina (il mezzo fermo, visto dal lato aperto) → inseguimento
  *    dall'alto (vista da plastico), con panoramiche sul canyon e sul ponte.
@@ -14467,13 +14798,21 @@ class CameraRig {
   }
 
   /** Vero mentre la camera è libera (per il pulsante «Segui il mezzo»). */
-  get free() { return (this.orbit.on && (this.mode === 'drive' || this.mode === 'balloon')) || (this.mode === 'balloon' && this.look.on); }
+  get free() { return (this.orbit.on && (this.mode === 'drive' || this.mode === 'balloon' || this.mode === 'heli')) || (this.mode === 'balloon' && this.look.on); }
 
   /** Mongolfiera (blocco M3): giro largo attorno al pallone, o in vetrina sul prato del decollo (`show`). */
   balloon(show = false) {
     this.mode = show ? 'balloonShow' : 'balloon';
     Object.assign(this.orbit, { on: false, w: 0 });
     Object.assign(this.look, { yaw: 0, pitch: 0, on: false });
+    this.t = 0;
+    if (show) this.pending = true;
+  }
+
+  /** V-22 Osprey: visuale dinamica aerea di volo libero, o in vetrina (`show`). */
+  heli(show = false) {
+    this.mode = show ? 'heliShow' : 'heli';
+    Object.assign(this.orbit, { on: false, w: 0 });
     this.t = 0;
     if (show) this.pending = true;
   }
@@ -14501,6 +14840,14 @@ class CameraRig {
       O.elev = clamp(O.elev + dy * 0.005, rad(-5), rad(80));
       return;
     }
+    if (this.mode === 'heli') {
+      const O = this.orbit, rad = THREE.MathUtils.degToRad;
+      if (!O.on) Object.assign(O, { yaw: 0, elev: rad(18), dist: 28 });
+      O.on = true;
+      O.yaw -= dx * 0.006;
+      O.elev = clamp(O.elev + dy * 0.005, rad(-5), rad(80));
+      return;
+    }
     if (this.mode !== 'drive') return;
     const O = this.orbit, C = CONFIG.camera.orbit, rad = THREE.MathUtils.degToRad;
     if (!O.on && O.w < 0.05) Object.assign(O, this._current);       // si parte dalla vista di adesso
@@ -14517,6 +14864,13 @@ class CameraRig {
       if (!O.on) Object.assign(O, { yaw: this.spin, elev: THREE.MathUtils.degToRad(C.elev), dist: C.dist });
       O.on = true;
       O.dist = clamp(O.dist * f, C.minDist, C.maxDist);
+      return;
+    }
+    if (this.mode === 'heli') {
+      const O = this.orbit;
+      if (!O.on) Object.assign(O, { yaw: 0, elev: THREE.MathUtils.degToRad(18), dist: 28 });
+      O.on = true;
+      O.dist = clamp(O.dist * f, 12, 100);
       return;
     }
     if (this.mode !== 'drive') return;
@@ -14757,11 +15111,36 @@ class CameraRig {
     return Math.min(need, this.maxLift ?? CONFIG.camera.maxLift);
   }
 
+  #heliPose(dt, heli) {
+    const p = heli.position;
+    this.t += dt;
+    if (this.mode === 'heliShow') {
+      const a = heli.yaw + Math.PI * 0.72 + 0.25 * Math.sin(this.t * 0.15);
+      const R = this.camera.aspect < 1 ? 45 : 32;
+      this._wantPos.set(p.x + Math.sin(a) * R, p.y + 6, p.z + Math.cos(a) * R);
+      this._wantTarget.set(p.x, p.y + 2, p.z);
+      return;
+    }
+    const O = this.orbit;
+    O.w += ((O.on ? 1 : 0) - O.w) * (dt > 0 ? damp(O.on ? 10 : 2, dt) : 1);
+    const w = smoothstep(0, 1, O.w);
+    this.chaseYaw += angleDiff(this.chaseYaw, heli.yaw) * damp(3.2, dt);
+    const yaw = this.chaseYaw + Math.PI + (O.on ? O.yaw : 0) * w;
+    const elev = THREE.MathUtils.degToRad(lerp(16, O.elev ? THREE.MathUtils.radToDeg(O.elev) : 16, w));
+    const dist = lerp(26 + Math.min(18, heli.speed * 0.25), O.dist ?? 26, w);
+    this._wantPos.set(p.x + Math.sin(yaw) * Math.cos(elev) * dist, p.y + Math.sin(elev) * dist + 2.5, p.z + Math.cos(yaw) * Math.cos(elev) * dist);
+    const floor = Math.max(Terrain.heightAt(this._wantPos.x, -this._wantPos.z), Buildings.roofAt?.(this._wantPos.x, -this._wantPos.z) ?? -Infinity) + 2.2;
+    if (this._wantPos.y < floor) this._wantPos.y = floor;
+    const ahead = Math.min(12, heli.speed * 0.35);
+    this._wantTarget.set(p.x + heli.forward.x * ahead, p.y + 1.8, p.z + heli.forward.z * ahead);
+  }
+
   update(dt, driver) {
     if (this.mode !== 'free') {
       if (this.mode === 'showroom') this.#showroomPose(dt, driver);
       else if (this.mode === 'aerial') this.#aerialPose(dt, driver);
       else if (this.mode === 'balloon' || this.mode === 'balloonShow') this.#balloonPose(dt, driver);
+      else if (this.mode === 'heli' || this.mode === 'heliShow') this.#heliPose(dt, driver);
       else this.#chasePose(dt, driver);
       if (this.pending || (this.mode === 'balloon' && this.view === 'in')) {
         this.pos.copy(this._wantPos);
@@ -15396,7 +15775,10 @@ class UI {
       card.classList.toggle('is-selected', on);
       card.querySelector('input').checked = on;
     }
-    this.el.lede.textContent = VEHICLES.find((v) => v.id === id)?.air
+    const sel = VEHICLES.find((v) => v.id === id);
+    this.el.lede.textContent = sel?.id === 'osprey'
+      ? 'Volo militare libero da Botromagno: esplora Gravina dal cielo senza vincoli né percorsi preimpostati, al calar del sole.'
+      : sel?.air
       ? 'Si decolla da Botromagno: in mongolfiera sorvoli la necropoli, il Ponte Acquedotto e il centro storico, al calar del sole.'
       : 'Si parte dal Ponte Acquedotto: scegli il mezzo e percorri le vie reali del centro storico, al calar del sole.';
   }
@@ -16055,6 +16437,63 @@ const Burner = (() => {
       const masterVol = typeof EngineAudio !== 'undefined' ? (EngineAudio.enabled ? EngineAudio.volume : 0) : 1;
       gain.gain.setTargetAtTime(level * 0.1 * masterVol, ctx.currentTime, level > 0 ? 0.06 : 0.3);
     },
+  };
+})();
+
+/**
+ * 11d-ter. IL ROMBO DEL V-22 OSPREY:
+ * Due potenti turbine turboalbero con fischio aerodinamico e il caratteristico battito a bassa frequenza
+ * dei grandi rotori tripala controrotanti, modulato dinamicamente con giri, velocità e quota.
+ */
+const OspreyAudio = (() => {
+  let ctx = null, master = null, rotorOsc = null, hissGain = null;
+  function setup() {
+    ctx = new AudioContext();
+    master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
+
+    // 1. Sibilo turbine turboalbero Rolls-Royce T406
+    const n = ctx.sampleRate * 2, buf = ctx.createBuffer(1, n, ctx.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+    const src = ctx.createBufferSource();
+    src.buffer = buf; src.loop = true; src.start();
+
+    const turbineFilter = ctx.createBiquadFilter();
+    turbineFilter.type = 'bandpass'; turbineFilter.frequency.value = 1850; turbineFilter.Q.value = 3.6;
+    hissGain = ctx.createGain(); hissGain.gain.value = 0.28;
+    src.connect(turbineFilter).connect(hissGain).connect(master);
+
+    // 2. Chop e rombo a bassa frequenza dei rotori controrotanti
+    rotorOsc = ctx.createOscillator();
+    rotorOsc.type = 'triangle'; rotorOsc.frequency.value = 85; rotorOsc.start();
+
+    const chopLfo = ctx.createOscillator();
+    chopLfo.frequency.value = 19; chopLfo.start();
+    const chopDepth = ctx.createGain(); chopDepth.gain.value = 0.55;
+    chopLfo.connect(chopDepth);
+
+    const rotorGain = ctx.createGain(); rotorGain.gain.value = 0.45;
+    chopDepth.connect(rotorGain.gain);
+
+    const subFilter = ctx.createBiquadFilter();
+    subFilter.type = 'lowpass'; subFilter.frequency.value = 260; subFilter.Q.value = 1.6;
+    rotorOsc.connect(subFilter).connect(rotorGain).connect(master);
+  }
+
+  return {
+    set(level, speed = 0, vy = 0) {
+      if (!ctx) {
+        if (level <= 0 || !navigator.userActivation?.hasBeenActive) return;
+        try { setup(); } catch { return; }
+      }
+      if (ctx.state === 'suspended') ctx.resume();
+      const masterVol = typeof EngineAudio !== 'undefined' ? (EngineAudio.enabled ? EngineAudio.volume : 0) : 1;
+      const vol = clamp(level * 0.22 * masterVol, 0, 1);
+      master.gain.setTargetAtTime(vol, ctx.currentTime, level > 0 ? 0.08 : 0.25);
+      if (rotorOsc) {
+        const pitch = 75 + (speed / 68) * 50 + Math.max(0, vy) * 3;
+        rotorOsc.frequency.setTargetAtTime(pitch, ctx.currentTime, 0.1);
+      }
+    }
   };
 })();
 
@@ -16777,6 +17216,8 @@ async function main() {
   Volo.init(landmarks);                  // blocco M3: il giro della mongolfiera, con le quote sopra tetti e monumenti
   const flight = new Flight(events);
   flight.place(0, false);
+  const heli = new OspreyFlight(events);
+  heli.place(-680, 720, 52);
   const rig = new CameraRig(camera);
   const minimap = new MiniMap(document.getElementById('minimap'), network);
   const pauseMap = new PauseMap(ui.el.bigmap, minimap, landmarks);
@@ -16948,22 +17389,45 @@ async function main() {
     Walker.mesh.visible = false;
   };
 
-  /** Targa: la via (in auto e a piedi) o, in mongolfiera, il rione sotto la cesta e la quota dal suolo. */
+  /**
+   * V-22 Osprey: velivolo militare a volo libero, gondole basculanti e rotori controrotanti.
+   */
+  const poseOsprey = (dt) => {
+    const h = heli;
+    car.root.position.copy(h.position);
+    car.root.rotation.set(h.pitch, h.yaw, h.roll, 'YXZ');
+    car.animate(dt, h.speed, 0, h.pitch, h.roll, elapsed, { head: 1, tilt: h.tilt, rotorAngle: h.rotorAngle, driver: 1 });
+    OspreyAudio.set(phase === 'menu' ? 0.2 : phase === 'pause' ? 0.3 : h.audioLevel, h.speed, h.vy);
+    Walker.mesh.visible = false;
+  };
+
+  /** Targa: la via (in auto e a piedi), la quota in mongolfiera o i parametri di volo dell'Osprey. */
   const showPlate = () => {
-    if (mode !== 'balloon') { ui.showEdge(driver); return; }
-    const p = flight.position;
-    ui.el.street.textContent = 'In mongolfiera';
-    ui.el.dest.textContent = `${districtAt(p.x, -p.z)} · ${Math.max(0, Math.round(p.y - Terrain.heightAt(p.x, -p.z)))} m dal suolo`;
-    ui.el.plate?.classList.remove('is-walking');
+    if (mode === 'balloon') {
+      const p = flight.position;
+      ui.el.street.textContent = 'In mongolfiera';
+      ui.el.dest.textContent = `${districtAt(p.x, -p.z)} · ${Math.max(0, Math.round(p.y - Terrain.heightAt(p.x, -p.z)))} m dal suolo`;
+      ui.el.plate?.classList.remove('is-walking');
+      return;
+    }
+    if (mode === 'osprey') {
+      const p = heli.position;
+      const kmh = Math.round(heli.speed * 3.6);
+      const alt = Math.max(0, Math.round(p.y - Terrain.heightAt(p.x, -p.z)));
+      ui.el.street.textContent = 'V-22 Osprey · Volo libero';
+      ui.el.dest.textContent = `${districtAt(p.x, -p.z)} · Quota: ${alt} m · ${kmh} km/h`;
+      ui.el.plate?.classList.remove('is-walking');
+      return;
+    }
+    ui.showEdge(driver);
   };
 
   /**
-   * Cambia mezzo sul posto (dal menu iniziale o dalla pausa). Blocco M3: dalla schermata iniziale la
-   * mongolfiera decolla da Botromagno; dalla pausa compare in volo nel punto del giro più vicino; tornando
-   * a un'auto, l'auto riparte dalla via percorribile più vicina.
+   * Cambia mezzo sul posto (dal menu iniziale o dalla pausa). Dalla schermata iniziale mongolfiera
+   * e Osprey si posizionano su Botromagno; tornando a un'auto, si riparte dalla via più vicina.
    */
   let mode = 'car', lastCar = VEHICLES[0].id;
-  const subject = () => (mode === 'balloon' ? flight : driver);
+  const subject = () => (mode === 'balloon' ? flight : mode === 'osprey' ? heli : driver);
   const useVehicle = (id) => {
     const spec = VEHICLES.find((v) => v.id === id) ?? VEHICLES[0];
     const was = mode;
@@ -16971,7 +17435,18 @@ async function main() {
     car = VehicleFactory.get(spec.id);
     scene.add(car.root);
     EngineAudio.setVehicle(spec.id);
-    if (spec.air) {
+    if (spec.id === 'osprey') {
+      mode = 'osprey';
+      if (was !== 'osprey') {
+        const p = driver.onFoot ? Walker.mesh.position : driver.position;
+        if (phase === 'menu') heli.place(-680, 720, 52); else heli.place(p.x, -p.z);
+        heli.running = phase !== 'menu';
+        Walker.mesh.visible = false;
+        ui.closeDecision();
+        Tiles.ensure(heli.position.x, -heli.position.z, 420, areas);
+        if (phase === 'menu') rig.heli(true); else if (phase === 'drive') { rig.heli(); rig.pending = true; }
+      }
+    } else if (spec.air) {
       mode = 'balloon';
       if (was !== 'balloon') {
         const p = driver.onFoot ? Walker.mesh.position : driver.position;
@@ -16984,9 +17459,11 @@ async function main() {
       }
     } else {
       lastCar = spec.id;
-      if (was === 'balloon') {
+      if (was === 'balloon' || was === 'osprey') {
         Burner.set(0);
-        const p = flight.position, r = network.nearest(p.x, -p.z, [flight.forward.x, -flight.forward.z]);
+        OspreyAudio.set(0);
+        const p = (was === 'balloon' ? flight : heli).position;
+        const r = network.nearest(p.x, -p.z, [(was === 'balloon' ? flight : heli).forward.x, -(was === 'balloon' ? flight : heli).forward.z]);
         Tiles.ensure(r.edge.samples[0], -r.edge.samples[2], 420, areas);
         place(r);
         if (phase === 'menu') { rig.showroom(driver); rig.pending = true; } else if (phase === 'drive') rig.snap(driver);
@@ -16997,12 +17474,15 @@ async function main() {
       driver.accel = spec.accel;
     }
     ui.el.hud.classList.toggle('is-balloon', mode === 'balloon');
+    ui.el.hud.classList.toggle('is-osprey', mode === 'osprey');
     ui.el.btnView.hidden = mode !== 'balloon';
     minimap.tour = mode === 'balloon';
     rig.setVehicle(car.dims);
     minimap.color = spec.color;
     ui.markVehicle(spec.id);
-    if (mode === 'balloon') poseBalloon(0); else poseCar(0);
+    if (mode === 'balloon') poseBalloon(0);
+    else if (mode === 'osprey') poseOsprey(0);
+    else poseCar(0);
     if (phase === 'pause') pauseMap.showCar(subject()); else pauseMap.draw(subject());
     showPlate();
     try { localStorage.setItem(STORE_KEY, spec.id); } catch { /* memoria del browser non disponibile: pazienza */ }
@@ -17012,7 +17492,9 @@ async function main() {
   ui.buildPickers(VEHICLES, (id) => { useVehicle(id); rig.showroomCloseUp(); });
   rig.bridge = bridgeFrame();
   useVehicle(saved ?? VEHICLES[0].id);
-  if (mode === 'balloon') rig.balloon(true); else rig.showroom(driver, rig.bridge);
+  if (mode === 'balloon') rig.balloon(true);
+  else if (mode === 'osprey') rig.heli(true);
+  else rig.showroom(driver, rig.bridge);
 
   /** Inquadratura: la scena si sposta nella parte di schermo libera dai pannelli. */
   const reframe = () => {
@@ -17025,6 +17507,7 @@ async function main() {
     phase = 'pause';
     driver.pause();
     flight.pause();
+    heli.pause();
     rig.aerial(subject());
     ui.showPause(true, subject());
     pauseMap.pick = null;
@@ -17038,9 +17521,13 @@ async function main() {
     phase = 'drive';
     driver.resume();
     flight.resume();
+    heli.resume();
     if (mode === 'balloon') {
       flight.start();
       if (rig.mode !== 'balloon') rig.balloon();
+    } else if (mode === 'osprey') {
+      heli.start();
+      if (rig.mode !== 'heli') rig.heli();
     } else {
       driver.start();
       if (rig.mode !== 'drive') rig.startDrive(driver);
@@ -17054,8 +17541,8 @@ async function main() {
   let proximityTimer = 0;
   const checkLandmarks = () => {
     if (ui.cardBusy) return;
-    const p = subject().position, air = mode === 'balloon' && !flight.grounded;
-    if (mode === 'balloon' && !air) return;
+    const p = subject().position, air = (mode === 'balloon' && !flight.grounded) || (mode === 'osprey' && !heli.grounded);
+    if ((mode === 'balloon' || mode === 'osprey') && !air) return;
     for (const lm of landmarks) {
       if (lm.card === false) continue;
       const dx = lm.at[0] - p.x, dn = lm.at[1] + p.z, r = air ? Math.max(lm.radius, 45) : lm.radius;
@@ -17070,6 +17557,7 @@ async function main() {
   /** Nome di ciò che si è scelto sulla mappa (un luogo o la via più vicina al tocco). */
   const describe = (pick) => {
     if (pick.lm) return { label: pick.lm.name, ok: true };
+    if (mode === 'osprey') return { label: 'Volo libero: tocca per volare qui', ok: true };
     if (mode === 'balloon' && Volo.nearest(...pick.at).d < CONFIG.balloon.far) return { label: 'Sul giro della mongolfiera', ok: true };
     const r = network.nearest(...pick.at);
     return r.d < 30 ? { label: r.edge.name, ok: true } : { label: 'Qui non ci sono vie: tocca più vicino a una strada', ok: false };
@@ -17081,6 +17569,23 @@ async function main() {
   const BY_CAR = new Set(['bosco', 'quercus', 'vivaio', 'scout', 'picnic', 'pip', 'castello', 'meninni']);
   const teleport = async (pick) => {
     if (phase !== 'pause' || busy || !pick) return;
+    if (mode === 'osprey') {
+      const at = pick.lm?.at ?? pick.at;
+      busy = true;
+      await ui.fade(() => {
+        Tiles.ensure(at[0], at[1], 420, areas);
+        heli.place(at[0], at[1]);
+        poseOsprey(0);
+        rig.heli();
+        rig.pending = true;
+        minimap.draw(heli);
+        resume();
+        rig.setFrame(0, 0, true);
+      });
+      busy = false;
+      if (pick.lm && pick.lm.card !== false) { shown.set(pick.lm.id, elapsed); ui.showCard(pick.lm); }
+      return;
+    }
     if (mode === 'balloon') {
       const at = pick.lm?.at ?? pick.at, near = Volo.nearest(at[0], at[1]);
       if (near.d < CONFIG.balloon.far && !BY_CAR.has(pick.lm?.id)) {
@@ -17394,7 +17899,7 @@ async function main() {
     sync();
     ui.el.boostCheck.addEventListener('change', () => set(ui.el.boostCheck.checked));
     ui.el.btnPauseBoost.addEventListener('click', () => set(!on));
-    const B = ui.el.btnBoost, press = (v) => { driver.boosting = v; B.classList.toggle('is-on', v); };
+    const B = ui.el.btnBoost, press = (v) => { driver.boosting = v; heli.input.boost = v; B.classList.toggle('is-on', v); };
     B.addEventListener('pointerdown', (ev) => { ev.preventDefault(); B.setPointerCapture?.(ev.pointerId); press(true); });
     for (const t of ['pointerup', 'pointercancel', 'lostpointercapture']) B.addEventListener(t, () => press(false));
     B.addEventListener('contextmenu', (ev) => ev.preventDefault());
@@ -17407,15 +17912,38 @@ async function main() {
       const label = driver.onFoot ? 'Corri' : 'Accelera';
       if (show && B.dataset.label !== label) { B.dataset.label = label; B.querySelector('span').textContent = label; B.setAttribute('aria-label', `${label}: tieni premuto`); }
     };
+
+    // Controlli touch dedicati al volo libero del convertiplano militare Osprey
+    const bindHeliTouch = (id, prop, val) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const press = (active) => {
+        heli.input[prop] = active ? val : 0;
+        el.classList.toggle('is-active', active);
+      };
+      el.addEventListener('pointerdown', (ev) => { ev.preventDefault(); el.setPointerCapture?.(ev.pointerId); press(true); });
+      for (const t of ['pointerup', 'pointercancel', 'lostpointercapture']) el.addEventListener(t, () => press(false));
+      el.addEventListener('contextmenu', (ev) => ev.preventDefault());
+    };
+    bindHeliTouch('btn-heli-up', 'throttle', 1);
+    bindHeliTouch('btn-heli-down', 'throttle', -1);
+    bindHeliTouch('btn-heli-left', 'turn', 1);
+    bindHeliTouch('btn-heli-right', 'turn', -1);
+    bindHeliTouch('btn-heli-climb', 'climb', 1);
+    bindHeliTouch('btn-heli-descend', 'climb', -1);
   }
   // Acceleratore: Shift tenuto premuto, su PC.
   if (!ui.isTouch) {
-    addEventListener('keydown', (ev) => { if (ev.key === 'Shift') driver.boosting = true; });
-    addEventListener('keyup', (ev) => { if (ev.key === 'Shift') driver.boosting = false; });
-    addEventListener('blur', () => { driver.boosting = false; });
+    addEventListener('keydown', (ev) => {
+      if (ev.key === 'Shift') { driver.boosting = true; heli.input.boost = true; }
+    });
+    addEventListener('keyup', (ev) => {
+      if (ev.key === 'Shift') { driver.boosting = false; heli.input.boost = false; }
+    });
+    addEventListener('blur', () => { driver.boosting = false; heli.input.boost = false; });
   }
 
-  // Tastiera: frecce agli incroci, P / Spazio per la pausa, Esc per riprendere, C per cartolina.
+  // Tastiera: frecce e WASD per guida e volo libero, P / Spazio per la pausa, Esc per riprendere, C per cartolina.
   addEventListener('keydown', (ev) => {
     if (ev.repeat) return;
     const k = ev.key;
@@ -17426,7 +17954,7 @@ async function main() {
       ev.preventDefault();
       return;
     }
-    if (k === 'p' || k === 'P' || (k === ' ' && !onControl)) {
+    if ((k === 'p' || k === 'P' || (k === ' ' && !onControl && mode !== 'osprey'))) {
       if (phase === 'drive') pause(); else if (phase === 'pause') resume();
       ev.preventDefault();
       return;
@@ -17443,9 +17971,27 @@ async function main() {
       return;
     }
     if (phase !== 'drive' || onInput) return;           // blocco 4.4: sui cursori del volume le frecce li spostano
+    if (mode === 'osprey') {
+      if (k === 'ArrowLeft' || k === 'a' || k === 'A') { heli.input.turn = 1; ev.preventDefault(); }
+      else if (k === 'ArrowRight' || k === 'd' || k === 'D') { heli.input.turn = -1; ev.preventDefault(); }
+      else if (k === 'ArrowUp' || k === 'w' || k === 'W') { heli.input.throttle = 1; ev.preventDefault(); }
+      else if (k === 'ArrowDown' || k === 's' || k === 'S') { heli.input.throttle = -1; ev.preventDefault(); }
+      else if (k === ' ' || k === 'e' || k === 'E' || k === 'r' || k === 'R') { heli.input.climb = 1; ev.preventDefault(); }
+      else if (k === 'q' || k === 'Q' || k === 'c' || k === 'C') { heli.input.climb = -1; ev.preventDefault(); }
+      return;
+    }
     if (k === 'ArrowLeft' || k === 'a' || k === 'A') { driver.steer(-1); ev.preventDefault(); }
     else if (k === 'ArrowRight' || k === 'd' || k === 'D') { driver.steer(1); ev.preventDefault(); }
     else if (k === 'ArrowUp' || k === 'w' || k === 'W') { driver.chooseStraight(); ev.preventDefault(); }
+  });
+
+  addEventListener('keyup', (ev) => {
+    if (mode === 'osprey') {
+      const k = ev.key;
+      if (k === 'ArrowLeft' || k === 'a' || k === 'A' || k === 'ArrowRight' || k === 'd' || k === 'D') heli.input.turn = 0;
+      if (k === 'ArrowUp' || k === 'w' || k === 'W' || k === 'ArrowDown' || k === 's' || k === 'S') heli.input.throttle = 0;
+      if (k === ' ' || k === 'e' || k === 'E' || k === 'r' || k === 'R' || k === 'q' || k === 'Q' || k === 'c' || k === 'C') heli.input.climb = 0;
+    }
   });
 
   // Se si cambia app o scheda (una telefonata, un messaggio) il viaggio va in pausa.
@@ -17479,16 +18025,25 @@ async function main() {
     () => {
       phase = 'drive';
       try { if (localStorage.getItem('gravina3d.radio') === '1' && !Radio.on) Radio.toggle(); } catch { /* pazienza */ }
-      if (mode === 'balloon') rig.balloon(); else rig.startDrive(driver);
+      if (mode === 'balloon') rig.balloon();
+      else if (mode === 'osprey') rig.heli();
+      else rig.startDrive(driver);
       reframe();
-      setTimeout(() => { if (mode === 'balloon') flight.start(); else if (!driver.running) driver.start(); }, CONFIG.drive.startDelay * 1000);
+      setTimeout(() => {
+        if (mode === 'balloon') flight.start();
+        else if (mode === 'osprey') heli.start();
+        else if (!driver.running) driver.start();
+      }, CONFIG.drive.startDelay * 1000);
     },
     () => {
       phase = 'drive';
       try { if (localStorage.getItem('gravina3d.radio') === '1' && !Radio.on) Radio.toggle(); } catch { /* pazienza */ }
-      if (mode === 'balloon') rig.balloon(); else rig.startDrive(driver);
+      if (mode === 'balloon') rig.balloon();
+      else if (mode === 'osprey') rig.heli();
+      else rig.startDrive(driver);
       reframe();
       setTimeout(() => {
+        if (mode === 'osprey' || mode === 'balloon') useVehicle(lastCar);
         if (!driver.running) driver.start();
         driver.startTour(TOUR_STOPS, 0);
       }, CONFIG.drive.startDelay * 1000);
@@ -17502,17 +18057,24 @@ async function main() {
   const step = (dt) => {
     elapsed += dt;
     const S = subject();
-    if (mode === 'balloon') { flight.update(dt, elapsed); poseBalloon(dt); } else { driver.update(dt); poseCar(dt); }
+    if (mode === 'balloon') { flight.update(dt, elapsed); poseBalloon(dt); }
+    else if (mode === 'osprey') { heli.update(dt, elapsed); poseOsprey(dt); }
+    else { driver.update(dt); poseCar(dt); }
     rig.update(dt, S);
-    // in mongolfiera le ombre restano attorno al suolo sotto la cesta (il riquadro delle ombre è di 180 m)
-    updateSunShadow(sun, mode === 'balloon' ? _focus.set(S.position.x, Terrain.heightAt(S.position.x, -S.position.z), S.position.z) : S.position);
+    // in volo le ombre restano attorno al suolo sotto il velivolo (il riquadro delle ombre è di 180 m)
+    updateSunShadow(sun, (mode === 'balloon' || mode === 'osprey') ? _focus.set(S.position.x, Terrain.heightAt(S.position.x, -S.position.z), S.position.z) : S.position);
     if (phase === 'menu') return;
     minimap.draw(S);
     ui.tickDecision(driver);
     touchBoost?.();
+    const heliTouch = document.getElementById('heli-touch');
+    if (heliTouch) {
+      const showHeli = ui.isTouch && mode === 'osprey' && phase === 'drive';
+      if (heliTouch.hidden === showHeli) heliTouch.hidden = !showHeli;
+    }
     if (ui.el.btnFollow.hidden === rig.free) ui.el.btnFollow.hidden = !rig.free;
     ui.tickCard(dt);
-    if (mode === 'balloon' && (plateTimer -= dt) <= 0) { plateTimer = 0.5; showPlate(); }
+    if ((mode === 'balloon' || mode === 'osprey') && (plateTimer -= dt) <= 0) { plateTimer = 0.5; showPlate(); }
     if (landing > 0 && phase === 'drive' && !busy && (landing -= dt) <= 0) finishTour();
     // In panchina (blocco M2): dopo qualche secondo con la scheda, il pulsante per tornare al mezzo
     if (driver.sitting && phase === 'drive' && (sitTimer += dt) > 5 && ui.el.btnBench.hidden) ui.el.btnBench.hidden = false;
@@ -17539,7 +18101,7 @@ async function main() {
     scene.fog.far = lerp(CONFIG.city.fogFar, 640, forestFog);
     ForestSound.update(dt, { inside: forestIn, tetro: meninniIn, onFoot: mode === 'car' && driver.onFoot, speed: S.speed, paused: phase === 'pause' });
     Radio.duck(1 - 0.65 * ForestSound.level);
-    EngineAudio.update(driver.speed, driver.top, driver.boost > 0.3 ? 1 : 0, phase === 'pause', mode === 'balloon' || driver.onFoot || driver.sitting);
+    EngineAudio.update(driver.speed, driver.top, driver.boost > 0.3 ? 1 : 0, phase === 'pause', mode === 'balloon' || mode === 'osprey' || driver.onFoot || driver.sitting);
   };
   let forestTimer = 0, forestIn = 0, forestFog = 0, meninniIn = 0;
 
@@ -17566,7 +18128,7 @@ async function main() {
         driver.place(r.edge, r.dir, Math.max(0, r.s - back));
         return r.edge.name;
       },
-      roadWalls, Balconi, Raddrizza, SpondaOvest, Passi, Walker, useVehicle, pause, resume, teleport, pauseMap, Radio, EngineAudio, Forest, ForestSound, flight, Volo, Burner, VehicleFactory, forestAmount,
+      roadWalls, Balconi, Raddrizza, SpondaOvest, Passi, Walker, useVehicle, pause, resume, teleport, pauseMap, Radio, EngineAudio, Forest, ForestSound, flight, Volo, Burner, heli, OspreyAudio, VehicleFactory, forestAmount,
       get mode() { return mode; },
       /** Il mezzo disegnato (root, body, animate): per le prove sul tremolio (blocco 4.5). */
       get vehicle() { return car; },
@@ -17583,7 +18145,7 @@ async function main() {
     const dt = Math.min(raw, 0.05);   // tetto: niente salti dopo un cambio di scheda
     buildCity();
     step(dt);
-    if (phase !== 'menu') ui.updateLabels(camera, innerWidth, innerHeight, mode === 'balloon' ? 560 : 320, mode === 'balloon' ? flight.position : null, CONFIG.balloon.minorLabels);
+    if (phase !== 'menu') ui.updateLabels(camera, innerWidth, innerHeight, (mode === 'balloon' || mode === 'osprey') ? 560 : 320, (mode === 'balloon' ? flight.position : mode === 'osprey' ? heli.position : null), CONFIG.balloon.minorLabels);
     Tiles.updateLod(camera);
     Balconi.update(camera, dt);
     Cascata.update(dt);
@@ -17594,8 +18156,12 @@ async function main() {
       fpsAcc += dt; fpsFrames++;
       if (fpsAcc > 0.5) {
         const info = renderer.info.render;
-        debugEl.textContent = `fps ${(fpsFrames / fpsAcc).toFixed(0)} · triangoli ${info.triangles} · draw ${info.calls} · ${phase}\n` +
-          `via ${driver.edge.name} (${driver.edge.id}) s=${driver.s.toFixed(1)}/${driver.edge.length.toFixed(1)} v=${driver.speed.toFixed(1)}`;
+        const subInfo = mode === 'osprey'
+          ? `Osprey x=${heli.position.x.toFixed(1)} y=${heli.position.y.toFixed(1)} z=${heli.position.z.toFixed(1)} v=${(heli.speed * 3.6).toFixed(1)} km/h`
+          : mode === 'balloon'
+          ? `Mongolfiera s=${flight.s.toFixed(1)} y=${flight.position.y.toFixed(1)}`
+          : `via ${driver.edge ? driver.edge.name : 'libera'} (${driver.edge ? driver.edge.id : '-'}) s=${driver.s.toFixed(1)}/${driver.edge ? driver.edge.length.toFixed(1) : 0} v=${driver.speed.toFixed(1)}`;
+        debugEl.textContent = `fps ${(fpsFrames / fpsAcc).toFixed(0)} · triangoli ${info.triangles} · draw ${info.calls} · ${phase}\n${subInfo}`;
         fpsAcc = 0; fpsFrames = 0;
       }
     }
