@@ -52,6 +52,13 @@ controlla anche saturazione e valori anomali e che dal vivo il motore cambi giri
 npm run motori              # oppure: node motori.mjs huracan
 ```
 
+Suoni del bosco (blocco 4.6): 90 s di bosco come dal vivo in `shots/bosco-passeggiata.wav` e ogni specie una volta,
+in fila, in `shots/bosco-versi.wav` (l'elenco coi secondi lo stampa la prova); controlla saturazione e valori anomali:
+
+```bash
+npm run bosco               # oppure: node bosco.mjs
+```
+
 Velocità massime (blocco 4.4): ogni mezzo con l'acceleratore sulla strada fuori città più lunga e nel
 centro storico; controlla che non superi mai il limite della via né la sua massima e che agli incroci con
 la scelta arrivi sotto i 25 km/h:

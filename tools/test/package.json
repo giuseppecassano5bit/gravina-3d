@@ -9,6 +9,7 @@
     "foto": "node foto.mjs",
     "anteprima": "node anteprima.mjs",
     "motori": "node motori.mjs",
+    "bosco": "node bosco.mjs",
     "velocita": "node velocita.mjs"
   },
   "devDependencies": {
