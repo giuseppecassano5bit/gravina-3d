@@ -2087,7 +2087,11 @@ SCHOOLS = [
     ('Scuola primaria Tommaso Fiore', (837, 351), 2),           # Overture, Via Fratelli Cervi
     ('Circolo didattico Savio-Fiore', (545, 1052), 2),          # Overture, Via Fratelli Cervi
     ('Scuola primaria Michele Soranno', (1748, 266), 2),        # Overture, Via Michele Soranno
-    ('Scuola primaria Santomasi', (387, 596), 2),               # Overture (Corso Aldo Moro 51, IC Santomasi-Scacchi)
+    # 18/10/2026 (committente): la Santomasi è la scuola media dell'IC Santomasi-Scacchi, non una primaria
+    ('Scuola media Santomasi', (387, 596), 2),                  # Overture (Corso Aldo Moro 51), Street View ott 2025
+    # 18/10/2026 (committente, Street View ott 2025: «6 Corso Aldo Moro», cancello con l'insegna dell'IC Santomasi-Scacchi):
+    # la scuola è l'edificio OSM w411139563; il cortile tra la scuola e il Corso è il vuoto dell'isolato
+    ('Scuola primaria e dell\'infanzia A. Scacchi', (280, 335), 2),
 ]
 CHURCHES = [
     ('Chiesa Gesù Buon Pastore', (1055, -176)),                 # OSM w328013129 (edificio senza nome)

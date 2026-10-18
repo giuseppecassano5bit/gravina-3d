@@ -1,5 +1,5 @@
 Stato al 18 ottobre 2026: **Progetto e tutte le fasi completati al 100% e uniti su `main`!**
-Fase 4 completata per intero: blocchi 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8a (Corso Aldo Moro e Repubblica), 4.8b (Centro Storico), 4.8c (Quartieri Nord ed Est), 4.8d (Quartieri Sud ed Ovest), 4.8e (P.I.P. Zona Artigianale), 4.8f (Periferia rurale e masserie) e 4.9 (Interfaccia, Bilinguismo IT/EN, Fullscreen, Restyling materico tufo/bronzo e ottimizzazione landscape).
+Fase 4 completata per intero: blocchi 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8a (Corso Aldo Moro e Repubblica), 4.8b (Centro Storico), 4.8c (Quartieri Nord ed Est), 4.8d (Quartieri Sud ed Ovest), 4.8e (P.I.P. Zona Artigianale), 4.8f (Periferia rurale e masserie) e 4.9 (Interfaccia, Bilinguismo IT/EN, Fullscreen, Restyling materico tufo/bronzo e ottimizzazione landscape). Blocco 4.10 (cinema, teatri e scuole) sul branch `cinema-scuole-vida`, in attesa del sì del committente.
 Tutte le verifiche automatiche sono verdi (87/87 interazioni, 0 problemi simula, budget PC e mobile rispettati a 60 fps).
 
 **Fase 3.4 (Gravina oltre il centro storico) completata**: piano, dati, budget, rischi e divisione
@@ -508,6 +508,33 @@ commerciali e protette: il committente ha scelto musica ambient originale, gener
 - [ ] Prestazioni su telefono: livelli di dettaglio per le finestre, misura su un telefono vero.
 - [x] **Interfaccia e Bilinguismo** (blocco 4.9): restyling materico tufo e bronzo, selettore lingua IT/EN dinamico, schede storiche tradotte per tutti i 41 landmark, layout landscape compatto.
 - [x] Licenza del codice: MIT, file `LICENSE` (© 2026 Giuseppe Cassano; blocco 4.4). I dati di `GEO` restano ODbL e Copernicus.
+
+### Blocco 4.10 · Cinema, teatri e scuole (branch `cinema-scuole-vida`, richieste del committente del 18/10/2026)
+
+- [x] **Cinema Teatro Mastrogiacomo**: facciata rifatta sulla foto del committente e su Street View (`Details.mastrogiacomo`),
+      larga circa 11 m sul tratto nord del lato dell'isolato verso Piazza Scacchi (prima occupava tutti i 46 m del lato, con un
+      cornicione sospeso in aria); scheda corretta sulle fonti (GravinaLife: 1923–1927, ricostruzione in cemento armato 1939–1941,
+      chiusura nel 1995; tolto l'acquisto del Comune «nel 2024», non verificato).
+- [x] **Cinema Teatro Centrone**: spostato sul lato ovest di Via De Gasperi, nell'isolato tra Via XX Settembre e la via a sud (prima
+      era sull'isolato di fronte, all'angolo con Via Milano); torri poligonali, loggia su due colonne doriche, apertura vetrata in alto,
+      sala col tetto a capanna color ruggine (`Details.centrone`); scheda corretta sulle fonti (BariInedita: 6 gennaio 1947, Leonardo
+      Centrone, impresa Candido, 2.000 posti, chiuso nel 1990).
+- [x] **Teatro Vida**: da Corso Aldo Moro a Via Giardini 57 (lato est), con ingresso, insegne, tenda, aiuola con la palma e bacheca
+      (`Details.teatroVida`); davanti niente giardinetti generati (`Details.senzaGiardini`); scheda ridotta a quello che si vede.
+- [x] **Scuole**: la Santomasi (Corso Aldo Moro 51) è la **scuola media**; nuova **Scuola primaria e dell'infanzia A. Scacchi** in Corso
+      Aldo Moro 6 (OSM w411139563): il vuoto dell'isolato era il suo cortile, ora con cancello e insegna, muretto con la ringhiera azzurra,
+      padiglione col murale (indicativo), pini e ingresso (`Details.scuolaScacchi`); la scuola resta un corpo unico col tetto piano.
+- [x] Tolto il **campetto da calcio inventato** nel prato sotto Botromagno (`campiSportivi`, «Madonna delle Grazie» a [-275, 455]).
+- [ ] Da verificare col committente: gli altri campetti di `campiSportivi` (blocco 4.3) non hanno una fonte nel README; in OSM non c'è
+      nessun campo entro 200 m da quelli di Gesù Buon Pastore, Spirito Santo e Santi Pietro e Paolo, e i due campetti «nei cortili»
+      (Crocifisso, San Domenico) stanno a più di 50 m dal campo OSM più vicino. Si possono guardare uno per uno su Street View.
+- [x] Prove: `simula` verde (0 problemi, 0 case e 0 dettagli sulla strada), `interazioni` tutte verdi, nessun errore in console;
+      prestazioni `shots/prestazioni-dopo-4-10.json` contro `prestazioni-prima-4-10.json` (stessa macchina): 60 fps ovunque, draw call
+      invariate (PC al massimo 55, telefono 36), da +2 000 a +10 000 triangoli nelle viste del centro, «Pronto» +90 ms; +6 KB compressi.
+- [ ] **Tetto dei triangoli già superato prima del blocco 4.10** (blocchi 4.8, «Architettura Quartiere»: unità, balconi, giardinetti):
+      PC fino a 488 000 nella vista «alta» (tetto 400 000), telefono fino a 314 000 in «centro» (tetto 250 000); dopo il 4.10 495 000 e
+      318 000. Da decidere col committente come rientrare senza togliere niente in città (per esempio i balconi e i giardinetti solo
+      nella versione vicina dei riquadri, o il caricamento attorno alla visuale).
 
 ## 4. Da sistemare o verificare (emerso finora)
 
