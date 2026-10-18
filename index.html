@@ -6258,7 +6258,7 @@ const Tiles = {
       if (b.facade) b.top = b.facade.top = FACCIATE.street(b.facade) + b.facade.alto;
       b.seed = hash2(index, 1231);
       b.index = index;
-      if (b.kind === 13) Villette.prepare(b);           // blocco N4b: le unità delle villette, ognuna col suo tetto
+      if (b.kind === 13 || Villette.shouldPrepare?.(b)) Villette.prepare(b);
       t.buildings.push(b);
       this.roofs.push({ pts: outer, top: b.top + (b.kind === 1 ? 4 : 0.5), wall: b.top });
     });
@@ -6958,7 +6958,7 @@ const Tiles = {
       if (far && b.name) (b.name === 'Casino Scacchi' ? Scacchi : Meninni).far(tb);   // da lontano il guscio; da vicino i dettagli (N5b: Casino Scacchi)
       return;
     }
-    if (kind === 13) return Villette.building(tb, b, far);   // blocco N4b: villette del Liceo Tarantino (sezione 6d)
+    if (kind === 13 || b.vil) return Villette.building(tb, b, far);
     if (far) {
       // Da lontano: sagoma semplificata (scarto 1,2 m), senza cortili né torrini.
       const keep = Plane.simplify(rings[0], 1.2);
@@ -8637,6 +8637,78 @@ const Villette = {
   count: { villette: 0, unita: 0, balconi: 0, giardini: 0, alberi: 0 },
   piazze: [],
 
+  palettes: {
+    villette: ['#f1ede5', '#ebe0c7', '#e2d2b3', '#efe0b0', '#dedad2', '#e6cdb4', '#d5dbc3', '#f4efe2', '#e9d9bd'],
+    centro_moderno: ['#f2eee6', '#ebe1c9', '#e3d4b6', '#f0e2b3', '#dfdad3', '#e7cfb7', '#d7dcc5', '#f5f0e4', '#eadabe', '#e4dbce', '#ded5c5', '#efe0cb'],
+    centro_storico: ['#f4efe2', '#ebe0c7', '#e2d2b3', '#efe0b0', '#dedad2', '#ebd8b3', '#dfc17b', '#ede7da', '#ded5c4', '#d5dbc3'],
+    nord_est: ['#f0ece4', '#e9dfc6', '#ded4b5', '#ebe1be', '#dad7d0', '#e4cbaf', '#d2dac0', '#f1ebd8', '#e6d5b7', '#dfd5c8'],
+    sud_ovest: ['#f1ede5', '#ebe0c7', '#e2d2b3', '#efe0b0', '#dedad2', '#e6cdb4', '#d5dbc3', '#f4efe2', '#e9d9bd', '#e0d8cc'],
+    pip: ['#c8c6c0', '#b8b5ae', '#cfc8ba', '#dedad2', '#d2cbbe', '#bbb5aa', '#a9a49c', '#c2beb4'],
+    agro: ['#fbf8f2', '#f4efe6', '#ede5d4', '#ded4be', '#cebfa5', '#d9c5a5', '#ebe0c7', '#e5dac8'],
+  },
+
+  activeZones: new Set(['villette', 'centro_moderno']),
+
+  zone(b) {
+    if (b.kind === 13) return 'villette';
+    const c = b.c ?? Plane.centroid(b.rings[0]);
+    const e = c[0], n = c[1];
+    if (b.isOld || (e > -160 && e < 330 && n > -170 && n < 340 && (b.kind === 0 || b.kind === 4))) return 'centro_storico';
+    if (e > 2040 && e < 2760 && n > 300 && n < 1260) return 'pip';
+    if (e < -100 || (e > 1000 && n < -350) || n > 1500 || (e > 1600 && n < 200) || e > 2760) return 'agro';
+    if (e >= 150 && e <= 550 && n >= 120 && n <= 650) return 'centro_moderno';
+    if (n > 550 || (e > 550 && n > 0)) return 'nord_est';
+    return 'sud_ovest';
+  },
+
+  shouldPrepare(b) {
+    if (b.kind === 13) return true;
+    if (b.kind === 1 || b.kind === 7 || b.kind === 11 || b.kind === 12 || b.facade) return false;
+    if (b.name === 'Scuola primaria Santomasi') return false;
+    const z = this.zone(b);
+    return this.activeZones.has(z);
+  },
+
+  config(b) {
+    const z = this.zone(b);
+    const h = b.height ?? 9;
+    const pal = this.palettes[z] ?? this.walls;
+    let unita = 8.0, coppiProb = 0.0, pannelliProb = 0.45, atticoProb = 0.0, balcProb = 0.85, garageProb = 0.35;
+    let railTypes = [0, 0, 1, 1, 2, 3, 4];
+    if (z === 'villette') {
+      unita = 8.0;
+    } else if (z === 'centro_storico') {
+      unita = h > 10 ? 9.0 : 7.0;
+      coppiProb = 0.75;
+      pannelliProb = 0.08;
+      atticoProb = 0.0;
+      balcProb = 0.70;
+      railTypes = [0, 0, 0, 0, 4, 4];
+    } else if (z === 'pip') {
+      unita = 18.0;
+      coppiProb = 0.0;
+      pannelliProb = 0.70;
+      atticoProb = 0.0;
+      balcProb = 0.15;
+      railTypes = [0, 0, 0];
+    } else if (z === 'agro') {
+      unita = 10.0;
+      coppiProb = 0.90;
+      pannelliProb = 0.10;
+      atticoProb = 0.0;
+      balcProb = 0.40;
+      railTypes = [0, 0, 4];
+    } else {
+      unita = h >= 18 ? 14.0 : h >= 12 ? 11.5 : 9.0;
+      coppiProb = h <= 7 ? 0.25 : 0.05;
+      pannelliProb = 0.50;
+      atticoProb = h >= 12 ? 0.40 : 0.0;
+      balcProb = 0.88;
+      garageProb = h >= 7 ? 0.45 : 0.2;
+    }
+    return { z, unita, pal, coppiProb, pannelliProb, atticoProb, balcProb, garageProb, railTypes };
+  },
+
   /** Riga di GEO.villette.case dell'edificio (indice in GEO.city): larghezza delle unità e unità diverse. */
   _row(index) {
     this._table ??= new Map((GEO.villette?.case ?? []).map(([k, unita, righe]) => [k, { unita, righe }]));
@@ -8648,10 +8720,16 @@ const Villette = {
    * terreno più alto; b.top diventa il più alto (col colmo dei coppi).
    */
   prepare(b) {
-    const row = this._row(b.index), outer = b.rings[0], rect = Plane.orientedRect(outer), { c, u } = rect;
+    const isVil = b.kind === 13;
+    const cfg = this.config(b);
+    const row = isVil ? this._row(b.index) : null;
+    const unitaWidth = isVil ? row.unita : cfg.unita;
+    const outer = b.rings[0], rect = Plane.orientedRect(outer), { c, u } = rect;
     const S = ([e, n]) => (e - c[0]) * u[0] + (n - c[1]) * u[1];
-    const s0 = Math.min(...outer.map(S)), s1 = Math.max(...outer.map(S)), K = Math.max(1, Math.round((s1 - s0) / row.unita));
+    const s0 = Math.min(...outer.map(S)), s1 = Math.max(...outer.map(S));
+    const K = Math.max(1, Math.round((s1 - s0) / unitaWidth));
     const units = [];
+    const bHoles = b.rings.slice(1);
     for (let k = 0; k < K; k++) {
       const a = lerp(s0, s1, k / K), z = lerp(s0, s1, (k + 1) / K);
       let poly = outer;
@@ -8660,26 +8738,52 @@ const Villette = {
       poly = poly.filter((p, i) => { const q = poly[(i + 1) % poly.length]; return Math.hypot(q[0] - p[0], q[1] - p[1]) > 0.05; });
       if (poly.length < 3 || Math.abs(Plane.signedArea(poly)) < 3) { units.push(null); continue; }
       if (Plane.signedArea(poly) < 0) poly = [...poly].reverse();          // antiorario visto dall'alto
-      const g = poly.map(([e, n]) => Terrain.heightAt(e, n)), seed = hash2(b.index * 37 + k, 911);
+
+      const uHoles = [];
+      for (const H of bHoles) {
+        let hp = H;
+        if (k > 0) hp = Plane.clipHalfPlane(hp, (p) => S(p) - a);
+        if (k < K - 1) hp = Plane.clipHalfPlane(hp, (p) => z - S(p));
+        hp = hp.filter((p, i) => { const q = hp[(i + 1) % hp.length]; return Math.hypot(q[0] - p[0], q[1] - p[1]) > 0.05; });
+        if (hp.length >= 3 && Math.abs(Plane.signedArea(hp)) >= 3) {
+          if (Plane.signedArea(hp) > 0) hp = [...hp].reverse();
+          uHoles.push(hp);
+        }
+      }
+
+      const g = poly.map(([e, n]) => Terrain.heightAt(e, n)), seed = hash2((b.index ?? 0) * 37 + k, 911);
       let height = b.height, code = 0;
-      for (const [e, n, h, cd] of row.righe) if (Plane.contains(poly, e, n)) { if (h) height = h; code |= cd; }
-      const coppi = (code & 1) !== 0, gMax = Math.max(...g);
-      const top = gMax + height - (coppi ? this.PARAPETTO - 0.3 : 0);     // coi coppi: la gronda, senza parapetto
-      const h3 = (i) => hash2(b.index * 53 + k * 7 + i, 313);
+      if (isVil) {
+        for (const [e, n, h, cd] of row.righe) if (Plane.contains(poly, e, n)) { if (h) height = h; code |= cd; }
+      }
+      const h3 = (i) => hash2((b.index ?? 0) * 53 + k * 7 + i, 313);
+      const coppi = isVil ? ((code & 1) !== 0) : (h3(15) < cfg.coppiProb);
+      const pannelli = isVil ? ((code & 2) !== 0) : (!coppi && h3(16) < cfg.pannelliProb);
+      const attico = isVil ? ((code & 4) !== 0) : (!coppi && h3(17) < cfg.atticoProb);
+      const gMax = Math.max(...g);
+      const top = gMax + height - (coppi ? this.PARAPETTO - 0.3 : 0);
+      const wallColor = new THREE.Color(cfg.pal[Math.floor(h3(1) * cfg.pal.length)]);
+      const rail = cfg.railTypes[Math.floor(h3(2) * cfg.railTypes.length)];
       units.push({
-        k, a, z, poly, g, gMax, top, coppi, pannelli: (code & 2) !== 0, attico: (code & 4) !== 0, seed,
+        k, a, z, poly, holes: uHoles, g, gMax, top, coppi, pannelli, attico, seed,
         rise: coppi ? Math.min(1.8, (z - a) * 0.28) : 0,
-        wall: new THREE.Color(this.walls[Math.floor(h3(1) * this.walls.length)]),
-        // ringhiere: 0 ferro scuro, 1 verde, 2 bianca, 3 vetro, 4 muratura (Street View: tutte e cinque nel triangolo)
-        rail: [0, 0, 0, 1, 1, 2, 3, 4, 4][Math.floor(h3(2) * 9)], tapp: h3(3) < 0.55, stone: h3(4) < 0.4, bands: h3(5) < 0.5,
-        garage: h3(6) < 0.45, balc: h3(7) < 0.85, hedge: h3(8) < 0.6, tree: h3(9),
+        wall: wallColor,
+        rail,
+        tapp: h3(3) < 0.55,
+        stone: h3(4) < 0.4,
+        bands: h3(5) < 0.5,
+        garage: h3(6) < cfg.garageProb,
+        balc: h3(7) < cfg.balcProb,
+        hedge: h3(8) < 0.6,
+        tree: h3(9),
       });
     }
     b.vil = { S, u, v: rect.v, c, K, units };
+    b.hasGardens = (cfg.z !== 'pip');
     let top = -Infinity;
     for (const un of units) if (un) top = Math.max(top, un.top + un.rise);
     b.top = top;
-    this.count.villette++;
+    if (isVil) this.count.villette++;
     this.count.unita += units.filter(Boolean).length;
   },
 
@@ -8712,7 +8816,7 @@ const Villette = {
         const L = Math.hypot(Q[0] - P[0], Q[1] - P[1]);
         if (L < 0.05) continue;
         const ox = (Q[1] - P[1]) / L, on = -(Q[0] - P[0]) / L, side = this._cut(V, un, P, Q);
-        col.copy(un.wall).multiplyScalar(0.97 + hash2(b.index, i + un.k * 17) * 0.04);
+        col.copy(un.wall).multiplyScalar(0.97 + hash2(b.index ?? 0, i + un.k * 17) * 0.04);
         const nb = side ? V.units[un.k + side] : null;
         if (nb) {
           // sul taglio: il salto verso la vicina più bassa (senza zoccolo né balconi)
@@ -8726,7 +8830,7 @@ const Villette = {
           const nbays = this._bays(L), gm = Math.max(gp, gq);
           const long = V.K === 1 || L >= 5.5 || Math.abs(((Q[0] - P[0]) * V.u[0] + (Q[1] - P[1]) * V.u[1]) / L) > 0.6;
           let nBalc = 0;
-          for (let f = 0; f < 7; f++) { if (roofY - (f + 1) * this.PIANO >= gm + 2.0) nBalc++; else break; }
+          for (let f = 0; f < 12; f++) { if (roofY - (f + 1) * this.PIANO >= gm + 2.0) nBalc++; else break; }
           const withBalc = un.balc && long && L >= 3.4 && nBalc > 0;
           const kx = this._kx(withBalc ? nBalc : 0, false, un.garage && long);
           const w = this._wc(un, this._onCut(V, un, P), false);
@@ -8740,6 +8844,26 @@ const Villette = {
           tb.quad(P3(Q, roofY), P3(P, roofY), P3(P, top), P3(Q, top), inner, null, [-ox, 0, on]);
         }
       }
+      // buchi cortile interni
+      if (un.holes && un.holes.length > 0) {
+        for (const hPoly of un.holes) {
+          const hn = hPoly.length;
+          for (let i = 0; i < hn; i++) {
+            const P = hPoly[i], Q = hPoly[(i + 1) % hn], L = Math.hypot(Q[0] - P[0], Q[1] - P[1]);
+            if (L < 0.05) continue;
+            const ox = -(Q[1] - P[1]) / L, on = (Q[0] - P[0]) / L;
+            col.copy(un.wall).multiplyScalar(0.95);
+            const nbays = this._bays(L);
+            const kx = this._kx(0, true, false), w = this._wc(un, false, true);
+            const info = [kx, base, top, w, kx, base, top, w + nbays, kx, base, top, w + nbays, kx, base, top, w];
+            tb.quad(P3(P, base), P3(Q, base), P3(Q, top), P3(P, top), col, info, [ox, 0, -on]);
+            if (!far && !un.coppi) {
+              const inner = new THREE.Color().copy(un.wall).multiplyScalar(0.9);
+              tb.quad(P3(Q, roofY), P3(P, roofY), P3(P, top), P3(Q, top), inner, null, [-ox, 0, on]);
+            }
+          }
+        }
+      }
       if (un.coppi) {
         const mid = (un.a + un.z) / 2, cc = [V.c[0] + V.u[0] * mid, V.c[1] + V.u[1] * mid];
         Buildings.gableOnFootprint(tb, poly, { c: cc, u: V.v, v: V.u, hl: 1, hw: (un.z - un.a) / 2 }, top, un.rise,
@@ -8747,9 +8871,10 @@ const Villette = {
         continue;
       }
       // terrazza
-      const tris = THREE.ShapeUtils.triangulateShape(poly.map(([e, nn]) => new THREE.Vector2(e, nn)), []);
+      const tris = THREE.ShapeUtils.triangulateShape(poly.map(([e, nn]) => new THREE.Vector2(e, nn)), (un.holes || []).map((h) => h.map(([e, nn]) => new THREE.Vector2(e, nn))));
+      const allPts = [poly, ...(un.holes || [])].flat();
       col.set(this.terraces[Math.floor(un.seed * 7) % this.terraces.length]).multiplyScalar(0.97 + un.seed * 0.05);
-      for (const [x, y, z] of tris) tb.tri(P3(poly[x], roofY + 0.02), P3(poly[y], roofY + 0.02), P3(poly[z], roofY + 0.02), col, null, [0, 1, 0]);
+      for (const [x, y, z] of tris) tb.tri(P3(allPts[x], roofY + 0.02), P3(allPts[y], roofY + 0.02), P3(allPts[z], roofY + 0.02), col, null, [0, 1, 0]);
       if (!far) this._roofThings(tb, b, un, roofY);
     }
   },
@@ -8838,7 +8963,8 @@ const Villette = {
     this.piazze = (GEO.villette?.piazze ?? []).map((f) => { const pts = DATA.pairs(f); return { pts, bb: Plane.bbox(pts) }; });
   },
 
-  build() {
+  ensureCol() {
+    if (this.col) return;
     const C = (h) => new THREE.Color(h);
     this.col = {
       hedge: [C('#4b6a33'), C('#56763a'), C('#44612f')], lawn: [C('#7d9a4c'), C('#86a152'), C('#73904a')], pillar: C('#ece7dc'),
@@ -8846,8 +8972,21 @@ const Villette = {
       palm: [C('#5c7a34'), C('#6b8838')], cypress: C('#3f5a32'), cedar: [C('#3e5848'), C('#466352'), C('#38503f')],
       pine: [C('#4f6b35'), C('#5b7a3a')], wood: C('#8a5a36'), iron: C('#2b2826'), gap: C('#3f4a36'),
     };
+  },
+
+  build() {
+    this.ensureCol();
     for (const b of DATA.city()) if (b.kind === 13 && b.vil) this._gardens(b);
     for (const p of this.piazze) this._piazza(p);
+  },
+
+  buildGardensZone(bb) {
+    this.ensureCol();
+    for (const b of DATA.city()) {
+      if (b.vil && b.hasGardens && b.c && b.c[0] >= bb[0] && b.c[0] <= bb[1] && b.c[1] >= bb[2] && b.c[1] <= bb[3]) {
+        this._gardens(b);
+      }
+    }
   },
 
   /**
@@ -10185,6 +10324,7 @@ const Details = {
     if (Scacchi.ok) Tiles.later(Scacchi.BB, () => Scacchi.build());              // blocco N5b: Casino Scacchi, cappella, terrazzamenti
     if (Sportland.ok) Tiles.later(Sportland.BB, () => Sportland.build());          // blocco N5b: i campi di Sportland
     Tiles.later([520, 830, -540, -320], () => Villette.build());
+    Tiles.later([100, 600, 100, 700], () => Villette.buildGardensZone([100, 600, 100, 700]));
     Tiles.later(Capotenda.BB, () => Capotenda.build());   // blocco N5: guado, passerella, cave, grotta, muretti, vigna
   },
 
