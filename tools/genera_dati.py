@@ -2087,6 +2087,7 @@ SCHOOLS = [
     ('Scuola primaria Tommaso Fiore', (837, 351), 2),           # Overture, Via Fratelli Cervi
     ('Circolo didattico Savio-Fiore', (545, 1052), 2),          # Overture, Via Fratelli Cervi
     ('Scuola primaria Michele Soranno', (1748, 266), 2),        # Overture, Via Michele Soranno
+    ('Scuola primaria Santomasi', (387, 596), 2),               # Overture (Corso Aldo Moro 51, IC Santomasi-Scacchi)
 ]
 CHURCHES = [
     ('Chiesa Gesù Buon Pastore', (1055, -176)),                 # OSM w328013129 (edificio senza nome)
