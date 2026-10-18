@@ -2030,6 +2030,17 @@ def city_buildings(buildings, cover):
         kind = b['kind']
         if b['cls'] in ('industrial', 'warehouse') or (code == COVER['industria'] and b['poly'].area > 300):
             kind = CITY_KIND['industry']
+        if inside((c.x, c.y), PIP):
+            seed = (math.sin(c.x * 12.9898 + c.y * 78.233) * 43758.5453) % 1
+            if b.get('osm') == 1384764964 or b.get('cls') == 'school' or (b.get('name') and 'Bachelet' in b['name']):
+                kind = CITY_KIND['school']
+                h = 7.6
+            elif b.get('cls') in ('shed', 'roof') or kind == CITY_KIND['shed']:
+                kind = CITY_KIND['shed']
+                h = 4.2
+            else:
+                kind = CITY_KIND['industry']
+                h = round(6.5 + seed * 1.5, 1)
         out.append({**b, 'height': h, 'kind': kind})
     return out
 
