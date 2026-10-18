@@ -119,17 +119,18 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
   3. Ferrari Monza SP2 (barchetta biposto aperta senza parabrezza, 4,66 × 1,99 × 1,15 m, Virtual Wind Shield, twin buttresses, fascia continua LED a tutta larghezza e 4 scarichi);
   4. Trattore John Deere serie 8R coi contropesi anteriori (6,65 × 2,55 × 3,45 m, castello zavorre in ghisa a sbalzo, ruote posteriori giganti da 2,16 m, cabina CommandView IV e fumo alto).
   La mongolfiera (quinto mezzo volante introdotto nel blocco M3) resta invariata.
-- **Cinema, teatri e luoghi della cultura (blocchi N7 e 4.7)**:
-  Modellazione delle facciate e dei portali dei luoghi storici della cultura in `Details.luoghiCultura(tops)` (0 draw call aggiuntive, geometrie nello strato `dettagli` dei riquadri vicini):
-  1. *Cinema Teatro Mastrogiacomo* (Piazza Arcangelo Scacchi 16): facciata razionalista anni '30-'40 con bow-window a sbalzo, finestra a nastro orizzontale a losanghe, cornice a "L" di feritoie traforate, tondi in bassorilievo, atrio d'ingresso cinema e bacheche locandine a giorno;
-  2. *Cinema Teatro Centrone* (Via Alcide De Gasperi 14): facciata monumentale tardo-liberty con loggia a colonne doriche, balconata, grande rosone radiale, avancorpi laterali e insegna dorata;
-  3. *Teatro Vida* (Corso Aldo Moro, edificio 494 / Palazzo Gramegna-Spada): portale d'ingresso moderno con vetrata, insegna stilizzata rossa, bacheca locandina illuminata a giorno e lanterna a muro;
+- **Cinema, teatri e luoghi della cultura (blocchi N7, 4.7 e 4.10)**:
+  Modellazione delle facciate e dei portali dei luoghi storici della cultura in `Details.luoghiCultura(tops)` (0 draw call aggiuntive, dettagli nello strato `dettagli` dei riquadri vicini; dal blocco 4.10 volumi e intonaci principali nello strato `edifici`, visibili anche da lontano):
+  1. *Cinema Teatro Mastrogiacomo* (Piazza Arcangelo Scacchi 23, blocco 4.10, `Details.mastrogiacomo`): la facciata razionalista della ricostruzione del 1939–1941, dalla foto del committente e da Street View, larga circa 11 m sul tratto nord del lato dell'isolato verso la piazza: lesena chiara scanalata, due tondi con le barre, cornice rialzata con le feritoie quadrate a «L», finestra a nastro con oblò e losanghe, pensilina coi fari, piano terra con porte a sopraluce, specchiature murate e portale di pietra grigia;
+  2. *Cinema Teatro Centrone* (Via Alcide De Gasperi 14, **lato ovest**, tra Via XX Settembre e la via a sud; blocco 4.10, `Details.centrone`): torri poligonali agli angoli, loggia con la balaustra su due colonne doriche, portone ad arco, grande apertura vetrata nella cornice di pietra, sala col tetto a capanna color ruggine e fianchi a finestre centinate (Street View da tutti i lati);
+  3. *Teatro Vida* (Via Giardini 57, lato est; blocco 4.10, `Details.teatroVida`): ingresso vetrato, insegna nera col segno verde (senza scritte), tenda bianca, aiuola con la palma, bacheca degli spettacoli; davanti niente giardinetti generati (`Details.senzaGiardini`);
   4. *Fondazione Museo Pomarici Santomasi* (Via Museo 20): portale ad arco a tutto sesto in bugnato con stemma nobiliare in chiave di volta e balconata con ringhiera in ferro;
   5. *Gravina Sotterranea* (Rione Piaggio / Via Meucci): portale d'accesso all'ipogeo ad arco con cancello in ferro e lanterna antica a braccio;
   6. *Biblioteca Capitolare Finia* (Piazza Notar Domenico / Piazza Benedetto XIII): prospetto tardo-barocco con fastigio mistilineo a volute, campanile a vela centrale sommitale con campana in bronzo, grande orologio circolare con lancette, 3 finestre centinate con conchiglie barocche scolpite sotto i davanzali, portale con stemma prelatizio in rilievo e gradinata in pietra calcarea.
   Schede curate in `LANDMARKS` con fonti storiche e gruppo dedicato `Cinema, teatri e cultura` in `POI_GROUPS` nella pausa.
 - **Correzioni dei luoghi e percorsi pedonali (blocco 4.7)**:
-  - *Scuola primaria Santomasi*: ricollocata al civico 6 di Corso Aldo Moro (edificio r6148683@1);
+  - *Scuole dell'I.C. Santomasi-Scacchi* (blocco 4.10, correzione del committente del 18/10/2026): la *Scuola media Santomasi* è in Corso Aldo Moro 51; la *Scuola primaria e dell'infanzia A. Scacchi* è in Corso Aldo Moro 6, edificio OSM w411139563, col cortile verso il Corso, il cancello con l'insegna, il muretto con la ringhiera azzurra e il padiglione col murale (`Details.scuolaScacchi`; la scuola non si divide in «unità» coi coppi);
+  - *Campetto «Madonna delle Grazie»* sotto Botromagno: non esiste, tolto da `campiSportivi` (blocco 4.10);
   - *Larghetto San Francesco*: percorso pedonale (OSM way 600751157) da Via San Francesco alla facciata della chiesa di San Francesco con goccia pedonale d'inversione nello slargo;
   - *Santa Cecilia*: rimossa la finta chiesa in Via Santa Cecilia (l'edificio OSM w411148976 è una normale casa residenziale).
 - **Cartolina e giro guidato dei monumenti (blocco N8)**:
