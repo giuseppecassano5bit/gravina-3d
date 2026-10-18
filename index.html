@@ -4658,14 +4658,41 @@ const Buildings = {
       /** Quota del tetto nel punto (e, n): con i gradoni dipende dalla striscia. */
       const topAt = (e, n) => (strips ? strips.at(e, n) : top);
 
-      // Estrusione della sagoma reale (con cortili), o delle sue strisce a gradoni
-      const pieces = strips ? strips.list : [{ poly: outer, base, top }];
-      for (const piece of pieces) {
-        this.roofs.push({ pts: piece.poly, top: piece.top + Math.max(rise, 1.5) + (kind === 1 ? 4 : 0), wall: piece.top });
-        // le chiese restano di pietra liscia; case e palazzi con zoccolo, marcapiano e cornicione (blocco N1)
-        this.prism(tb, piece.poly, strips ? [] : holes, piece.base, piece.top, wall, tiled ? wall : roof, seed, index, kind === 1 ? SURF.PLAIN : SURF.OLD);
+      // Suddivisione degli isolati in unità indipendenti con intonaci e tetti differenziati
+      const S = ([e, n]) => (e - rect.c[0]) * rect.u[0] + (n - rect.c[1]) * rect.u[1];
+      const s0 = Math.min(...outer.map(S)), s1 = Math.max(...outer.map(S)), span = s1 - s0;
+      const canSplit = span > 12 && !holes.length && kind !== 1 && !strips;
+      const K = canSplit ? Math.max(2, Math.round(span / 8.5)) : 1;
+      let pieces = strips ? strips.list : null;
+      if (!pieces) {
+        if (K > 1) {
+          pieces = [];
+          for (let k = 0; k < K; k++) {
+            const a = lerp(s0, s1, k / K), z = lerp(s0, s1, (k + 1) / K);
+            let p = Plane.clipHalfPlane(Plane.clipHalfPlane(outer, (pt) => S(pt) - a), (pt) => z - S(pt));
+            p = p.filter((pt, i) => Math.hypot(p[(i + 1) % p.length][0] - pt[0], p[(i + 1) % p.length][1] - pt[1]) > 0.05);
+            if (p.length < 3 || Math.abs(Plane.signedArea(p)) < 2.5) continue;
+            if (Plane.signedArea(p) < 0) p = [...p].reverse();
+            const uWall = (old ? facadesOld : facadesNew)[Math.floor(hash2(index * 47 + k * 11, 719) * (old ? facadesOld.length : facadesNew.length))];
+            const inSightCone = ce > -55 && ce < 20 && cn > 10 && cn < 310;
+            const uTiled = inSightCone ? false : (hash2(index * 31 + k * 13, 523) < 0.68);
+            const uRoof = uTiled ? roofTiles[Math.floor(hash2(index * 13 + k, 33) * roofTiles.length)] : roofFlat[Math.floor(hash2(index * 7 + k, 11) * roofFlat.length)];
+            const uRise = uTiled ? Math.min(1.6, (z - a) * 0.25) : 0;
+            const mid = (a + z) / 2, cc = [rect.c[0] + rect.u[0] * mid, rect.c[1] + rect.u[1] * mid];
+            pieces.push({ poly: p, base, top, wall: uWall, tiled: uTiled, roof: uRoof, rise: uRise, cc, hw: (z - a) / 2 });
+          }
+        }
+        if (!pieces || !pieces.length) pieces = [{ poly: outer, base, top, wall, tiled, roof, rise, cc: rect.c, hw: rect.hw }];
       }
-      if (tiled && !holes.length) this.gableOnFootprint(tb, outer, rect, top, rise, roof, wall);
+
+      for (const piece of pieces) {
+        const pRise = piece.rise ?? rise, pWall = piece.wall ?? wall, pRoof = piece.roof ?? roof, pTiled = piece.tiled ?? tiled;
+        this.roofs.push({ pts: piece.poly, top: piece.top + Math.max(pRise, 1.5) + (kind === 1 ? 4 : 0), wall: piece.top });
+        this.prism(tb, piece.poly, strips ? [] : holes, piece.base, piece.top, pWall, pTiled ? pWall : pRoof, seed, index, kind === 1 ? SURF.PLAIN : SURF.OLD);
+        if (pTiled && !holes.length) {
+          this.gableOnFootprint(tb, piece.poly, { c: piece.cc ?? rect.c, u: rect.v, v: rect.u, hl: 1, hw: piece.hw ?? rect.hw }, piece.top, pRise, pRoof, pWall);
+        }
+      }
       // Sui salti tra un gradone e l'altro: una porta sulla terrazza di sotto e una finestra.
       if (strips) {
         for (const step of strips.steps) {
@@ -4718,7 +4745,7 @@ const Buildings = {
           for (let k = 0; k < cols; k++) {
             const c = C[k];
             for (let f = 1; f < c.floors; f++) {
-              if (c.bal.has(f) || hash2(index * 7 + i * 13, k * 17 + f) > 0.125) continue;
+              if (c.bal.has(f) || hash2(index * 7 + i * 13, k * 17 + f) > 0.38) continue;
               const FL = c.Lg + f * H, over = Terrain.conformer.clearance(c.e + ox * 0.75, c.n + on * 0.75) < 0.3;
               if (FL + 2.6 > c.roofY - 0.3 || (over && FL - 0.45 < c.street + 3.4)) continue;
               const next = C[k + 1], long = next && !next.bal.has(f) && Math.abs(next.Lg - c.Lg) < 0.05 && f < next.floors && hash2(index, k * 5 + f) < 0.3
@@ -8647,7 +8674,7 @@ const Villette = {
     agro: ['#fbf8f2', '#f4efe6', '#ede5d4', '#ded4be', '#cebfa5', '#d9c5a5', '#ebe0c7', '#e5dac8'],
   },
 
-  activeZones: new Set(['villette', 'centro_moderno']),
+  activeZones: new Set(['villette', 'centro_moderno', 'centro_storico']),
 
   zone(b) {
     if (b.kind === 13) return 'villette';
@@ -8756,10 +8783,12 @@ const Villette = {
       if (isVil) {
         for (const [e, n, h, cd] of row.righe) if (Plane.contains(poly, e, n)) { if (h) height = h; code |= cd; }
       }
+      const [uCe, uCn] = Plane.centroid(poly);
+      const inSightCone = uCe > -55 && uCe < 20 && uCn > 10 && uCn < 310;
       const h3 = (i) => hash2((b.index ?? 0) * 53 + k * 7 + i, 313);
-      const coppi = isVil ? ((code & 1) !== 0) : (h3(15) < cfg.coppiProb);
-      const pannelli = isVil ? ((code & 2) !== 0) : (!coppi && h3(16) < cfg.pannelliProb);
-      const attico = isVil ? ((code & 4) !== 0) : (!coppi && h3(17) < cfg.atticoProb);
+      const coppi = inSightCone ? false : (isVil ? ((code & 1) !== 0) : (h3(15) < cfg.coppiProb));
+      const pannelli = isVil ? ((code & 2) !== 0) : (!coppi && !inSightCone && h3(16) < cfg.pannelliProb);
+      const attico = isVil ? ((code & 4) !== 0) : (!coppi && !inSightCone && h3(17) < cfg.atticoProb);
       const gMax = Math.max(...g);
       const top = gMax + height - (coppi ? this.PARAPETTO - 0.3 : 0);
       const wallColor = new THREE.Color(cfg.pal[Math.floor(h3(1) * cfg.pal.length)]);
@@ -10325,6 +10354,7 @@ const Details = {
     if (Sportland.ok) Tiles.later(Sportland.BB, () => Sportland.build());          // blocco N5b: i campi di Sportland
     Tiles.later([520, 830, -540, -320], () => Villette.build());
     Tiles.later([100, 600, 100, 700], () => Villette.buildGardensZone([100, 600, 100, 700]));
+    Tiles.later([-200, 400, -200, 400], () => Villette.buildGardensZone([-200, 400, -200, 400]));
     Tiles.later(Capotenda.BB, () => Capotenda.build());   // blocco N5: guado, passerella, cave, grotta, muretti, vigna
   },
 
