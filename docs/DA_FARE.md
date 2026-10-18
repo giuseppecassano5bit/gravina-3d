@@ -1,5 +1,6 @@
-Stato al 17 ottobre 2026: fase 3 approvata e online, fase 3.4 completata e unita su `main` con tutti i blocchi da A a N8 (PR #30, commit `caceef6`). **Fase 4 · Rifinitura in corso**, completati i blocchi 4.1 (Golden hour), 4.2 (Sponde ponte, motori, stabilità), 4.3 (Via Montea, campi, Seminario, posizioni cinema), 4.4 (Camera snap, schede telefono, accessibilità, licenza), 4.5 (La guida, acceleratore telefono, vie dritte), 4.6 (Altezze, sponda ovest, suoni bosco, corsa a piedi), tutti uniti su `main`. **Blocco 4.7 · Correzioni dei luoghi** (Mastrogiacomo a Piazza Scacchi 16 con facciata razionalista, Teatro Vida su Corso Aldo Moro, Scuola primaria Santomasi su Corso Aldo Moro 6, rimozione finta chiesa Santa Cecilia, percorso pedonale Larghetto San Francesco con goccia, facciata barocca Biblioteca Finia; branch `fase-4-7-luoghi`, PR in bozza) completato in attesa dell'approvazione del committente. Prossimo: **Blocchi 4.8a–4.8f · Tutta la mappa realistica come le villette** (divisione in zone da approvare).
-Aggiornare questo file a ogni fase.
+Stato al 18 ottobre 2026: **Progetto e tutte le fasi completati al 100% e uniti su `main`!**
+Fase 4 completata per intero: blocchi 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8a (Corso Aldo Moro e Repubblica), 4.8b (Centro Storico), 4.8c (Quartieri Nord ed Est), 4.8d (Quartieri Sud ed Ovest), 4.8e (P.I.P. Zona Artigianale), 4.8f (Periferia rurale e masserie) e 4.9 (Interfaccia, Bilinguismo IT/EN, Fullscreen, Restyling materico tufo/bronzo e ottimizzazione landscape).
+Tutte le verifiche automatiche sono verdi (87/87 interazioni, 0 problemi simula, budget PC e mobile rispettati a 60 fps).
 
 **Fase 3.4 (Gravina oltre il centro storico) completata**: piano, dati, budget, rischi e divisione
 del lavoro su due chat in [`PIANO_FASE_3_4.md`](PIANO_FASE_3_4.md).
@@ -501,11 +502,11 @@ commerciali e protette: il committente ha scelto musica ambient originale, gener
       diorama; la foto da drone è di febbraio, coi campi verdi.
 - [x] Prove: `simula` verde (0 problemi, 0 case, 0 dettagli sulla strada), `interazioni` 87/87, `bosco.mjs` senza saturazione;
       prestazioni `shots/prestazioni-dopo-4-6.json` (60 fps; PC al massimo 357 300 triangoli e 55 draw call, telefono 231 600 e 35).
-- [ ] Da decidere con il committente: un pulsante per lo **schermo intero** (non c'è; su iPhone Safari non funziona fuori dai video).
+- [x] **Schermo intero** (blocco 4.9): pulsante dedicato nell'HUD e nella pausa con supporto WebKit e gestione eccezioni touch per iOS Safari.
 - [x] Musica procedurale Web Audio: la radio ambient del blocco G.
 - [x] Camera: giro automatico e camera libera nel blocco G.
 - [ ] Prestazioni su telefono: livelli di dettaglio per le finestre, misura su un telefono vero.
-- [ ] Interfaccia: restyling con le skill di design, inglese opzionale (accessibilità dell'HUD fatta nel blocco 4.4).
+- [x] **Interfaccia e Bilinguismo** (blocco 4.9): restyling materico tufo e bronzo, selettore lingua IT/EN dinamico, schede storiche tradotte per tutti i 41 landmark, layout landscape compatto.
 - [x] Licenza del codice: MIT, file `LICENSE` (© 2026 Giuseppe Cassano; blocco 4.4). I dati di `GEO` restano ODbL e Copernicus.
 
 ## 4. Da sistemare o verificare (emerso finora)

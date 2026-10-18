@@ -88,6 +88,8 @@ Tutto per continuare sul proprio computer è nel repository:
 | Andare a piedi | scegli un cartello col pedone («a piedi») | tocca un cartello col pedone |
 | Girare la camera | trascina col mouse; rotella per avvicinarsi o allontanarsi; **Segui il mezzo** per tornare dietro | trascina con un dito; due dita per lo zoom |
 | Musica | <kbd>M</kbd> o il pulsante **Musica**; poi brano successivo e volume | tocca **♪** |
+| Schermo intero | pulsante **⛶** nell'HUD o nel menu di pausa | tocca **⛶** |
+| Cambiare lingua (IT/EN) | pulsante lingua nella schermata iniziale o nel menu di pausa | tocca **IT \| EN** |
 
 Il mezzo avanza da solo. Se non scegli, agli incroci prosegue sulla via più dritta.
 Il menu di pausa compare solo a mezzo fermo; se cambi app o scheda il viaggio va in pausa da
@@ -105,6 +107,7 @@ modello, fari al tramonto, **stop** quando rallentano e **frecce** prima delle s
 | Audi RS Q8 | SUV coupé sportivo grigio con calandra Singleframe ottagonale RS, cerchi da 23", fari Matrix LED e doppio scarico ovale; possente e brillante |
 | Ferrari Monza SP2 | barchetta biposto aperta senza parabrezza, Virtual Wind Shield, doppie gobbe posteriori, nastro LED continuo a tutta larghezza e 4 scarichi; la più svelta (sempre a passo da centro storico) |
 | Trattore John Deere 8R coi contropesi | verde e giallo col massiccio castello zavorre in ghisa a sbalzo, ruote posteriori giganti da 2,16 m, cabina CommandView IV e sbuffi di fumo procedurale; il più imponente e lento |
+| V-22 Osprey (volo libero) | convertiplano militare bimotore a rotori basculanti; decollo e atterraggio verticale, volo 3D completamente libero senza vincoli stradali su tutta la mappa fino a 380 m di quota, controlli WASD/frecce/Spazio/C su desktop e touch su mobile |
 | Mongolfiera | pallone a spicchi nei colori del diorama con una fascia blu, cesta di vimini, fiamma e soffio del bruciatore; vola su un **giro fisso** di 2,7 km da Botromagno, sempre almeno 30 m sopra tetti e monumenti, e non segue le vie (un'eccezione come il Ponte Acquedotto). Il pulsante **Vista dalla cesta / Vista esterna** passa dalla prima alla terza persona. Alla fine del giro si riparte con l'ultima auto dalla via più vicina al decollo; i luoghi lontani dal giro (il bosco, il P.I.P., il Castello, il Casino di Meninni) si raggiungono scendendo e prendendo l'auto |
 
 ## Com'è fatto
