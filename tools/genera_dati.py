@@ -2079,8 +2079,6 @@ SCHOOLS = [
     ('ITT Bachelet · IPSIA G. Galilei', (2628, 687), 2),        # OSM w1384764963 (area), w1384764964, nel P.I.P.
     ('Scuola primaria Padre Pio', (1117, -216), 2),             # OSM w411138848, Via Guardialto
     ('Scuola media Don E. Montemurro', (648, -323), 3),         # OSM w411138849, Via Tripoli
-    ('Circolo didattico San Giovanni Bosco', (320, -139), 3),   # OSM r6148449, Corso Vittorio Emanuele
-    ('Edificio scolastico S.G. Bosco', (910, -21), 3),          # OSM, nome dell'edificio
     ('Scuola secondaria N. Ingannamorte', (730, 418), 3),       # OSM n12091003369, Via Francesco Baracca
     ('Scuola dell\'infanzia Papa Giovanni Paolo II', (1212, -187), 1),   # OSM n12039009818
     ('Scuola dell\'infanzia Alla Fine dell\'Arcobaleno', (1368, 124), 1),   # OSM n12039071161
@@ -2089,7 +2087,6 @@ SCHOOLS = [
     ('Scuola primaria Tommaso Fiore', (837, 351), 2),           # Overture, Via Fratelli Cervi
     ('Circolo didattico Savio-Fiore', (545, 1052), 2),          # Overture, Via Fratelli Cervi
     ('Scuola primaria Michele Soranno', (1748, 266), 2),        # Overture, Via Michele Soranno
-    ('Scuola primaria Santomasi', (345, 335), 2),               # blocco 4.7: Corso Aldo Moro 6
 ]
 CHURCHES = [
     ('Chiesa Gesù Buon Pastore', (1055, -176)),                 # OSM w328013129 (edificio senza nome)
@@ -2286,7 +2283,7 @@ def chiese_aree(buildings):
 
 def taglio_torri_4_8a(buildings):
     """Blocco 4.8a · Separazione delle due torri isolate da 8 piani (Corso Aldo Moro 8 e Via Matteotti 18)
-    e della Scuola primaria Santomasi (Corso Aldo Moro 6) dai rispettivi isolati monolitici OSM/Overture.
+    e del corpo basso di Corso Aldo Moro 6 dai rispettivi isolati monolitici OSM/Overture.
     Elimina la finta chiesa w411148157 unendola alla torre di Corso Aldo Moro."""
     # 1. Corso Aldo Moro: isolato w/r6148683 (civici 6–14) + finta chiesa w411148157
     b_rel = next((b for b in buildings if b['poly'].area > 4000 and 350 < b['poly'].centroid.x < 380), None)
@@ -2307,10 +2304,10 @@ def taglio_torri_4_8a(buildings):
         p_scuola = isolato.intersection(box_scuola)
         p_torre = isolato.intersection(cut_torre)
         p_nord = isolato.difference(box_scuola).difference(cut_torre)
-        buildings.append({'poly': p_scuola, 'kind': KIND['public'], 'cls': 'school', 'name': 'Scuola primaria Santomasi', 'height': None, 'level': 0, 'osm': None})
+        buildings.append({'poly': p_scuola, 'kind': KIND['apartments'], 'cls': 'apartments', 'name': None, 'height': None, 'level': 0, 'osm': None})
         buildings.append({'poly': p_torre, 'kind': KIND['apartments'], 'cls': 'apartments', 'name': None, 'height': None, 'level': 0, 'osm': None})
         buildings.append({'poly': p_nord, 'kind': KIND['apartments'], 'cls': 'apartments', 'name': None, 'height': None, 'level': 0, 'osm': None})
-        print(f'  blocco 4.8a: isolato Corso Aldo Moro tagliato in 3 edifici (scuola {p_scuola.area:.0f} m², torre {p_torre.area:.0f} m², cortina nord {p_nord.area:.0f} m²)')
+        print(f'  blocco 4.8a: isolato Corso Aldo Moro tagliato in 3 edifici (civico 6 {p_scuola.area:.0f} m², torre {p_torre.area:.0f} m², cortina nord {p_nord.area:.0f} m²)')
 
     # 2. Via Matteotti: isolato r6148644 (civici 14–18)
     p_mat_pt = Point(241.4, -7.2)
@@ -2862,7 +2859,7 @@ LIVELLI = [
         (411140132, 370.43, -109.85, 2),
         (411145000, 278.78, -128.11, 2),
         (None, 375.60, -141.43, 3),          # Ufficio Postale Centrale
-        (None, 291.68, -143.47, 3),          # San Giovanni Bosco
+        (None, 291.68, -143.47, 3),          # Corso Vittorio Emanuele
     ]),
     ('Street View e rilievi, estensione centro storico: Piaggio, Fondovito, Civita, Giudecca (blocco 4.8b)', [
         (411140067, 190.73, 511.85, 2),
@@ -3450,7 +3447,7 @@ LIVELLI = [
     ]),
     ('Street View e satellite, Corso Aldo Moro 1–14, Via Matteotti 14–18, Piazza Scacchi (ott 2025; blocco 4.8a)', [
         (None, 355.0, 375.0, 8),          # Corso Aldo Moro 8: torre residenziale di 8 livelli (taglio dell'isolato)
-        (None, 345.0, 335.0, 2),          # Corso Aldo Moro 6: Scuola primaria Santomasi (2 livelli scolastici)
+        (None, 345.0, 335.0, 2),          # Corso Aldo Moro 6: corpo a 2 livelli
         (None, 380.0, 410.0, 4),          # Corso Aldo Moro 10–14: cortina residenziale a 4 livelli
         (None, 375.0, 290.0, 4),          # Corso Aldo Moro 2–4 e Via Giardini: palazzina a 4 livelli
         (None, 391.6, 453.5, 3),          # Corso Aldo Moro (Palazzo Gramegna-Spada / Teatro Vida): 3 livelli
