@@ -116,6 +116,9 @@
   :root {
     --tufo: #E8D2A0;
     --tufo-deep: #B8925A;
+    --gold-tufo: #DFC17B;
+    --bronze: #2E241A;
+    --bronze-light: #4A3A2B;
     --dusk: #1E2536;
     --dusk-glass: rgba(26, 31, 46, 0.74);
     --sunset: #F0A04B;
@@ -225,10 +228,35 @@
     font: 700 0.8rem/1 var(--font-sign); letter-spacing: 0.12em; text-transform: uppercase;
     color: var(--tufo); background: rgba(244, 238, 226, 0.06);
     border: 1.5px solid rgba(232, 210, 160, 0.55); border-radius: 99px; cursor: pointer;
-    transition: background 0.18s ease, border-color 0.18s ease;
+    transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
   }
   .btn-about svg { width: 18px; height: 18px; flex: none; }
-  .btn-about:hover { background: rgba(244, 238, 226, 0.14); border-color: var(--tufo); }
+  .btn-about:hover { background: rgba(244, 238, 226, 0.14); border-color: var(--tufo); transform: translateY(-1px); }
+
+  /* Selettore lingua bilingue (Italiano / Inglese) */
+  .btn-lang {
+    display: inline-flex; align-items: center; gap: 0.45rem; min-height: 44px; padding: 0 0.85rem;
+    font: 700 0.82rem/1 var(--font-sign); letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--tufo); background: rgba(244, 238, 226, 0.06);
+    border: 1.5px solid rgba(232, 210, 160, 0.55); border-radius: 99px; cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+  }
+  .btn-lang:hover { background: rgba(244, 238, 226, 0.14); border-color: var(--tufo); transform: translateY(-1px); }
+  .btn-lang svg { width: 16px; height: 16px; flex: none; color: var(--sunset); }
+
+  .lang-pills { display: flex; gap: 0.6rem; margin-top: 0.2rem; }
+  .pill-lang {
+    flex: 1; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem;
+    font: 600 0.88rem/1 var(--font-sign); letter-spacing: 0.06em;
+    color: var(--tufo); background: rgba(244, 238, 226, 0.07);
+    border: 1px solid rgba(232, 210, 160, 0.3); border-radius: 4px; cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  }
+  .pill-lang:hover { background: rgba(244, 238, 226, 0.14); border-color: var(--tufo); }
+  .pill-lang.is-selected {
+    background: rgba(240, 160, 75, 0.22); border-color: var(--sunset); color: #fff;
+    box-shadow: inset 0 0 0 1px var(--sunset);
+  }
 
   /* Senza JavaScript: due righe su cos'è il progetto al posto dei comandi */
   .noscript { margin: 0; padding: 0.8rem 1rem; font: 400 0.95rem/1.5 var(--font-ui); color: var(--ink); background: var(--marble); border-radius: 3px; }
@@ -523,9 +551,13 @@
   .pill {
     display: flex; align-items: center; gap: 0.45rem; height: 46px; padding: 0 1.05rem 0 0.85rem;
     font: 700 0.84rem/1 var(--font-sign); letter-spacing: 0.14em; text-transform: uppercase;
-    color: #fff; background: var(--dusk-glass); border: 2px solid rgba(255, 255, 255, 0.85); border-radius: 99px;
+    color: #fff; background: rgba(24, 28, 40, 0.82); backdrop-filter: blur(8px);
+    border: 1.5px solid rgba(232, 210, 160, 0.48); border-radius: 99px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
     cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
   }
+  .pill:hover { background: rgba(36, 42, 60, 0.92); border-color: var(--sunset); transform: translateY(-1px); }
   .pill svg { width: 15px; height: 15px; flex: none; }
   .pill:active { background: var(--sign-brown); }
   .pill:focus-visible, .radio__next:focus-visible, .radio__vol:focus-visible { outline: 3px solid var(--sunset); outline-offset: 2px; }
@@ -558,13 +590,14 @@
   .engine__vol:focus-visible { outline: 3px solid var(--sunset); outline-offset: 2px; }
 
   .postcard-btn { position: absolute; top: calc(var(--gutter) + 176px + 30px + 168px + var(--safe-top)); right: calc(var(--gutter) + var(--safe-right)); }
-  .follow-btn { position: absolute; top: calc(var(--gutter) + 176px + 30px + 224px + var(--safe-top)); right: calc(var(--gutter) + var(--safe-right)); }
+  .fullscreen-btn { position: absolute; top: calc(var(--gutter) + 176px + 30px + 224px + var(--safe-top)); right: calc(var(--gutter) + var(--safe-right)); }
+  .follow-btn { position: absolute; top: calc(var(--gutter) + 176px + 30px + 280px + var(--safe-top)); right: calc(var(--gutter) + var(--safe-right)); }
   .follow-btn[hidden] { display: none; }
-  .hud.is-paused .radio, .hud.is-paused .engine, .hud.is-paused .follow-btn { display: none; }
+  .hud.is-paused .radio, .hud.is-paused .engine, .hud.is-paused .follow-btn, .hud.is-paused .fullscreen-btn { display: none; }
   /* mongolfiera (blocco M3): «Vista dalla cesta / Vista esterna» al posto di «Segui il mezzo», che scende di una riga */
-  .view-btn { position: absolute; top: calc(var(--gutter) + 176px + 30px + 224px + var(--safe-top)); right: calc(var(--gutter) + var(--safe-right)); }
+  .view-btn { position: absolute; top: calc(var(--gutter) + 176px + 30px + 280px + var(--safe-top)); right: calc(var(--gutter) + var(--safe-right)); }
   .view-btn[hidden], .hud.is-paused .view-btn { display: none; }
-  .hud.is-balloon .follow-btn { top: calc(var(--gutter) + 176px + 30px + 280px + var(--safe-top)); }
+  .hud.is-balloon .follow-btn { top: calc(var(--gutter) + 176px + 30px + 336px + var(--safe-top)); }
 
   /* Blocco N8: banner del Giro guidato dei monumenti e toast */
   .tour-hud {
@@ -715,8 +748,9 @@
     .engine { top: calc(var(--gutter) + 104px + 24px + 116px + var(--safe-top)); }
     .engine__vol { display: none !important; }
     .postcard-btn { top: calc(var(--gutter) + 104px + 24px + 174px + var(--safe-top)); }
-    .follow-btn, .view-btn { top: calc(var(--gutter) + 104px + 24px + 232px + var(--safe-top)); }
-    .hud.is-balloon .follow-btn { top: calc(var(--gutter) + 104px + 24px + 290px + var(--safe-top)); }
+    .fullscreen-btn { top: calc(var(--gutter) + 104px + 24px + 232px + var(--safe-top)); }
+    .follow-btn, .view-btn { top: calc(var(--gutter) + 104px + 24px + 290px + var(--safe-top)); }
+    .hud.is-balloon .follow-btn { top: calc(var(--gutter) + 104px + 24px + 348px + var(--safe-top)); }
     .plaque { max-width: calc(100vw - 2 * var(--gutter) - 116px); padding: 0.45rem 0.8rem 0.5rem; }
     .plaque__street { font-size: 1rem; }
     /* blocco 4.4: in verticale la scheda sta nella fascia alta (al massimo un terzo dello schermo) e
@@ -778,13 +812,18 @@
     .engine { top: calc(var(--gutter) + 92px + 24px + 116px + var(--safe-top)); }
     .engine__vol { display: none !important; }
     .postcard-btn { top: calc(var(--gutter) + 92px + 24px + 174px + var(--safe-top)); }
-    .follow-btn, .view-btn { top: calc(var(--gutter) + 92px + 24px + 232px + var(--safe-top)); }
-    .hud.is-balloon .follow-btn { top: calc(var(--gutter) + 92px + 24px + 290px + var(--safe-top)); }
+    .fullscreen-btn { top: calc(var(--gutter) + 92px + 24px + 232px + var(--safe-top)); }
+    .follow-btn, .view-btn { top: calc(var(--gutter) + 92px + 24px + 290px + var(--safe-top)); }
+    .hud.is-balloon .follow-btn { top: calc(var(--gutter) + 92px + 24px + 348px + var(--safe-top)); }
     .plaque { padding: 0.4rem 0.8rem 0.45rem; }
     .plaque__street { font-size: 1rem; }
-    .card { top: calc(var(--gutter) + 58px + var(--safe-top)); width: min(330px, 42vw); padding: 0.6rem 0.8rem 0.7rem; gap: 0.2rem; }
+    .card {
+      top: calc(var(--gutter) + 52px + var(--safe-top)); width: min(340px, 46vw);
+      max-height: min(150px, 42dvh); padding: 0.65rem 0.85rem 0.75rem; gap: 0.25rem;
+      overflow-y: auto; overscroll-behavior: contain;
+    }
     .card__title { font-size: 1.05rem; }
-    .card__text { font-size: 0.8rem; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
+    .card__text { font-size: 0.82rem; line-height: 1.4; display: block; overflow: visible; }
     .junction { bottom: calc(10px + var(--safe-bottom)); gap: 0.35rem; }
     .sign { padding: 0.4rem 0.75rem 0.45rem 0.6rem; }
     .touch-arrow { display: none !important; }   /* in orizzontale bastano i cartelli */
@@ -862,13 +901,19 @@
     <p class="controls-hint" id="controls-hint">Agli incroci scegli la via con <kbd>←</kbd> <kbd>→</kbd> · <kbd>Shift</kbd> tenuto per andare più veloce · <kbd>P</kbd> per la pausa: cambi mezzo o ti teletrasporti.</p>
     <div class="credit">
       <p class="credit__by">
-        <span class="credit__label">Un progetto di</span>
+        <span class="credit__label" id="credit-label">Un progetto di</span>
         <span class="credit__name">Giuseppe Cassano</span>
       </p>
-      <button class="btn-about" id="btn-about" type="button" aria-haspopup="dialog" aria-controls="about">
-        <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8.2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="10" cy="6.2" r="1.15" fill="currentColor"/><path d="M10 9v5.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        Il progetto
-      </button>
+      <div style="display: flex; align-items: center; gap: 0.55rem;">
+        <button class="btn-lang" id="btn-lang" type="button" aria-label="Cambia lingua (Italiano / English)" title="Switch language">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.6"/><ellipse cx="10" cy="10" rx="3.6" ry="8" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M2.5 10h15M3.8 6h12.4M3.8 14h12.4" stroke="currentColor" stroke-width="1.3"/></svg>
+          <span id="lang-current">IT</span>
+        </button>
+        <button class="btn-about" id="btn-about" type="button" aria-haspopup="dialog" aria-controls="about">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8.2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="10" cy="6.2" r="1.15" fill="currentColor"/><path d="M10 9v5.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span id="btn-about-label">Il progetto</span>
+        </button>
+      </div>
     </div>
     <p class="attribution">Mappa: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors (ODbL), via <a href="https://overturemaps.org" target="_blank" rel="noopener">Overture Maps</a>.<br>Quote del terreno: <span lang="en">produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved</span></p>
   </div>
@@ -977,7 +1022,13 @@
 
   <button class="pill postcard-btn" id="btn-postcard" type="button" aria-label="Scatta una cartolina" aria-keyshortcuts="C" title="Scatta una cartolina ricordo (tasto C)">
     <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4A1.5 1.5 0 0 0 1 5.5v7A1.5 1.5 0 0 0 2.5 14h11a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 13.5 4h-2.172a1.5 1.5 0 0 1-1.06-.44l-.828-.828A1.5 1.5 0 0 0 8.38 2.293H7.62a1.5 1.5 0 0 0-1.06.44l-.828.828A1.5 1.5 0 0 1 4.672 4H2.5zm5.5 8a3 3 0 1 1 0-6 3 3 0 0 1 0 6z" fill="currentColor"/></svg>
-    <span>Cartolina</span>
+    <span id="postcard-label">Cartolina</span>
+  </button>
+
+  <button class="pill fullscreen-btn" id="btn-fullscreen" type="button" aria-label="Schermo intero" title="Schermo intero">
+    <svg viewBox="0 0 16 16" id="fs-icon-enter" aria-hidden="true"><path d="M1.5 1.5h4v1.5h-2.5v2.5h-1.5zM10.5 1.5h4v4h-1.5v-2.5h-2.5zM14.5 10.5v4h-4v-1.5h2.5v-2.5zM1.5 10.5h1.5v2.5h2.5v1.5h-4z" fill="currentColor"/></svg>
+    <svg viewBox="0 0 16 16" id="fs-icon-exit" aria-hidden="true" hidden><path d="M5.5 5.5h-4v-1.5h2.5v-2.5h1.5zM10.5 5.5v-4h1.5v2.5h2.5v1.5zM10.5 10.5h4v1.5h-2.5v2.5h-1.5zM5.5 10.5v4h-1.5v-2.5h-2.5v-1.5z" fill="currentColor"/></svg>
+    <span id="fs-label">Schermo intero</span>
   </button>
 
   <button class="pill follow-btn" id="btn-follow" type="button" hidden aria-label="Segui il mezzo">
@@ -1087,8 +1138,16 @@
       <h3 class="pause__h" id="pause-sound-label">Suoni</h3>
       <button class="sound-switch" id="btn-forest-sound" type="button" role="switch" aria-checked="true">
         <span class="sound-switch__track" aria-hidden="true"><span class="sound-switch__dot"></span></span>
-        <span class="sound-switch__text"><strong>Suoni del bosco</strong><small>Uccelli e animali dentro il Bosco Difesa Grande; vento e corvi al Casino di Meninni</small></span>
+        <span class="sound-switch__text"><strong id="forest-sound-title">Suoni del bosco</strong><small id="forest-sound-hint">Uccelli e animali dentro il Bosco Difesa Grande; vento e corvi al Casino di Meninni</small></span>
       </button>
+    </section>
+
+    <section aria-labelledby="pause-lang-label">
+      <h3 class="pause__h" id="pause-lang-label">Lingua / Language</h3>
+      <div class="lang-pills" role="radiogroup" aria-labelledby="pause-lang-label">
+        <button class="pill-lang is-selected" id="btn-lang-it" type="button" role="radio" aria-checked="true">🇮🇹 Italiano</button>
+        <button class="pill-lang" id="btn-lang-en" type="button" role="radio" aria-checked="false">🇬🇧 English</button>
+      </div>
     </section>
 
     <section aria-labelledby="pause-map-label">
@@ -1780,144 +1839,208 @@ const DATA = {
 const LANDMARKS = [
   {
     id: 'duomo', name: 'Cattedrale di Santa Maria Assunta', ref: 'Cattedrale', kicker: 'Piazza Benedetto XIII · dal 1092', radius: 50,
+    en_name: 'Cathedral of Santa Maria Assunta', en_kicker: 'Piazza Benedetto XIII · since 1092',
     text: 'Voluta nel 1092 dal normanno Umfrido d’Altavilla, fu ricostruita dopo l’incendio e il terremoto del 1456. Il portale maggiore è a ovest, sotto il rosone a ventiquattro raggi con l’Assunta; un secondo ingresso si apre sul fianco sud, verso la piazza. Il campanile ha la cupola a cipolla del 1698. Basilica minore dal 1993.',
+    en_text: 'Commissioned in 1092 by the Norman count Humphrey of Hauteville, it was rebuilt after the devastating fire and earthquake of 1456. The main portal faces west beneath a 24-spoke rose window depicting the Assumption; a second entrance opens along the southern flank facing the square. The bell tower features an onion dome dating from 1698. Designated a minor basilica in 1993.',
   },
   {
     id: 'belvedere', name: 'La Gravina', at: [-27, 19], kicker: 'Belvedere della Cattedrale', radius: 32,
+    en_name: 'The Gravina Canyon', en_kicker: 'Cathedral Belvedere',
     text: 'Il canyon che dà il nome alla città, scavato nel calcare e nel tufo dal torrente Gravina. Sulle sue pareti si aprono grotte e chiese rupestri.',
+    en_text: 'The dramatic canyon that gives the city its name, carved into limestone and calcarenite tufo by the Gravina stream. Rock-hewn dwellings and ancient rock churches line its cliffs.',
   },
   {
     id: 'purgatorio', name: 'Chiesa del Purgatorio', ref: 'Santa Maria del Suffragio', kicker: 'Piazza Notar Domenico · dal 1649', radius: 34,
+    en_name: 'Church of the Purgatorio', en_kicker: 'Piazza Notar Domenico · since 1649',
     text: 'Voluta dai duchi Ferdinando III Orsini e Giovanna Frangipane della Tolfa, genitori di papa Benedetto XIII. Sul timpano spezzato del portale giacciono due scheletri; i pilastri, fatti di torri sovrapposte (lo stemma dei Frangipane), poggiano sugli orsi degli Orsini.',
+    en_text: 'Commissioned by Duke Ferdinando III Orsini and Giovanna Frangipane della Tolfa, parents of Pope Benedict XIII. Two sculpted skeletons lie on the broken pediment above the portal; pilasters of stacked towers (the Frangipane emblem) rest on carved Orsini bears.',
   },
   {
     id: 'orsini', name: 'Palazzo Ducale Orsini', ref: 'Palazzo Ducale Orsini', kicker: 'Piazza della Repubblica', radius: 38,
+    en_name: 'Orsini Ducal Palace', en_kicker: 'Piazza della Repubblica',
     text: 'Residenza dei duchi Orsini, signori di Gravina, affacciata su Piazza della Repubblica, il cuore della città.',
+    en_text: 'The historic residence of the Orsini dukes, rulers of Gravina, overlooking Piazza della Repubblica, the heart of the town.',
   },
   {
     id: 'gesu', name: 'Chiesa del Gesù', ref: 'Chiesa del Gesù', kicker: 'Santissimo Nome di Gesù · 1645', radius: 26,
+    en_name: 'Church of the Gesù', en_kicker: 'Holy Name of Jesus · 1645',
     text: 'Fu eretta nel 1645, per volontà testamentaria di Balsamo Lupi, trasformando due stalle a pianterreno e due stanze del Palazzo Lupi. Oggi è sconsacrata e ospita la confraternita di San Michele Arcangelo.',
+    en_text: 'Built in 1645 through the bequest of Balsamo Lupi by converting ground-floor stables and two chambers of Palazzo Lupi. Now deconsecrated, it serves as the seat of the Archconfraternity of Saint Michael the Archangel.',
   },
   {
     // Blocco N7 / 4.3 / 4.7: Cinema Teatro Mastrogiacomo (Piazza Arcangelo Scacchi 16)
     id: 'mastrogiacomo', name: 'Cinema Teatro Mastrogiacomo', at: [348, 48], kicker: 'Piazza Scacchi 16 · aperto nel 1927', radius: 26,
+    en_name: 'Mastrogiacomo Cinema Theatre', en_kicker: 'Piazza Scacchi 16 · opened in 1927',
     text: 'Voluto dal cavaliere Michele Mastrogiacomo e progettato dall’ingegnere De Martino, fu inaugurato nel 1927 come primo grande teatro moderno della città, con galleria e palchetti in stile Liberty. Trasformato in seguito con struttura in cemento armato e sala cinematografica, ha animato per decenni la vita culturale gravinese prima della chiusura nel 1995. Nel 2024 è stato acquisito al patrimonio comunale per il recupero a teatro e polo culturale polifunzionale.',
+    en_text: 'Commissioned by Michele Mastrogiacomo and designed by engineer De Martino, it opened in 1927 as the city’s first modern theatre, featuring Art Nouveau galleries and private boxes. Later renovated with a reinforced concrete structure and cinema hall, it served as a cultural hub for decades until closing in 1995. Acquired by the municipality in 2024, it is being restored as a multifunctional civic theatre.',
   },
   {
     // Blocco N7 / 4.3: Cinema Teatro Centrone (Via Alcide De Gasperi 14, primi 60 m da Piazza Scacchi)
     id: 'centrone', name: 'Cinema Teatro Centrone', at: [415, -50], kicker: 'Via De Gasperi · politeama del 1947', radius: 36,
+    en_name: 'Centrone Cinema Theatre', en_kicker: 'Via De Gasperi · 1947 playhouse',
     text: 'Costruito tra il 1946 e il 1947 in tufo locale per iniziativa dell’imprenditore Leonardo Centrone, è uno degli edifici teatrali più imponenti e originali della Murgia. La facciata tardo-liberty con colonne doriche, balconata e grande rosone geometrico introduceva a una maestosa sala da oltre 2.000 posti. Tempio del cinema e della musica, ha ospitato concerti memorabili di cantautori come Domenico Modugno, Francesco De Gregori e Riccardo Cocciante prima della chiusura nel 1990.',
+    en_text: 'Built between 1946 and 1947 from local tufo stone by entrepreneur Leonardo Centrone, it stands as one of the grandest theatre buildings in the Murgia. The late-Liberty facade with Doric columns, a balcony, and a geometric rose window led into a cavernous 2,000-seat auditorium that hosted historic concerts by prominent Italian songwriters before closing in 1990.',
   },
   {
     // Blocco N7 / 4.7: Teatro Vida (Corso Aldo Moro)
     id: 'teatrovida', name: 'Teatro Vida', at: [372, 492], kicker: 'Corso Aldo Moro · teatro e formazione artistica', radius: 32,
+    en_name: 'Vida Theatre', en_kicker: 'Corso Aldo Moro · theatre and arts academy',
     text: 'Spazio teatrale indipendente e sede della compagnia e accademia teatrale Vida, su Corso Aldo Moro. È un attivo punto di riferimento cittadino per la prosa contemporanea, il teatro comico, le rassegne per ragazzi e i laboratori di formazione artistica e cinematografica.',
+    en_text: 'An independent theatre space and home of the Vida theatre company and academy on Corso Aldo Moro. It serves as an active cultural centre for contemporary drama, comedy, youth theatre, and acting workshops.',
   },
   {
     id: 'santomasi', name: 'Museo Pomarici Santomasi', ref: 'Museo e Biblioteca Ettore Pomarici Santomasi', kicker: 'Via Museo · palazzo nobiliare e pinacoteca', radius: 30,
+    en_name: 'Pomarici Santomasi Museum', en_kicker: 'Via Museo · noble palace & art gallery',
     text: 'Palazzo nobiliare lasciato in eredità alla città nel 1917 dal barone Ettore Pomarici Santomasi. Custodisce un museo con ricche collezioni archeologiche apule e peucete, maioliche, armeria, quadreria nobiliare e gli straordinari affreschi bizantini dell’XI secolo della cripta di San Vito Vecchio, qui salvati e rimontati dopo la demolizione della chiesetta rupestre.',
+    en_text: 'A noble palace bequeathed to the city in 1917 by Baron Ettore Pomarici Santomasi. It houses extensive Apulian and Peucetian archaeological collections, ceramics, weaponry, a painting gallery, and the extraordinary 11th-century Byzantine frescoes from the crypt of San Vito Vecchio, preserved and reconstructed here.',
   },
   {
     id: 'santalucia', name: 'Santa Lucia', ref: 'Chiesa Rupestre Santa Lucia', kicker: 'Rione Piaggio · chiesa rupestre', radius: 30,
+    en_name: 'Church of Santa Lucia', en_kicker: 'Piaggio District · rock church',
     text: 'Piccola chiesa rupestre del rione Piaggio, uno dei due rioni medievali scavati nel tufo lungo la gravina.',
+    en_text: 'A small rock-hewn church nestled in the Piaggio district, one of two medieval cave quarters carved into the tufo cliffs of the canyon.',
   },
   {
     id: 'santasofia', name: 'Santa Sofia', ref: 'Chiesa di Santa Sofia', kicker: 'Mausoleo di Angela Castriota Skanderbeg', radius: 28,
+    en_name: 'Church of Santa Sofia', en_kicker: 'Mausoleum of Angela Castriota Scanderbeg',
     text: 'Chiesa antica, già dell’età bizantina, a fine Quattrocento divenne il centro della comunità albanese. La duchessa Angela Castriota Skanderbeg, nipote dell’eroe albanese e moglie di Ferdinando I Orsini, la fece ampliare: dentro c’è il suo mausoleo in marmo di Carrara. Nel 1539 vi fu aggiunto un monastero di clarisse.',
+    en_text: 'An ancient church dating back to Byzantine times that became the spiritual hub of the local Albanian community in the late 15th century. Duchess Angela Castriota Scanderbeg, niece of the Albanian national hero and wife of Ferdinando I Orsini, expanded it: her marble mausoleum rests inside. A Poor Clares convent was added in 1539.',
   },
   {
     id: 'sanfrancesco', name: 'San Francesco', ref: 'Chiesa San Francesco', kicker: 'Campanile del 1766 · circa 40 m', radius: 32,
+    en_name: 'Church of San Francesco', en_kicker: '1766 bell tower · approx. 40 m',
     text: 'Secondo la tradizione la fondò lo stesso San Francesco, di passaggio a Gravina; un convento francescano è già citato in una bolla di Bonifacio VIII del 1300. Fu ricostruita più grande dopo il terremoto del 1456. Il campanile, alzato dai frati nel 1766, sale per tre ordini fino a circa 40 metri.',
+    en_text: 'According to tradition, it was founded by Saint Francis of Assisi himself during his travels through Gravina; a Franciscan friary is documented as early as a 1300 papal bull of Boniface VIII. Rebuilt on a grander scale after the 1456 earthquake, its three-tiered bell tower was erected in 1766, rising nearly 40 metres.',
   },
   {
     id: 'santateresa', name: 'Santa Teresa', ref: 'Santa Teresa', kicker: 'Carmelitane scalze · 1699', radius: 26,
+    en_name: 'Church of Santa Teresa', en_kicker: 'Discalced Carmelites · 1699',
     text: 'Era l’antica parrocchia di San Matteo: prese il nome di Santa Teresa quando il vescovo Marcello Cavalieri fondò il monastero delle carmelitane scalze, istituito nel 1699.',
+    en_text: 'Formerly the ancient parish of San Matteo, it was dedicated to Saint Teresa when Bishop Marcello Cavalieri established the adjacent monastery of Discalced Carmelites in 1699.',
   },
   { id: 'addolorata', name: 'Addolorata', ref: "Chiesa Madonna dell'Addolorata", card: false },
   {
     id: 'sotterranea', name: 'Gravina Sotterranea', at: [146, -56], kicker: 'Rione Piaggio · la città sotto la città', radius: 28,
+    en_name: 'Underground Gravina', en_kicker: 'Piaggio District · city beneath the city',
     text: 'Ingresso al suggestivo labirinto ipogeo scavato nel banco di tufo sotto il centro storico. Una fitta rete di ambienti su più livelli articolata tra monumentali cisterne per l’acqua piovana, cantine nobiliari, granai medievali, frantoi rupestri e cunicoli di fuga che per secoli hanno garantito la sopravvivenza della città.',
+    en_text: 'Entrance to the subterranean labyrinth carved into the tufo bedrock beneath the historic center. A multi-level network of monumental rainwater cisterns, noble wine cellars, medieval grain silos, cave olive mills, and escape tunnels that sustained the community for centuries.',
   },
   {
     // Blocco N7: Biblioteca Finia
     id: 'finia', name: 'Biblioteca Finia', at: [106, -24], kicker: 'Piazza Benedetto XIII · fondata nel Seicento', radius: 24,
+    en_name: 'Finia Library', en_kicker: 'Piazza Benedetto XIII · 17th-century library',
     text: 'Tra le più antiche biblioteche di pubblica lettura della Puglia, istituita nel XVII secolo nel complesso episcopale grazie ai lasciti del cardinale Fini e del cardinale Niccolò Coscia. Conserva un patrimonio librario di oltre 40.000 volumi, tra cui incunaboli, cinquecentine, pergamene manoscritte e gli archivi storici della diocesi di Gravina.',
+    en_text: 'One of the oldest public reading libraries in Apulia, founded in the 17th century within the episcopal complex through bequests from Cardinals Fini and Coscia. It preserves over 40,000 volumes, including incunabula, rare 16th-century editions, parchment manuscripts, and the historic diocesan archives.',
   },
   {
     // Blocco 4.3: Seminario Vescovile (Piazza Benedetto XIII 25)
     id: 'seminario', name: 'Seminario Vescovile', at: [70, -25], kicker: 'Piazza Benedetto XIII · fondato nel 1595', radius: 24,
+    en_name: 'Bishop’s Seminary', en_kicker: 'Piazza Benedetto XIII · founded in 1595',
     text: 'Fondato nel 1595 dal vescovo Vincenzo Giustiniani in attuazione dei decreti del Concilio di Trento, fu il primo seminario istituito in Terra di Bari. Ampliato nel Settecento sotto il patrocinio di papa Benedetto XIII Orsini, presenta un’austera facciata tardo-rinascimentale con portale bugnato e stemma vescovile. Oggi ospita il Museo Capitolare d’Arte Sacra.',
+    en_text: 'Founded in 1595 by Bishop Vincenzo Giustiniani following the Council of Trent, this was the first seminary established in the Terra di Bari. Expanded in the 18th century under the patronage of Pope Benedict XIII Orsini, it features a late Renaissance facade with rusticated portal and now houses the Capitular Museum of Sacred Art.',
   },
   {
     id: 'pellicciari', name: 'Piazza Pellicciari', ref: 'Piazza Giuseppe Pellicciari', kicker: 'Porta del rione Fondovito', radius: 30,
+    en_name: 'Piazza Pellicciari', en_kicker: 'Gateway to the Fondovito District',
     text: 'Da qui una scalinata attraversa il rione medievale di Fondovito e scende fino alla chiesa rupestre di San Michele.',
+    en_text: 'A stone stairway descends from this square through the medieval Fondovito quarter to the cave church of San Michele delle Grotte.',
   },
   { id: 'fondovico', name: 'Piazzetta Fondovico', at: [-18, -121], card: false },    // OSM w385177566, un prato
   {
     id: 'hortus', name: 'Hortus', at: [-35, -234], via: [26.9, -244.7], radius: 25, kicker: 'Il paesaggio e la cultura',
+    en_name: 'Hortus Community Garden', en_kicker: 'Landscape & Culture',
     text: 'Spazio verde condiviso e giardino sociale recuperato nel rione Fondovico, terrazzato sui pendii che guardano il canyon della gravina. Nato come progetto di rigenerazione urbana e orto comunitario, ospita eventi culturali e artistici valorizzando il paesaggio rupestre.',
+    en_text: 'A shared community garden and social green space restored in the Fondovico quarter, terraced along the slopes overlooking the ravine. Born as an urban regeneration project, it hosts cultural and artistic events celebrating the rock landscape.',
   },
   {
     id: 'settecamere', name: 'Sette Camere', ref: 'Complesso rupestre delle Sette Camere', kicker: 'Complesso rupestre · Alto Medioevo', radius: 36,
+    en_name: 'Seven Chambers Cave Complex', en_kicker: 'Rock complex · Early Middle Ages',
     text: 'Sul versante di Botromagno, di fronte al Fondovito, una fila di grotte scavate dall’uomo in un banco di tufo, presumibilmente negli ultimi secoli dell’Alto Medioevo.',
+    en_text: 'On the western slopes of Botromagno facing Fondovito, a series of human-hewn caves carved into the tufo rock face, likely dating back to the late Early Middle Ages.',
   },
   {
     id: 'quattrofontane', name: 'Quattro Fontane', ref: 'Quattro Fontane', kicker: 'Fontana pubblica · 1779', radius: 24,
+    en_name: 'Quattro Fontane', en_kicker: 'Public fountain · 1779',
     text: 'La lapide racconta che nel 1779, regnando Ferdinando IV, i gravinesi decisero di portare qui l’acqua del Pozzo Pateo, in una fontana pagata con denaro pubblico e restaurata nel 1859. L’acqua esce ancora da due serpenti marini intrecciati. Un’altra lapide ricorda l’arrivo dell’acqua del Sele, il 31 dicembre 1927.',
+    en_text: 'An inscription records that in 1779, under King Ferdinand IV, the citizens channeled water from Pozzo Pateo to this public fountain, restored in 1859. Water pours from two entwined sea serpents. Another plaque commemorates the arrival of the Sele Aqueduct on December 31, 1927.',
   },
   {
     id: 'sannicola', name: 'San Nicola', ref: 'Chiesa San Nicola', kicker: 'Santi Nicola e Cecilia · facciata del 1704', radius: 26,
+    en_name: 'Church of San Nicola', en_kicker: 'Saints Nicholas & Cecilia · 1704 facade',
     text: 'Sorge dove c’era già una chiesa nel IX–X secolo. Demolita nel 1410, fu ricostruita e completata nel Seicento; la facciata è del 1704. Qui fu fondata, molto probabilmente nel 1555, la confraternita della Santissima Annunziata.',
+    en_text: 'Stands on the site of a 9th–10th century church. Demolished in 1410, it was rebuilt during the 17th century with a facade added in 1704. It was the historical home of the Confraternity of the Santissima Annunziata, founded in 1555.',
   },
   {
     id: 'portasanmichele', name: 'Porta San Michele', at: [398.4, -24.9], kicker: 'Piazza Scacchi · statua del 1799', radius: 26,
+    en_name: 'Porta San Michele', en_kicker: 'Piazza Scacchi · 1799 statue',
     text: 'Qui si apriva una porta della città, detta prima di San Tommaso e poi Reale. Fu dedicata a San Michele Arcangelo dopo il 1799, quando secondo la tradizione il santo salvò Gravina dal saccheggio delle truppe del cardinale Ruffo. La sua statua di legno, con quella data, sta nella nicchia all’angolo della piazza: restaurata, vi è tornata nel novembre 2020.',
+    en_text: 'Site of an ancient city gate, originally known as Porta San Tommaso and later Porta Reale. Dedicated to Saint Michael after 1799, when the archangel reportedly spared the city from Cardinal Ruffo’s sacking. His carved wooden statue rests in a corner niche on the square, reinstalled after restoration in 2020.',
   },
   {
     id: 'scacchi', name: 'Piazza Scacchi', ref: 'Piazza Arcangelo Scacchi', kicker: 'Due busti tra le aiuole', radius: 30,
+    en_name: 'Piazza Scacchi', en_kicker: 'Memorial busts in the gardens',
     text: 'Il busto in pietra ricorda Arcangelo Scacchi (1810–1893), mineralogista nato a Gravina, nella piazza davanti alla sua casa natale. All’altro capo, sotto l’ulivo, il busto in bronzo di Canio Musacchio, «primo sindacalista meridionale» come dice la sua lapide.',
+    en_text: 'A stone bust commemorates Arcangelo Scacchi (1810–1893), renowned mineralogist born in Gravina, opposite his birthplace. On the far side under the olive tree stands the bronze bust of Canio Musacchio, honoured as the first trade union leader of Southern Italy.',
   },
   {
     id: 'bastione', name: 'Bastione medievale', ref: 'Bastione Medioevale', kicker: 'Mura della città', radius: 20,
+    en_name: 'Medieval Bastion', en_kicker: 'City Defensive Walls',
     text: 'È l’ultimo tratto rimasto dell’antica cinta muraria: dal quartiere di Sant’Andrea arriva fino al Ponte Acquedotto.',
+    en_text: 'The last surviving section of the ancient defensive walls, stretching from the Sant’Andrea quarter down to the Aqueduct Bridge.',
   },
   {
     id: 'agostino', name: 'Sant’Agostino', ref: "Parrocchia San Giovanni Battista in Sant'Agostino - Gravina in Puglia", kicker: 'San Giovanni Battista', radius: 28,
+    en_name: 'Church of Sant’Agostino', en_kicker: 'Saint John the Baptist',
     text: 'La parrocchia di San Giovanni Battista in Sant’Agostino, accanto al chiostro di Sant’Agostino.',
+    en_text: 'The parish church of San Giovanni Battista in Sant’Agostino, flanking the historic Augustinian cloister.',
   },
   {
     // blocco N2: sul portico in fondo alla terrazza (prima la scheda stava sulla sagoma OSM w411139697, a [-68, -101])
     id: 'sanmichele', name: 'San Michele delle Grotte', at: [-59.6, -181.4], kicker: 'Rione Fondovito · chiesa rupestre', radius: 36,
+    en_name: 'San Michele delle Grotte', en_kicker: 'Fondovito District · rock-hewn church',
     text: 'Scavata in un blocco di tufo in fondo alla Calata e alla terrazza sulla gravina. Si entra da grotte naturali allargate a portico, con grandi pilastri, in cinque navate divise da quattordici pilastri: restano tracce di affreschi, tra cui il Cristo Pantocratore, e nella navata centrale l’altare con la statua di San Michele. È considerata la prima cattedrale di Gravina. In una grotta accanto, teschi e ossa che la tradizione attribuisce ai gravinesi uccisi dai Saraceni nel 999.',
+    en_text: 'Entirely carved out of a massive tufo outcrop below the Fondovito terrace. Entered through a natural cave portico with massive pillars, the interior unfolds into five rock aisles supported by fourteen pillars. Traces of ancient frescoes survive, including a Christ Pantocrator. Revered as the early cathedral of Gravina, an adjoining cave preserves bones attributed to victims of the Saracen raid of 999.',
   },
   {
     id: 'ponte', name: 'Ponte Acquedotto', at: [-24, 297], kicker: '90 m di luce · 37 m d’altezza', radius: 50,
+    en_name: 'Aqueduct Bridge', en_kicker: '90 m span · 37 m high',
     text: 'Attestato già nel 1686 e crollato nel terremoto del 1722, fu ricostruito dagli Orsini come ponte-acquedotto tra il 1743 e il 1781, con archi su due ordini. È uno dei set di «No Time to Die» (2021), il film di James Bond.',
+    en_text: 'Documented as early as 1686 and damaged in the 1722 earthquake, it was rebuilt by the Orsini family between 1743 and 1781 as a two-tiered aqueduct bridge spanning the canyon. It gained global fame as a filming location for the James Bond film "No Time to Die" (2021).',
   },
   {
     id: 'fontana', name: 'Fontana della Stella', ref: 'Fontana Madonna la Stella', kicker: 'Testata est del ponte', radius: 22,
+    en_name: 'Fontana della Stella', en_kicker: 'Eastern bridgehead',
     text: 'Fontana storica alla testata del Ponte Acquedotto, sul lato della città.',
+    en_text: 'Historic fountain situated at the eastern bridgehead of the Aqueduct Bridge on the city side.',
   },
   {
     id: 'stella', name: 'Madonna della Stella', ref: 'Chiesa Rupestre Madonna della Stella', kicker: 'Chiesa rupestre', radius: 34,
+    en_name: 'Madonna della Stella', en_kicker: 'Rock-hewn sanctuary',
     text: 'Sul versante opposto della gravina, oltre il ponte: fuori è una chiesetta imbiancata con il campanile a vela, dentro è scavata nella roccia. Secondo la tradizione prende il nome da un’immagine della Madonna col Bambino con una stella sulla fronte, trovata da alcuni contadini.',
+    en_text: 'On the western ridge across the Aqueduct Bridge: whitewashed on the exterior with a bell-gable, but hollowed into solid rock inside. Tradition holds that it was named after a fresco of the Virgin and Child bearing a star on her brow, discovered by local peasants.',
   },
   {
     id: 'botromagno', name: 'Botromagno', at: [-232, 80], kicker: 'Parco archeologico', radius: 45,
+    en_name: 'Botromagno Archaeological Park', en_kicker: 'Archaeological park',
     text: 'Sul versante opposto al centro storico si alza la collina di Botromagno, dove sorse l’abitato più antico di Gravina: oggi è un parco archeologico di oltre 400 ettari. Qui c’era il centro apulo di Sidion, che batteva moneta con la leggenda «Sidinon»; dopo l’arrivo dei romani, alla fine del IV secolo a.C., prese il nome di Silvium e diventò una stazione sulla via Appia. Sul pendio restano tracce della cinta muraria della fine del IV secolo a.C. e, sul colle, tombe a semicamera intonacate e dipinte del V secolo a.C.',
+    en_text: 'Rising across the ravine from the old town, Botromagno hill holds the earliest settlement of Gravina: now an archaeological park over 400 hectares. Here stood the Peucetian/Apulian city of Sidion, which minted its own coinage ("Sidinon"); after the Roman conquest in the late 4th century BC, it became Silvium, a post along the Via Appia. Remains include 4th-century BC defensive walls and painted chamber tombs from the 5th century BC.',
   },
   // Blocco M1: la necropoli sugli scavi (fonti nel README); il punto OSM «Padre Eterno» è con ogni
   // probabilità la chiesa-grotta citata da Stanze Orsini, ma non è verificato: solo l'etichetta.
   {
     id: 'necropoli', name: 'Necropoli del Padre Eterno', at: [-180, 455], kicker: 'Botromagno · tombe dal VII al IV secolo a.C.', radius: 45,
+    en_name: 'Padre Eterno Necropolis', en_kicker: 'Botromagno · tombs from 7th to 4th c. BC',
     text: 'Ai piedi del colle di Botromagno l’area del Padre Eterno corre per circa 1.400 m lungo il bordo ovest della gravina, a pochi passi dalla chiesa-grotta affrescata del Padre Eterno. Le tombe sono fosse scavate nella roccia, dalla fine del VII alla fine del IV secolo a.C.; sei, in serie monumentali, formavano un recinto funerario. Il 2 settembre 1988 vi fu trovata una tomba del IV secolo a.C. con 46 pezzi di corredo. Nella roccia restano anche le buche per i pali delle capanne del IX–VIII secolo a.C., cisterne, canalizzazioni e fornaci per vasi e laterizi.',
+    en_text: 'At the foot of Botromagno hill, the Padre Eterno burial ground runs for 1,400 m along the western canyon rim near the rock church of Padre Eterno. Tombs cut into bedrock date from the late 7th to late 4th century BC. In 1988 an undisturbed 4th-century BC tomb was unearthed containing 46 funerary items. Iron Age post holes, cisterns, channels, and ceramic kilns also mark the rock surface.',
   },
   { id: 'scavi', name: 'Scavi archeologici di Botromagno', ref: 'Scavi archeologici di Botromagno', card: false },
   { id: 'padreeterno', name: 'Padre Eterno', ref: 'Padre Eterno', card: false },
   // Blocco N5 (testo approvato dal committente il 14/10/2026; fonti nel README): sul sentiero che attraversa Capotenda
   {
     id: 'capotenda', name: 'Capotenda', at: [-660, 880], kicker: 'Via Madonna della Stella · area naturalistica', radius: 45, via: [-737, 862],
+    en_name: 'Capotenda Natural Area', en_kicker: 'Via Madonna della Stella · nature reserve',
     text: 'Lungo Via Madonna della Stella la gravina si stringe tra rocce chiare a strati: è l’area naturalistica di Capotenda, tra laghetti e il torrente. Nella roccia si aprono antiche cave ipogee di salnitro: lo si cavava col piccone e lo si raffinava a Napoli; poi i pastori allargarono i varchi per far passare le mucche della transumanza. Da qui parte il Sentiero dell’Acqua e della Pietra, cammino geopoetico presentato nel novembre 2018 (ideato dalla guida ambientale Ezio Spano con il Comune, cammino di Davide Sapienza), che passa per l’area del Padre Eterno – necropoli del VII secolo a.C., chiesa rupestre e tombe di due guerrieri tra V e IV secolo a.C. – e arriva al Ponte Acquedotto.',
+    en_text: 'Along Via Madonna della Stella, the ravine narrows between stratified limestone cliffs into the scenic Capotenda natural reserve. Man-made caves here were ancient saltpetre mines, later widened by shepherds for transhumant cattle herds. This is the trailhead for the "Water and Stone Trail" (Sentiero dell’Acqua e della Pietra), connecting Capotenda past the Padre Eterno necropolis and warrior tombs to the Aqueduct Bridge.',
   },
   { id: 'repubblica', name: 'Piazza della Repubblica', ref: 'Piazza della Repubblica', card: false },
   { id: 'villa', name: 'Villa Comunale', ref: 'Villa Comunale', card: false },
@@ -1934,37 +2057,51 @@ const CITY_LANDMARKS = [
   { id: 'pip', name: 'P.I.P. - Zona Artigianale', at: [2709, 778], card: false },
   {
     id: 'bosco', name: 'Bosco Difesa Grande', at: [330, -1640], kicker: 'Zona speciale di conservazione · a 6 km dalla città', radius: 60,
+    en_name: 'Difesa Grande Forest', en_kicker: 'Special Area of Conservation · 6 km south',
     text: 'Bosco di querce (roverella, cerro e farnetto) circa 6 km a sud di Gravina: circa 1.900 ettari di bosco dentro un sito Natura 2000 di oltre 5.200 ettari, zona speciale di conservazione dal 2015. Gli incendi del 12 agosto 2017 e del 28 luglio 2021 ne hanno bruciato una parte. Qui la strada è accorciata: il tracciato reale è lungo circa 5,4 km.',
+    en_text: 'A primeval oak woodland (downy oak, Turkey oak, and Italian oak) located 6 km south of Gravina: nearly 1,900 hectares of forest within a Natura 2000 protected zone exceeding 5,200 hectares. A Special Area of Conservation since 2015, preserved as one of the richest biodiversity sanctuaries in Apulia.',
   },
   // Blocco L: area Quercus e vivaio (posizioni del diorama, dalle zone a scala reale di GEO.bosco). Tono neutro, niente pubblicità.
   {
     id: 'quercus', name: 'Area Quercus', ref: 'Area Quercus', kicker: 'Bosco Difesa Grande · ex area ristoro «Marcuccio»', radius: 55,
+    en_name: 'Area Quercus', en_kicker: 'Difesa Grande Forest · recreation area',
     text: 'Nel cuore del bosco comunale, l’ex area ristoro «Marcuccio». Nel 2021 è passata a una nuova gestione, con due campi da calcetto, uno da tennis e l’area pic-nic; rinnovata nel 2024, ha campi da calcio e tennis, una zona giochi e il ristorante. Da qui partono escursioni nel bosco e gite a cavallo.',
+    en_text: 'Located in the heart of the municipal forest, formerly the "Marcuccio" retreat. Modernised with tennis and football courts, picnic facilities, playground, and restaurant, it serves as the primary base for hiking, trail riding, and nature excursions.',
   },
   {
     id: 'vivaio', name: 'Vivaio forestale', ref: 'Vivaio forestale', kicker: 'Centro visite «San Nicola la Macchia»', radius: 60,
+    en_name: 'Forest Nursery', en_kicker: 'San Nicola la Macchia Visitor Centre',
     text: 'All’incrocio con Contrada Annunziata, nel cuore del SIC Bosco Difesa Grande, c’è il vivaio forestale con il Centro visite «San Nicola la Macchia», pensato per attività educative e didattiche sulla natura: per scuole, famiglie e turisti.',
+    en_text: 'At the Contrada Annunziata crossroads in the core of the Difesa Grande Special Area of Conservation, the state forest nursery hosts the "San Nicola la Macchia" visitor and environmental education centre for schools and tourists.',
   },
   { id: 'scout', name: 'Base Scout Gravina 1', ref: 'Base Scout Gravina 1', card: false },
   { id: 'picnic', name: 'Area pic-nic', at: GEO.bosco?.picnic ?? [0, 0], card: false },
   // Blocco E: luoghi della città. Schede solo dove le fonti reggono (README); altrimenti l'etichetta.
   {
     id: 'fiera', name: 'Fiera di San Giorgio', at: [-53, 948], kicker: 'Parco Fiere · ad aprile, dal 1294', radius: 60,
+    en_name: 'San Giorgio Fair', en_kicker: 'Fairgrounds · every April, since 1294',
     text: 'Un documento del Registro Angioino dice che la fiera esisteva già prima del 1294, quando Carlo d’Angiò la ripristinò. Si tiene ad aprile, per la festa di San Giorgio: in origine sui terreni della chiesa di San Giorgio dei Cavalieri di Malta, oggi nel Parco Fiere dell’ex linificio, in via Spinazzola.',
+    en_text: 'An Angevin register records that the regional fair existed prior to 1294, when Charles II of Anjou officially rechartered it. Held every April for Saint George’s patronal festivities, it originally convened around the church of San Giorgio dei Cavalieri di Malta and is now hosted in the fairgrounds on Via Spinazzola.',
   },
   {
     id: 'stadio', name: 'Stadio Stefano Vicino', ref: 'Stadio Comunale "Stefano Vicino"', kicker: 'Via Fazzatoia · circa 4.000 posti', radius: 50,
+    en_name: 'Stefano Vicino Stadium', en_kicker: 'Via Fazzatoia · approx. 4,000 capacity',
     text: 'Lo stadio del calcio gravinese, un tempo il «Comunale di via Fazzatoia». Dal 2015 porta il nome di Stefano Vicino, allenatore e promotore del calcio in città, e ha il campo in erba sintetica. Tra il 2024 e il 2025 è stato rinnovato e la tribuna ovest ha avuto la copertura.',
+    en_text: 'The municipal football stadium, formerly known as Comunale di via Fazzatoia. In 2015 it was dedicated to coach Stefano Vicino, a beloved sports pioneer, featuring artificial turf and recently covered grandstands.',
   },
   {
     id: 'stazionefal', name: 'Stazione FAL', ref: 'Gravina (FAL)', kicker: 'Ferrovie Appulo Lucane · 1915', radius: 36,
+    en_name: 'FAL Railway Station', en_kicker: 'Ferrovie Appulo Lucane · 1915',
     text: 'Aperta nel 1915 sulla linea Bari–Altamura–Potenza delle Ferrovie Appulo Lucane, tra Altamura e Irsina. Accanto c’è la stazione delle Ferrovie dello Stato, sulla linea Rocchetta Sant’Antonio–Gioia del Colle.',
+    en_text: 'Opened in 1915 along the narrow-gauge Bari–Altamura–Potenza railway line of Ferrovie Appulo Lucane. Directly adjacent stands the standard-gauge FS station on the Rocchetta Sant’Antonio–Gioia del Colle line.',
   },
   { id: 'stazionefs', name: 'Stazione FS', ref: 'Gravina in Puglia', card: false },
   {
     // blocco N4: la scheda si apre già nello spiazzo dove finisce lo sterrato (circa 140 m), dove porta il teletrasporto (`via`)
     id: 'meninni', name: 'Casino di Meninni', ref: 'Casino di Meninni', kicker: 'Colle del Guardialto', radius: 150, via: [1449, -464],
+    en_name: 'Casino di Meninni', en_kicker: 'Guardialto Hill',
     text: 'Palazzo storico che dalla collina del Guardialto guarda la città. Davanti, un grande giardino scende lungo il pendio tra altissimi pini d’Aleppo; dietro, in uno spazio pianeggiante tra altissimi cipressi, è ben nascosta la cappella di famiglia. Oggi è un rudere senza tetto, «tanto fatiscente quanto mistico» come lo descrive il FAI, ed è stato più volte tra i suoi «Luoghi del Cuore».',
+    en_text: 'A noble country manor commanding views over Gravina from Guardialto hill. Terraced gardens with towering Aleppo pines descend in front, while a secluded family chapel hides among cypresses behind. Now an evocative roofless ruin, described by FAI (Italian National Trust) as "as mystical as it is decayed", it has repeatedly placed among Italy’s most cherished heritage sites.',
   },
   // Blocco N5b: il Casino Scacchi (rudere OSM w411138777), solo l'etichetta: nessuna fonte verificabile per una scheda.
   { id: 'casinoscacchi', name: 'Casino Scacchi', ref: 'Casino Scacchi', card: false },
@@ -1975,13 +2112,17 @@ const CITY_LANDMARKS = [
   // Blocco M2 (richiesta del committente): il monumento rifatto dalle foto, con la sosta in panchina (Soste).
   {
     id: 'caduti', name: 'Monumento ai Caduti', ref: 'Monumento ai Caduti', kicker: 'Villa Comunale · Grande Guerra 1915–1918', radius: 26,
+    en_name: 'War Memorial', en_kicker: 'Municipal Gardens · WWI 1915–1918',
     text: 'Monumento del 1934 al centro della Villa Comunale, opera bronzea di Angelo Galli fusa con cannoni austriaci. Raffigura l’Italia a cavallo con il vessillo, fanti alla carica e un prigioniero con le catene spezzate; sul dado in marmo sono incisi i nomi dei caduti gravinesi.',
+    en_text: 'Unveiled in 1934 at the centre of the municipal gardens, this bronze monument by Angelo Galli was cast from captured Austrian cannons. It depicts Italy on horseback bearing a banner, infantrymen charging into battle, and a prisoner breaking free of chains, with names of fallen citizens engraved on the marble plinth.',
   },
   // Blocco M2: la Cola Cola, all'ingresso della città su Via Bari (OSM w411137509, historic=memorial senza nome).
   {
     id: 'colacola', name: 'Monumento alla Cola Cola', at: GEO.m2?.colacola?.length ? Plane.centroid(DATA.pairs(GEO.m2.colacola)) : [1892, 102],
     kicker: 'Via Bari · il fischietto di Gravina', radius: 45,
+    en_name: 'Cola Cola Monument', en_kicker: 'Via Bari · the whistle of Gravina',
     text: 'La cola cola è il fischietto di terracotta simbolo di Gravina: un uccellino stilizzato col corpo bianco calce dipinto a strisce rosse, gialle, verdi e blu, che suona su due toni. Nasce dalla tradizione contadina dell’Ottocento e la famiglia Loglisci la modella ancora a mano: la loro casa natale, in Piazza Benedetto XIII, è la Casa Museo della Cola Cola. All’ingresso della città la ricorda una scultura gigante in vetroresina.',
+    en_text: 'The cola cola is Gravina’s iconic two-tone terracotta whistling bird, whitewashed and painted with cheerful red, yellow, green, and blue stripes. Originating in 19th-century peasant craft, the Loglisci family still molds them by hand. A monumental replica welcomes visitors along Via Bari at the entrance to town.',
   },
   { id: 'madonnina', name: 'La Madonnina', ref: 'Madonnina', card: false },
   { id: 'cimitero', name: 'Cimitero comunale', at: [-35, -655], card: false },
@@ -15678,6 +15819,121 @@ class PauseMap {
   }
 }
 
+const I18N = {
+  it: {
+    eyebrow: 'Centro storico · 40°49′ N 16°25′ E',
+    welcome: '<small>Benvenuti a</small>Gravina in Puglia',
+    startLedeCar: 'Si parte dal Ponte Acquedotto: scegli il mezzo e percorri le vie reali del centro storico, al calar del sole.',
+    startLedeBalloon: 'Si decolla da Botromagno: in mongolfiera sorvoli la necropoli, il Ponte Acquedotto e il centro storico, al calar del sole.',
+    startLedeOsprey: 'Volo militare libero da Botromagno: esplora Gravina dal cielo senza vincoli né percorsi preimpostati, al calar del sole.',
+    chooseVehicle: 'Scegli il mezzo',
+    btnStart: 'Parti',
+    btnTourStart: 'Giro guidato',
+    statusReady: 'Pronto',
+    controlsHintKeyboard: 'Agli incroci scegli la via con <kbd>←</kbd> <kbd>→</kbd> · <kbd>Shift</kbd> tenuto per andare più veloce · <kbd>P</kbd> per la pausa: cambi mezzo o ti teletrasporti.',
+    controlsHintTouch: 'Agli incroci tocca i cartelli marroni. Con Pausa ti fermi, cambi mezzo o ti teletrasporti.',
+    creditLabel: 'Un progetto di',
+    aboutBtn: 'Il progetto',
+    aboutTitle: 'Il progetto',
+    pauseTitle: 'In pausa',
+    btnResume: 'Riprendi',
+    changeVehicle: 'Cambia mezzo',
+    guidedTour: 'Giro guidato',
+    tourMonuments: 'Giro dei monumenti',
+    tourStatusDefault: 'Percorso guidato tra le 14 tappe storiche e culturali',
+    tourHudBadge: 'Giro guidato',
+    tourHudStop: (i, n, name) => `Tappa ${i} di ${n}: ${name}`,
+    btnTourSkip: 'Prossima',
+    btnTourExit: 'Esci',
+    boostLabel: 'Acceleratore',
+    boostHint: 'Con almeno 6\u00a0GB di memoria: un pulsante da tenere premuto porta i mezzi alla loro velocità massima. Per l’esperienza migliore usa un computer.',
+    soundsLabel: 'Suoni',
+    forestSoundsTitle: 'Suoni del bosco',
+    forestSoundsHint: 'Uccelli e animali dentro il Bosco Difesa Grande; vento e corvi al Casino di Meninni',
+    langLabel: 'Lingua / Language',
+    goToPlace: 'Vai a un luogo',
+    mapHint: 'Trascina la mappa per spostarti e avvicinati con la rotella o con due dita. Tocca un luogo, una via, un’etichetta nel diorama o un nome qui sotto: il viaggio riprende da lì.',
+    historicCentre: 'Centro storico',
+    noPlaceSelected: 'Nessun luogo selezionato',
+    btnGo: 'Vai qui',
+    btnPause: 'Pausa',
+    btnRadio: 'Musica',
+    btnEngine: 'Motore',
+    btnPostcard: 'Cartolina',
+    btnFullscreen: 'Schermo intero',
+    btnFullscreenExit: 'Riduci',
+    btnFollow: 'Segui il mezzo',
+    btnViewBasket: 'Vista dalla cesta',
+    btnViewExternal: 'Vista esterna',
+    btnBenchReturn: 'Esci dalla piazzetta · torna al mezzo',
+    btnBenchResume: 'Riprendi il percorso',
+    toastPostcard: 'Cartolina salvata!',
+    junction: 'Incrocio',
+    junctionRemaining: (m) => `Incrocio tra ${m} m · scegli la via`,
+    junctionHint: '<kbd>←</kbd> <kbd>→</kbd> per scegliere · <kbd>↑</kbd> dritto',
+    startPoint: 'Partenza',
+    walkingRoute: 'percorso pedonale',
+    onFoot: 'a piedi',
+    onFootReturn: 'a piedi verso il mezzo',
+  },
+  en: {
+    eyebrow: 'Historic Centre · 40°49′ N 16°25′ E',
+    welcome: '<small>Welcome to</small>Gravina in Puglia',
+    startLedeCar: 'Departing from the Aqueduct Bridge: choose your vehicle and drive through the real streets of the historic centre at sunset.',
+    startLedeBalloon: 'Taking off from Botromagno: soar above the necropolis, the Aqueduct Bridge, and the ancient quarters in a hot-air balloon at dusk.',
+    startLedeOsprey: 'Free military flight from Botromagno: explore Gravina from above without constraints or preset paths, in golden sunset light.',
+    chooseVehicle: 'Choose vehicle',
+    btnStart: 'Start',
+    btnTourStart: 'Guided tour',
+    statusReady: 'Ready',
+    controlsHintKeyboard: 'At junctions steer with <kbd>←</kbd> <kbd>→</kbd> · Hold <kbd>Shift</kbd> to speed up · <kbd>P</kbd> for pause: switch vehicle or teleport.',
+    controlsHintTouch: 'At junctions tap the brown signs. Use Pause to stop, change vehicle, or teleport.',
+    creditLabel: 'A project by',
+    aboutBtn: 'About',
+    aboutTitle: 'About the Project',
+    pauseTitle: 'Paused',
+    btnResume: 'Resume',
+    changeVehicle: 'Change vehicle',
+    guidedTour: 'Guided tour',
+    tourMonuments: 'Monuments tour',
+    tourStatusDefault: 'Guided itinerary through 14 historic landmarks of Gravina',
+    tourHudBadge: 'Guided tour',
+    tourHudStop: (i, n, name) => `Stop ${i} of ${n}: ${name}`,
+    btnTourSkip: 'Next',
+    btnTourExit: 'Exit',
+    boostLabel: 'Boost throttle',
+    boostHint: 'With at least 6\u00a0GB RAM: hold button to drive at maximum speed. For the best experience use a desktop computer.',
+    soundsLabel: 'Sounds',
+    forestSoundsTitle: 'Forest sounds',
+    forestSoundsHint: 'Birds and wildlife inside Bosco Difesa Grande; wind and ravens at Casino di Meninni',
+    langLabel: 'Language',
+    goToPlace: 'Go to a place',
+    mapHint: 'Drag the map to navigate and zoom with wheel or pinch. Tap a location, street, label, or name below to resume your journey there.',
+    historicCentre: 'Historic centre',
+    noPlaceSelected: 'No place selected',
+    btnGo: 'Go here',
+    btnPause: 'Pause',
+    btnRadio: 'Music',
+    btnEngine: 'Engine',
+    btnPostcard: 'Postcard',
+    btnFullscreen: 'Fullscreen',
+    btnFullscreenExit: 'Exit fullscreen',
+    btnFollow: 'Follow vehicle',
+    btnViewBasket: 'Basket view',
+    btnViewExternal: 'External view',
+    btnBenchReturn: 'Leave bench · return to vehicle',
+    btnBenchResume: 'Resume walking',
+    toastPostcard: 'Postcard saved!',
+    junction: 'Junction',
+    junctionRemaining: (m) => `Junction in ${m} m · choose route`,
+    junctionHint: '<kbd>←</kbd> <kbd>→</kbd> to choose · <kbd>↑</kbd> straight',
+    startPoint: 'Start point',
+    walkingRoute: 'pedestrian path',
+    onFoot: 'on foot',
+    onFootReturn: 'on foot to vehicle',
+  }
+};
+
 /* ═══════════════════════════════════════════════════════════════════════
  * 11. INTERFACCIA (DOM): scelta del mezzo, targa, cartelli, schede,
  *     etichette, menu di pausa, dissolvenze
@@ -15687,10 +15943,13 @@ class UI {
     const $ = (id) => document.getElementById(id);
     this.el = {
       start: $('start'), startPanel: $('start-panel'), btnStart: $('btn-start'), btnTourStart: $('btn-tour-start'), status: $('status'),
-      startPicker: $('start-picker'), controlsHint: $('controls-hint'), lede: $('start-lede'),
+      startPicker: $('start-picker'), startPickerLabel: $('start-picker-label'), controlsHint: $('controls-hint'), lede: $('start-lede'),
       btnFollow: $('btn-follow'), btnBench: $('btn-bench'), btnBenchLabel: $('btn-bench-label'), btnView: $('btn-view'), btnViewLabel: $('btn-view-label'), btnRadio: $('btn-radio'), radioLabel: $('radio-label'), btnNext: $('btn-next'), radioVol: $('radio-vol'),
       btnEngine: $('btn-engine'), engineLabel: $('engine-label'), engineVol: $('engine-vol'),
-      btnPostcard: $('btn-postcard'),
+      btnPostcard: $('btn-postcard'), postcardLabel: $('postcard-label'),
+      btnFullscreen: $('btn-fullscreen'), fsLabel: $('fs-label'), fsEnter: $('fs-icon-enter'), fsExit: $('fs-icon-exit'),
+      btnLang: $('btn-lang'), langCurrent: $('lang-current'), btnLangIt: $('btn-lang-it'), btnLangEn: $('btn-lang-en'),
+      creditLabel: $('credit-label'), btnAboutLabel: $('btn-about-label'),
       tourHud: $('tour-hud'), tourHudInfo: $('tour-hud-info'), btnTourSkip: $('btn-tour-skip'), btnTourExit: $('btn-tour-exit'),
       toast: $('toast'),
       hud: $('hud'), plate: $('plaque'), street: $('plaque-street'), dest: $('plaque-dest'), minimapBtn: $('minimap-btn'), btnPause: $('btn-pause'),
@@ -15700,13 +15959,22 @@ class UI {
       boostOpt: $('boost-opt'), boostCheck: $('boost-check'), btnBoost: $('btn-boost'), pauseBoost: $('pause-boost'), btnPauseBoost: $('btn-pause-boost'),
       labels: $('labels'),
       pause: $('pause'), pauseSheet: $('pause-sheet'), pauseTitle: $('pause-title'), btnResume: $('btn-resume'), btnPauseTour: $('btn-pause-tour'), pauseTourStatus: $('pause-tour-status'),
-      pausePicker: $('pause-picker'), bigmap: $('bigmap'), mapPickName: $('map-pick-name'), mapGo: $('map-go'), poiList: $('poi-list'),
+      pausePicker: $('pause-picker'), pausePickerLabel: $('pause-picker-label'), pauseTourLabel: $('pause-tour-label'), pauseBoostLabel: $('pause-boost-label'),
+      pauseSoundLabel: $('pause-sound-label'), pauseLangLabel: $('pause-lang-label'), pauseMapLabel: $('pause-map-label'),
+      forestSoundTitle: $('forest-sound-title'), forestSoundHint: $('forest-sound-hint'),
+      bigmap: $('bigmap'), mapPickName: $('map-pick-name'), mapGo: $('map-go'), mapHome: $('map-home'), poiList: $('poi-list'),
       fade: $('fade'),
     };
     this.isTouch = matchMedia('(pointer: coarse)').matches;
     this.cardTimer = 0;
     this.labels = [];
     this.labelsActive = false;
+    this.lang = 'it';
+    try {
+      const savedLang = localStorage.getItem('gravina3d.lang');
+      if (savedLang === 'en' || savedLang === 'it') this.lang = savedLang;
+    } catch { /* pazienza */ }
+
     // Blocco 4.4: mentre si legge (si scorre o si tocca la scheda) la scheda resta, e il fondo sfuma finché c'è altro
     const reading = () => { if (this.el.card.classList.contains('is-visible')) this.cardTimer = Math.max(this.cardTimer, 6); };
     this.el.card.addEventListener('scroll', () => { this.cardMore(); reading(); }, { passive: true });
@@ -15714,7 +15982,96 @@ class UI {
     this.el.card.addEventListener('focus', reading);
     addEventListener('resize', () => this.cardMore());
     this._v = new THREE.Vector3();
-    if (this.isTouch) this.el.controlsHint.textContent = 'Agli incroci tocca i cartelli marroni. Con Pausa ti fermi, cambi mezzo o ti teletrasporti.';
+
+    // Gestione schermo intero (fullscreen)
+    if (this.el.btnFullscreen) {
+      const syncFs = () => {
+        const isFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+        this.el.btnFullscreen.setAttribute('aria-pressed', String(isFs));
+        if (this.el.fsEnter) this.el.fsEnter.hidden = isFs;
+        if (this.el.fsExit) this.el.fsExit.hidden = !isFs;
+        const t = I18N[this.lang] || I18N.it;
+        if (this.el.fsLabel) this.el.fsLabel.textContent = isFs ? t.btnFullscreenExit : t.btnFullscreen;
+      };
+      this.el.btnFullscreen.addEventListener('click', () => {
+        try {
+          if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+            const root = document.documentElement;
+            if (root.requestFullscreen) root.requestFullscreen();
+            else if (root.webkitRequestFullscreen) root.webkitRequestFullscreen();
+          } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+            else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+          }
+        } catch { /* gestito con grazia */ }
+      });
+      document.addEventListener('fullscreenchange', syncFs);
+      document.addEventListener('webkitfullscreenchange', syncFs);
+    }
+
+    // Gestione lingua bilingue (Italiano / Inglese)
+    this.el.btnLang?.addEventListener('click', () => this.setLang(this.lang === 'it' ? 'en' : 'it'));
+    this.el.btnLangIt?.addEventListener('click', () => this.setLang('it'));
+    this.el.btnLangEn?.addEventListener('click', () => this.setLang('en'));
+
+    this.setLang(this.lang, false);
+  }
+
+  setLang(lang, persist = true) {
+    this.lang = lang === 'en' ? 'en' : 'it';
+    if (persist) {
+      try { localStorage.setItem('gravina3d.lang', this.lang); } catch { /* pazienza */ }
+    }
+    document.documentElement.lang = this.lang;
+    const t = I18N[this.lang];
+    if (this.el.langCurrent) this.el.langCurrent.textContent = this.lang.toUpperCase();
+    if (this.el.btnLangIt) {
+      this.el.btnLangIt.classList.toggle('is-selected', this.lang === 'it');
+      this.el.btnLangIt.setAttribute('aria-checked', String(this.lang === 'it'));
+    }
+    if (this.el.btnLangEn) {
+      this.el.btnLangEn.classList.toggle('is-selected', this.lang === 'en');
+      this.el.btnLangEn.setAttribute('aria-checked', String(this.lang === 'en'));
+    }
+    // Testi interfaccia
+    if (this.el.startPickerLabel) this.el.startPickerLabel.textContent = t.chooseVehicle;
+    if (this.el.btnStart && !this.el.btnStart.disabled) this.el.btnStart.textContent = t.btnStart;
+    if (this.el.btnTourStart) this.el.btnTourStart.textContent = t.btnTourStart;
+    if (this.el.creditLabel) this.el.creditLabel.textContent = t.creditLabel;
+    if (this.el.btnAboutLabel) this.el.btnAboutLabel.textContent = t.aboutBtn;
+    if (this.el.controlsHint) {
+      this.el.controlsHint.innerHTML = this.isTouch ? t.controlsHintTouch : t.controlsHintKeyboard;
+    }
+    if (this.el.btnPause) {
+      const span = this.el.btnPause.querySelector('span');
+      if (span) span.textContent = t.btnPause;
+    }
+    if (this.el.radioLabel) this.el.radioLabel.textContent = t.btnRadio;
+    if (this.el.engineLabel) this.el.engineLabel.textContent = t.btnEngine;
+    if (this.el.postcardLabel) this.el.postcardLabel.textContent = t.btnPostcard;
+    if (this.el.fsLabel) {
+      const isFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+      this.el.fsLabel.textContent = isFs ? t.btnFullscreenExit : t.btnFullscreen;
+    }
+    if (this.el.btnFollow) {
+      const span = this.el.btnFollow.querySelector('span');
+      if (span) span.textContent = t.btnFollow;
+    }
+    if (this.el.btnBenchLabel) this.el.btnBenchLabel.textContent = t.btnBenchReturn;
+    if (this.el.btnResume) {
+      this.el.btnResume.lastChild.textContent = ' ' + t.btnResume;
+    }
+    if (this.el.pausePickerLabel) this.el.pausePickerLabel.textContent = t.changeVehicle;
+    if (this.el.pauseTourLabel) this.el.pauseTourLabel.textContent = t.guidedTour;
+    if (this.el.pauseBoostLabel) this.el.pauseBoostLabel.textContent = t.boostLabel;
+    if (this.el.pauseSoundLabel) this.el.pauseSoundLabel.textContent = t.soundsLabel;
+    if (this.el.forestSoundTitle) this.el.forestSoundTitle.textContent = t.forestSoundsTitle;
+    if (this.el.forestSoundHint) this.el.forestSoundHint.textContent = t.forestSoundsHint;
+    if (this.el.pauseMapLabel) this.el.pauseMapLabel.textContent = t.goToPlace;
+    if (this.el.mapHome) this.el.mapHome.textContent = t.historicCentre;
+    if (this.el.mapGo) this.el.mapGo.textContent = t.btnGo;
+    if (this.el.btnTourSkip) this.el.btnTourSkip.textContent = t.btnTourSkip;
+    if (this.el.btnTourExit) this.el.btnTourExit.textContent = t.btnTourExit;
   }
 
   setStatus(text) { this.el.status.textContent = text; }
@@ -15776,11 +16133,12 @@ class UI {
       card.querySelector('input').checked = on;
     }
     const sel = VEHICLES.find((v) => v.id === id);
+    const t = I18N[this.lang] || I18N.it;
     this.el.lede.textContent = sel?.id === 'osprey'
-      ? 'Volo militare libero da Botromagno: esplora Gravina dal cielo senza vincoli né percorsi preimpostati, al calar del sole.'
+      ? t.startLedeOsprey
       : sel?.air
-      ? 'Si decolla da Botromagno: in mongolfiera sorvoli la necropoli, il Ponte Acquedotto e il centro storico, al calar del sole.'
-      : 'Si parte dal Ponte Acquedotto: scegli il mezzo e percorri le vie reali del centro storico, al calar del sole.';
+      ? t.startLedeBalloon
+      : t.startLedeCar;
   }
 
   enableStart(onStart, onTourStart) {
@@ -15805,10 +16163,11 @@ class UI {
   /** Targa: nome della via e rione. */
   showEdge(driver) {
     const e = driver.edge;
-    this.el.street.textContent = e.turn ? `${e.name} · slargo` : e.name;
+    const t = I18N[this.lang] || I18N.it;
+    this.el.street.textContent = e.turn ? `${e.name} · ${this.lang === 'en' ? 'widening' : 'slargo'}` : e.name;
     const mid = e.samples[Math.floor(e.count / 2) * 3], midN = -e.samples[Math.floor(e.count / 2) * 3 + 2];
     const where = districtAt(mid, midN);
-    this.el.dest.textContent = e.walk || e.foot ? `${where} · percorso pedonale` : driver.onFoot ? `${where} · a piedi${driver.car?.exit ? ' verso il mezzo' : ''}` : where;
+    this.el.dest.textContent = e.walk || e.foot ? `${where} · ${t.walkingRoute}` : driver.onFoot ? `${where} · ${driver.car?.exit ? t.onFootReturn : t.onFoot}` : where;
     this.el.plate?.classList.toggle('is-walking', driver.onFoot);
   }
 
@@ -15849,7 +16208,8 @@ class UI {
   tickDecision(driver) {
     if (this.el.junction.hidden || !driver.decision) return;
     const m = Math.max(0, Math.round(driver.remaining));
-    const text = m > 2 ? `Incrocio tra ${m} m · scegli la via` : 'Incrocio';
+    const t = I18N[this.lang] || I18N.it;
+    const text = m > 2 ? t.junctionRemaining(m) : t.junction;
     if (this.el.junctionHead.textContent !== text) this.el.junctionHead.textContent = text;
   }
 
@@ -15864,9 +16224,10 @@ class UI {
   /** Scheda del monumento: resta visibile qualche secondo. */
   showCard(lm) {
     const { card, cardKicker, cardTitle, cardText } = this.el;
-    cardKicker.textContent = lm.kicker;
-    cardTitle.textContent = lm.name;
-    cardText.textContent = lm.text;
+    const isEn = this.lang === 'en';
+    cardKicker.textContent = (isEn && lm.en_kicker) ? lm.en_kicker : lm.kicker;
+    cardTitle.textContent = (isEn && lm.en_name) ? lm.en_name : lm.name;
+    cardText.textContent = (isEn && lm.en_text) ? lm.en_text : lm.text;
     card.scrollTop = 0;
     card.classList.add('is-visible');
     this.cardTimer = 10;
