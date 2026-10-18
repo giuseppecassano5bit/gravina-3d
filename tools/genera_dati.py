@@ -2041,6 +2041,31 @@ def city_buildings(buildings, cover):
             else:
                 kind = CITY_KIND['industry']
                 h = round(6.5 + seed * 1.5, 1)
+        elif not b.get('name') and b.get('cls') != 'castle':
+            # Blocco 4.8f: periferia, case sparse e masserie (Botromagno, SP201, agro nord ed est)
+            is_periferia = (
+                c.x < -100 or                                      # Botromagno, Madonna della Stella, Capotenda
+                (c.x > 1000 and c.y < -350) or                     # SP201, Guardialto, Sportland, Meninni
+                c.y > 1500 or                                      # Agro nord oltre ferrovia
+                (c.x > 1600 and c.y < 200) or                      # Agro sud-est
+                c.x > 2760                                         # Agro est oltre PIP
+            )
+            if is_periferia:
+                seed = (math.sin(c.x * 12.9898 + c.y * 78.233) * 43758.5453) % 1
+                if b.get('cls') in ('shed', 'roof') or kind == CITY_KIND['shed']:
+                    kind = CITY_KIND['shed']
+                    h = 3.6
+                elif b.get('cls') in ('industrial', 'warehouse') or kind == CITY_KIND['industry']:
+                    kind = CITY_KIND['industry']
+                    h = round(5.8 + seed * 0.8, 1)
+                elif b['poly'].area >= 220:
+                    # Masserie a due piani: corpo padronale con corte, 2 livelli (6.8–7.4 m)
+                    kind = CITY_KIND['house']
+                    h = round(6.8 + seed * 0.6, 1)
+                else:
+                    # Casolari rurali e annessi a un piano (3.8–4.2 m)
+                    kind = CITY_KIND['house']
+                    h = round(3.8 + seed * 0.4, 1)
         out.append({**b, 'height': h, 'kind': kind})
     return out
 
