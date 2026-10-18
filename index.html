@@ -8674,7 +8674,7 @@ const Villette = {
     agro: ['#fbf8f2', '#f4efe6', '#ede5d4', '#ded4be', '#cebfa5', '#d9c5a5', '#ebe0c7', '#e5dac8'],
   },
 
-  activeZones: new Set(['villette', 'centro_moderno', 'centro_storico', 'nord_est']),
+  activeZones: new Set(['villette', 'centro_moderno', 'centro_storico', 'nord_est', 'sud_ovest']),
 
   zone(b) {
     if (b.kind === 13) return 'villette';
@@ -10356,6 +10356,7 @@ const Details = {
     Tiles.later([100, 600, 100, 700], () => Villette.buildGardensZone([100, 600, 100, 700]));
     Tiles.later([-200, 400, -200, 400], () => Villette.buildGardensZone([-200, 400, -200, 400]));
     Tiles.later([250, 1200, 500, 1800], () => Villette.buildGardensZone([250, 1200, 500, 1800]));
+    Tiles.later([200, 1000, -600, 200], () => Villette.buildGardensZone([200, 1000, -600, 200]));
     Tiles.later(Capotenda.BB, () => Capotenda.build());   // blocco N5: guado, passerella, cave, grotta, muretti, vigna
   },
 
