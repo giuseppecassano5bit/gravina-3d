@@ -1,6 +1,6 @@
-Stato al 18 ottobre 2026: **Progetto e tutte le fasi completati al 100% e uniti su `main`!**
-Fase 4 completata per intero: blocchi 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8a (Corso Aldo Moro e Repubblica), 4.8b (Centro Storico), 4.8c (Quartieri Nord ed Est), 4.8d (Quartieri Sud ed Ovest), 4.8e (P.I.P. Zona Artigianale), 4.8f (Periferia rurale e masserie) e 4.9 (Interfaccia, Bilinguismo IT/EN, Fullscreen, Restyling materico tufo/bronzo e ottimizzazione landscape). Blocco 4.10 (cinema, teatri e scuole) sul branch `cinema-scuole-vida`, in attesa del sì del committente.
-Tutte le verifiche automatiche sono verdi (87/87 interazioni, 0 problemi simula, budget PC e mobile rispettati a 60 fps).
+Stato al 04 novembre 2026: **Blocco 4.11 in corso sul branch `fase-4-11-verifiche`**.
+Blocco 4.10 unito su `main` (PR #38). Nel blocco 4.11: completata la verifica e correzione dei campetti di `Details.campiSportivi` (campi inesistenti rimossi, SS. Crocifisso e San Domenico corretti su posizioni e sagome OSM reali), misurata la baseline prestazionale con GPU e catturati 7 screenshot di riferimento per il tetto dei triangoli, corretta la Scuola Benedetto XIII (corpo unico chiaro non frazionato coi coppi) e verificata la sede centrale storica di San Giovanni Bosco su fonti MIUR. Restano da completare: ottimizzazione triangoli riquadri lontani, revisione schede e facciate blocchi 4.3–4.8, chiusura finale voci aperte e apertura PR.
+Prove automatiche: `npm run simula` verde (0 problemi, 0 case sulla strada, 0 dettagli sulla strada), `npm run interazioni` 87/87 test superati con successo a 60 fps.
 
 **Fase 3.4 (Gravina oltre il centro storico) completata**: piano, dati, budget, rischi e divisione
 del lavoro su due chat in [`PIANO_FASE_3_4.md`](PIANO_FASE_3_4.md).
