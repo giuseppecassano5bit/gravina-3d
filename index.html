@@ -4653,7 +4653,7 @@ const Buildings = {
       const steep = kind === 0 && !holes.length && rect.fill > 0.7;
       const strips = steep && gMax - gMin > 1.2 && this.inRioni(ce, cn) ? this.stepStrips(outer, ce, cn, height)
         : steep && gMax - gMin > 2.5 ? this.stepStrips(outer, ce, cn, height, this.downhill(outer, outer.map(([e, n]) => Terrain.heightAt(e, n))), gMax - gMin) : null;
-      const tiled = !strips && ((kind === 1 && !holes.length && facade?.tetto !== 'piano') || (rural && !holes.length) || (kind === 0 && !holes.length && rect.fill > 0.86 && area < 280 && seed < (old ? 0.3 : 0.15)));
+      const tiled = !strips && ((kind === 1 && !holes.length && facade?.tetto !== 'piano') || (rural && !holes.length) || (SCUOLE[name]?.tetto === 'coppi') || (kind === 0 && !holes.length && rect.fill > 0.86 && area < 280 && seed < (old ? 0.3 : 0.15)));
       const roof = hut ? new THREE.Color('#a39b8c') : tiled ? roofTiles[Math.floor(seed * 13) % 4] : roofFlat[Math.floor(seed * 11) % 4];
       const rise = tiled ? facade?.falda ?? Math.min(rural ? 2.4 : 4.5, rect.hw * (kind === 1 ? 0.7 : rural ? 0.45 : 0.55)) : 0;
       /** Quota del tetto nel punto (e, n): con i gradoni dipende dalla striscia. */
@@ -4662,7 +4662,7 @@ const Buildings = {
       // Suddivisione degli isolati in unità indipendenti con intonaci e tetti differenziati
       const S = ([e, n]) => (e - rect.c[0]) * rect.u[0] + (n - rect.c[1]) * rect.u[1];
       const s0 = Math.min(...outer.map(S)), s1 = Math.max(...outer.map(S)), span = s1 - s0;
-      const canSplit = span > 12 && !holes.length && kind !== 1 && !strips && !SCUOLE[name]?.cortile;   // blocco 4.10: la Scacchi è un corpo unico col tetto piano
+      const canSplit = span > 12 && !holes.length && kind !== 1 && !strips && !SCUOLE[name]?.cortile && !SCUOLE[name]?.unico;   // blocco 4.10/4.11: Scacchi e Benedetto XIII sono corpi unici
       const K = canSplit ? Math.max(2, Math.round(span / 8.5)) : 1;
       let pieces = strips ? strips.list : null;
       if (!pieces) {
@@ -9422,10 +9422,8 @@ const SCUOLE = {
   'Scuola secondaria N. Ingannamorte': { muro: '#ddd6c6', finestre: 4, recinto: 'muro' },                 // SV mag 2025
   'Circolo didattico Savio-Fiore': { muro: '#ede6d5', recinto: 'azzurro' },                               // SV ott 2025, da lontano
   'Scuola primaria Michele Soranno': { muro: '#b65c40' },                                                  // SV ott 2025, da lontano
-  'Scuola secondaria Benedetto XIII': { vecchia: true },                                                   // SV mag 2025
-  'Circolo didattico San Giovanni Bosco': { vecchia: true, muro: '#e3b5a7' },                              // SV mag 2025, intonaco rosa
+  'Scuola secondaria Benedetto XIII': { vecchia: true, unico: true, muro: '#ded9cb', tetto: 'coppi' },    // SV mag 2025, Via Libertà 2 (corpo unico chiaro coi coppi)
   'Liceo linguistico G. Tarantino': { palazzo: true },                                                     // SV mag 2022, Via Mameli
-  'Edificio scolastico S.G. Bosco': { palazzo: true },                                                     // SV ott 2025, Via Guardialto
   "Scuola dell'infanzia Alla Fine dell'Arcobaleno": { palazzo: true },                                     // Via Vespucci
   'Scuola media Santomasi': { muro: '#e2dccd' },                                                           // SV ott 2025, Corso Aldo Moro 51
   "Scuola primaria e dell'infanzia A. Scacchi": { vecchia: true, muro: '#ecdcaa', cortile: true },         // SV ott 2025, Corso Aldo Moro 6
