@@ -801,6 +801,11 @@ più pesante del giro, guardando verso la città).
 | Triangoli per fotogramma, telefono | 267 000 | 242 000 | 243 500 | 164 700 (centro) | 175 300 (centro) | 176 600 (centro) | 183 200 (centro) | ≤ 250 000 (obiettivo del blocco I: 200 000) |
 | Draw call, PC / telefono | 39 / 38 | 69 / 54 | 69 / 48 | 68 / 48 | 68 / 48 | 71 / 48 | 56 / 35 (prima di M3 71 / 50): 4 mesh per mezzo invece di più di 20 | ≤ 90 / ≤ 70 |
 
+Dopo i blocchi 4.8–4.10 il tetto è superato (PC «alta» 494 500, telefono «centro» 316 800). Nel blocco 4.11 balconi e vasi si
+disegnano solo nelle celle dentro l'inquadratura: PC al massimo 444 600 («alta», le altre sotto 400 000), telefono da 271 000 a
+276 000 in centro, scacchi, alta e salsa. Le opzioni che restano cambiano quello che si vede e le sceglie il committente
+(`docs/DA_FARE.md`, blocco 4.11).
+
 Nel blocco G il peso è sceso nonostante figurina, camera e radio: nodi, vie, vie decorative ed
 edifici del centro storico ora usano il `CODEC` (a 0,1 m, senza perdite), da 90 a 55 KB compressi.
 

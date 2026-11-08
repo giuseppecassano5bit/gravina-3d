@@ -1,6 +1,8 @@
-Stato al 18 ottobre 2026: **Progetto e tutte le fasi completati al 100% e uniti su `main`!**
-Fase 4 completata per intero: blocchi 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8a (Corso Aldo Moro e Repubblica), 4.8b (Centro Storico), 4.8c (Quartieri Nord ed Est), 4.8d (Quartieri Sud ed Ovest), 4.8e (P.I.P. Zona Artigianale), 4.8f (Periferia rurale e masserie) e 4.9 (Interfaccia, Bilinguismo IT/EN, Fullscreen, Restyling materico tufo/bronzo e ottimizzazione landscape). Blocco 4.10 (cinema, teatri e scuole) sul branch `cinema-scuole-vida`, in attesa del sì del committente.
-Tutte le verifiche automatiche sono verdi (87/87 interazioni, 0 problemi simula, budget PC e mobile rispettati a 60 fps).
+Stato all'8 novembre 2026: **blocco 4.11 (verifiche e chiusura) sul branch `fase-4-11-verifiche`, in attesa del committente**
+(pull request aperta, non unita). Il diorama **non è completo** e il **tetto dei triangoli non è rispettato** in tutte le viste:
+su PC la vista «alta» fa 444 600 triangoli (tetto 400 000); sul telefono centro, scacchi, alta e salsa fanno da 271 000 a 276 000
+(tetto 250 000). Draw call nei limiti (al massimo 55 su PC e 36 sul telefono), 60 fps sul Mac M4. Dettagli nella sezione «Blocco 4.11».
+Prove dell'8/11/2026: `simula` verde (problemi `[]`, 0 case e 0 dettagli sulla strada), `interazioni` 87 su 87, `difetti` uguale a `main`.
 
 **Fase 3.4 (Gravina oltre il centro storico) completata**: piano, dati, budget, rischi e divisione
 del lavoro su due chat in [`PIANO_FASE_3_4.md`](PIANO_FASE_3_4.md).
@@ -113,7 +115,7 @@ Ordine: I → D → E → L → M1 → M2 → M3 → N1 → N2 → N2b → N3 �
       - misure (`shots/prestazioni-dopo-m3.txt`): draw call da 71 a 56 su PC e da 50 a 35 sul telefono;
         triangoli al massimo 283 600 su PC (mongolfiera) e 183 200 sul telefono; 337 KB compressi;
         memoria JS 174 MB su PC (tetto 150, era 179) e 157 sul telefono.
-- [ ] Ritocchi dei mezzi: i fari della Huracán sporgono un poco dal muso.
+- [x] Ritocchi dei mezzi: i fari della Huracán sporgono un poco dal muso. Già risolta: dal blocco N6 la Huracán non c'è più (blocco 4.11).
 - [ ] Sul telefono, nella sosta in panchina, la scheda lunga dei Caduti copre il monumento: accorciarla
       o renderla richiudibile (vedi anche «schede lunghe» più giù).
 - [x] **N1 · centro storico vero** (`fase-3-4-n1-centro-storico`, PR #19, unita il 05/10/2026 con
@@ -366,8 +368,9 @@ commerciali e protette: il committente ha scelto musica ambient originale, gener
       verde; `prestazioni.mjs` con i triangoli per strato dei riquadri.
 - [x] **Camera della pausa in città**: l'orbita (24 m sopra il mezzo) sfiorava o entrava nei tetti
       delle palazzine. Corretta nel blocco G (`#aerialPose` usa `#roofLift`).
-- [ ] **Schermata iniziale in orizzontale sul telefono**: il pannello sfora di circa 50 px e la
-      riga delle quote Copernicus si vede solo scorrendo (chat interfaccia).
+- [x] **Schermata iniziale in orizzontale sul telefono**: il pannello sfora di circa 50 px e la
+      riga delle quote Copernicus si vede solo scorrendo (chat interfaccia). Già risolta (blocco 4.9): nel telefono emulato
+      844 × 390 tutto il pannello e le quote stanno nello schermo (`shots/orizz-iniziale-4-11.png`, 8/11/2026); manca la prova su un telefono vero.
 - [ ] Provare la città su un telefono vero (fps, tempo di costruzione, calore).
 - [x] Dopo l'unione: blocco F (strade per il Bosco Difesa Grande e il P.I.P.), unito.
 
@@ -385,7 +388,7 @@ commerciali e protette: il committente ha scelto musica ambient originale, gener
 - [x] **Rifugio**: è l'area Quercus, con la scheda (blocco L).
 - [x] Prossimo: blocco G (percorsi a piedi e quote reali del centro storico): fatto, con la
       camera libera del blocco B.
-- [ ] Blocchi D (revisione del centro storico) ed E (nuovi luoghi): non ancora iniziati.
+- [x] Blocchi D (revisione del centro storico) ed E (nuovi luoghi): non ancora iniziati. Già risolta: fatti e uniti (PR #14 e #15).
 
 ## Fatto finora
 
@@ -525,16 +528,138 @@ commerciali e protette: il committente ha scelto musica ambient originale, gener
       Aldo Moro 6 (OSM w411139563): il vuoto dell'isolato era il suo cortile, ora con cancello e insegna, muretto con la ringhiera azzurra,
       padiglione col murale (indicativo), pini e ingresso (`Details.scuolaScacchi`); la scuola resta un corpo unico col tetto piano.
 - [x] Tolto il **campetto da calcio inventato** nel prato sotto Botromagno (`campiSportivi`, «Madonna delle Grazie» a [-275, 455]).
-- [ ] Da verificare col committente: gli altri campetti di `campiSportivi` (blocco 4.3) non hanno una fonte nel README; in OSM non c'è
+- [x] Da verificare col committente: gli altri campetti di `campiSportivi` (blocco 4.3) non hanno una fonte nel README; in OSM non c'è
       nessun campo entro 200 m da quelli di Gesù Buon Pastore, Spirito Santo e Santi Pietro e Paolo, e i due campetti «nei cortili»
       (Crocifisso, San Domenico) stanno a più di 50 m dal campo OSM più vicino. Si possono guardare uno per uno su Street View.
+      Fatto nel blocco 4.11 (tabella nella sezione «Blocco 4.11»).
 - [x] Prove: `simula` verde (0 problemi, 0 case e 0 dettagli sulla strada), `interazioni` tutte verdi, nessun errore in console;
       prestazioni `shots/prestazioni-dopo-4-10.json` contro `prestazioni-prima-4-10.json` (stessa macchina): 60 fps ovunque, draw call
       invariate (PC al massimo 55, telefono 36), da +2 000 a +10 000 triangoli nelle viste del centro, «Pronto» +90 ms; +6 KB compressi.
-- [ ] **Tetto dei triangoli già superato prima del blocco 4.10** (blocchi 4.8, «Architettura Quartiere»: unità, balconi, giardinetti):
+- [ ] **Tetto dei triangoli già superato prima del blocco 4.10** (aggiornato nel blocco 4.11: vedi la sezione «Blocco 4.11») (blocchi 4.8, «Architettura Quartiere»: unità, balconi, giardinetti):
       PC fino a 488 000 nella vista «alta» (tetto 400 000), telefono fino a 314 000 in «centro» (tetto 250 000); dopo il 4.10 495 000 e
       318 000. Da decidere col committente come rientrare senza togliere niente in città (per esempio i balconi e i giardinetti solo
       nella versione vicina dei riquadri, o il caricamento attorno alla visuale).
+
+### Blocco 4.11 · Verifiche e chiusura (branch `fase-4-11-verifiche`, 4–8/11/2026; Antigravity i punti 1 e 3, Claude il resto)
+
+**1. Campetti di `Details.campiSportivi`** (un commit per campetto). Ricontrollati l'8/11 su OSM (le due sagome coincidono).
+
+| Campetto | Punto nel codice (est, nord) | Esiste? | Dov'è davvero | Fonte |
+|---|---|---|---|---|
+| SS. Crocifisso «Giuseppe Dipalma» | 470.5, -557.5 | sì, altrove | [448.5, -525.0], 26,3 × 17,2 m, -76° | OSM w622105965 (`leisure=pitch`, `sport=soccer`, senza nome: il nome «Dipalma» **non è verificato**) |
+| SS. Crocifisso, chiostro | 435.1, -578.6 | no | tolto | non in OSM; satellite (Antigravity) |
+| San Domenico | 593.6, -84.7 | sì, spostato | [596.0, -97.3], 26,5 × 13,5 m | OSM w653332895 |
+| San Domenico, cortile dell'oratorio | 554.7, -63.7 | no | tolto | non in OSM; satellite (Antigravity) |
+| Gesù Buon Pastore | 1092.5, -181.5 | no | tolto | non in OSM; satellite (Antigravity) |
+| Spirito Santo | 1744, 178 | no | tolto | non in OSM; satellite (Antigravity) |
+| Santi Pietro e Paolo | 1065, 1113.5 | no | tolto | non in OSM; satellite (Antigravity) |
+
+Nello stesso lavoro Antigravity ha corretto `campiSportivi`: `clearance` fuori dalla griglia delle vie dà `null`, e `null < 1` è vero in JS.
+
+**2. Tetto dei triangoli.** Misure con `node prestazioni.mjs` (Mac M4, GPU vera): `shots/prestazioni-prima-4-11.json` (rifatta l'8/11:
+quella del 4/11 aveva il telefono senza profilo leggero) e `shots/prestazioni-dopo-4-11.json`.
+
+| Vista | PC prima | PC dopo | Telefono prima | Telefono dopo |
+|---|---|---|---|---|
+| alta | 494 465 | **444 597** | 301 649 | **271 063** |
+| scacchi | 441 907 | 384 651 | 305 853 | **276 297** |
+| pausa | 430 438 | 372 890 | 275 246 | 237 802 |
+| centro | 421 447 | 338 257 | 316 809 | **272 169** |
+| mongolfiera | 407 915 | 398 721 | 194 928 | 188 536 |
+| partenza | 404 503 | 360 463 | 187 492 | 145 802 |
+| salsa | 286 598 | 286 598 | 272 616 | **272 544** |
+
+In grassetto quelle ancora sopra il tetto (400 000 PC, 250 000 telefono). Draw call al massimo 55 (PC) e 36 (telefono), come prima;
+60 fps in tutte le viste; «Pronto» circa 2,5 s come prima (questa misura comprende l'apertura della pagina).
+
+- Da dove vengono (`scomponi.mjs` nello scratchpad, vista per vista): i riquadri vicini (dettagli solo da vicino 80–117 000: finestre
+  e gradini del centro storico, giardinetti delle unità; case del centro storico 50–60 000; terreno e vie 45–75 000), i riquadri
+  lontani nelle viste dall'alto (fino a 100 000, soprattutto le villette del blocco 4.8 nella versione lontana) e i balconi istanziati
+  (fino a 95 000). In tutta la città le villette fanno 254 000 triangoli di balconi e 57 000 di torrini e pannelli (solo da vicino) e
+  142 000 nella versione lontana.
+- Fatto, **senza cambiare niente di visibile**: balconi, ringhiere e vasi si disegnano solo nelle celle da 60 m che entrano
+  nell'inquadratura (prima tutte quelle entro 180 m, anche alle spalle). Da circa 95 000 a 15–30 000 triangoli nelle viste in città.
+  Controllo: 8 viste confrontate pixel per pixel col commit prima (7 identiche, 4 pixel diversi nell'ottava).
+- Nella vista «mongolfiera» il calo viene anche dalle case puntellate tolte in Via giudice Montea (punto 4).
+- **Non fatto, perché cambierebbe quello che si vede** (decisione del committente):
+  1. *soglie del dettaglio più corte* (PC da 560 a 460 m, telefono da 420 a 340 m), provate su una copia: PC tutte le viste sotto
+     400 000 (alta 363 000), telefono centro 251 000, scacchi 254 000, alta ancora 280 000. Ma a quella distanza una fascia di case
+     perde finestre e dettagli: confronto in `riferimenti/foto_4_11/soglie-attuali-alta.png` e `soglie-corte-alta.png`;
+  2. *un terzo livello di dettaglio* («medio»): oltre 250–300 m via gradini, giardinetti, balconi e oggetti sui tetti delle villette,
+     tenendo case, finestre e alberi. Richiede di riordinare i riquadri; il guadagno sul telefono è incerto (stima 10–30 000);
+  3. *il caricamento attorno alla visuale* che il committente ha in mente: riquadri più piccoli per la parte vicina, così quelli fuori
+     dall'inquadratura non si disegnano. Costa draw call (oggi 55 su 90 su PC);
+  4. *villette più leggere nella versione lontana* (sagome delle unità semplificate): rischio di fessure tra le unità.
+
+**3. Scuole del centro.**
+
+| Scuola | Cosa c'è | Fatto |
+|---|---|---|
+| Benedetto XIII (Via Libertà) | edificio unico | Antigravity: esclusa dal frazionamento (`SCUOLE[..].unico`), intonaco chiaro, tetto coi coppi. Effetto collaterale: cambia la sequenza casuale dei torrini sui tetti del centro storico (posizioni diverse, nessuno in più) |
+| San Giovanni Bosco (Corso Vittorio Emanuele 32/34) | Street View, ottobre 2025 («32 Corso Vittorio Emanuele»): grande edificio storico con intonaco rosa salmone, lesene e cornicione chiari, cortile recintato verso il Corso; gli alberi coprono eventuali scritte. Il Ministero dà lì la primaria «S.G. Bosco» (Antigravity) | **niente**: decide il committente. La riga orfana `Circolo didattico San Giovanni Bosco` in `SCUOLE` (nessun edificio ha quel nome; nei dati c'è «San Giovanni Bosco») è stata tolta |
+| Edificio scolastico S.G. Bosco (Via Guardialto) | — | tolta la riga orfana `Edificio scolastico S.G. Bosco` (nei dati il nome è «Edificio Scolastico S.G. Bosco», con la maiuscola: non era usata) |
+
+**4. Schede e facciate dei blocchi fatti con Antigravity** (fonti nel README).
+
+| Elemento | Verificato | Fonte | Cosa è cambiato |
+|---|---|---|---|
+| Scheda Seminario Vescovile | in parte | Finestre sull'Arte: fondato da Vincenzo Giustiniani (vescovo dal 1593), primo della Terra di Bari, l'edificio oggi è un condominio | **tolta**: nessuna fonte dice quale edificio sia; il civico 25, l'ampliamento sotto Benedetto XIII e il «Museo Capitolare» non trovano conferma |
+| Facciata del Seminario | no | Street View maggio 2025 («11 Piazza Benedetto XIII»): facciata semplice, porte rettangolari | **tolta** (portale bugnato, stemma, balcone) |
+| Scheda Biblioteca Finia | corretta | Il Tacco di Bacco, Wikipedia (Cennini) | 1686, cardinale Orsini esecutore del vescovo Cennini, 15 000 volumi, 12 incunaboli, 430 cinquecentine (prima: «Seicento», cardinali «Fini e Coscia», 40 000 volumi) |
+| Facciata Finia | sì | Street View ottobre 2025: scritta «BIBLIOTECA FINIA» sotto l'orologio | stemma di pietra invece che dorato; il resto c'è (vela con campana, orologio, finestre centinate con conchiglia, gradini) |
+| Via giudice Montea | in parte | foto a 360° del 2021 | resta il parapetto; **tolte** la cortina di tre case (lì c'è un muro di sostegno) e le case puntellate con transenne e cartelli (nel 2021 un cantiere di restauro con la gru) |
+| Portale Museo Santomasi | corretto | Street View ottobre 2025 («20 Via Museo») | spostato sul civico 20 (era 17 m più a est); arco liscio con lesene e chiave, balcone; **tolti** bugnato, stemma dorato e lapide |
+| Scheda Santomasi | corretta | cultura.gov.it, FAI | affreschi della fine del Duecento (non XI secolo); tolta la «demolizione della chiesetta»; storia del lascito del 1917 e della fondazione del 1920 |
+| Portale Gravina Sotterranea | non verificabile | in Via Meucci Street View ha solo foto di interni | **tolto** (arco, cancello, lanterna) |
+| Scheda Gravina Sotterranea | in parte | sito dell'associazione | ridotta: sede in Via Meucci 10, visite nel reticolo di ambienti e cunicoli; tolti cisterne, cantine, granai, frantoi, cunicoli di fuga |
+| Tutti gli `en_text` (30 schede) | confrontati | il `text` italiano | corretti 19 testi che dicevano di più: «count», «dwellings», «Archconfraternity», 1555 senza «probabilmente», il ponte «damaged» invece di crollato, l'«affresco» della Stella, «Peucetian», tomba «undisturbed», «Iron Age», «limestone», bosco «primeval» e «oasi di biodiversità», area Quercus «primary base», vivaio «state», la Fiera «regional» e «patronal», lo stadio «beloved», «narrow/standard-gauge», Meninni «noble manor» e i «Luoghi del Cuore» |
+| Testi della guida | — | blocco N6 | la guida nominava ancora Panda 4x4 del 1999, RS6 e Huracán: ora i mezzi veri |
+
+Non verificato: la scheda di Hortus (blocco N5c) e quelle dei blocchi più vecchi oltre al confronto con l'inglese; il nome
+«Giuseppe Dipalma» del campo del Crocifisso; il numero esatto di finestre della Finia (due si vedono, la terza è coperta).
+
+**5. Voci aperte di questo file** (passate tutte l'8/11/2026).
+
+| Voce | Esito |
+|---|---|
+| Nome della strada del bosco | serve il committente |
+| Prestazioni: caricamento attorno alla visuale | serve il committente (opzioni nel punto 2) |
+| Vasca grande del vivaio fuori dalla zolla | serve il committente («se si vuole») |
+| Street View di M2 (paletti della Villa, foto della Cola Cola) | resta aperta: non rifatta in questo blocco |
+| Fari della Huracán | già risolta (il mezzo non c'è più): spuntata |
+| Scheda dei Caduti sul telefono nella sosta in panchina | serve un telefono vero (dal blocco N8 le schede delle soste sono scorrevoli) |
+| Esagerazione ×1,5 delle quote | serve il committente |
+| Ritocchi di N2 (dentro la chiesa, scale esterne, sentieri) | serve il committente |
+| Domande di N2 (San Bartolomeo, San Demetrio) | serve il committente |
+| Ritocchi di N2b (piani delle altre case, Santa Lucia, Via Piaggio) | serve il committente |
+| Ritocchi di N3 (palestra del Bachelet, scuole senza foto, Mater Ecclesiae…) | serve il committente |
+| Villette, Meninni, Capotenda, N5b: ritocchi possibili | serve il committente |
+| Provare su un telefono vero (camera libera, musica) | serve un telefono vero |
+| Figurina con vestiti diversi | serve il committente |
+| Sitemap in Search Console | serve il committente (il suo account) |
+| Schermata iniziale in orizzontale | già risolta nel telefono emulato: spuntata, manca il telefono vero |
+| Provare la città su un telefono vero | serve un telefono vero |
+| Blocchi D ed E «non iniziati» | già risolta (PR #14 e #15): spuntata |
+| Provare su un telefono vero (schede, cartelli) | serve un telefono vero |
+| Torri di 8–9 livelli e altre 236 case | serve il committente |
+| Colori del paesaggio lontano | serve il committente |
+| Prestazioni su telefono, finestre | serve un telefono vero (e la scelta del punto 2) |
+| Campetti di `campiSportivi` | fatta adesso (punto 1): spuntata |
+| Tetto dei triangoli | serve il committente (punto 2) |
+| Addolorata e Annunziata | serve il committente |
+| Schede tagliate in orizzontale | serve il committente («se si vuole») |
+| Prestazioni del blocco C su un telefono di fascia media | serve un telefono vero |
+| Marchi dei mezzi | serve il committente (aggiornato l'elenco: Ferrari e Bell Boeing al posto di Lamborghini) |
+
+**Nuovo, per il committente**: dal 18/10/2026 su `main` c'è un sesto mezzo, il convertiplano **V-22 Osprey** a volo libero (commit
+4aa7db4), che `CLAUDE.md` non prevede («i mezzi sono i cinque»): è voluto? Va bene un mezzo militare in un diorama turistico? Il volo
+libero non segue le vie: è un'eccezione come la mongolfiera.
+
+**Prove dell'8/11/2026**: `npm run simula` problemi `[]`, `casesullastrada` 0, `dettaglisullastrada` vuoto, 24,3 km; `npm run interazioni`
+87 su 87, nessun errore in console; `node difetti.mjs` uguale a `main` (sotto 37, galleggia 13, dischi 0, spezzate 65, sovrapposte 0);
+`node prestazioni.mjs dopo-4-11` come nella tabella del punto 2. Nelle prove, `common.mjs` ora attiva il tocco anche via CDP: con la
+GPU vera Chromium apriva a volte il «telefono» senza tocco, e il diorama partiva col profilo da PC (la misura del 4/11 era sbagliata
+per questo).
 
 ## 4. Da sistemare o verificare (emerso finora)
 
@@ -580,5 +705,5 @@ commerciali e protette: il committente ha scelto musica ambient originale, gener
       Misurare su un telefono di fascia media.
 
 **Progetto**
-- [ ] I marchi dei mezzi (Fiat, Audi, Lamborghini, John Deere) vanno verificati prima di un uso
+- [ ] I marchi dei mezzi (dal blocco N6 Fiat, Audi, Ferrari, John Deere, più Bell Boeing per il V-22 Osprey) vanno verificati prima di un uso
       commerciale o promozionale.

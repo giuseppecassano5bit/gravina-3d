@@ -10,6 +10,8 @@ const [name, ...nums] = process.argv.slice(2);
 const views = [];
 for (let i = 0; i + 5 < nums.length; i += 6) views.push(nums.slice(i, i + 6));
 const { browser, page, logs } = await open({ w: 1280, h: 720 });
+// blocco 4.11: aspetta che i riquadri siano tutti costruiti (segno «gravina:completo»), così prima e dopo si confrontano
+await page.waitForFunction(() => performance.getEntriesByName('gravina:completo').length > 0, null, { timeout: 120000 }).catch(() => {});
 await page.evaluate(() => {
   document.getElementById('hud').hidden = true;
   document.querySelector('.labels').hidden = true;
