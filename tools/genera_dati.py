@@ -2079,6 +2079,7 @@ SCHOOLS = [
     ('ITT Bachelet · IPSIA G. Galilei', (2628, 687), 2),        # OSM w1384764963 (area), w1384764964, nel P.I.P.
     ('Scuola primaria Padre Pio', (1117, -216), 2),             # OSM w411138848, Via Guardialto
     ('Scuola media Don E. Montemurro', (648, -323), 3),         # OSM w411138849, Via Tripoli
+    ('Circolo didattico San Giovanni Bosco', (320, -139), 3),   # OSM r6148449, Corso Vittorio Emanuele
     ('Scuola secondaria N. Ingannamorte', (730, 418), 3),       # OSM n12091003369, Via Francesco Baracca
     ('Scuola dell\'infanzia Papa Giovanni Paolo II', (1212, -187), 1),   # OSM n12039009818
     ('Scuola dell\'infanzia Alla Fine dell\'Arcobaleno', (1368, 124), 1),   # OSM n12039071161
@@ -2864,7 +2865,7 @@ LIVELLI = [
         (411140132, 370.43, -109.85, 2),
         (411145000, 278.78, -128.11, 2),
         (None, 375.60, -141.43, 3),          # Ufficio Postale Centrale
-        (None, 291.68, -143.47, 3),          # Corso Vittorio Emanuele
+        (None, 291.68, -143.47, 3),          # San Giovanni Bosco
     ]),
     ('Street View e rilievi, estensione centro storico: Piaggio, Fondovito, Civita, Giudecca (blocco 4.8b)', [
         (411140067, 190.73, 511.85, 2),
