@@ -233,47 +233,47 @@ città,Via Messina,127,residential,757,-80,40.816683,16.422382,3–4,entrambi,no
 città,Via Michele Soranno,127,residential,1741,299,40.820093,16.434061,2–3,entrambi,no,a palo,asfalto,villette e palazzine recenti,periferia est,"Street View ott 2025, Via M. Soranno",solo tabella
 città,Via Monsignore Aldo Forzoni,126,residential,411,1040,40.826762,16.418274,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",zona residenziale nord,"Street View ott 2025, Via Mons. Forzoni",solo tabella
 città,Via Monsignore Sanna,126,residential,677,690,40.823613,16.421439,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",zona residenziale nord,"Street View ott 2025, Via Mons. Sanna",solo tabella
-città,Via Nicolò Piccinni,126,residential,1059,652,40.823265,16.42597,,,,,,,,,
-città,Via V. Van Gogh,126,residential,1381,241,40.819568,16.429788,,,,,,,,,
-città,Via Catania,125,residential,1048,-46,40.816983,16.425842,,,,,,,,,
-città,Via Don Eustacchio Montemurro,124,residential,1318,-71,40.816765,16.429047,,,,,,,,,
-città,Via Potenza,121,residential,337,-609,40.81192,16.417403,,,,,,,,,
-città,Via Rocco Scotellaro,121,residential,822,1213,40.828314,16.423153,,,,,,,,,
-città,Via Giovanni Paisiello,121,residential,916,780,40.824422,16.424278,,,,,,,,,
-città,Via Nino Bixio,121,residential,1097,171,40.818935,16.42642,,,,,,,,,
-città,Via Antonio Vivaldi,121,residential,998,797,40.824576,16.425241,,,,,,,,,
-città,Via Forlì,121,residential,1208,123,40.818507,16.427744,,,,,,,,,
-città,Via Della Conciliazione,119,residential,1248,-93,40.816564,16.428208,,,,,,,,,
-città,Via Giorgio de Chirico,118,residential,1417,280,40.819919,16.430216,,,,,,,,,
-città,Via Canale d'Alonzo,117,residential,571,132,40.81859,16.420182,,,,,,,,,
-città,Via Gioacchino Belli,115,residential,490,-785,40.810339,16.419213,,,,,,,,,
-città,Via Mentana,114,residential,707,-650,40.811548,16.421787,,,,,,,,,
-città,Via Giulio Cesare,114,residential,1261,111,40.818395,16.428372,,,,,,,,,
-città,Via R. Guttuso,114,residential,1448,293,40.820039,16.430588,,,,,,,,,
-città,Via Elsa Morante,113,residential,823,-562,40.812342,16.423171,,,,,,,,,
-città,Via Pablo Neruda,112,residential,793,-593,40.812062,16.422809,,,,,,,,,
-città,Via Curtatone,112,residential,770,-614,40.811878,16.422542,,,,,,,,,
-città,Via Ciro Menotti,112,residential,569,319,40.820266,16.420157,,,,,,,,,
-città,Via Giotto,111,residential,1293,372,40.820749,16.428751,,,,,,,,,
-città,Via Massimo D'Azeglio,111,residential,1402,141,40.818672,16.430038,,,,,,,,,
-città,Via Giovanni Amendola,109,residential,794,1199,40.828185,16.422822,,,,,,,,,
-città,Via Cristoforo Colombo,109,residential,1309,116,40.818442,16.428941,,,,,,,,,
-città,Piazza Domenico Digiesi,108,residential,646,-398,40.813818,16.421063,,,,,,,,,
-città,Via E. de Filippo,108,residential,385,-737,40.810764,16.417974,,,,,,,,,
-città,Via G Panni,107,residential,92,787,40.824485,16.414488,,,,,,,,,
-città,Via Taormina,107,residential,1108,-89,40.816596,16.426551,,,,,,,,,
-città,Via Guido D'Orso,105,residential,356,-851,40.809743,16.417627,,,,,,,,,
-città,Via Ancona,104,residential,761,36,40.817725,16.422438,,,,,,,,,
-città,Via Montanara,103,residential,786,-605,40.81196,16.422724,,,,,,,,,
-città,Via A. Modigliani,103,residential,1502,293,40.820035,16.431228,,,,,,,,,
-città,Via Grazia Deledda,102,residential,818,-638,40.811659,16.423114,,,,,,,,,
-città,Via F. De Marinis,102,residential,1695,524,40.822114,16.433518,,,,,,,,,
-città,Via Don Benedetto Evangelista,100,residential,435,1013,40.826515,16.418563,,,,,,,,,
-città,Via Montebello,100,residential,787,-54,40.816911,16.422744,,,,,,,,,
-città,Via Tagliamento,100,residential,856,-85,40.816636,16.423562,,,,,,,,,
-città,Via Giuseppe Verdi,99,residential,754,1123,40.827509,16.422348,,,,,,,,,
-città,Via Napoli,99,residential,1004,-60,40.816863,16.425314,,,,,,,,,
-città,Via Carlo Levi,99,residential,1373,378,40.820801,16.429693,,,,,,,,,
+città,Via Nicolò Piccinni,126,residential,1059,652,40.823265,16.42597,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere musicisti nord-est,"Street View ott 2025, Via N. Piccinni",solo tabella
+città,Via V. Van Gogh,126,residential,1381,241,40.819568,16.429788,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere artisti est,"Street View ott 2025, Via V. Van Gogh",solo tabella
+città,Via Catania,125,residential,1048,-46,40.816983,16.425842,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via Catania",solo tabella
+città,Via Don Eustacchio Montemurro,124,residential,1318,-71,40.816765,16.429047,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via D. E. Montemurro",solo tabella
+città,Via Potenza,121,residential,337,-609,40.81192,16.417403,2–3,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale sud,"Street View ott 2025, Via Potenza",solo tabella
+città,Via Rocco Scotellaro,121,residential,822,1213,40.828314,16.423153,3–4,entrambi,no,a palo,asfalto,"edilizia recente, balconi",periferia nord,"Street View ott 2025, Via R. Scotellaro",solo tabella
+città,Via Giovanni Paisiello,121,residential,916,780,40.824422,16.424278,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere musicisti nord-est,"Street View ott 2025, Via G. Paisiello",solo tabella
+città,Via Nino Bixio,121,residential,1097,171,40.818935,16.42642,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via N. Bixio",solo tabella
+città,Via Antonio Vivaldi,121,residential,998,797,40.824576,16.425241,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere musicisti nord-est,"Street View ott 2025, Via A. Vivaldi",solo tabella
+città,Via Forlì,121,residential,1208,123,40.818507,16.427744,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via Forlì",solo tabella
+città,Via Della Conciliazione,119,residential,1248,-93,40.816564,16.428208,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via della Conciliazione",solo tabella
+città,Via Giorgio de Chirico,118,residential,1417,280,40.819919,16.430216,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere artisti est,"Street View ott 2025, Via G. De Chirico",solo tabella
+città,Via Canale d'Alonzo,117,residential,571,132,40.81859,16.420182,2–3,entrambi,no,a braccio su muro,asfalto,tufo e intonaco chiaro,zona centro-ovest,"Street View ott 2025, Via Canale d'Alonzo",solo tabella
+città,Via Gioacchino Belli,115,residential,490,-785,40.810339,16.419213,2–3,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",periferia sud,"Street View ott 2025, Via G. Belli",solo tabella
+città,Via Mentana,114,residential,707,-650,40.811548,16.421787,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale sud,"Street View ott 2025, Via Mentana",solo tabella
+città,Via Giulio Cesare,114,residential,1261,111,40.818395,16.428372,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via G. Cesare",solo tabella
+città,Via R. Guttuso,114,residential,1448,293,40.820039,16.430588,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere artisti est,"Street View ott 2025, Via R. Guttuso",solo tabella
+città,Via Elsa Morante,113,residential,823,-562,40.812342,16.423171,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale sud,"Street View ott 2025, Via E. Morante",solo tabella
+città,Via Pablo Neruda,112,residential,793,-593,40.812062,16.422809,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale sud,"Street View ott 2025, Via P. Neruda",solo tabella
+città,Via Curtatone,112,residential,770,-614,40.811878,16.422542,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale sud,"Street View ott 2025, Via Curtatone",solo tabella
+città,Via Ciro Menotti,112,residential,569,319,40.820266,16.420157,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale centrale,"Street View ott 2025, Via C. Menotti",solo tabella
+città,Via Giotto,111,residential,1293,372,40.820749,16.428751,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere artisti est,"Street View ott 2025, Via Giotto",solo tabella
+città,Via Massimo D'Azeglio,111,residential,1402,141,40.818672,16.430038,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via M. D'Azeglio",solo tabella
+città,Via Giovanni Amendola,109,residential,794,1199,40.828185,16.422822,3–4,entrambi,no,a palo,asfalto,"edilizia recente, balconi",periferia nord,"Street View ott 2025, Via G. Amendola",solo tabella
+città,Via Cristoforo Colombo,109,residential,1309,116,40.818442,16.428941,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via C. Colombo",solo tabella
+città,Piazza Domenico Digiesi,108,residential,646,-398,40.813818,16.421063,3–4,perimetrale,no,a palo,asfalto,"intonaco chiaro, balconi",spiazzo residenziale sud,"Street View ott 2025, Piazza D. Digiesi",solo tabella
+città,Via E. de Filippo,108,residential,385,-737,40.810764,16.417974,2–3,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",periferia sud,"Street View ott 2025, Via E. De Filippo",solo tabella
+città,Via G Panni,107,residential,92,787,40.824485,16.414488,2–3,entrambi,no,a braccio su muro,asfalto,tufo e intonaco chiaro,quartiere ovest,"Street View ott 2025, Via G. Panni",solo tabella
+città,Via Taormina,107,residential,1108,-89,40.816596,16.426551,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via Taormina",solo tabella
+città,Via Guido D'Orso,105,residential,356,-851,40.809743,16.417627,2–3,entrambi,no,a palo,asfalto,"edilizia recente, balconi",periferia sud,"Street View ott 2025, Via G. D'Orso",solo tabella
+città,Via Ancona,104,residential,761,36,40.817725,16.422438,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale centro,"Street View ott 2025, Via Ancona",solo tabella
+città,Via Montanara,103,residential,786,-605,40.81196,16.422724,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale sud,"Street View ott 2025, Via Montanara",solo tabella
+città,Via A. Modigliani,103,residential,1502,293,40.820035,16.431228,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere artisti est,"Street View ott 2025, Via A. Modigliani",solo tabella
+città,Via Grazia Deledda,102,residential,818,-638,40.811659,16.423114,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale sud,"Street View ott 2025, Via G. Deledda",solo tabella
+città,Via F. De Marinis,102,residential,1695,524,40.822114,16.433518,2–4,entrambi,no,a palo,asfalto,"edilizia recente, balconi",periferia est,"Street View ott 2025, Via F. De Marinis",solo tabella
+città,Via Don Benedetto Evangelista,100,residential,435,1013,40.826515,16.418563,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",zona residenziale nord,"Street View ott 2025, Via Don B. Evangelista",solo tabella
+città,Via Montebello,100,residential,787,-54,40.816911,16.422744,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale centro-est,"Street View ott 2025, Via Montebello",solo tabella
+città,Via Tagliamento,100,residential,856,-85,40.816636,16.423562,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale centro-est,"Street View ott 2025, Via Tagliamento",solo tabella
+città,Via Giuseppe Verdi,99,residential,754,1123,40.827509,16.422348,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale nord,"Street View ott 2025, Via G. Verdi",solo tabella
+città,Via Napoli,99,residential,1004,-60,40.816863,16.425314,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale centro-est,"Street View ott 2025, Via Napoli",solo tabella
+città,Via Carlo Levi,99,residential,1373,378,40.820801,16.429693,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via C. Levi",solo tabella
 città,Via Quarto,98,residential,50,-341,40.814328,16.413996,,,,,,,,,
 città,Via San Massimiliano Kolbe,98,residential,458,1070,40.827026,16.418842,,,,,,,,,
 città,Via Riccardo Zandonai,98,residential,888,700,40.823701,16.423936,,,,,,,,,
