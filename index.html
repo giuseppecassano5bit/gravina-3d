@@ -1841,13 +1841,13 @@ const LANDMARKS = [
     id: 'duomo', name: 'Cattedrale di Santa Maria Assunta', ref: 'Cattedrale', kicker: 'Piazza Benedetto XIII · dal 1092', radius: 50,
     en_name: 'Cathedral of Santa Maria Assunta', en_kicker: 'Piazza Benedetto XIII · since 1092',
     text: 'Voluta nel 1092 dal normanno Umfrido d’Altavilla, fu ricostruita dopo l’incendio e il terremoto del 1456. Il portale maggiore è a ovest, sotto il rosone a ventiquattro raggi con l’Assunta; un secondo ingresso si apre sul fianco sud, verso la piazza. Il campanile ha la cupola a cipolla del 1698. Basilica minore dal 1993.',
-    en_text: 'Commissioned in 1092 by the Norman count Humphrey of Hauteville, it was rebuilt after the devastating fire and earthquake of 1456. The main portal faces west beneath a 24-spoke rose window depicting the Assumption; a second entrance opens along the southern flank facing the square. The bell tower features an onion dome dating from 1698. Designated a minor basilica in 1993.',
+    en_text: 'Commissioned in 1092 by the Norman Humphrey of Hauteville, it was rebuilt after the fire and earthquake of 1456. The main portal faces west beneath a 24-spoke rose window depicting the Assumption; a second entrance opens along the southern flank facing the square. The bell tower features an onion dome dating from 1698. Designated a minor basilica in 1993.',
   },
   {
     id: 'belvedere', name: 'La Gravina', at: [-27, 19], kicker: 'Belvedere della Cattedrale', radius: 32,
     en_name: 'The Gravina Canyon', en_kicker: 'Cathedral Belvedere',
     text: 'Il canyon che dà il nome alla città, scavato nel calcare e nel tufo dal torrente Gravina. Sulle sue pareti si aprono grotte e chiese rupestri.',
-    en_text: 'The dramatic canyon that gives the city its name, carved into limestone and calcarenite tufo by the Gravina stream. Rock-hewn dwellings and ancient rock churches line its cliffs.',
+    en_text: 'The dramatic canyon that gives the city its name, carved into limestone and calcarenite tufo by the Gravina stream. Caves and rock churches open in its walls.',
   },
   {
     id: 'purgatorio', name: 'Chiesa del Purgatorio', ref: 'Santa Maria del Suffragio', kicker: 'Piazza Notar Domenico · dal 1649', radius: 34,
@@ -1865,7 +1865,7 @@ const LANDMARKS = [
     id: 'gesu', name: 'Chiesa del Gesù', ref: 'Chiesa del Gesù', kicker: 'Santissimo Nome di Gesù · 1645', radius: 26,
     en_name: 'Church of the Gesù', en_kicker: 'Holy Name of Jesus · 1645',
     text: 'Fu eretta nel 1645, per volontà testamentaria di Balsamo Lupi, trasformando due stalle a pianterreno e due stanze del Palazzo Lupi. Oggi è sconsacrata e ospita la confraternita di San Michele Arcangelo.',
-    en_text: 'Built in 1645 through the bequest of Balsamo Lupi by converting ground-floor stables and two chambers of Palazzo Lupi. Now deconsecrated, it serves as the seat of the Archconfraternity of Saint Michael the Archangel.',
+    en_text: 'Built in 1645 through the bequest of Balsamo Lupi by converting ground-floor stables and two chambers of Palazzo Lupi. Now deconsecrated, it is home to the confraternity of Saint Michael the Archangel.',
   },
   {
     // Blocco N7 / 4.10: Cinema Teatro Mastrogiacomo (Piazza Arcangelo Scacchi 23); fonti nel README
@@ -1891,8 +1891,8 @@ const LANDMARKS = [
   {
     id: 'santomasi', name: 'Museo Pomarici Santomasi', ref: 'Museo e Biblioteca Ettore Pomarici Santomasi', kicker: 'Via Museo · palazzo nobiliare e pinacoteca', radius: 30,
     en_name: 'Pomarici Santomasi Museum', en_kicker: 'Via Museo · noble palace & art gallery',
-    text: 'Palazzo nobiliare lasciato in eredità alla città nel 1917 dal barone Ettore Pomarici Santomasi. Custodisce un museo con ricche collezioni archeologiche apule e peucete, maioliche, armeria, quadreria nobiliare e gli straordinari affreschi bizantini dell’XI secolo della cripta di San Vito Vecchio, qui salvati e rimontati dopo la demolizione della chiesetta rupestre.',
-    en_text: 'A noble palace bequeathed to the city in 1917 by Baron Ettore Pomarici Santomasi. It houses extensive Apulian and Peucetian archaeological collections, ceramics, weaponry, a painting gallery, and the extraordinary 11th-century Byzantine frescoes from the crypt of San Vito Vecchio, preserved and reconstructed here.',
+    text: 'Palazzo del Seicento dei Pomarici Santomasi. Nel 1917, alla morte dell’ultimo discendente, Ettore Pomarici Santomasi, palazzo e azienda agricola furono lasciati al Comune, e nel 1920, per suo testamento, nacque la fondazione, con un museo, una pinacoteca e una biblioteca. Custodisce armi, dipinti, ceramiche, monete e reperti archeologici e, al piano terra, la cripta bizantina della chiesa di San Vito Vecchio ricostruita, con affreschi della fine del Duecento.',
+    en_text: 'A 17th-century palace of the Pomarici Santomasi family. In 1917, on the death of the last descendant, Ettore Pomarici Santomasi, the palace and the farm were left to the town, and in 1920, under his will, the foundation was born, with a museum, a picture gallery and a library. It holds weapons, paintings, ceramics, coins and archaeological finds and, on the ground floor, the reconstructed Byzantine crypt of the church of San Vito Vecchio, with frescoes from the late 13th century.',
   },
   {
     id: 'santalucia', name: 'Santa Lucia', ref: 'Chiesa Rupestre Santa Lucia', kicker: 'Rione Piaggio · chiesa rupestre', radius: 30,
@@ -1922,22 +1922,15 @@ const LANDMARKS = [
   {
     id: 'sotterranea', name: 'Gravina Sotterranea', at: [146, -56], kicker: 'Rione Piaggio · la città sotto la città', radius: 28,
     en_name: 'Underground Gravina', en_kicker: 'Piaggio District · city beneath the city',
-    text: 'Ingresso al suggestivo labirinto ipogeo scavato nel banco di tufo sotto il centro storico. Una fitta rete di ambienti su più livelli articolata tra monumentali cisterne per l’acqua piovana, cantine nobiliari, granai medievali, frantoi rupestri e cunicoli di fuga che per secoli hanno garantito la sopravvivenza della città.',
-    en_text: 'Entrance to the subterranean labyrinth carved into the tufo bedrock beneath the historic center. A multi-level network of monumental rainwater cisterns, noble wine cellars, medieval grain silos, cave olive mills, and escape tunnels that sustained the community for centuries.',
+    text: 'In Via Meucci 10 ha sede l’associazione Gravina Sotterranea, che accompagna i visitatori nel reticolo di ambienti e cunicoli scavati sotto il centro storico.',
+    en_text: 'Via Meucci 10 is the home of the Gravina Sotterranea association, which guides visitors through the network of rooms and tunnels dug beneath the old town.',
   },
   {
     // Blocco N7: Biblioteca Finia
-    id: 'finia', name: 'Biblioteca Finia', at: [106, -24], kicker: 'Piazza Benedetto XIII · fondata nel Seicento', radius: 24,
-    en_name: 'Finia Library', en_kicker: 'Piazza Benedetto XIII · 17th-century library',
-    text: 'Tra le più antiche biblioteche di pubblica lettura della Puglia, istituita nel XVII secolo nel complesso episcopale grazie ai lasciti del cardinale Fini e del cardinale Niccolò Coscia. Conserva un patrimonio librario di oltre 40.000 volumi, tra cui incunaboli, cinquecentine, pergamene manoscritte e gli archivi storici della diocesi di Gravina.',
-    en_text: 'One of the oldest public reading libraries in Apulia, founded in the 17th century within the episcopal complex through bequests from Cardinals Fini and Coscia. It preserves over 40,000 volumes, including incunabula, rare 16th-century editions, parchment manuscripts, and the historic diocesan archives.',
-  },
-  {
-    // Blocco 4.3: Seminario Vescovile (Piazza Benedetto XIII 25)
-    id: 'seminario', name: 'Seminario Vescovile', at: [70, -25], kicker: 'Piazza Benedetto XIII · fondato nel 1595', radius: 24,
-    en_name: 'Bishop’s Seminary', en_kicker: 'Piazza Benedetto XIII · founded in 1595',
-    text: 'Fondato nel 1595 dal vescovo Vincenzo Giustiniani in attuazione dei decreti del Concilio di Trento, fu il primo seminario istituito in Terra di Bari. Ampliato nel Settecento sotto il patrocinio di papa Benedetto XIII Orsini, presenta un’austera facciata tardo-rinascimentale con portale bugnato e stemma vescovile. Oggi ospita il Museo Capitolare d’Arte Sacra.',
-    en_text: 'Founded in 1595 by Bishop Vincenzo Giustiniani following the Council of Trent, this was the first seminary established in the Terra di Bari. Expanded in the 18th century under the patronage of Pope Benedict XIII Orsini, it features a late Renaissance facade with rusticated portal and now houses the Capitular Museum of Sacred Art.',
+    id: 'finia', name: 'Biblioteca Finia', at: [106, -24], kicker: 'Piazza Benedetto XIII · fondata nel 1686', radius: 24,
+    en_name: 'Finia Library', en_kicker: 'Piazza Benedetto XIII · founded in 1686',
+    text: 'La fondò nel 1686 il cardinale Vincenzo Maria Orsini, allora arcivescovo di Benevento e dal 1724 papa Benedetto XIII, come esecutore testamentario del vescovo di Gravina Domenico Cennini, morto due anni prima. Conserva oltre 15.000 volumi, tra cui 12 incunaboli e circa 430 edizioni del Cinquecento. Sulla facciata, sotto l’orologio, la scritta «Biblioteca Finia».',
+    en_text: 'Founded in 1686 by Cardinal Vincenzo Maria Orsini, then Archbishop of Benevento and from 1724 Pope Benedict XIII, as executor of the will of Domenico Cennini, Bishop of Gravina, who had died two years earlier. It holds over 15,000 volumes, including 12 incunabula and about 430 sixteenth-century editions. On the facade, below the clock, the inscription “Biblioteca Finia”.',
   },
   {
     id: 'pellicciari', name: 'Piazza Pellicciari', ref: 'Piazza Giuseppe Pellicciari', kicker: 'Porta del rione Fondovito', radius: 30,
@@ -1968,7 +1961,7 @@ const LANDMARKS = [
     id: 'sannicola', name: 'San Nicola', ref: 'Chiesa San Nicola', kicker: 'Santi Nicola e Cecilia · facciata del 1704', radius: 26,
     en_name: 'Church of San Nicola', en_kicker: 'Saints Nicholas & Cecilia · 1704 facade',
     text: 'Sorge dove c’era già una chiesa nel IX–X secolo. Demolita nel 1410, fu ricostruita e completata nel Seicento; la facciata è del 1704. Qui fu fondata, molto probabilmente nel 1555, la confraternita della Santissima Annunziata.',
-    en_text: 'Stands on the site of a 9th–10th century church. Demolished in 1410, it was rebuilt during the 17th century with a facade added in 1704. It was the historical home of the Confraternity of the Santissima Annunziata, founded in 1555.',
+    en_text: 'Stands on the site of a 9th–10th century church. Demolished in 1410, it was rebuilt during the 17th century with a facade added in 1704. The confraternity of the Santissima Annunziata was founded here, most probably in 1555.',
   },
   {
     id: 'portasanmichele', name: 'Porta San Michele', at: [398.4, -24.9], kicker: 'Piazza Scacchi · statua del 1799', radius: 26,
@@ -1980,7 +1973,7 @@ const LANDMARKS = [
     id: 'scacchi', name: 'Piazza Scacchi', ref: 'Piazza Arcangelo Scacchi', kicker: 'Due busti tra le aiuole', radius: 30,
     en_name: 'Piazza Scacchi', en_kicker: 'Memorial busts in the gardens',
     text: 'Il busto in pietra ricorda Arcangelo Scacchi (1810–1893), mineralogista nato a Gravina, nella piazza davanti alla sua casa natale. All’altro capo, sotto l’ulivo, il busto in bronzo di Canio Musacchio, «primo sindacalista meridionale» come dice la sua lapide.',
-    en_text: 'A stone bust commemorates Arcangelo Scacchi (1810–1893), renowned mineralogist born in Gravina, opposite his birthplace. On the far side under the olive tree stands the bronze bust of Canio Musacchio, honoured as the first trade union leader of Southern Italy.',
+    en_text: 'A stone bust commemorates Arcangelo Scacchi (1810–1893), renowned mineralogist born in Gravina, opposite his birthplace. On the far side under the olive tree stands the bronze bust of Canio Musacchio, “the first trade unionist of the South”, as his plaque says.',
   },
   {
     id: 'bastione', name: 'Bastione medievale', ref: 'Bastione Medioevale', kicker: 'Mura della città', radius: 20,
@@ -2005,7 +1998,7 @@ const LANDMARKS = [
     id: 'ponte', name: 'Ponte Acquedotto', at: [-24, 297], kicker: '90 m di luce · 37 m d’altezza', radius: 50,
     en_name: 'Aqueduct Bridge', en_kicker: '90 m span · 37 m high',
     text: 'Attestato già nel 1686 e crollato nel terremoto del 1722, fu ricostruito dagli Orsini come ponte-acquedotto tra il 1743 e il 1781, con archi su due ordini. È uno dei set di «No Time to Die» (2021), il film di James Bond.',
-    en_text: 'Documented as early as 1686 and damaged in the 1722 earthquake, it was rebuilt by the Orsini family between 1743 and 1781 as a two-tiered aqueduct bridge spanning the canyon. It gained global fame as a filming location for the James Bond film "No Time to Die" (2021).',
+    en_text: 'Documented as early as 1686 and collapsed in the 1722 earthquake, it was rebuilt by the Orsini between 1743 and 1781 as an aqueduct bridge with two tiers of arches. It is one of the sets of the James Bond film "No Time to Die" (2021).',
   },
   {
     id: 'fontana', name: 'Fontana della Stella', ref: 'Fontana Madonna la Stella', kicker: 'Testata est del ponte', radius: 22,
@@ -2017,13 +2010,13 @@ const LANDMARKS = [
     id: 'stella', name: 'Madonna della Stella', ref: 'Chiesa Rupestre Madonna della Stella', kicker: 'Chiesa rupestre', radius: 34,
     en_name: 'Madonna della Stella', en_kicker: 'Rock-hewn sanctuary',
     text: 'Sul versante opposto della gravina, oltre il ponte: fuori è una chiesetta imbiancata con il campanile a vela, dentro è scavata nella roccia. Secondo la tradizione prende il nome da un’immagine della Madonna col Bambino con una stella sulla fronte, trovata da alcuni contadini.',
-    en_text: 'On the western ridge across the Aqueduct Bridge: whitewashed on the exterior with a bell-gable, but hollowed into solid rock inside. Tradition holds that it was named after a fresco of the Virgin and Child bearing a star on her brow, discovered by local peasants.',
+    en_text: 'On the western ridge across the Aqueduct Bridge: whitewashed on the exterior with a bell-gable, but hollowed into solid rock inside. Tradition holds that it was named after an image of the Virgin and Child with a star on her brow, found by some peasants.',
   },
   {
     id: 'botromagno', name: 'Botromagno', at: [-232, 80], kicker: 'Parco archeologico', radius: 45,
     en_name: 'Botromagno Archaeological Park', en_kicker: 'Archaeological park',
     text: 'Sul versante opposto al centro storico si alza la collina di Botromagno, dove sorse l’abitato più antico di Gravina: oggi è un parco archeologico di oltre 400 ettari. Qui c’era il centro apulo di Sidion, che batteva moneta con la leggenda «Sidinon»; dopo l’arrivo dei romani, alla fine del IV secolo a.C., prese il nome di Silvium e diventò una stazione sulla via Appia. Sul pendio restano tracce della cinta muraria della fine del IV secolo a.C. e, sul colle, tombe a semicamera intonacate e dipinte del V secolo a.C.',
-    en_text: 'Rising across the ravine from the old town, Botromagno hill holds the earliest settlement of Gravina: now an archaeological park over 400 hectares. Here stood the Peucetian/Apulian city of Sidion, which minted its own coinage ("Sidinon"); after the Roman conquest in the late 4th century BC, it became Silvium, a post along the Via Appia. Remains include 4th-century BC defensive walls and painted chamber tombs from the 5th century BC.',
+    en_text: 'Rising across the ravine from the old town, Botromagno hill holds the earliest settlement of Gravina: now an archaeological park over 400 hectares. Here stood the Apulian town of Sidion, which minted its own coinage ("Sidinon"); after the Roman conquest in the late 4th century BC, it became Silvium, a post along the Via Appia. Remains include 4th-century BC defensive walls and painted chamber tombs from the 5th century BC.',
   },
   // Blocco M1: la necropoli sugli scavi (fonti nel README); il punto OSM «Padre Eterno» è con ogni
   // probabilità la chiesa-grotta citata da Stanze Orsini, ma non è verificato: solo l'etichetta.
@@ -2031,7 +2024,7 @@ const LANDMARKS = [
     id: 'necropoli', name: 'Necropoli del Padre Eterno', at: [-180, 455], kicker: 'Botromagno · tombe dal VII al IV secolo a.C.', radius: 45,
     en_name: 'Padre Eterno Necropolis', en_kicker: 'Botromagno · tombs from 7th to 4th c. BC',
     text: 'Ai piedi del colle di Botromagno l’area del Padre Eterno corre per circa 1.400 m lungo il bordo ovest della gravina, a pochi passi dalla chiesa-grotta affrescata del Padre Eterno. Le tombe sono fosse scavate nella roccia, dalla fine del VII alla fine del IV secolo a.C.; sei, in serie monumentali, formavano un recinto funerario. Il 2 settembre 1988 vi fu trovata una tomba del IV secolo a.C. con 46 pezzi di corredo. Nella roccia restano anche le buche per i pali delle capanne del IX–VIII secolo a.C., cisterne, canalizzazioni e fornaci per vasi e laterizi.',
-    en_text: 'At the foot of Botromagno hill, the Padre Eterno burial ground runs for 1,400 m along the western canyon rim near the rock church of Padre Eterno. Tombs cut into bedrock date from the late 7th to late 4th century BC. In 1988 an undisturbed 4th-century BC tomb was unearthed containing 46 funerary items. Iron Age post holes, cisterns, channels, and ceramic kilns also mark the rock surface.',
+    en_text: 'At the foot of Botromagno hill, the Padre Eterno burial ground runs for 1,400 m along the western canyon rim near the rock church of Padre Eterno. Tombs cut into bedrock date from the late 7th to late 4th century BC. On 2 September 1988 a 4th-century BC tomb was found here with 46 grave goods. The rock also keeps post holes of 9th–8th century BC huts, cisterns, channels and kilns for pottery and bricks.',
   },
   { id: 'scavi', name: 'Scavi archeologici di Botromagno', ref: 'Scavi archeologici di Botromagno', card: false },
   { id: 'padreeterno', name: 'Padre Eterno', ref: 'Padre Eterno', card: false },
@@ -2040,7 +2033,7 @@ const LANDMARKS = [
     id: 'capotenda', name: 'Capotenda', at: [-660, 880], kicker: 'Via Madonna della Stella · area naturalistica', radius: 45, via: [-737, 862],
     en_name: 'Capotenda Natural Area', en_kicker: 'Via Madonna della Stella · nature reserve',
     text: 'Lungo Via Madonna della Stella la gravina si stringe tra rocce chiare a strati: è l’area naturalistica di Capotenda, tra laghetti e il torrente. Nella roccia si aprono antiche cave ipogee di salnitro: lo si cavava col piccone e lo si raffinava a Napoli; poi i pastori allargarono i varchi per far passare le mucche della transumanza. Da qui parte il Sentiero dell’Acqua e della Pietra, cammino geopoetico presentato nel novembre 2018 (ideato dalla guida ambientale Ezio Spano con il Comune, cammino di Davide Sapienza), che passa per l’area del Padre Eterno – necropoli del VII secolo a.C., chiesa rupestre e tombe di due guerrieri tra V e IV secolo a.C. – e arriva al Ponte Acquedotto.',
-    en_text: 'Along Via Madonna della Stella, the ravine narrows between stratified limestone cliffs into the scenic Capotenda natural reserve. Man-made caves here were ancient saltpetre mines, later widened by shepherds for transhumant cattle herds. This is the trailhead for the "Water and Stone Trail" (Sentiero dell’Acqua e della Pietra), connecting Capotenda past the Padre Eterno necropolis and warrior tombs to the Aqueduct Bridge.',
+    en_text: 'Along Via Madonna della Stella, the ravine narrows between pale layered rocks: this is the Capotenda nature area, with small lakes and the stream. The caves in the rock were old saltpetre quarries, later widened by shepherds to let the cattle of the transhumance through. This is the trailhead for the "Water and Stone Trail" (Sentiero dell’Acqua e della Pietra), connecting Capotenda past the Padre Eterno necropolis and warrior tombs to the Aqueduct Bridge.',
   },
   { id: 'repubblica', name: 'Piazza della Repubblica', ref: 'Piazza della Repubblica', card: false },
   { id: 'villa', name: 'Villa Comunale', ref: 'Villa Comunale', card: false },
@@ -2059,20 +2052,20 @@ const CITY_LANDMARKS = [
     id: 'bosco', name: 'Bosco Difesa Grande', at: [330, -1640], kicker: 'Zona speciale di conservazione · a 6 km dalla città', radius: 60,
     en_name: 'Difesa Grande Forest', en_kicker: 'Special Area of Conservation · 6 km south',
     text: 'Bosco di querce (roverella, cerro e farnetto) circa 6 km a sud di Gravina: circa 1.900 ettari di bosco dentro un sito Natura 2000 di oltre 5.200 ettari, zona speciale di conservazione dal 2015. Gli incendi del 12 agosto 2017 e del 28 luglio 2021 ne hanno bruciato una parte. Qui la strada è accorciata: il tracciato reale è lungo circa 5,4 km.',
-    en_text: 'A primeval oak woodland (downy oak, Turkey oak, and Italian oak) located 6 km south of Gravina: nearly 1,900 hectares of forest within a Natura 2000 protected zone exceeding 5,200 hectares. A Special Area of Conservation since 2015, preserved as one of the richest biodiversity sanctuaries in Apulia.',
+    en_text: 'An oak wood (downy oak, Turkey oak and Hungarian oak) about 6 km south of Gravina: about 1,900 hectares of woodland inside a Natura 2000 site of over 5,200 hectares, a Special Area of Conservation since 2015. The fires of 12 August 2017 and 28 July 2021 burned part of it. Here the road is shortened: the real route is about 5.4 km long.',
   },
   // Blocco L: area Quercus e vivaio (posizioni del diorama, dalle zone a scala reale di GEO.bosco). Tono neutro, niente pubblicità.
   {
     id: 'quercus', name: 'Area Quercus', ref: 'Area Quercus', kicker: 'Bosco Difesa Grande · ex area ristoro «Marcuccio»', radius: 55,
     en_name: 'Area Quercus', en_kicker: 'Difesa Grande Forest · recreation area',
     text: 'Nel cuore del bosco comunale, l’ex area ristoro «Marcuccio». Nel 2021 è passata a una nuova gestione, con due campi da calcetto, uno da tennis e l’area pic-nic; rinnovata nel 2024, ha campi da calcio e tennis, una zona giochi e il ristorante. Da qui partono escursioni nel bosco e gite a cavallo.',
-    en_text: 'Located in the heart of the municipal forest, formerly the "Marcuccio" retreat. Modernised with tennis and football courts, picnic facilities, playground, and restaurant, it serves as the primary base for hiking, trail riding, and nature excursions.',
+    en_text: 'Located in the heart of the municipal forest, formerly the "Marcuccio" retreat. Under new management since 2021 and renovated in 2024, it has football and tennis courts, a picnic area, a playground and the restaurant. Walks in the wood and horse rides start from here.',
   },
   {
     id: 'vivaio', name: 'Vivaio forestale', ref: 'Vivaio forestale', kicker: 'Centro visite «San Nicola la Macchia»', radius: 60,
     en_name: 'Forest Nursery', en_kicker: 'San Nicola la Macchia Visitor Centre',
     text: 'All’incrocio con Contrada Annunziata, nel cuore del SIC Bosco Difesa Grande, c’è il vivaio forestale con il Centro visite «San Nicola la Macchia», pensato per attività educative e didattiche sulla natura: per scuole, famiglie e turisti.',
-    en_text: 'At the Contrada Annunziata crossroads in the core of the Difesa Grande Special Area of Conservation, the state forest nursery hosts the "San Nicola la Macchia" visitor and environmental education centre for schools and tourists.',
+    en_text: 'At the Contrada Annunziata crossroads in the core of the Difesa Grande Special Area of Conservation, the forest nursery hosts the "San Nicola la Macchia" visitor and environmental education centre for schools and tourists.',
   },
   { id: 'scout', name: 'Base Scout Gravina 1', ref: 'Base Scout Gravina 1', card: false },
   { id: 'picnic', name: 'Area pic-nic', at: GEO.bosco?.picnic ?? [0, 0], card: false },
@@ -2081,19 +2074,19 @@ const CITY_LANDMARKS = [
     id: 'fiera', name: 'Fiera di San Giorgio', at: [-53, 948], kicker: 'Parco Fiere · ad aprile, dal 1294', radius: 60,
     en_name: 'San Giorgio Fair', en_kicker: 'Fairgrounds · every April, since 1294',
     text: 'Un documento del Registro Angioino dice che la fiera esisteva già prima del 1294, quando Carlo d’Angiò la ripristinò. Si tiene ad aprile, per la festa di San Giorgio: in origine sui terreni della chiesa di San Giorgio dei Cavalieri di Malta, oggi nel Parco Fiere dell’ex linificio, in via Spinazzola.',
-    en_text: 'An Angevin register records that the regional fair existed prior to 1294, when Charles II of Anjou officially rechartered it. Held every April for Saint George’s patronal festivities, it originally convened around the church of San Giorgio dei Cavalieri di Malta and is now hosted in the fairgrounds on Via Spinazzola.',
+    en_text: 'An Angevin register records that the fair already existed before 1294, when Charles of Anjou restored it. It is held in April, for the feast of Saint George: originally on the land of the church of San Giorgio dei Cavalieri di Malta and is now hosted in the fairgrounds on Via Spinazzola.',
   },
   {
     id: 'stadio', name: 'Stadio Stefano Vicino', ref: 'Stadio Comunale "Stefano Vicino"', kicker: 'Via Fazzatoia · circa 4.000 posti', radius: 50,
     en_name: 'Stefano Vicino Stadium', en_kicker: 'Via Fazzatoia · approx. 4,000 capacity',
     text: 'Lo stadio del calcio gravinese, un tempo il «Comunale di via Fazzatoia». Dal 2015 porta il nome di Stefano Vicino, allenatore e promotore del calcio in città, e ha il campo in erba sintetica. Tra il 2024 e il 2025 è stato rinnovato e la tribuna ovest ha avuto la copertura.',
-    en_text: 'The municipal football stadium, formerly known as Comunale di via Fazzatoia. In 2015 it was dedicated to coach Stefano Vicino, a beloved sports pioneer, featuring artificial turf and recently covered grandstands.',
+    en_text: 'The municipal football stadium, formerly known as Comunale di via Fazzatoia. Since 2015 it has been named after Stefano Vicino, coach and promoter of football in the town, and it has an artificial turf pitch. In 2024–2025 it was renovated and the west stand was roofed.',
   },
   {
     id: 'stazionefal', name: 'Stazione FAL', ref: 'Gravina (FAL)', kicker: 'Ferrovie Appulo Lucane · 1915', radius: 36,
     en_name: 'FAL Railway Station', en_kicker: 'Ferrovie Appulo Lucane · 1915',
     text: 'Aperta nel 1915 sulla linea Bari–Altamura–Potenza delle Ferrovie Appulo Lucane, tra Altamura e Irsina. Accanto c’è la stazione delle Ferrovie dello Stato, sulla linea Rocchetta Sant’Antonio–Gioia del Colle.',
-    en_text: 'Opened in 1915 along the narrow-gauge Bari–Altamura–Potenza railway line of Ferrovie Appulo Lucane. Directly adjacent stands the standard-gauge FS station on the Rocchetta Sant’Antonio–Gioia del Colle line.',
+    en_text: 'Opened in 1915 on the Bari–Altamura–Potenza line of the Ferrovie Appulo Lucane, between Altamura and Irsina. Next to it stands the Ferrovie dello Stato station on the Rocchetta Sant’Antonio–Gioia del Colle line.',
   },
   { id: 'stazionefs', name: 'Stazione FS', ref: 'Gravina in Puglia', card: false },
   {
@@ -2101,7 +2094,7 @@ const CITY_LANDMARKS = [
     id: 'meninni', name: 'Casino di Meninni', ref: 'Casino di Meninni', kicker: 'Colle del Guardialto', radius: 150, via: [1449, -464],
     en_name: 'Casino di Meninni', en_kicker: 'Guardialto Hill',
     text: 'Palazzo storico che dalla collina del Guardialto guarda la città. Davanti, un grande giardino scende lungo il pendio tra altissimi pini d’Aleppo; dietro, in uno spazio pianeggiante tra altissimi cipressi, è ben nascosta la cappella di famiglia. Oggi è un rudere senza tetto, «tanto fatiscente quanto mistico» come lo descrive il FAI, ed è stato più volte tra i suoi «Luoghi del Cuore».',
-    en_text: 'A noble country manor commanding views over Gravina from Guardialto hill. Terraced gardens with towering Aleppo pines descend in front, while a secluded family chapel hides among cypresses behind. Now an evocative roofless ruin, described by FAI (Italian National Trust) as "as mystical as it is decayed", it has repeatedly placed among Italy’s most cherished heritage sites.',
+    en_text: 'A historic palace looking over Gravina from Guardialto hill. Terraced gardens with towering Aleppo pines descend in front, while a secluded family chapel hides among cypresses behind. Now an evocative roofless ruin, described by FAI (Italian National Trust) as "as mystical as it is decayed", it has several times been among the FAI’s «Places of the Heart» (Luoghi del Cuore).',
   },
   // Blocco N5b: il Casino Scacchi (rudere OSM w411138777), solo l'etichetta: nessuna fonte verificabile per una scheda.
   { id: 'casinoscacchi', name: 'Casino Scacchi', ref: 'Casino Scacchi', card: false },
@@ -9508,8 +9501,7 @@ const Details = {
     this.portaSanMichele(tops);
     this.piazzaScacchi();
     this.luoghiCultura(tops);                 // blocco N7: cinema, teatri e luoghi della cultura
-    this.seminario(tops);                     // blocco 4.3: Seminario Vescovile in Piazza Benedetto XIII
-    this.viaGiudiceMontea(tops);              // blocco 4.3: Via giudice Montea (case storiche, case a pericolo crollo e parapetto)
+    this.viaGiudiceMontea();                  // blocco 4.3: parapetto di Via giudice Montea (blocco 4.11: tolte case e puntelli)
     if (lm('quattrofontane')) this.quattroFontane(lm('quattrofontane').at);
     for (const [e, n] of GEO.views) this.railing(e, n);
     this.cityPlaces();
@@ -9789,36 +9781,28 @@ const Details = {
     this.centrone();
     this.teatroVida();
 
-    // 4. FONDAZIONE PALAZZO POMARICI SANTOMASI (Via Museo 20)
-    const santomasiWall = this.wallNear([151.3, 123.5], 5);
+    // 4. FONDAZIONE PALAZZO POMARICI SANTOMASI (Via Museo 20). Blocco 4.11, Street View ottobre 2025 (pano «20 Via Museo»):
+    // portale ad arco liscio con le lesene e la chiave, portone chiodato, balcone con la ringhiera; niente bugnato né stemma.
+    // Il portale sta all'estremità ovest del fronte su Via Museo (civico 20: Google e Overture a [134.5, 119.6]), non più 17 m
+    // più a est: x0 lo sposta lungo il muro (che ha il centro a [140.4, 120.4]).
+    const santomasiWall = this.wallNear([140.4, 120.4], 3), x0 = -3.2;
     if (santomasiWall) {
-      const tb = this.near(santomasiWall.M), f = this.frame(santomasiWall, tb), y = f.ground;
+      const tb = this.near(santomasiWall.M), f = this.frame(santomasiWall, tb), y = f.ground, { M, n } = santomasiWall;
+      this.keepOut.push({ M: [M[0] - n[1] * x0, M[1] + n[0] * x0], n, half: 1.9, top: y + 6 });   // niente finestre sul portale
       const arch = (w, h, d) => { const sh = new THREE.Shape(); sh.moveTo(-w / 2, 0); sh.lineTo(w / 2, 0); sh.lineTo(w / 2, h - w / 2); sh.absarc(0, h - w / 2, w / 2, 0, Math.PI, false); sh.closePath(); return new THREE.ExtrudeGeometry(sh, { depth: d, bevelEnabled: false, curveSegments: 8 }); };
-      f.add(arch(2.8, 3.8, 0.25), tufo, 0, y, 0.15);
-      f.add(arch(2.1, 3.4, 0.12), wood, 0, y, 0.18);
-      f.box(0.65, 0.85, 0.22, tufo, 0, y + 3.85, 0.28);
-      f.box(0.45, 0.65, 0.08, gold, 0, y + 3.85, 0.38);
-      f.box(3.2, 0.25, 0.95, stone, 0, y + 4.6, 0.55);
-      f.box(3.2, 1.0, 0.08, iron, 0, y + 4.85, 0.95);
-      for (const s of [-1, 1]) f.box(0.08, 1.0, 0.95, iron, s * 1.55, y + 4.85, 0.55);
-      f.box(1.8, 0.45, 0.08, C('#f2eee5'), 0, y + 4.25, 0.22);
+      f.add(arch(2.8, 3.8, 0.25), tufo, x0, y, 0.15);
+      f.add(arch(2.1, 3.4, 0.12), wood, x0, y, 0.18);
+      for (const s of [-1, 1]) f.box(0.32, 3.9, 0.12, tufo, x0 + s * 1.55, y, 0.2);   // lesene ai lati dell'arco
+      f.box(0.3, 0.45, 0.2, tufo, x0, y + 3.5, 0.3);                               // chiave dell'arco
+      f.box(3.2, 0.25, 0.95, stone, x0, y + 4.6, 0.55);                            // balcone con la ringhiera
+      f.box(3.2, 1.0, 0.08, iron, x0, y + 4.85, 0.95);
+      for (const s of [-1, 1]) f.box(0.08, 1.0, 0.95, iron, x0 + s * 1.55, y + 4.85, 0.55);
     }
 
-    // 5. GRAVINA SOTTERRANEA (Rione Piaggio / Via Meucci, edificio 267)
-    const sotterraneaWall = this.wallNear([143.8, -58.0], 4) ?? this.wallNear([146.1, -56.8], 4);
-    if (sotterraneaWall) {
-      const tb = this.near(sotterraneaWall.M), f = this.frame(sotterraneaWall, tb), y = f.ground;
-      const arch = (w, h, d) => { const sh = new THREE.Shape(); sh.moveTo(-w / 2, 0); sh.lineTo(w / 2, 0); sh.lineTo(w / 2, h - w / 2); sh.absarc(0, h - w / 2, w / 2, 0, Math.PI, false); sh.closePath(); return new THREE.ExtrudeGeometry(sh, { depth: d, bevelEnabled: false, curveSegments: 8 }); };
-      f.add(arch(2.4, 3.0, 0.22), tufo, 0, y, 0.12);
-      f.add(arch(1.8, 2.6, 0.08), dark, 0, y, 0.16);
-      for (let gx = -0.75; gx <= 0.75; gx += 0.25) f.box(0.04, 2.4, 0.04, iron, gx, y + 0.1, 0.18);
-      f.box(2.2, 0.50, 0.12, stone, 0, y + 3.15, 0.18);
-      f.box(0.05, 0.45, 0.35, iron, 1.45, y + 2.4, 0.25);
-      f.box(0.24, 0.35, 0.24, iron, 1.45, y + 2.1, 0.42);
-      f.box(0.18, 0.25, 0.18, C('#ffea9f'), 1.45, y + 2.1, 0.42);
-    }
+    // 5. GRAVINA SOTTERRANEA (Via Meucci 10): blocco 4.11, tolto il portale con cancello e lanterna. In Via Meucci non passa
+    // Street View (solo foto degli interni) e nessuna foto mostra l'ingresso: resta la scheda.
 
-    // 6. BIBLIOTECA FINIA (Piazza Notar Domenico / Piazza Benedetto XIII, edificio 121)
+    // 6. BIBLIOTECA FINIA (Piazza Benedetto XIII, edificio 121): Street View ottobre 2025, scritta «BIBLIOTECA FINIA» sotto l'orologio
     const finiaWall = this.wallNear([108.8, -22.6], 3) ?? this.wallNear([104.7, -31.8], 3);
     if (finiaWall) {
       const tb = this.near(finiaWall.M), f = this.frame(finiaWall, tb), y = f.ground;
@@ -9845,7 +9829,7 @@ const Details = {
 
       // Grande stemma/cartiglio barocco scolpito in rilievo sopra il portale
       f.box(0.85, 1.10, 0.22, stoneWarm, 0, y + 4.40, 0.20);
-      f.box(0.65, 0.85, 0.10, gold, 0, y + 4.40, 0.28);
+      f.box(0.65, 0.85, 0.10, stoneLight, 0, y + 4.40, 0.28);   // blocco 4.11: lo stemma è di pietra (Street View ottobre 2025)
       f.add(new THREE.CylinderGeometry(0.18, 0.18, 0.14, 12).rotateX(Math.PI / 2), stoneWarm, 0, y + 5.0, 0.24);
 
       // 3 finestre centinate barocche al piano superiore con conchiglie scolpite
@@ -10258,113 +10242,18 @@ const Details = {
     }
   },
 
-  /**
-   * SEMINARIO VESCOVILE (blocco 4.3, Piazza Benedetto XIII 25, edificio 123):
-   * Fondato nel 1595 da mons. Vincenzo Giustiniani (primo seminario della Terra di Bari) e ampliato nel Settecento
-   * sotto papa Benedetto XIII Orsini. Facciata monumentale in tufo e pietra calcarea con portale bugnato a tutto sesto,
-   * stemma vescovile scolpito in chiave di volta, portone ligneo chiodato, fasce marcapiano, finestre modanate con
-   * inferriate al pianterreno e targa dedicatoria.
-   */
-  seminario(tops) {
-    const semWall = this.wallNear([62.2, -27.0], 3);
-    if (!semWall) return;
-    const C = (h) => new THREE.Color(h), { iron, stone } = this.col;
-    const tufo = C('#dfd0b0'), bugna = C('#cbb994'), wood = C('#432e1f'), gold = C('#cca84a'), dark = C('#222428'), marble = C('#f0eadc');
-    const tb = this.near(semWall.M), f = this.frame(semWall, tb), y = f.ground;
-    const top = tops.get('#' + semWall.index)?.top ?? y + 11.2;
-    const L = semWall.len, H = top - y;
-    this.keepOut.push({ M: semWall.M, n: semWall.n, half: L / 2 + 0.4, top: top + 1.5 });
-
-    // Paramento nobile in tufo, zoccolo basamentale bugnato, lesene e fasce marcapiano
-    f.box(L - 0.1, H, 0.10, tufo, 0, y, 0.05);
-    f.box(L, 1.15, 0.18, bugna, 0, y, 0.09);
-    for (const lx of [-L / 2 + 0.35, -3.2, L / 2 - 0.35]) {
-      f.box(0.65, H, 0.20, stone, lx, y, 0.10);
-    }
-    f.box(L + 0.2, 0.22, 0.26, stone, 0, y + 3.85, 0.13);   // marcapiano 1° livello
-    f.box(L + 0.2, 0.20, 0.24, stone, 0, y + 7.35, 0.12);   // marcapiano 2° livello
-    f.box(L + 0.4, 0.48, 0.42, stone, 0, top - 0.48, 0.21); // cornicione sommitale
-    for (let mx = -L / 2 + 1.2; mx <= L / 2 - 1.2; mx += 1.1) {
-      f.box(0.24, 0.22, 0.36, stone, mx, top - 0.65, 0.22);
-    }
-
-    // Grande portale monumentale al civico 25 (nello slargo lastricato a est dell'aiuola: x = -8.5)
-    const px = -8.5;
-    const arch = (w, h, d) => {
-      const sh = new THREE.Shape();
-      sh.moveTo(-w / 2, 0); sh.lineTo(w / 2, 0); sh.lineTo(w / 2, h - w / 2);
-      sh.absarc(0, h - w / 2, w / 2, 0, Math.PI, false); sh.closePath();
-      return new THREE.ExtrudeGeometry(sh, { depth: d, bevelEnabled: false, curveSegments: 10 });
-    };
-    f.box(3.6, 0.18, 0.70, stone, px, y, 0.35);             // gradino di soglia in pietra
-    f.add(arch(3.0, 3.75, 0.26), stone, px, y, 0.12);       // archivolto a tutto sesto
-    for (let k = 0; k < 6; k++) {                           // bugnato sugli stipiti
-      for (const s of [-1, 1]) {
-        f.box(0.56, 0.42, 0.32, k % 2 ? stone : bugna, px + s * 1.32, y + 0.18 + k * 0.46, 0.18);
-      }
-    }
-    for (let a = 1; a <= 5; a++) {                          // conci radiali sull'arco bugnato
-      const ang = (a / 6) * Math.PI;
-      f.add(new THREE.BoxGeometry(0.32, 0.48, 0.34).rotateZ(ang - Math.PI / 2), a % 2 ? bugna : stone, px + Math.cos(ang) * 1.28, y + 2.25 + Math.sin(ang) * 1.28, 0.20);
-    }
-    // Portone ligneo chiodato a due battenti
-    f.add(arch(2.2, 3.35, 0.16), wood, px, y + 0.12, 0.26);
-    f.box(0.08, 3.25, 0.18, C('#2c1d12'), px, y + 0.12, 0.28);
-    for (const s of [-1, 1]) {
-      for (const by of [0.65, 1.65, 2.45]) f.box(0.72, 0.55, 0.06, C('#362417'), px + s * 0.54, y + by, 0.33);
-      f.add(new THREE.TorusGeometry(0.11, 0.025, 6, 10), gold, px + s * 0.32, y + 1.45, 0.36); // batacchi
-    }
-    // Stemma vescovile scolpito in chiave di volta
-    f.box(0.76, 0.92, 0.28, stone, px, y + 3.45, 0.28);
-    f.box(0.52, 0.64, 0.10, gold, px, y + 3.45, 0.40);
-    f.box(0.68, 0.16, 0.14, bugna, px, y + 3.88, 0.38);     // galero vescovile
-
-    // Balconata nobile in ferro battuto sopra il portale e targa dedicatoria
-    f.box(3.4, 0.22, 0.88, stone, px, y + 4.35, 0.44);
-    for (const s of [-1, 0, 1]) f.box(0.22, 0.32, 0.65, stone, px + s * 1.25, y + 4.05, 0.34);
-    f.box(3.3, 0.06, 0.06, iron, px, y + 5.42, 0.84);       // corrimano frontale
-    for (const s of [-1, 1]) f.box(0.06, 0.06, 0.84, iron, px + s * 1.62, y + 5.42, 0.44);
-    for (let bx = -1.55; bx <= 1.56; bx += 0.22) f.box(0.035, 0.86, 0.035, iron, px + bx, y + 4.57, 0.84);
-    for (const s of [-1, 1]) for (let bz = 0.15; bz <= 0.80; bz += 0.22) f.box(0.035, 0.86, 0.035, iron, px + s * 1.62, y + 4.57, bz);
-    f.box(1.45, 0.62, 0.08, marble, px + 2.45, y + 2.15, 0.14); // targa storica scolpita
-    f.box(1.25, 0.06, 0.04, C('#6e6558'), px + 2.45, y + 2.52, 0.19);
-    f.box(1.05, 0.05, 0.04, C('#6e6558'), px + 2.45, y + 2.34, 0.19);
-    f.box(1.15, 0.05, 0.04, C('#6e6558'), px + 2.45, y + 2.18, 0.19);
-
-    // Finestre modanate su 3 ordini con inferriate storiche al pianterreno
-    const cols = [-12.6, -8.5, -4.4, -0.4, 3.8, 8.0, 12.2];
-    for (const wx of cols) {
-      // Pianterreno (salta il portale a px = -8.5)
-      if (Math.abs(wx - px) > 1.5) {
-        f.box(1.38, 1.88, 0.12, stone, wx, y + 1.25, 0.08);
-        f.box(1.06, 1.56, 0.08, dark, wx, y + 1.40, 0.13);
-        for (let gx = -0.4; gx <= 0.41; gx += 0.2) f.box(0.03, 1.55, 0.06, iron, wx + gx, y + 1.40, 0.17);
-      }
-      // Piano nobile (1° piano)
-      const h1 = Math.abs(wx - px) < 0.5 ? 2.25 : 1.95;
-      f.box(1.48, h1 + 0.25, 0.12, stone, wx, y + 4.55, 0.08);
-      f.box(1.14, h1, 0.08, C('#354f39'), wx, y + 4.67, 0.13);
-      f.box(1.68, 0.24, 0.24, stone, wx, y + 4.55 + h1 + 0.22, 0.14); // timpanetto
-      // Secondo piano
-      f.box(1.38, 1.75, 0.12, stone, wx, y + 7.95, 0.08);
-      f.box(1.08, 1.48, 0.08, C('#4a3728'), wx, y + 8.08, 0.13);
-    }
-  },
+  // Blocco 4.11: tolti la scheda e la facciata del «Seminario Vescovile» (blocco 4.3) sul lato sud di Piazza Benedetto XIII:
+  // su Street View (maggio 2025) lì c'è una facciata semplice con porte rettangolari, senza portale bugnato, stemma né
+  // balcone, e nessuna fonte dice in quale edificio fosse il seminario fondato da Vincenzo Giustiniani (oggi un condominio).
 
   /**
    * VIA GIUDICE MONTEA (blocco 4.3, dal Ponte Acquedotto verso il Bastione medievale e la città):
-   * 1. Muretto continuo di parapetto in conci di tufo con copertina in pietra calcarea lungo il ciglio ovest verso la gravina;
-   * 2. Cortina di case storiche in tufo a 2 piani sul lato est del primo tratto di salita dal ponte (n = 252..281);
-   * 3. Case a pericolo crollo reali lungo la via (sia nel primo tratto sia sui fronti storici a [31.4, 242], [25.6, 209.3] e [18.4, 165.3]):
-   *    puntellature strutturali inclinate in travi di legno e acciaio contro le facciate, tiranti e capochiave a croce,
-   *    lesioni e crepe diagonali nel tufo, porte e finestre del piano terra murate o sbarrate con assi a X e transenne.
+   * muretto continuo di parapetto in conci di tufo con copertina in pietra calcarea lungo il ciglio ovest verso la gravina
+   * (si vede nella foto a 360° «jimmyguarnizione», ottobre 2021). Blocco 4.11: tolte le case e i puntelli non confermati.
    * Ogni elemento verifica la distanza di sicurezza dalla carreggiata (`conformerClearance`).
    */
-  viaGiudiceMontea(tops) {
-    const C = (h) => new THREE.Color(h), { stone, light, iron, door } = this.col;
-    const tufo = C('#d4c39e'), tufoDark = C('#b8a47c'), tufoRaw = C('#a69067'), crack = C('#383028');
-    const beamWood = C('#7d5835'), beamDark = C('#5e4024'), steel = C('#5b6168'), red = C('#cf382e'), white = C('#f2efe8');
-    const shutter = C('#3c6646'), roofCol = C('#c5b28c');
+  viaGiudiceMontea() {
+    const { stone, light } = this.col, tufoDark = new THREE.Color('#b8a47c');
 
     // 1. Parapetto continuo in conci di tufo lungo il ciglio ovest (lato gravina) di Via giudice Montea (v198 e v1388)
     for (const id of ['v198', 'v1388']) {
@@ -10396,148 +10285,8 @@ const Details = {
         }
       }
     }
-
-    // Helper per attrezzare una facciata (o porzione di essa) come "casa a pericolo crollo" con puntellature, tiranti, crepe e transenne
-    const shoreFacade = (f, M, n, y, x0, x1, H, maxZ = 1.65) => {
-      const span = x1 - x0, cx = (x0 + x1) / 2;
-      const t = [-n[1], n[0]];
-      const worldAt = (x, z) => [M[0] + t[0] * x + n[0] * z, M[1] + t[1] * x + n[1] * z];
-      const safeAt = (x, z, gap = 0.32) => this.net.conformerClearance(...worldAt(x, z)) > gap;
-
-      // Toppe di intonaco caduto con conci di tufo erosi a vista e lesioni diagonali a gradini
-      f.box(span - 0.3, Math.min(H - 0.6, 6.6), 0.07, tufoDark, cx, y + 0.2, 0.04);
-      for (let k = 0; k < 5; k++) {
-        const rx = x0 + 0.8 + ((k + 0.4) * (span - 1.6)) / 5, ry = y + 0.9 + (k % 3) * 1.45;
-        f.box(1.15, 0.65, 0.09, tufoRaw, rx, ry, 0.05);
-      }
-      // Crepe diagonali ramificate sul paramento in tufo
-      for (const sx of [-0.28, 0.24]) {
-        const kx = cx + sx * span;
-        for (let s = 0; s < 5; s++) {
-          f.box(0.07, 0.78, 0.10, crack, kx + s * 0.22 * (sx < 0 ? 1 : -1), y + 1.4 + s * 0.68, 0.06, (sx < 0 ? -0.32 : 0.32));
-        }
-      }
-      // Tiranti metallici e capochiave (bolzoni) a croce / a X tra 1° e 2° piano
-      for (let tx = x0 + 1.2; tx <= x1 - 1.1; tx += 3.1) {
-        for (const ty of [y + 3.55, Math.min(y + 6.45, y + H - 0.85)]) {
-          f.box(0.58, 0.08, 0.12, iron, tx, ty, 0.08, 0.65);
-          f.box(0.58, 0.08, 0.12, iron, tx, ty, 0.08, -0.65);
-          f.box(0.14, 0.14, 0.15, iron, tx, ty, 0.09);
-        }
-      }
-      // Aperture al piano terra e primo piano murate in tufo o sbarrate con assi di legno incrociate a X
-      const nBays = Math.max(2, Math.floor(span / 3.4));
-      for (let b = 0; b < nBays; b++) {
-        const bx = x0 + ((b + 0.5) * span) / nBays;
-        // Vano piano terra tamponato/sbarrato
-        f.box(1.36, 2.35, 0.10, stone, bx, y, 0.05);
-        f.box(1.12, 2.15, 0.08, b % 2 === 0 ? tufoRaw : C('#231f1c'), bx, y + 0.05, 0.08);
-        // Assi di legno inchiodate a croce di Sant'Andrea e traversa
-        f.box(1.24, 0.14, 0.06, beamWood, bx, y + 1.05, 0.13, 0.52);
-        f.box(1.24, 0.14, 0.06, beamWood, bx, y + 1.05, 0.13, -0.52);
-        f.box(1.18, 0.15, 0.06, beamDark, bx, y + 0.55, 0.14);
-        f.box(1.18, 0.15, 0.06, beamDark, bx, y + 1.65, 0.14);
-        // Finestra 1° piano con telaio di puntellatura interno a croce
-        if (H > 5.2) {
-          const wy = y + 3.95;
-          f.box(1.26, 1.75, 0.10, stone, bx, wy, 0.05);
-          f.box(0.98, 1.48, 0.08, C('#201d1a'), bx, wy + 0.12, 0.08);
-          f.box(1.10, 0.11, 0.06, beamWood, bx, wy + 0.78, 0.13, 0.58);
-          f.box(1.10, 0.11, 0.06, beamWood, bx, wy + 0.78, 0.13, -0.58);
-        }
-      }
-      // Puntellature strutturali inclinate (ritti verticali a muro, puntoni inclinati in legno/acciaio e dormienti a terra)
-      let zFoot = maxZ;
-      while (zFoot > 0.55 && (!safeAt(x0 + 0.8, zFoot, 0.38) || !safeAt(cx, zFoot, 0.38) || !safeAt(x1 - 0.8, zFoot, 0.38))) zFoot -= 0.2;
-      if (zFoot >= 0.55) {
-        const nShores = Math.max(3, Math.round(span / 2.6));
-        const shoreH = Math.min(H - 0.8, 5.2);
-        // Banchina orizzontale superiore contro la facciata e dormiente al suolo
-        f.box(span - 0.8, 0.20, 0.18, beamDark, cx, y + shoreH - 0.25, 0.14);
-        f.box(span - 0.8, 0.16, 0.24, beamDark, cx, y - 0.05, zFoot - 0.12);
-        const strutLen = Math.hypot(shoreH - 0.2, zFoot - 0.15);
-        const tilt = Math.atan2(zFoot - 0.15, shoreH - 0.2);
-        for (let i = 0; i < nShores; i++) {
-          const sx = x0 + 0.9 + (i * (span - 1.8)) / Math.max(1, nShores - 1);
-          if (!safeAt(sx, zFoot, 0.35)) continue;
-          const colBeam = i % 2 === 0 ? beamWood : steel;
-          // Ritto verticale addossato al muro
-          f.box(0.18, shoreH + 0.2, 0.16, beamDark, sx, y - 0.05, 0.10);
-          // Puntone strutturale inclinato dalla base esterna fino alla banchina sul muro
-          const gStrut = new THREE.BoxGeometry(0.18, strutLen, 0.18);
-          gStrut.rotateX(-tilt);
-          f.add(gStrut, colBeam, sx, y + shoreH / 2 - 0.05, (zFoot + 0.12) / 2);
-          // Saetta secondaria / Rompitratta orizzontale a metà altezza
-          f.box(0.14, 0.14, (zFoot + 0.1) * 0.55, colBeam, sx, y + shoreH * 0.48, (zFoot + 0.1) * 0.28);
-        }
-        // Controvento orizzontale di collegamento tra i puntoni e transenna bianco-rossa di sicurezza
-        f.box(span - 1.4, 0.12, 0.12, steel, cx, y + 1.85, zFoot * 0.58);
-        for (let bx = x0 + 1.4; bx <= x1 - 1.4; bx += 2.6) {
-          if (!safeAt(bx, zFoot + 0.08, 0.38)) continue;
-          // Transenna stradale con piedi, telaio e fascia a strisce bianche e rosse
-          f.box(1.85, 0.95, 0.05, steel, bx, y, zFoot + 0.06);
-          for (let st = -0.75; st <= 0.76; st += 0.30) {
-            f.box(0.15, 0.22, 0.07, Math.round((st + 0.75) / 0.30) % 2 ? red : white, bx + st, y + 0.62, zFoot + 0.06);
-          }
-          // Cartello giallo/rosso di "Pericolo Crollo"
-          f.box(0.46, 0.34, 0.08, C('#e8c438'), bx, y + 0.26, zFoot + 0.07);
-          f.box(0.38, 0.08, 0.09, red, bx, y + 0.48, zFoot + 0.07);
-        }
-      }
-    };
-
-    // 2. Cortina di case storiche in tufo nel primo tratto di salita dal ponte (lato est, n = 252..280)
-    //    con la casa centrale (n = 265.5) in stato di pericolo crollo e puntellata
-    const newHouses = [
-      { c: [34.0, 274.8], L: 8.6, D: 6.0, H: 7.4, deg: 97, shored: false, wall: C('#dfd0b0') },
-      { c: [34.9, 265.8], L: 9.0, D: 6.2, H: 8.2, deg: 95, shored: true,  wall: C('#d2c09a') },
-      { c: [35.0, 256.6], L: 8.6, D: 6.0, H: 7.8, deg: 92, shored: false, wall: C('#e4d6b8') },
-    ];
-    for (const h of newHouses) {
-      const a = (h.deg * Math.PI) / 180, t = [Math.cos(a), Math.sin(a)], n = [-t[1], t[0]]; // n punta a ovest verso Via giudice Montea
-      const M = [h.c[0] + n[0] * (h.D / 2), h.c[1] + n[1] * (h.D / 2)];
-      if (this.net.conformerClearance(...M) < 1.35) continue;
-      const y = Terrain.heightAt(...M), base = y - 1.2, top = y + h.H;
-      const etb = Tiles.builderAt(...h.c, 'edifici'), dtb = this.near(M);
-      // Corpo di fabbrica in tufo nello strato edifici (visibile anche da lontano)
-      etb.addGeometry(new THREE.BoxGeometry(h.L, top - base, h.D).rotateY(a).translate(h.c[0], (top + base) / 2, -h.c[1]), h.wall);
-      etb.addGeometry(new THREE.BoxGeometry(h.L + 0.3, 0.35, h.D + 0.3).rotateY(a).translate(h.c[0], top - 0.18, -h.c[1]), stone);
-      etb.addGeometry(new THREE.BoxGeometry(h.L - 0.3, 0.12, h.D - 0.3).rotateY(a).translate(h.c[0], top + 0.05, -h.c[1]), roofCol);
-      const f = wallFrame(dtb, M, n);
-      f.box(h.L + 0.08, 0.95, 0.14, tufoDark, 0, y - 0.1, 0.05);  // zoccolo in conci di tufo
-      f.box(h.L + 0.16, 0.18, 0.20, light, 0, y + 3.65, 0.08);    // fascia marcapiano
-      if (h.shored) {
-        shoreFacade(f, M, n, y, -h.L / 2 + 0.3, h.L / 2 - 0.3, h.H, 1.25);
-      } else {
-        for (const wx of [-2.4, 0, 2.4]) {
-          if (wx === 0) {
-            f.box(1.38, 2.35, 0.10, light, wx, y, 0.05);
-            f.box(1.12, 2.18, 0.08, door, wx, y, 0.08);
-          } else {
-            f.box(1.15, 1.45, 0.08, light, wx, y + 0.85, 0.05);
-            f.box(0.92, 1.22, 0.08, shutter, wx, y + 0.95, 0.08);
-          }
-          f.box(1.22, 1.65, 0.10, light, wx, y + 4.25, 0.05);
-          f.box(0.96, 1.42, 0.08, shutter, wx, y + 4.36, 0.08);
-        }
-      }
-    }
-
-    // 3. Case a pericolo crollo reali sulle facciate storiche di Via giudice Montea (edificio 37)
-    const realCollapsible = [
-      { pt: [31.4, 242.0], x0: -9.5, x1: 8.5, maxZ: 1.75 },  // grande cortina nord su Via giudice Montea (len = 24.3 m)
-      { pt: [25.6, 209.3], x0: -2.8, x1: 2.8, maxZ: 0.95 },  // fronte intermedio prima del Bastione (len = 6.4 m)
-      { pt: [18.4, 165.3], x0: -8.5, x1: 8.5, maxZ: 1.85 },  // grande cortina sud verso Via Calderoni (len = 23.7 m)
-    ];
-    for (const item of realCollapsible) {
-      const w = this.wallNear(item.pt, 4);
-      if (!w) continue;
-      const tb = this.near(w.M), f = this.frame(w, tb), y = f.ground;
-      const top = tops.get('#' + w.index)?.top ?? y + 9.5;
-      const H = Math.max(6.8, Math.min(10.5, top - y));
-      this.keepOut.push({ M: w.M, n: w.n, half: w.len / 2 + 0.4, top: top + 1.5 });
-      shoreFacade(f, w.M, w.n, y, Math.max(-w.len / 2 + 0.4, item.x0), Math.min(w.len / 2 - 0.4, item.x1), H, item.maxZ);
-    }
+    // Blocco 4.11: tolte la «cortina di case» (n = 252..281, non in OSM: lì c'è un alto muro di sostegno) e le «case a
+    // pericolo crollo» puntellate: nessuna foto le conferma (foto a 360° del 2021: un cantiere di restauro con la gru).
   },
 
   /**
@@ -16015,7 +15764,7 @@ const POI_GROUPS = [
   { name: 'Chiese', ids: ['duomo', 'purgatorio', 'gesu', 'sanfrancesco', 'sannicola', 'santasofia', 'santateresa', 'agostino', 'addolorata'] },
   { name: 'Chiese e grotte rupestri', ids: ['sanmichele', 'santalucia', 'stella', 'settecamere'] },
   { name: 'Cinema, teatri e cultura', ids: ['mastrogiacomo', 'centrone', 'teatrovida', 'santomasi', 'sotterranea', 'finia'] },
-  { name: 'Palazzi e monumenti', ids: ['orsini', 'seminario'] },
+  { name: 'Palazzi e monumenti', ids: ['orsini'] },
   { name: 'Porte, mura e fontane', ids: ['portasanmichele', 'bastione', 'quattrofontane'] },
   { name: 'Piazze e giardini', ids: ['scacchi', 'pellicciari', 'fondovico', 'hortus', 'repubblica', 'villa'] },
   { name: 'La gravina e il paesaggio', ids: ['belvedere', 'ponte', 'fontana', 'botromagno', 'necropoli', 'scavi', 'padreeterno', 'capotenda'] },
