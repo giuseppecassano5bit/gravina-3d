@@ -172,8 +172,12 @@ RACCORDI_PIEDI = [
     # (OSM w469108906, surface=concrete); Via Marconi tocca la stessa area nel vertice (103.2, -115.5)
     ('Piazza Giuseppe Pellicciari', [(89.3, -126.6), (103.2, -115.5)], 2),
 ]
-# Blocco N2: vie cieche del centro storico che si disegnano (decorative, non percorribili) perché portano a un luogo
-DECO_Z0 = {1384781495}                        # Via Giacomo Leopardi, fino al cancello di Hortus (Street View, ottobre 2025)
+# Blocco N2: vie cieche del centro storico che si disegnano (decorative, non percorribili) perché portano a un luogo;
+# e vie documentate nel rilievo 4.12 (decisione del committente dell'08/11/2026)
+DECO_Z0 = {
+    1384781495,                        # Via Giacomo Leopardi, fino al cancello di Hortus (Street View, ottobre 2025)
+    1384781494,                        # Via Giovanni Pascoli
+}
 SOTTOPASSO_PIEDI = {1288069909}               # sottopassaggio pedonale della stazione (OSM level=-1, tra due scalinate)
 # Percorso del ponte: pedonale nella realtà, percorribile nel diorama.
 BRIDGE_ROUTE_NAME = 'Via giudice Montea'
@@ -402,6 +406,19 @@ def build_edges(segments, connectors):
     edges = []
     for s in segments:
         cls, name = s.get('class'), (s.get('names') or {}).get('primary')
+        if name:
+            # Correzioni toponomastiche verificate (blocco 4.12, approvazione del committente)
+            NOMI_CORREZIONI = {
+                'Via Carlo Bertocchi': 'Via Carlo Betocchi',
+                'Vía Antonio Punzi': 'Via Antonio Punzi',
+                'Vía Giacomo Lupi': 'Via Giacomo Lupi',
+                'Vía Alchimia': 'Via Alchimia',
+                'Vía Alessandro Manzoni': 'Via Alessandro Manzoni',
+                'via Dante Alighieri': 'Via Dante Alighieri',
+                'via Guardialto Alto': 'Via Guardialto Alto',
+                'Via Michealangelo Calderoni': 'Via Michelangelo Calderoni',
+            }
+            name = NOMI_CORREZIONI.get(name, name)
         if s.get('subtype') != 'road':
             continue
         pts = [to_local(*p) for p in s['geom']['coordinates']]
@@ -2079,6 +2096,7 @@ SCHOOLS = [
     ('ITT Bachelet · IPSIA G. Galilei', (2628, 687), 2),        # OSM w1384764963 (area), w1384764964, nel P.I.P.
     ('Scuola primaria Padre Pio', (1117, -216), 2),             # OSM w411138848, Via Guardialto
     ('Scuola media Don E. Montemurro', (648, -323), 3),         # OSM w411138849, Via Tripoli
+    ('Circolo didattico San Giovanni Bosco', (320, -139), 3),   # OSM r6148449, Corso Vittorio Emanuele
     ('Scuola secondaria N. Ingannamorte', (730, 418), 3),       # OSM n12091003369, Via Francesco Baracca
     ('Scuola dell\'infanzia Papa Giovanni Paolo II', (1212, -187), 1),   # OSM n12039009818
     ('Scuola dell\'infanzia Alla Fine dell\'Arcobaleno', (1368, 124), 1),   # OSM n12039071161
@@ -2198,7 +2216,7 @@ def sportland(city):
 #   (Google, visto il 14/10/2026: solo come riferimento visivo) e gli altri piani col parapetto. Le tettoie restano tettoie.
 #   I piani stanno nella tabella LIVELLI (righe della città); qui le unità diverse e i tetti.
 #   Vertici del triangolo sulle vie OSM: Via Eugenio Montale w107709045, Via Salvatore Quasimodo w1384775301, Via Carlo
-#   Bertocchi w1384781475 (il poeta è Carlo Betocchi: in OSM il nome ha un refuso, nel diorama resta quello di OSM).
+#   Betocchi w1384781475 (il poeta è Carlo Betocchi: refuso toponomastico corretto nel 4.12).
 # ─────────────────────────────────────────────────────────────────────────────
 VILLETTE_TRI = [(554.2, -346.8), (674.0, -348.9), (741.2, -351.0), (749.7, -352.8), (756.3, -355.3), (787.7, -385.4), (794.5, -392.0),
                 (804.4, -403.5), (805.5, -407.6), (804.4, -410.6), (801.9, -413.4), (736.9, -457.8), (708.8, -477.0), (659.2, -509.7),
@@ -2236,7 +2254,7 @@ def villette(city):
         if b['kind'] in (CITY_KIND['house'], CITY_KIND['apartments']) and not b['name'] and tri.contains(b['poly'].centroid):
             b['kind'] = CITY_KIND['villetta']
             n += 1
-    print(f'  villette del triangolo Via Montale – Via Quasimodo – Via Bertocchi: {n} edifici')
+    print(f'  villette del triangolo Via Montale – Via Quasimodo – Via Betocchi: {n} edifici')
 
 
 def villette_dati(city):
@@ -2674,7 +2692,7 @@ LIVELLI = [
         (None, 296.0, -65.0, 7),           # Viale Orsini 69, angolo Via Libertà: palazzina moderna di sette livelli
     ]),
     # @@LIVELLI-FINE@@
-    # Blocco N4b: le villette del triangolo Via Montale – Via Quasimodo – Via Bertocchi (edifici della città). I livelli si
+    # Blocco N4b: le villette del triangolo Via Montale – Via Quasimodo – Via Betocchi (edifici della città). I livelli si
     # contano sul lato più alto della sagoma (in città il tetto sta a gMax + altezza, Tiles.placeBuildings): sul lato basso
     # si vede un livello in più, come nelle foto. Niente «almeno» per la città.
     ('Street View, Via Eugenio Montale 1–42 e «56 Via Tripoli» (ott 2025), Via A. Palazzeschi (mag 2025)', [
@@ -2864,7 +2882,7 @@ LIVELLI = [
         (411140132, 370.43, -109.85, 2),
         (411145000, 278.78, -128.11, 2),
         (None, 375.60, -141.43, 3),          # Ufficio Postale Centrale
-        (None, 291.68, -143.47, 3),          # Corso Vittorio Emanuele
+        (None, 291.68, -143.47, 3),          # San Giovanni Bosco
     ]),
     ('Street View e rilievi, estensione centro storico: Piaggio, Fondovito, Civita, Giudecca (blocco 4.8b)', [
         (411140067, 190.73, 511.85, 2),
