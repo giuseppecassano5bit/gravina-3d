@@ -17,7 +17,17 @@ const THREE_DIR = path.join(HERE, 'node_modules/three');
 export const SHOTS = path.join(HERE, 'shots');
 fs.mkdirSync(SHOTS, { recursive: true });
 
-export async function open({ w = 1280, h = 720, mobile = false, landscape = false, gpu = false, dpr, init } = {}) {
+export async function open(opts = {}) {
+  // Blocco 4.11: con la GPU vera Chromium a volte apre il «telefono» senza il tocco (pointer: fine, maxTouchPoints 0), e il
+  // diorama parte col profilo da PC: le misure del telefono venivano sbagliate. Se succede, si riapre (fino a 6 volte).
+  for (let k = 0; ; k++) {
+    const r = await openOnce(opts);
+    if (!opts.mobile || k >= 5 || await r.page.evaluate(() => matchMedia('(pointer: coarse)').matches)) return r;
+    await r.browser.close();
+  }
+}
+
+async function openOnce({ w = 1280, h = 720, mobile = false, landscape = false, gpu = false, dpr, init } = {}) {
   const browser = await chromium.launch({
     executablePath: process.env.CHROMIUM_PATH || undefined,
     channel: gpu ? 'chromium' : undefined,   // il Chromium completo: la "headless shell" non usa la GPU
@@ -29,6 +39,11 @@ export async function open({ w = 1280, h = 720, mobile = false, landscape = fals
     ? { viewport: phone, deviceScaleFactor: dpr ?? 2, hasTouch: true, isMobile: true }
     : { viewport: { width: w, height: h }, deviceScaleFactor: dpr ?? 1 });
   const page = await ctx.newPage();
+  if (mobile) {
+    // Blocco 4.11: il tocco anche via CDP (con la GPU vera la sola opzione del contesto a volte non basta)
+    const cdp = await ctx.newCDPSession(page);
+    await cdp.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
+  }
   if (init) await page.addInitScript(init);
   const logs = [];
   page.on('console', (m) => logs.push(`[${m.type()}] ${m.text()}`));
