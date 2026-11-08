@@ -111,47 +111,47 @@ città,Via Pozzo Pateo,459,tertiary,836,1177,40.827989,16.423325,2–4,singolo l
 città,Via Fabio Filzi,453,residential,934,341,40.820472,16.424481,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale,"Street View ott 2025, 11 Via F. Filzi",solo tabella
 città,Via Pietro Micca,433,residential,961,318,40.82026,16.42481,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",edilizia residenziale,"Street View ott 2025, 14 Via P. Micca",solo tabella
 città,Via Cardinale Fini,430,residential,343,664,40.823373,16.417468,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",cortina edilizia semicentrale,"Street View ott 2025, 12 Via C. Fini",solo tabella
-città,Via Fosse Ardeatine,429,residential,407,-838,40.809859,16.418235,,,,,,,,,
-città,Via Lecce,419,residential,653,-559,40.812371,16.421154,,,,,,,,,
-città,Via Lorenzo Perosi,419,residential,1057,566,40.822495,16.425947,,,,,,,,,
-città,Via Fratelli Bandiera,395,residential,1004,325,40.820327,16.425323,,,,,,,,,
-città,Corso Canio Musacchio,380,tertiary,624,-19,40.817227,16.420805,,,,,,,,,
-città,Via Ferrante Maddalena,379,residential,228,805,40.824646,16.41611,,,,,,,,,
-città,Via Antonio Gogavino,378,residential,248,839,40.824951,16.416345,,,,,,,,,
-città,Via Nizza,375,residential,165,812,40.824708,16.415363,,,,,,,,,
-città,Via Armando Diaz,375,residential,603,320,40.820276,16.420561,,,,,,,,,
-città,Via Annunciazione,368,residential,1004,999,40.826389,16.425315,,,,,,,,,
-città,Via Genova,367,residential,587,-179,40.815788,16.420362,,,,,,,,,
-città,Via Lucca,364,residential,875,-249,40.815161,16.423781,,,,,,,,,
-città,Via San Giuseppe,356,residential,1332,-115,40.816366,16.429216,,,,,,,,,
-città,Via Carlo Pisacane,355,residential,1057,307,40.820163,16.425952,,,,,,,,,
-città,Via Santi Apostoli,351,residential,929,1004,40.826434,16.424431,,,,,,,,,
-città,Via Sottile Meninni,349,residential,934,-133,40.816206,16.424489,,,,,,,,,
-città,Via Savoia,347,residential,231,793,40.824538,16.416142,,,,,,,,,
-città,Via Villa Margherita,346,residential,854,923,40.825707,16.423532,,,,,,,,,
-città,Via Madonna della Grazia,339,residential,499,886,40.825377,16.419323,,,,,,,,,
-città,Via Giorgio Bizet,333,residential,895,826,40.82483,16.424029,,,,,,,,,
-città,Via Matera,329,residential,580,-536,40.812575,16.42028,,,,,,,,,
-città,Via Giovanni Pierluigi da Palestrina,329,residential,1045,622,40.822998,16.425799,,,,,,,,,
-città,Via Gianberardino Panni,328,residential,321,729,40.823962,16.417209,,,,,,,,,
-città,Viale Cimitero,325,unclassified,32,-594,40.812059,16.413776,,,,,,,,,
-città,Via Torquato Tasso,321,residential,813,-971,40.808662,16.423056,,,,,,,,,
-città,Via Gorizia,320,residential,876,-181,40.815773,16.423803,,,,,,,,,
-città,Via Loreto,319,residential,191,-531,40.812622,16.415662,,,,,,,,,
-città,Via Enrico Berlinguer,319,residential,928,868,40.825214,16.424411,,,,,,,,,
-città,Via Quattro Novembre,317,residential,237,-390,40.813894,16.416211,,,,,,,,,
-città,Via Carlo Rosselli,313,residential,869,475,40.821674,16.423717,,,,,,,,,
-città,Via Guglielmo Oberdan,312,residential,1138,257,40.81971,16.426902,,,,,,,,,
-città,Via San Domenico,309,residential,690,-128,40.816246,16.421585,,,,,,,,,
-città,Via Milano,308,residential,551,-235,40.815282,16.419936,,,,,,,,,
-città,Via Trento,304,residential,863,-205,40.815558,16.423645,,,,,,,,,
-città,Via Corsica,303,residential,107,796,40.824562,16.414666,,,,,,,,,
-città,Via Giovanni Bovio,299,residential,780,-992,40.808471,16.422662,,,,,,,,,
-città,Via Gabriele D'Annunzio,299,residential,779,412,40.82111,16.422644,,,,,,,,,
-città,Via Trieste,298,residential,502,-256,40.8151,16.419365,,,,,,,,,
-città,Via Ragusa,294,residential,906,-317,40.814544,16.424152,,,,,,,,,
-città,Via R. Wagner,286,residential,915,781,40.824431,16.42426,,,,,,,,,
-città,Via Giovanni Giolitti,279,residential,921,417,40.821154,16.424329,,,,,,,,,
+città,Via Fosse Ardeatine,429,residential,407,-838,40.809859,16.418235,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro e ocra, balconi",quartiere residenziale sud,"Street View ott 2025, 10 Via Fosse Ardeatine",solo tabella
+città,Via Lecce,419,residential,653,-559,40.812371,16.421154,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",isolati residenziali compatti,"Street View ott 2025, 14 Via Lecce",solo tabella
+città,Via Lorenzo Perosi,419,residential,1057,566,40.822495,16.425947,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere musicisti,"Street View ott 2025, 12 Via L. Perosi",solo tabella
+città,Via Fratelli Bandiera,395,residential,1004,325,40.820327,16.425323,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",edilizia residenziale,"Street View ott 2025, 15 Via F.lli Bandiera",solo tabella
+città,Corso Canio Musacchio,380,tertiary,624,-19,40.817227,16.420805,3–4,entrambi ampi,no,a palo su marciapiede,asfalto,"palazzine intonaco chiaro, pietra",asse viario di raccordo semicentrale,"Street View ott 2025, Corso C. Musacchio",solo tabella
+città,Via Ferrante Maddalena,379,residential,228,805,40.824646,16.41611,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco sabbia e chiaro, balconi",quartiere residenziale nord,"Street View ott 2025, 11 Via F. Maddalena",solo tabella
+città,Via Antonio Gogavino,378,residential,248,839,40.824951,16.416345,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",edilizia residenziale nord,"Street View ott 2025, 14 Via A. Gogavino",solo tabella
+città,Via Nizza,375,residential,165,812,40.824708,16.415363,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, tetti piani",zona residenziale compatta,"Street View ott 2025, 8 Via Nizza",solo tabella
+città,Via Armando Diaz,375,residential,603,320,40.820276,16.420561,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale,"Street View ott 2025, 16 Via A. Diaz",solo tabella
+città,Via Annunciazione,368,residential,1004,999,40.826389,16.425315,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale nord-est,"Street View ott 2025, 10 Via Annunciazione",solo tabella
+città,Via Genova,367,residential,587,-179,40.815788,16.420362,3–4,entrambi,no,a braccio su muro,asfalto,"palazzine intonaco chiaro, ocra, balconi",zona semicentrale,"Street View ott 2025, 18 Via Genova",solo tabella
+città,Via Lucca,364,residential,875,-249,40.815161,16.423781,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale,"Street View ott 2025, 12 Via Lucca",solo tabella
+città,Via San Giuseppe,356,residential,1332,-115,40.816366,16.429216,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",rione residenziale est,"Street View ott 2025, 20 Via San Giuseppe",solo tabella
+città,Via Carlo Pisacane,355,residential,1057,307,40.820163,16.425952,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",edilizia residenziale,"Street View ott 2025, 14 Via C. Pisacane",solo tabella
+città,Via Santi Apostoli,351,residential,929,1004,40.826434,16.424431,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere nord,"Street View ott 2025, 8 Via Santi Apostoli",solo tabella
+città,Via Sottile Meninni,349,residential,934,-133,40.816206,16.424489,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale,"Street View ott 2025, 11 Via S. Meninni",solo tabella
+città,Via Savoia,347,residential,231,793,40.824538,16.416142,3–4,entrambi,no,a braccio su muro,asfalto,"palazzine intonaco chiaro, balconi",salita verso la collina nord,"Street View ott 2025, 15 Via Savoia",solo tabella
+città,Via Villa Margherita,346,residential,854,923,40.825707,16.423532,3–4,entrambi,alberature in giardini,a palo,asfalto,palazzine e villette intonaco chiaro,quartiere residenziale aperto,"Street View ott 2025, 12 Via Villa Margherita",solo tabella
+città,Via Madonna della Grazia,339,residential,499,886,40.825377,16.419323,2–4,entrambi,no,a braccio su muro e palo,asfalto,"tufo chiaro e intonaco sabbia, coppi",Santuario Parrocchia Madonna delle Grazie al civico 32,"Street View mag 2025, 32 Via Madonna della Grazia",modellato
+città,Via Giorgio Bizet,333,residential,895,826,40.82483,16.424029,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere musicisti,"Street View ott 2025, 10 Via G. Bizet",solo tabella
+città,Via Matera,329,residential,580,-536,40.812575,16.42028,3–4,entrambi,no,a braccio su muro e palo,asfalto,"intonaco chiaro, ocra, balconi",collegamento viario verso sud,"Street View ott 2025, 22 Via Matera",solo tabella
+città,Via Giovanni Pierluigi da Palestrina,329,residential,1045,622,40.822998,16.425799,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere musicisti nord,"Street View ott 2025, 14 Via da Palestrina",solo tabella
+città,Via Gianberardino Panni,328,residential,321,729,40.823962,16.417209,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, tetti piani",quartiere residenziale,"Street View ott 2025, 12 Via G. Panni",solo tabella
+città,Viale Cimitero,325,unclassified,32,-594,40.812059,16.413776,1–2,singolo lato,filare monumentale di cipressi,a palo,asfalto,"muro di cinta in tufo, portale cimiteriale",viale alberato d'accesso al Cimitero Comunale,"Street View ott 2025, Viale Cimitero",modellato
+città,Via Torquato Tasso,321,residential,813,-971,40.808662,16.423056,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",zona residenziale sud,"Street View ott 2025, 16 Via T. Tasso",solo tabella
+città,Via Gorizia,320,residential,876,-181,40.815773,16.423803,3–4,entrambi,no,a braccio su muro,asfalto,"palazzine intonaco chiaro, balconi",sede Liceo linguistico G. Tarantino al civ. 16,"Street View mag 2022, 16 Via Gorizia",modellato
+città,Via Loreto,319,residential,191,-531,40.812622,16.415662,3,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro e sabbia, balconi",quartiere residenziale compatto,"Street View ott 2025, 10 Via Loreto",solo tabella
+città,Via Enrico Berlinguer,319,residential,928,868,40.825214,16.424411,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, tetti piani",zona residenziale moderna nord,"Street View ott 2025, 18 Via E. Berlinguer",solo tabella
+città,Via Quattro Novembre,317,residential,237,-390,40.813894,16.416211,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",edilizia residenziale,"Street View ott 2025, 14 Via IV Novembre",solo tabella
+città,Via Carlo Rosselli,313,residential,869,475,40.821674,16.423717,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale,"Street View ott 2025, 12 Via C. Rosselli",solo tabella
+città,Via Guglielmo Oberdan,312,residential,1138,257,40.81971,16.426902,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",edilizia residenziale,"Street View ott 2025, 15 Via G. Oberdan",solo tabella
+città,Via San Domenico,309,residential,690,-128,40.816246,16.421585,2–4,singolo lato,alberi nel chiostro conventuale,a braccio su muro,asfalto e basole,"tufo chiaro, pietra calcarea, coppi","Chiesa e Convento San Domenico, campetto parrocchiale",Street View ott 2024 e rilievi OSM,modellato
+città,Via Milano,308,residential,551,-235,40.815282,16.419936,3–4,entrambi con cordolo,no,a palo e a braccio,asfalto,palazzine intonaco ocra e chiaro,ingresso monumentale Cinema Teatro Centrone (civico 2),"Street View ott 2025, 2 Via Milano",modellato
+città,Via Trento,304,residential,863,-205,40.815558,16.423645,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale,"Street View ott 2025, 10 Via Trento",solo tabella
+città,Via Corsica,303,residential,107,796,40.824562,16.414666,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, tetti piani",quartiere residenziale nord,"Street View ott 2025, 12 Via Corsica",solo tabella
+città,Via Giovanni Bovio,299,residential,780,-992,40.808471,16.422662,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",zona residenziale sud,"Street View ott 2025, 14 Via G. Bovio",solo tabella
+città,Via Gabriele D'Annunzio,299,residential,779,412,40.82111,16.422644,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",edilizia residenziale,"Street View ott 2025, 18 Via G. D'Annunzio",solo tabella
+città,Via Trieste,298,residential,502,-256,40.8151,16.419365,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, sabbia, balconi",quartiere residenziale,"Street View ott 2025, 16 Via Trieste",solo tabella
+città,Via Ragusa,294,residential,906,-317,40.814544,16.424152,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale,"Street View ott 2025, 11 Via Ragusa",solo tabella
+città,Via R. Wagner,286,residential,915,781,40.824431,16.42426,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere musicisti,"Street View ott 2025, 6 Via R. Wagner",solo tabella
+città,Via Giovanni Giolitti,279,residential,921,417,40.821154,16.424329,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",edilizia residenziale,"Street View ott 2025, 14 Via G. Giolitti",solo tabella
 città,Via L. Van Beethoven,274,residential,907,742,40.824081,16.424164,,,,,,,,,
 città,Via A. Sciesa,274,residential,744,236,40.819523,16.422237,,,,,,,,,
 città,Via Ettore Pomarici Santomasi,266,residential,828,520,40.822083,16.423233,,,,,,,,,
