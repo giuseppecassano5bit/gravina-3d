@@ -152,47 +152,47 @@ città,Via Trieste,298,residential,502,-256,40.8151,16.419365,3–4,entrambi,no,
 città,Via Ragusa,294,residential,906,-317,40.814544,16.424152,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale,"Street View ott 2025, 11 Via Ragusa",solo tabella
 città,Via R. Wagner,286,residential,915,781,40.824431,16.42426,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere musicisti,"Street View ott 2025, 6 Via R. Wagner",solo tabella
 città,Via Giovanni Giolitti,279,residential,921,417,40.821154,16.424329,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",edilizia residenziale,"Street View ott 2025, 14 Via G. Giolitti",solo tabella
-città,Via L. Van Beethoven,274,residential,907,742,40.824081,16.424164,,,,,,,,,
-città,Via A. Sciesa,274,residential,744,236,40.819523,16.422237,,,,,,,,,
-città,Via Ettore Pomarici Santomasi,266,residential,828,520,40.822083,16.423233,,,,,,,,,
-città,Via Goito,264,unclassified,92,-477,40.813109,16.414493,,,,,,,,,
-città,Via Silvio Pellico,263,residential,1185,286,40.819971,16.42747,,,,,,,,,
-città,Via Ludovico Ariosto,259,residential,1271,303,40.820123,16.428491,,,,,,,,,
-città,Via Eugenio Montale,256,residential,724,-361,40.814155,16.421994,,,,,,,,,
-città,Via Amerigo Vespucci,256,residential,1348,159,40.818832,16.429405,,,,,,,,,
-città,Via Pisa,249,residential,851,59,40.817932,16.423501,,,,,,,,,
-città,Via Piave,245,residential,542,711,40.823802,16.419836,,,,,,,,,
-città,Via Aspromonte,242,residential,536,-579,40.812191,16.419757,,,,,,,,,
-città,Via Don Saverio Valerio,239,residential,657,837,40.824935,16.421198,,,,,,,,,
-città,Via Argentario,237,residential,485,-676,40.811321,16.419155,,,,,,,,,
-città,Via Martiri dei Saraceni,235,residential,1290,-77,40.816707,16.428713,,,,,,,,,
-città,Via Salvatore Quasimodo,234,residential,724,-463,40.81323,16.421991,,,,,,,,,
-città,Via Pompei,225,residential,564,-227,40.815359,16.420095,,,,,,,,,
-città,Via Istria,225,residential,956,-197,40.815631,16.424745,,,,,,,,,
-città,Via Pietro Maroncelli,225,residential,1227,278,40.819904,16.427965,,,,,,,,,
-città,Via Nicolò Damiani,214,residential,588,634,40.823109,16.420376,,,,,,,,,
-città,Via Ettore Fieramosca,208,residential,710,-840,40.809845,16.421826,,,,,,,,,
-città,Via Reggio Calabria,207,residential,863,-274,40.814935,16.42364,,,,,,,,,
-città,Via Brindisi,205,residential,803,-315,40.814569,16.422927,,,,,,,,,
-città,Via Salsa,205,residential,723,-605,40.811953,16.421987,,,,,,,,,
-città,Via Pola,205,residential,679,-36,40.817073,16.421459,,,,,,,,,
-città,Via Livorno,203,residential,783,-78,40.8167,16.422693,,,,,,,,,
-città,Via Primo Maggio,202,residential,171,-382,40.813965,16.415429,,,,,,,,,
-città,Via Padova,202,residential,612,-218,40.815443,16.42067,,,,,,,,,
-città,Via Lenin,202,residential,731,849,40.825039,16.422079,,,,,,,,,
-città,Via Leggiadro,202,residential,1693,484,40.821755,16.433493,,,,,,,,,
-città,Via Saverio Mercadante,201,residential,971,934,40.825804,16.424927,,,,,,,,,
-città,Via Cosenza,200,residential,834,-293,40.814765,16.423296,,,,,,,,,
-città,Via Santa Caterina da Siena,199,residential,1192,-67,40.816801,16.427553,,,,,,,,,
-città,Via Orti,197,residential,211,-365,40.814114,16.415906,,,,,,,,,
-città,Piazza Cavour,197,residential,478,-69,40.816776,16.419075,,,,,,,,,
-città,Via Carlo Bertocchi,195,residential,600,-434,40.813491,16.420517,,,,,,,,,
-città,Via Vittorio Alfieri,190,residential,785,558,40.822423,16.422712,,,,,,,,,
-città,Via Monsignor V. Giustiniani,190,residential,616,887,40.825378,16.420708,,,,,,,,,
-città,Via Pablo Picasso,188,residential,1337,220,40.819381,16.429272,,,,,,,,,
-città,Via Cimabue,186,residential,1543,164,40.81888,16.431715,,,,,,,,,
-città,Via Fratelli Cervi,184,residential,612,1010,40.826487,16.420663,,,,,,,,,
-città,Via Arezzo,182,residential,716,-161,40.815953,16.421902,,,,,,,,,
+città,Via L. Van Beethoven,274,residential,907,742,40.824081,16.424164,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere musicisti,"Street View ott 2025, 8 Via L. Van Beethoven",solo tabella
+città,Via A. Sciesa,274,residential,744,236,40.819523,16.422237,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",edilizia residenziale,"Street View ott 2025, 12 Via A. Sciesa",solo tabella
+città,Via Ettore Pomarici Santomasi,266,residential,828,520,40.822083,16.423233,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale nord,"Street View ott 2025, 15 Via E. Pomarici Santomasi",solo tabella
+città,Via Goito,264,unclassified,92,-477,40.813109,16.414493,2–3,singolo lato,alberi spontanei scarpata,a braccio su muro,asfalto,"tufo e intonaco chiaro, coppi",strada panoramica sul ciglio sud (pendenza 22%),"Street View ott 2025, Via Goito",modellato
+città,Via Silvio Pellico,263,residential,1185,286,40.819971,16.42747,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",edilizia residenziale,"Street View ott 2025, 10 Via S. Pellico",solo tabella
+città,Via Ludovico Ariosto,259,residential,1271,303,40.820123,16.428491,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, 14 Via L. Ariosto",solo tabella
+città,Via Eugenio Montale,256,residential,724,-361,40.814155,16.421994,3–4,entrambi con cordolo,siepi e giardinetti privati,a palo su marciapiede,asfalto,"villette a schiera e palazzine, tetti coppi e terrazze",lato nord triangolo villette Liceo Tarantino (VILLETTE),"Street View ott 2025, 1–42 Via E. Montale",modellato
+città,Via Amerigo Vespucci,256,residential,1348,159,40.818832,16.429405,3–4,entrambi,no,a palo,asfalto,"palazzine intonaco chiaro, balconi",Scuola dell'infanzia Alla Fine dell'Arcobaleno (piano terra),"Street View mag 2022, Via A. Vespucci",modellato
+città,Via Pisa,249,residential,851,59,40.817932,16.423501,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale,"Street View ott 2025, 11 Via Pisa",solo tabella
+città,Via Piave,245,residential,542,711,40.823802,16.419836,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",rione residenziale,"Street View ott 2025, 14 Via Piave",solo tabella
+città,Via Aspromonte,242,residential,536,-579,40.812191,16.419757,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, ocra, balconi",quartiere residenziale sud,"Street View ott 2025, 16 Via Aspromonte",solo tabella
+città,Via Don Saverio Valerio,239,residential,657,837,40.824935,16.421198,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",zona residenziale nord,"Street View ott 2025, 8 Via Don S. Valerio",solo tabella
+città,Via Argentario,237,residential,485,-676,40.811321,16.419155,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale sud,"Street View ott 2025, 10 Via Argentario",solo tabella
+città,Via Martiri dei Saraceni,235,residential,1290,-77,40.816707,16.428713,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",zona residenziale est,"Street View ott 2025, 12 Via Martiri dei Saraceni",solo tabella
+città,Via Salvatore Quasimodo,234,residential,724,-463,40.81323,16.421991,3–5,entrambi con cordolo,giardinetti fronte strada e siepi,a palo su marciapiede,asfalto,"villette a schiera e condomini, balconi verdi e ferro",lato est triangolo villette Liceo Tarantino (VILLETTE),"Street View ott 2025, 8–46 Via S. Quasimodo",modellato
+città,Via Pompei,225,residential,564,-227,40.815359,16.420095,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale compatto,"Street View ott 2025, 14 Via Pompei",solo tabella
+città,Via Istria,225,residential,956,-197,40.815631,16.424745,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",edilizia residenziale,"Street View ott 2025, 10 Via Istria",solo tabella
+città,Via Pietro Maroncelli,225,residential,1227,278,40.819904,16.427965,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale,"Street View ott 2025, 8 Via P. Maroncelli",solo tabella
+città,Via Nicolò Damiani,214,residential,588,634,40.823109,16.420376,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, sabbia, balconi",quartiere residenziale,"Street View ott 2025, 12 Via N. Damiani",solo tabella
+città,Via Ettore Fieramosca,208,residential,710,-840,40.809845,16.421826,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",zona residenziale sud,"Street View ott 2025, 14 Via E. Fieramosca",solo tabella
+città,Via Reggio Calabria,207,residential,863,-274,40.814935,16.42364,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale,"Street View ott 2025, 16 Via Reggio Calabria",solo tabella
+città,Via Brindisi,205,residential,803,-315,40.814569,16.422927,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale,"Street View ott 2025, 12 Via Brindisi",solo tabella
+città,Via Salsa,205,residential,723,-605,40.811953,16.421987,2–4,singolo lato,ulivi e mandorli in giardini privati,a palo,asfalto,"villette e palazzine intonaco chiaro, terrazze",punto panoramico di visuale Salsa sulle colline,"Street View ott 2025, Via Salsa",modellato
+città,Via Pola,205,residential,679,-36,40.817073,16.421459,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",rione residenziale,"Street View ott 2025, 15 Via Pola",solo tabella
+città,Via Livorno,203,residential,783,-78,40.8167,16.422693,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale,"Street View ott 2025, 11 Via Livorno",solo tabella
+città,Via Primo Maggio,202,residential,171,-382,40.813965,16.415429,3,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro e tufo, balconi",rione compatto,"Street View ott 2025, 14 Via I Maggio",solo tabella
+città,Via Padova,202,residential,612,-218,40.815443,16.42067,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",edilizia residenziale,"Street View ott 2025, 18 Via Padova",solo tabella
+città,Via Lenin,202,residential,731,849,40.825039,16.422079,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, tetti piani",zona residenziale nord,"Street View ott 2025, 10 Via Lenin",solo tabella
+città,Via Leggiadro,202,residential,1693,484,40.821755,16.433493,2–3,singolo lato,alberi da giardino,a palo,asfalto,villette e case indipendenti intonaco chiaro,quartiere residenziale periferico est,"Street View ott 2025, Via Leggiadro",solo tabella
+città,Via Saverio Mercadante,201,residential,971,934,40.825804,16.424927,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere musicisti,"Street View ott 2025, 12 Via S. Mercadante",solo tabella
+città,Via Cosenza,200,residential,834,-293,40.814765,16.423296,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale,"Street View ott 2025, 15 Via Cosenza",solo tabella
+città,Via Santa Caterina da Siena,199,residential,1192,-67,40.816801,16.427553,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",zona residenziale est,"Street View ott 2025, 10 Via S. Caterina",solo tabella
+città,Via Orti,197,residential,211,-365,40.814114,16.415906,3,entrambi,no,a braccio su muro,asfalto,"intonaco sabbia e chiaro, balconi",rione residenziale compatto,"Street View ott 2025, 12 Via Orti",solo tabella
+città,Piazza Cavour,197,residential,478,-69,40.816776,16.419075,2–4,area perimetrale lastricata,alberelli in vaso e aiuole,lanterne a mensola e palo artistico,basole di pietra e asfalto,"tufo chiaro, pietra sagomata monumentale, coppi",facciata monumentale Chiesa di San Domenico e chiostro,"Street View ott 2024, Piazza Cavour",modellato
+città,Via Carlo Bertocchi,195,residential,600,-434,40.813491,16.420517,3–5,entrambi con cordolo,pini e cedri in piazzette Digiesi e Concordia,a palo su marciapiede,asfalto,"villette e palazzine a schiera, tetti coppi e piani",lato ovest triangolo villette Liceo Tarantino (VILLETTE),"Street View ott 2025, 5 Via C. Betocchi",modellato
+città,Via Vittorio Alfieri,190,residential,785,558,40.822423,16.422712,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale,"Street View ott 2025, 14 Via V. Alfieri",solo tabella
+città,Via Monsignor V. Giustiniani,190,residential,616,887,40.825378,16.420708,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, tetti piani",zona residenziale nord,"Street View ott 2025, 11 Via M. Giustiniani",solo tabella
+città,Via Pablo Picasso,188,residential,1337,220,40.819381,16.429272,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere artisti est,"Street View ott 2025, 8 Via P. Picasso",solo tabella
+città,Via Cimabue,186,residential,1543,164,40.81888,16.431715,2–3,singolo lato,alberi da giardino,a palo,asfalto,"villette intonaco chiaro, recinzioni",zona residenziale periferica est,"Street View ott 2025, Via Cimabue",solo tabella
+città,Via Fratelli Cervi,184,residential,612,1010,40.826487,16.420663,2–4,entrambi con cordolo,alberi e prato nei cortili scolastici,a palo su marciapiede,asfalto,"scuole e palazzine intonaco chiaro, recinzioni azzurre",Circolo didattico Savio-Fiore e Scuola primaria Tommaso Fiore,Street View ott 2025 e cdsaviofiore.edu.it,modellato
+città,Via Arezzo,182,residential,716,-161,40.815953,16.421902,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",edilizia residenziale,"Street View ott 2025, 10 Via Arezzo",solo tabella
 città,Via Tiziano,179,residential,1690,188,40.819089,16.433454,,,,,,,,,
 città,Via Pupilli,178,residential,422,-378,40.813996,16.418413,,,,,,,,,
 città,Via Vincenzo Gioberti,178,residential,1092,370,40.820734,16.426357,,,,,,,,,
