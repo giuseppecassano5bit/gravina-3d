@@ -5458,7 +5458,9 @@ const Buildings = {
  *    lastra di pietra sulle mensole e ringhiera di ferro (le sbarre le disegna lo shader con l'alpha
  *    test: niente triangoli per le sbarre), vasi di fiori sui balconi e accanto alle porte. Tre
  *    InstancedMesh, cioè tre draw call; si mostrano solo le istanze entro CONFIG.buildings.near metri
- *    dalla camera (celle da 60 m), e sul telefono la metà.
+ *    dalla camera (celle da 60 m), e sul telefono la metà. Blocco 4.11: solo le celle che entrano
+ *    nell'inquadratura (sfera della cella contro il tronco di vista, a ogni fotogramma): stesso aspetto,
+ *    meno triangoli.
  * ═══════════════════════════════════════════════════════════════════════ */
 const Balconi = {
   CELL: 60,
@@ -5574,30 +5576,43 @@ const Balconi = {
       list.forEach((o, i) => {
         o.m.toArray(mats, i * 16);
         if (cols) o.c.toArray(cols, i * 3);
-        const k = key(o), c = cells.get(k) ?? cells.set(k, { i: Math.floor(o.e / this.CELL), j: Math.floor(o.n / this.CELL), a: i, b: i }).get(k);
+        const k = key(o), c = cells.get(k) ?? cells.set(k, { i: Math.floor(o.e / this.CELL), j: Math.floor(o.n / this.CELL), a: i, b: i, y0: Infinity, y1: -Infinity }).get(k);
         c.b = i + 1;
+        const y = mats[i * 16 + 13];                 // quota dell'istanza (traslazione della matrice)
+        c.y0 = Math.min(c.y0, y); c.y1 = Math.max(c.y1, y);
       });
       if (cols) mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(Math.max(1, list.length) * 3), 3);
       group.add(mesh);
-      return { mesh, mats, cols, cells: [...cells.values()], total: list.length };
+      // sfera che contiene la cella (60 × 60 m, più 2 m attorno per la sporgenza delle istanze)
+      for (const c of cells.values()) {
+        c.sphere = new THREE.Sphere(new THREE.Vector3((c.i + 0.5) * this.CELL, (c.y0 + c.y1) / 2 + 0.5, -(c.j + 0.5) * this.CELL),
+          Math.hypot(this.CELL * 0.71, (c.y1 - c.y0) / 2 + 1.5) + 2);
+      }
+      return { mesh, mats, cols, cells: [...cells.values()], total: list.length, shown: '' };
     });
     this.count = { balconi: balconies.length, vasi: pots.length };
     return group;
   },
 
-  /** Ogni tanto (o se la camera si è spostata) tiene solo le istanze delle celle vicine alla camera. */
+  /**
+   * A ogni fotogramma tiene solo le istanze delle celle vicine alla camera che entrano nell'inquadratura
+   * (blocco 4.11; prima tutte quelle attorno, anche alle spalle). Le matrici si ricopiano solo se l'elenco
+   * delle celle cambia.
+   */
   update(camera, dt, all = false) {
     const e = camera.position.x, n = -camera.position.z;
-    this.t += dt;
-    if (!all && this.last && this.t < 0.5 && Math.hypot(e - this.last[0], n - this.last[1]) < 8) return;
-    this.t = 0;
-    this.last = [e, n];
     const R = CONFIG.buildings.near + this.CELL * 0.71, C = this.CELL;
+    camera.updateMatrixWorld();
+    const F = this._frustum ??= new THREE.Frustum(), PV = this._pv ??= new THREE.Matrix4();
+    F.setFromProjectionMatrix(PV.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse));
     for (const set of this.sets) {
       const { mesh, mats, cols } = set, M = mesh.instanceMatrix.array, K = mesh.instanceColor?.array;
+      const show = set.cells.filter((c) => all || (Math.hypot((c.i + 0.5) * C - e, (c.j + 0.5) * C - n) <= R && F.intersectsSphere(c.sphere)));
+      const sig = show.map((c) => c.a).join(',');
+      if (sig === set.shown) continue;
+      set.shown = sig;
       let count = 0;
-      for (const c of set.cells) {
-        if (!all && Math.hypot((c.i + 0.5) * C - e, (c.j + 0.5) * C - n) > R) continue;
+      for (const c of show) {
         M.set(mats.subarray(c.a * 16, c.b * 16), count * 16);
         if (K) K.set(cols.subarray(c.a * 3, c.b * 3), count * 3);
         count += c.b - c.a;
@@ -6542,6 +6557,7 @@ const Tiles = {
     Sottopassi.build(t, tb);                           // blocco M2: muri, marciapiedi e impalcati dei sottopassi (opere della via)
     const s1 = tb.n;
     for (const b of t.buildings) this._building(tb, b, false);
+    const s1d = tb.n;                                  // da qui: i dettagli solo da vicino preparati con builderAt
     if (pre.dettagli) tb.append(pre.dettagli);
     const s2 = tb.n;
     this._trees(t, tb, null);
@@ -6568,7 +6584,7 @@ const Tiles = {
     // Intervalli di triangoli: le prove (simula.mjs) controllano edifici e alberi (le parti in
     // `controllo`, di tutti e due i livelli), non le superfici.
     t.ranges = {
-      terreno: [0, s0], vie: [s0, s1], edifici: [s1, s2], alberi: [s2, s3], comuni: [s3, s5], lontano: [s5, s9], terrenoLontano: [s5, s6], vieLontane: [s6, s7],
+      terreno: [0, s0], vie: [s0, s1], edifici: [s1, s2], dettagli: [s1d, s2], alberi: [s2, s3], comuni: [s3, s5], lontano: [s5, s9], terrenoLontano: [s5, s6], vieLontane: [s6, s7], edificiLontani: [s7, s8], alberiLontani: [s8, s9],
       controllo: [[s1, s3], [s3, s4], [s7, s9]],
     };
     t.lod = { near: [0, s5], far: [s3, s9] };
