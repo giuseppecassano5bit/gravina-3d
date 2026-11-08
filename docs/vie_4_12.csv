@@ -70,47 +70,47 @@ Z0 centro e dintorni,Via Francesco Petrarca,46,residential,99,-195,40.815642,16.
 Z0 centro e dintorni,Via San Martino,45,residential,196,-218,40.815437,16.415732,2–3,singolo lato,no,a braccio su muro,basole di pietra e asfalto,"tufo chiaro, intonaco chiaro, coppi",cortina edilizia rione Piaggio,"Street View ott 2025, Via San Martino",modellato
 Z0 centro e dintorni,Gradoni San Giovanni Battista,36,steps,70,-118,40.81634,16.414234,1–2,nessuno (gradinata),capperi su roccia,lanterna su muro,gradini monolitici in pietra calcarea,"roccia a vista, tufo e basole",scalinata monumentale di collegamento con Piazza Pellicciari,"Street View ott 2025, Gradoni San Giovanni",modellato
 Z0 centro e dintorni,Via Paranza Vigilanza,28,residential,162,275,40.819877,16.415322,2,nessuno,no,lanterna su muro,basole di pietra (sett),"tufo sbozzato, intonaco calce, coppi",stretto vicolo medievale con arco di passaggio,"Street View ott 2025, Via Paranza Vigilanza",modellato
-città,Via Madonna della Stella,2727,unclassified,-527,387,40.820885,16.407141,,,,,,,,,
-città,Via Bari,2452,secondary,1678,97,40.818276,16.433318,,,,,,,,,
-città,Via Guardialto Piccolo,1989,residential,1822,-549,40.812461,16.43503,,,,,,,,,
-città,Via Guardialto,1976,tertiary,1336,-443,40.813412,16.429258,,,,,,,,,
-città,Via Falcone e Borsellino,1824,secondary,1344,889,40.8254,16.429349,,,,,,,,,
-città,Corso Giuseppe di Vittorio,1545,residential,640,776,40.824381,16.421002,,,,,,,,,
-città,Via Vincenzo Ragni,1387,residential,1134,280,40.819917,16.426857,,,,,,,,,
-città,Via Spinazzola,1186,tertiary,197,1123,40.827507,16.41574,,,,,,,,,
-città,Via Emilio Guida,1185,residential,1093,194,40.81915,16.426377,,,,,,,,,
-città,Via Indipendenza,1073,residential,881,607,40.822861,16.423859,,,,,,,,,
-città,Via Tripoli,830,secondary,706,-236,40.815273,16.421779,,,,,,,,,
-città,Via Alcide De Gasperi,802,tertiary,319,-458,40.81328,16.417185,,,,,,,,,
-città,Via Federico Meninni,800,residential,942,371,40.820743,16.424579,,,,,,,,,
-città,Via Casale,796,residential,848,92,40.818225,16.423471,,,,,,,,,
-città,Via Ludovico Maiorana,718,residential,341,587,40.822678,16.417447,,,,,,,,,
-città,Vía Alchimia,696,residential,810,266,40.819795,16.42302,,,,,,,,,
-città,Viale dei Pini,667,residential,508,-921,40.809115,16.419427,,,,,,,,,
-città,Via Maurizio Lettieri,654,residential,254,585,40.822664,16.41642,,,,,,,,,
-città,Via Galileo Galilei,641,residential,1331,130,40.818567,16.429198,,,,,,,,,
-città,Vía Antonio Punzi,579,residential,497,495,40.821852,16.419297,,,,,,,,,
-città,Via Rodi,574,residential,659,-765,40.810519,16.42122,,,,,,,,,
-città,Via San Sebastiano,574,residential,258,-357,40.814188,16.416461,,,,,,,,,
-città,Viale Regina Margherita,554,tertiary,497,802,40.824614,16.419298,,,,,,,,,
-città,Via Girolamo Bruno,550,residential,744,309,40.820176,16.422227,,,,,,,,,
-città,Corso Aldo Moro,546,tertiary,387,571,40.822538,16.417994,,,,,,,,,
-città,Via Francesco Baracca,526,residential,692,455,40.821494,16.42161,,,,,,,,,
-città,via Guardialto Alto,521,service,1468,-869,40.809577,16.43082,,,,,,,,,
-città,Via Annibale Moles,503,residential,212,681,40.823526,16.415915,,,,,,,,,
-città,Via Tommaso Albinoni,501,residential,1290,722,40.823895,16.428715,,,,,,,,,
-città,Via Domenico Nardone,491,residential,473,1113,40.827418,16.41901,,,,,,,,,
-città,Viale Falcone e Borsellino,490,residential,1962,279,40.819909,16.43669,,,,,,,,,
-città,Via Nazario Sauro,487,residential,828,377,40.820791,16.423233,,,,,,,,,
-città,Via Cesare Battisti,486,residential,887,347,40.820523,16.42393,,,,,,,,,
-città,Via Palermo,471,residential,1242,-126,40.816265,16.428147,,,,,,,,,
-città,Via Luigi Cadorna,465,residential,652,263,40.81977,16.421136,,,,,,,,,
-città,Via Luigi Longo,462,residential,1077,917,40.825651,16.426189,,,,,,,,,
-città,Via Fazzatoia,461,residential,40,792,40.824527,16.41387,,,,,,,,,
-città,Via Pozzo Pateo,459,tertiary,836,1177,40.827989,16.423325,,,,,,,,,
-città,Via Fabio Filzi,453,residential,934,341,40.820472,16.424481,,,,,,,,,
-città,Via Pietro Micca,433,residential,961,318,40.82026,16.42481,,,,,,,,,
-città,Via Cardinale Fini,430,residential,343,664,40.823373,16.417468,,,,,,,,,
+città,Via Madonna della Stella,2727,unclassified,-527,387,40.820885,16.407141,1–2,singolo lato / sterrato,ulivi e macchia mediterranea,lanterne a palo e fari,asfalto e fondo naturale,"tufo, pietra viva e muretti a secco","Ponte Acquedotto, Capotenda, Chiesa rupestre, scavi archeologici",Street View ott 2025 e rilievi OSM/FAI,modellato
+città,Via Bari,2452,secondary,1678,97,40.818276,16.433318,3–5,entrambi ampi,oleandri spartitraffico e alberature,pali alti moderni a doppio sbraccio,asfalto,"intonaco chiaro, ocra e cortine moderne",Monumento alla Cola Cola con goccia di svolta,"Street View ott 2025, Via Bari",modellato
+città,Via Guardialto Piccolo,1989,residential,1822,-549,40.812461,16.43503,1–3,singolo lato,pini isolati e giardini privati,a palo,asfalto,"intonaco rosa (Case rosa), intonaco chiaro",Scuola dell'infanzia Giovanni Paolo II al civ. 6,Street View ott 2025 e secondocdgravina.it,modellato
+città,Via Guardialto,1976,tertiary,1336,-443,40.813412,16.429258,2–4,singolo lato,pini d'Aleppo monumentali al Casino Meninni,a palo,asfalto (SP201),"palazzine intonaco chiaro, tufo, rudere Casino Meninni","Scuola primaria Padre Pio (civ. 78), Casino Meninni","Street View ott 2025, Via Guardialto",modellato
+città,Via Falcone e Borsellino,1824,secondary,1344,889,40.8254,16.429349,3–5,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",sottopasso ferroviario in trincea con muri d'ala,"Street View apr 2025, Via Falcone e Borsellino",modellato
+città,Corso Giuseppe di Vittorio,1545,residential,640,776,40.824381,16.421002,4–5,entrambi con cordolo,no,a palo su marciapiede,asfalto,"condomini intonaco chiaro, sabbia, balconi continui",sottopasso ferroviario in trincea con impalcato,"Street View ott 2025, Corso G. di Vittorio",modellato
+città,Via Vincenzo Ragni,1387,residential,1134,280,40.819917,16.426857,3–4,entrambi,no,a braccio su muro e palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, 20 Via V. Ragni",solo tabella
+città,Via Spinazzola,1186,tertiary,197,1123,40.827507,16.41574,2–4,entrambi,no,a palo,asfalto,"intonaco chiaro, capannoni e recinzioni",viadotto binari a pile e ingresso Fiera San Giorgio,"Street View apr 2025, Via Spinazzola",modellato
+città,Via Emilio Guida,1185,residential,1093,194,40.81915,16.426377,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, sabbia, balconi",isolati residenziali compatti,"Street View ott 2025, 14 Via E. Guida",solo tabella
+città,Via Indipendenza,1073,residential,881,607,40.822861,16.423859,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro e ocra, balconi",asse residenziale nord,"Street View ott 2025, 22 Via Indipendenza",solo tabella
+città,Via Tripoli,830,secondary,706,-236,40.815273,16.421779,3–5,entrambi con cordolo,no,a palo su marciapiede,asfalto,"condomini intonaco chiaro, ocra, balconi",Scuola media Don E. Montemurro al civico 56,"Street View mag 2025, 56 Via Tripoli",modellato
+città,Via Alcide De Gasperi,802,tertiary,319,-458,40.81328,16.417185,3–5,entrambi,no,a palo e a braccio,asfalto,"palazzine intonaco chiaro, ocra, balconi",Cinema Teatro Centrone al civ. 14 con loggia dorica,"Street View ott 2025, 14 Via De Gasperi",modellato
+città,Via Federico Meninni,800,residential,942,371,40.820743,16.424579,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale,"Street View ott 2025, 18 Via F. Meninni",solo tabella
+città,Via Casale,796,residential,848,92,40.818225,16.423471,2–3,singolo lato,no,a braccio su muro,asfalto e basole,"tufo chiaro e intonaco sabbia, coppi",raccordo centro-periferia,"Street View ott 2025, 12 Via Casale",solo tabella
+città,Via Ludovico Maiorana,718,residential,341,587,40.822678,16.417447,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",isolati residenziali,"Street View ott 2025, 10 Via L. Maiorana",solo tabella
+città,Vía Alchimia,696,residential,810,266,40.819795,16.42302,2–3,singolo lato,no,a braccio su muro,asfalto,"intonaco chiaro e tufo, coppi",edificato tradizionale,"Street View ott 2025, 15 Via Alchimia",solo tabella
+città,Viale dei Pini,667,residential,508,-921,40.809115,16.419427,2–3,entrambi,filare di pini d'Aleppo,a palo,asfalto,"villette intonaco chiaro, giardini recintati",zona residenziale sud immersa nel verde,"Street View ott 2025, Viale dei Pini",solo tabella
+città,Via Maurizio Lettieri,654,residential,254,585,40.822664,16.41642,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro e sabbia, balconi",cortina residenziale,"Street View ott 2025, 16 Via M. Lettieri",solo tabella
+città,Via Galileo Galilei,641,residential,1331,130,40.818567,16.429198,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi metallici",rione residenziale est,"Street View ott 2025, 20 Via G. Galilei",solo tabella
+città,Vía Antonio Punzi,579,residential,497,495,40.821852,16.419297,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale centro-nord,"Street View ott 2025, 14 Via A. Punzi",solo tabella
+città,Via Rodi,574,residential,659,-765,40.810519,16.42122,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro e ocra, balconi",quartiere residenziale sud,"Street View ott 2025, 12 Via Rodi",solo tabella
+città,Via San Sebastiano,574,residential,258,-357,40.814188,16.416461,3–4,entrambi con cordolo pietra,alberelli in cortili,a palo su marciapiede,asfalto,"palazzine intonaco chiaro, tufo, balconi",Chiesa SS. Crocifisso e San Sebastiano,"Street View ott 2025, 148 Via San Sebastiano",modellato
+città,Viale Regina Margherita,554,tertiary,497,802,40.824614,16.419298,3–5,entrambi ampi,alberature sparse su viale,a palo alto,asfalto,"palazzine moderne intonaco chiaro, balconi",viale di circonvallazione nord,"Street View ott 2025, Viale Regina Margherita",solo tabella
+città,Via Girolamo Bruno,550,residential,744,309,40.820176,16.422227,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, sabbia, balconi",isolati residenziali compatti,"Street View ott 2025, 15 Via G. Bruno",solo tabella
+città,Corso Aldo Moro,546,tertiary,387,571,40.822538,16.417994,3–5,entrambi ampi con cordolo,pini nel cortile scuola Scacchi,a palo su marciapiede,asfalto,"palazzi intonaco chiaro, pietra, cortina continua","Scuola media Santomasi (civ. 51), Scuola Scacchi (civ. 6)","Street View ott 2025, Corso Aldo Moro",modellato
+città,Via Francesco Baracca,526,residential,692,455,40.821494,16.42161,3–4,entrambi,no,a braccio su muro e palo,asfalto,"intonaco chiaro, balconi",Scuola secondaria N. Ingannamorte al civico 5,"Street View mag 2025, 5 Via C. Rosselli/Baracca",modellato
+città,via Guardialto Alto,521,service,1468,-869,40.809577,16.43082,1–2,nessuno (sterrato),macchia e cespugli spontanei,fari su recinzioni,terra battuta e pietrisco (sterrato),"recinzioni metalliche, muri bassi centro sportivo",accesso e piazzale di Sportland con goccia di ritorno,Street View ott 2025 e satellite,modellato
+città,Via Annibale Moles,503,residential,212,681,40.823526,16.415915,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, tetti piani",zona residenziale nord,"Street View ott 2025, 11 Via A. Moles",solo tabella
+città,Via Tommaso Albinoni,501,residential,1290,722,40.823895,16.428715,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale musicisti,"Street View ott 2025, 8 Via T. Albinoni",solo tabella
+città,Via Domenico Nardone,491,residential,473,1113,40.827418,16.41901,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, tetti piani",viabilità residenziale nord,"Street View ott 2025, 14 Via D. Nardone",solo tabella
+città,Viale Falcone e Borsellino,490,residential,1962,279,40.819909,16.43669,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, cortine moderne",asse di raccordo periferico,"Street View ott 2025, Viale Falcone e Borsellino",solo tabella
+città,Via Nazario Sauro,487,residential,828,377,40.820791,16.423233,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale compatto,"Street View ott 2025, 10 Via N. Sauro",solo tabella
+città,Via Cesare Battisti,486,residential,887,347,40.820523,16.42393,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, sabbia, balconi",edilizia residenziale,"Street View ott 2025, 12 Via C. Battisti",solo tabella
+città,Via Palermo,471,residential,1242,-126,40.816265,16.428147,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale,"Street View ott 2025, 16 Via Palermo",solo tabella
+città,Via Luigi Cadorna,465,residential,652,263,40.81977,16.421136,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",isolati residenziali compatti,"Street View ott 2025, 18 Via L. Cadorna",solo tabella
+città,Via Luigi Longo,462,residential,1077,917,40.825651,16.426189,2–4,entrambi,alberature in aiuole,a palo,asfalto,"palazzine moderne, chiesa a cono Santi Pietro e Paolo",sagrato e pertinenze parrocchia Santi Pietro e Paolo,"Street View apr 2025, Via L. Longo",modellato
+città,Via Fazzatoia,461,residential,40,792,40.824527,16.41387,2–3,singolo lato,alberi attorno allo stadio,a palo e torri faro stadio,asfalto,"muro di cinta stadio, intonaco chiaro",Stadio Comunale Stefano Vicino con tribuna coperta ovest,"Street View ott 2025, Via Fazzatoia",modellato
+città,Via Pozzo Pateo,459,tertiary,836,1177,40.827989,16.423325,2–4,singolo lato,no,a palo,asfalto,"intonaco chiaro, capannoni e recinzioni",asse viario nord verso la campagna,"Street View ott 2025, Via Pozzo Pateo",solo tabella
+città,Via Fabio Filzi,453,residential,934,341,40.820472,16.424481,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale,"Street View ott 2025, 11 Via F. Filzi",solo tabella
+città,Via Pietro Micca,433,residential,961,318,40.82026,16.42481,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",edilizia residenziale,"Street View ott 2025, 14 Via P. Micca",solo tabella
+città,Via Cardinale Fini,430,residential,343,664,40.823373,16.417468,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",cortina edilizia semicentrale,"Street View ott 2025, 12 Via C. Fini",solo tabella
 città,Via Fosse Ardeatine,429,residential,407,-838,40.809859,16.418235,,,,,,,,,
 città,Via Lecce,419,residential,653,-559,40.812371,16.421154,,,,,,,,,
 città,Via Lorenzo Perosi,419,residential,1057,566,40.822495,16.425947,,,,,,,,,
