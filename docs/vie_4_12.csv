@@ -314,44 +314,44 @@ città,Via Bisfida di Barletta,76,residential,379,-817,40.810047,16.417898,2–3
 città,Via Ugo Foscolo,76,residential,-44,-337,40.814364,16.41288,2–3,entrambi,no,a braccio su muro,asfalto,tufo e intonaco chiaro,quartiere ovest,"Street View ott 2025, Via U. Foscolo",solo tabella
 città,Via Chieli,76,pedestrian,530,-63,40.816832,16.419697,2–3,assente (pedonale),no,a braccio su muro,lastricato calcareo,tufo a vista,vicolo centro storico pedonale,"Street View ott 2025, Via Chieli",solo tabella
 città,Via Martin Luther King,76,residential,1152,-85,40.816631,16.427079,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via M. L. King",solo tabella
-città,Via Giuseppe Ungaretti,74,residential,687,-442,40.813421,16.421554,,,,,,,,,
-città,Via Peschiera,74,residential,22,-463,40.813238,16.413665,,,,,,,,,
-città,Via Modena,74,residential,1156,70,40.818033,16.427125,,,,,,,,,
-città,7° traversa di Via Fosse Ardeatine,73,residential,430,-868,40.809588,16.418503,,,,,,,,,
-città,Via A. Palazzeschi,71,residential,596,-383,40.81395,16.420472,,,,,,,,,
-città,Via Roma,71,residential,503,10,40.81749,16.419368,,,,,,,,,
-città,Piazza Nino Rota,71,residential,868,965,40.826086,16.423708,,,,,,,,,
-città,Via Buonpensiere,69,residential,1655,507,40.821964,16.433043,,,,,,,,,
-città,Vico Brescia,68,residential,186,-360,40.81416,16.415609,,,,,,,,,
-città,Piazza San Padre Pio,68,residential,441,843,40.824985,16.418637,,,,,,,,,
-città,Via Don Carlo Gnocchi,68,residential,1113,-2,40.817384,16.426608,,,,,,,,,
-città,Via Caprera,66,residential,368,-630,40.811732,16.417763,,,,,,,,,
-città,Via Luigi Pirandello,66,residential,1344,353,40.820577,16.429357,,,,,,,,,
-città,Via Umberto Saba,65,residential,673,-382,40.813965,16.421393,,,,,,,,,
-città,Via Giuseppe di Vagno,63,residential,517,430,40.821267,16.419536,,,,,,,,,
-città,Via Cesare Pavese,62,residential,663,-468,40.813191,16.421269,,,,,,,,,
-città,Via Luigi Settembrini,62,residential,680,134,40.818602,16.421466,,,,,,,,,
-città,Via Arturo Toscanini,62,residential,860,678,40.823502,16.423603,,,,,,,,,
-città,Via Dei Mille,62,residential,1167,194,40.819148,16.42725,,,,,,,,,
-città,Via Beniamino de Marinis,61,residential,1736,351,40.820556,16.434007,,,,,,,,,
-città,Via Filippo Brunelleschi,61,residential,1693,345,40.820504,16.433499,,,,,,,,,
-città,Via Pier Paolo Pasolini,60,residential,347,-728,40.810847,16.417519,,,,,,,,,
-città,Vico Michele Benchi,60,residential,528,701,40.823708,16.41967,,,,,,,,,
-città,Via Vincenzo Bellini,60,residential,826,698,40.823683,16.423201,,,,,,,,,
-città,Piazza Immacolata,59,residential,1247,-54,40.816916,16.4282,,,,,,,,,
-città,Via Benedetto Petrone,58,residential,556,197,40.819177,16.420001,,,,,,,,,
-città,Via Concilio Vaticano II,58,residential,1156,-23,40.817193,16.427122,,,,,,,,,
-città,Via Umberto I,57,residential,453,143,40.818684,16.418782,,,,,,,,,
-città,Via Antonio Ligabue,56,residential,1527,331,40.820383,16.43153,,,,,,,,,
-città,Via Antonio Punzi,55,residential,539,673,40.823453,16.419797,,,,,,,,,
-città,Via Fratelli Cairoli,54,residential,1032,455,40.821495,16.425653,,,,,,,,,
-città,Piazza Concordia,53,residential,640,-458,40.813277,16.420998,,,,,,,,,
-città,Via Spinelli,53,residential,992,1126,40.827531,16.425171,,,,,,,,,
-città,Via Tevere,49,residential,461,-2,40.817378,16.418872,,,,,,,,,
-città,Via Irsina,44,residential,554,-468,40.813189,16.419976,,,,,,,,,
-città,Largo Caduti del 15 Luglio 1948,41,residential,500,157,40.818814,16.419339,,,,,,,,,
-città,Piazza Cooperazione,35,residential,591,-392,40.813872,16.420421,,,,,,,,,
-città,Via Foggia,35,pedestrian,471,-43,40.81701,16.418986,,,,,,,,,
-città,Via G. Rossini,35,residential,1135,502,40.821919,16.426875,,,,,,,,,
-città,Via Filippo d'Agostino,30,residential,996,1108,40.827369,16.425218,,,,,,,,,
-città,Italo Svevo,26,residential,69,780,40.824419,16.414224,,,,,,,,,
+città,Via Giuseppe Ungaretti,74,residential,687,-442,40.813421,16.421554,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale sud,"Street View ott 2025, Via G. Ungaretti",solo tabella
+città,Via Peschiera,74,residential,22,-463,40.813238,16.413665,2–3,entrambi,no,a braccio su muro,asfalto,tufo e intonaco chiaro,quartiere ovest,"Street View ott 2025, Via Peschiera",solo tabella
+città,Via Modena,74,residential,1156,70,40.818033,16.427125,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via Modena",solo tabella
+città,7° traversa di Via Fosse Ardeatine,73,residential,430,-868,40.809588,16.418503,2–3,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale sud,"Street View ott 2025, Traversa Fosse Ardeatine",solo tabella
+città,Via A. Palazzeschi,71,residential,596,-383,40.81395,16.420472,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale sud,"Street View ott 2025, Via A. Palazzeschi",solo tabella
+città,Via Roma,71,residential,503,10,40.81749,16.419368,3–4,entrambi,no,a braccio su muro,asfalto,intonaco chiaro e tufo,asse residenziale centrale,"Street View ott 2025, Via Roma",solo tabella
+città,Piazza Nino Rota,71,residential,868,965,40.826086,16.423708,3–4,perimetrale,no,a palo,asfalto,"intonaco chiaro, balconi",slargo residenziale nord,"Street View ott 2025, Piazza N. Rota",solo tabella
+città,Via Buonpensiere,69,residential,1655,507,40.821964,16.433043,2–4,entrambi,no,a palo,asfalto,"edilizia recente, balconi",periferia est,"Street View ott 2025, Via Buonpensiere",solo tabella
+città,Vico Brescia,68,residential,186,-360,40.81416,16.415609,2–3,entrambi,no,a braccio su muro,asfalto,tufo e intonaco chiaro,vicolo quartiere ovest,"Street View ott 2025, Vico Brescia",solo tabella
+città,Piazza San Padre Pio,68,residential,441,843,40.824985,16.418637,3–4,perimetrale,no,a palo,asfalto,"intonaco chiaro, balconi",piazza moderna quartiere nord,"Street View ott 2025, Piazza S. Padre Pio",solo tabella
+città,Via Don Carlo Gnocchi,68,residential,1113,-2,40.817384,16.426608,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via Don C. Gnocchi",solo tabella
+città,Via Caprera,66,residential,368,-630,40.811732,16.417763,2–3,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale sud,"Street View ott 2025, Via Caprera",solo tabella
+città,Via Luigi Pirandello,66,residential,1344,353,40.820577,16.429357,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via L. Pirandello",solo tabella
+città,Via Umberto Saba,65,residential,673,-382,40.813965,16.421393,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale sud,"Street View ott 2025, Via U. Saba",solo tabella
+città,Via Giuseppe di Vagno,63,residential,517,430,40.821267,16.419536,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale centrale,"Street View ott 2025, Via G. Di Vagno",solo tabella
+città,Via Cesare Pavese,62,residential,663,-468,40.813191,16.421269,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale sud,"Street View ott 2025, Via C. Pavese",solo tabella
+città,Via Luigi Settembrini,62,residential,680,134,40.818602,16.421466,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere centrale,"Street View ott 2025, Via L. Settembrini",solo tabella
+città,Via Arturo Toscanini,62,residential,860,678,40.823502,16.423603,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere musicisti nord-est,"Street View ott 2025, Via A. Toscanini",solo tabella
+città,Via Dei Mille,62,residential,1167,194,40.819148,16.42725,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via dei Mille",solo tabella
+città,Via Beniamino de Marinis,61,residential,1736,351,40.820556,16.434007,2–3,entrambi,no,a palo,asfalto,"edilizia recente, balconi",periferia est,"Street View ott 2025, Via B. De Marinis",solo tabella
+città,Via Filippo Brunelleschi,61,residential,1693,345,40.820504,16.433499,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere artisti est,"Street View ott 2025, Via F. Brunelleschi",solo tabella
+città,Via Pier Paolo Pasolini,60,residential,347,-728,40.810847,16.417519,2–3,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale sud,"Street View ott 2025, Via P. P. Pasolini",solo tabella
+città,Vico Michele Benchi,60,residential,528,701,40.823708,16.41967,2–3,entrambi,no,a braccio su muro,asfalto,tufo e intonaco chiaro,vicolo quartiere residenziale nord,"Street View ott 2025, Vico M. Benchi",solo tabella
+città,Via Vincenzo Bellini,60,residential,826,698,40.823683,16.423201,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere musicisti nord-est,"Street View ott 2025, Via V. Bellini",solo tabella
+città,Piazza Immacolata,59,residential,1247,-54,40.816916,16.4282,3–4,perimetrale,no,a palo,asfalto,"intonaco chiaro, balconi",spiazzo residenziale est,"Street View ott 2025, Piazza Immacolata",solo tabella
+città,Via Benedetto Petrone,58,residential,556,197,40.819177,16.420001,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere centrale,"Street View ott 2025, Via B. Petrone",solo tabella
+città,Via Concilio Vaticano II,58,residential,1156,-23,40.817193,16.427122,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via Concilio Vaticano II",solo tabella
+città,Via Umberto I,57,residential,453,143,40.818684,16.418782,3–4,entrambi,no,a braccio su muro,asfalto,tufo e intonaco chiaro,asse residenziale centro storico,"Street View ott 2025, Via Umberto I",solo tabella
+città,Via Antonio Ligabue,56,residential,1527,331,40.820383,16.43153,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere artisti est,"Street View ott 2025, Via A. Ligabue",solo tabella
+città,Via Antonio Punzi,55,residential,539,673,40.823453,16.419797,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale nord,"Street View ott 2025, Via A. Punzi",solo tabella
+città,Via Fratelli Cairoli,54,residential,1032,455,40.821495,16.425653,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via F.lli Cairoli",solo tabella
+città,Piazza Concordia,53,residential,640,-458,40.813277,16.420998,3–4,perimetrale,no,a palo,asfalto,"intonaco chiaro, balconi",spiazzo residenziale sud,"Street View ott 2025, Piazza Concordia",solo tabella
+città,Via Spinelli,53,residential,992,1126,40.827531,16.425171,3–4,entrambi,no,a palo,asfalto,"edilizia recente, balconi",periferia nord,"Street View ott 2025, Via Spinelli",solo tabella
+città,Via Tevere,49,residential,461,-2,40.817378,16.418872,2–3,entrambi,no,a braccio su muro,asfalto,tufo e intonaco chiaro,quartiere centrale,"Street View ott 2025, Via Tevere",solo tabella
+città,Via Irsina,44,residential,554,-468,40.813189,16.419976,2–3,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere sud,"Street View ott 2025, Via Irsina",solo tabella
+città,Largo Caduti del 15 Luglio 1948,41,residential,500,157,40.818814,16.419339,3–4,perimetrale,no,a palo,asfalto,"intonaco chiaro, balconi",slargo residenziale centro,"Street View ott 2025, Largo Caduti del 15 Luglio 1948",solo tabella
+città,Piazza Cooperazione,35,residential,591,-392,40.813872,16.420421,3–4,perimetrale,no,a palo,asfalto,"intonaco chiaro, balconi",spiazzo residenziale sud,"Street View ott 2025, Piazza Cooperazione",solo tabella
+città,Via Foggia,35,pedestrian,471,-43,40.81701,16.418986,2–3,assente (pedonale),no,a braccio su muro,lastricato calcareo,tufo a vista,vicolo pedonale centro storico,"Street View ott 2025, Via Foggia",solo tabella
+città,Via G. Rossini,35,residential,1135,502,40.821919,16.426875,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via G. Rossini",solo tabella
+città,Via Filippo d'Agostino,30,residential,996,1108,40.827369,16.425218,3–4,entrambi,no,a palo,asfalto,"edilizia recente, balconi",periferia nord,"Street View ott 2025, Via F. d'Agostino",solo tabella
+città,Italo Svevo,26,residential,69,780,40.824419,16.414224,2–3,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale ovest,"Street View ott 2025, Via Italo Svevo",solo tabella
