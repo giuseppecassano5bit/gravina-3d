@@ -4736,7 +4736,7 @@ const Buildings = {
           const floors = Math.floor((roofY - 0.6 - street + 0.45) / H), Lg = roofY - 0.6 - floors * H;
           C.push({ e, n, roofY, street, floors, Lg, bal: new Map() });
         }
-        if (kind !== 1) {
+        if (kind !== 1 && !SCUOLE[name]?.liscia) {
           for (let k = 0; k < cols; k++) {
             const c = C[k];
             for (let f = 1; f < c.floors; f++) {
@@ -9422,7 +9422,8 @@ const FACCIATE = {
  * recinzione verde; scale: scale antincendio di acciaio a zig-zag (-1 a sinistra, 1 a destra della fronte); tettoia:
  * 'curva' sull'ingresso; vecchia: nel centro storico (edificio «pubblico» nei dati); palazzo: la scuola sta al piano terra
  * di un palazzo di abitazioni, resta solo l'etichetta (niente campo, pennoni e recinzione); cortile (blocco 4.10): ingresso,
- * cortile e cancello disegnati a mano da Street View (Details.scuolaScacchi).
+ * cortile e cancello disegnati a mano da Street View (Details.scuolaScacchi); liscia: niente balconi; bosco (blocco 4.12):
+ * fronte, muretto e filare disegnati a mano da Street View (Details.scuolaBosco).
  */
 const SCUOLE = {
   'Liceo scientifico G. Tarantino': { muro: '#e2ded5', finestre: 2, recinto: 'sbarre' },                  // SV mag 2022
@@ -9437,7 +9438,7 @@ const SCUOLE = {
   "Scuola dell'infanzia Alla Fine dell'Arcobaleno": { palazzo: true },                                     // Via Vespucci
   'Scuola media Santomasi': { muro: '#e2dccd' },                                                           // SV ott 2025, Corso Aldo Moro 51
   "Scuola primaria e dell'infanzia A. Scacchi": { vecchia: true, muro: '#ecdcaa', cortile: true },         // SV ott 2025, Corso Aldo Moro 6
-  'Circolo didattico San Giovanni Bosco': { vecchia: true, muro: '#e3b5a7' },                              // SV ott 2025, Corso Vittorio Emanuele 32/34 (rosa salmone)
+  'Circolo didattico San Giovanni Bosco': { vecchia: true, unico: true, liscia: true, bosco: true, muro: '#ecbfa9' },   // SV ott 2025, «34 Corso Vittorio Emanuele»: corpo unico rosa salmone, senza balconi (Details.scuolaBosco)
   'Scuola primaria Padre Pio': { muro: '#888c8f', finestre: 1, recinto: 'muro' },                          // GravinaLife (scuola via Guardialto 78): intonaco grigio, infissi verdi, muretto con ringhiera
   'Scuola primaria Tommaso Fiore': { muro: '#ede8de', finestre: 2, recinto: 'azzurro' },                   // cdsaviofiore.edu.it foto plesso Fiore (Via F.lli Cervi 16): intonaco chiaro, finestre a 3 luci, cancello azzurro
 };
@@ -9486,6 +9487,7 @@ const Details = {
       const name = DATA.name(nameIdx);
       if (kind !== 5 || !SCUOLE[name]?.vecchia) return;
       if (SCUOLE[name].cortile) this.scuolaScacchi();                                   // blocco 4.10: ingresso, cortile e cancello rifatti a mano
+      else if (SCUOLE[name].bosco) this.scuolaBosco(tops.get(name)?.top);               // blocco 4.12: fronte, muretto e filare
       else this.school({ rings: [DATA.pairs(rings[0])], name });
     });
 
@@ -10243,6 +10245,49 @@ const Details = {
       fb.box(1.8, 0.08, 0.45, C('#6b4a33'), 0, yb + 0.45, 0);
       fb.box(1.8, 0.4, 0.08, C('#6b4a33'), 0, yb + 0.55, -0.22);
       for (const s of [-1, 1]) fb.box(0.08, 0.5, 0.45, this.col.iron, s * 0.8, yb, 0);
+    }
+  },
+
+  /**
+   * SCUOLA SAN GIOVANNI BOSCO (blocco 4.12, Corso Vittorio Emanuele 32/34, OSM r6148449; Street View ottobre 2025, «34 Corso
+   * Vittorio Emanuele»): lesene e cornicione chiari sul fronte verso il Corso, portale di pietra col portone di legno in cima
+   * ai gradini (posizione letta dalla foto, indicativa), muretto con la ringhiera e filare di alberi potati sul marciapiede.
+   * Le finestre restano quelle generiche del muro: dal vero sono due piani alti, con le finestre centinate in basso.
+   */
+  scuolaBosco(top) {
+    const C = (h) => new THREE.Color(h), chiaro = C('#efe6d6'), pietra = C('#b9ad98');
+    const fronti = [[292.4, -133.4, 305.9, -128.3], [305.6, -127.3, 322.2, -120.8], [322.6, -121.4, 336, -116.2], [334.8, -113.5, 345.8, -109]];
+    for (const [a, b, c, d] of fronti) {
+      const w = this.wallNear([(a + c) / 2, (b + d) / 2], 1);
+      if (!w) continue;
+      const f = this.frame({ M: w.M, n: w.n }, this.near(w.M)), y = f.ground, H = (top ?? y + 11) - y;
+      f.box(w.len, 0.9, 0.1, pietra, 0, y - 0.2, 0.05);                                 // zoccolo
+      f.box(w.len, 0.5, 0.4, chiaro, 0, y + H - 0.8, 0.18);                             // cornicione
+      for (const x of [-w.len / 2 + 0.3, w.len / 2 - 0.3]) f.box(0.6, H - 0.8, 0.14, chiaro, x, y, 0.07);   // lesene agli angoli dei corpi
+    }
+    // portale in cima ai gradini
+    const wp = this.wallNear([340.3, -111.3], 1);
+    if (wp) {
+      const f = this.frame({ M: wp.M, n: wp.n }, this.near(wp.M)), y = f.ground;
+      this.keepOut.push({ M: wp.M, n: wp.n, half: 2.2, top: y + 5 });
+      f.box(3.4, 4.6, 0.16, pietra, 0, y, 0.08);
+      f.box(2.3, 3.5, 0.08, C('#7d6345'), 0, y + 0.6, 0.18);
+      f.box(3.8, 0.3, 0.45, pietra, 0, y + 4.6, 0.2);
+      for (let k = 0; k < 3; k++) f.box(6.2 - k * 0.5, 0.2 + k * 0.2, 2.4 - k * 0.7, pietra, 0, y - 0.1, (2.4 - k * 0.7) / 2);
+    }
+    // muretto con la ringhiera e filare lungo il Corso (asse: OSM, tratto da 269.4,-120.4 a 389.4,-74.1), lasciando il varco dei gradini
+    const R0 = [269.4, -120.4], u = [0.9333, 0.36], v = [0.36, -0.9333], at = (s, d) => [R0[0] + u[0] * s + v[0] * d, R0[1] + u[1] * s + v[1] * d];
+    const iron = this.col.iron, muretto = C('#cdc3ae'), bark = C('#5d4632'), foglie = [C('#3f5a2c'), C('#4b6733')];
+    const G = at(77, 7.5), tb = this.near(G);
+    for (let s = 22; s < 82; s += 2) {
+      const [e, n] = at(s, 7.5);
+      if (Math.hypot(e - G[0], n - G[1]) < 3.4 || !this.free(e, n, 0.5)) continue;
+      tb.addGeometry(new THREE.BoxGeometry(2.04, 1.0, 0.35).rotateY(Math.atan2(u[1], u[0])).translate(e, Terrain.heightAt(e, n) + 0.1, -n), muretto);
+    }
+    this.fence(tb, at(22, 7.5), at(73.4, 7.5), 1.9, iron, { rail: true, thin: true, step: 1.25 });
+    for (let s = 20; s < 90; s += 6.5) {
+      const [e, n] = at(s, 3.9);
+      if (this.free(e, n, 0.8)) this.tree(tb, e, n, 5.2, 1.7, bark, foglie, Math.round(s), 0.32);
     }
   },
 
@@ -12544,9 +12589,10 @@ const Details = {
       });
     }
 
-    // 8. Corsi principali della città moderna (Corso Aldo Moro, Corso Giuseppe di Vittorio, Viale Orsini):
-    //    lampioni a palo in ghisa sui marciapiedi (rilievo 4.12, approvazione committente)
-    const corsi = this.net.edges.filter((e) => ['Corso Aldo Moro', 'Corso Giuseppe di Vittorio', 'Viale Orsini'].includes(e.name));
+    // 8. Corso Aldo Moro e Viale Orsini: lampioni scuri a due bracci sui marciapiedi (Street View ottobre 2025, «94 Corso Aldo
+    //    Moro» e «1 Piazza Arcangelo Scacchi»; passo indicativo). Corso Giuseppe di Vittorio no: lì i pali sono alti e moderni,
+    //    e aspetta il rilievo. Lanterne in un gruppo a parte (lanternMeshes), così non si disegnano da lontano.
+    const corsi = this.net.edges.filter((e) => ['Corso Aldo Moro', 'Viale Orsini'].includes(e.name));
     let cSide = 1;
     for (const edge of corsi) {
       const S = edge.samples;
@@ -12556,7 +12602,9 @@ const Details = {
         for (const sd of [cSide, -cSide]) {
           const d = edge.width / 2 + 0.6, pe = e - tn / l * d * sd, pn = n + te / l * d * sd;
           if (this.net.conformerClearance(pe, pn) < 0.4 || Buildings.occupied(pe, pn) || Buildings.occupied(pe - tn / l * 0.4 * sd, pn + te / l * 0.4 * sd)) continue;
-          this.lampPost([pe, pn], 1, [tn / l * sd, -te / l * sd]);
+          const n0 = this.lanterns.length;
+          this.lampPost([pe, pn], 2, [tn / l * sd, -te / l * sd]);
+          for (let j = n0; j < this.lanterns.length; j++) this.lanterns[j].corso = true;
           cSide = -sd;
           break;
         }
@@ -12961,7 +13009,12 @@ const Details = {
 
   /** Lanterne istanziate: staffa scura e vetro caldo, due sole draw call. */
   lanternMeshes() {
-    const list = this.lanterns, count = Math.max(1, list.length);
+    const corsi = this.lanterns.filter((L) => L.corso);                    // blocco 4.12: i corsi a parte (la sfera di culling resta piccola)
+    return [...this._lanternGroup(this.lanterns.filter((L) => !L.corso)), ...(corsi.length ? this._lanternGroup(corsi) : [])];
+  },
+
+  _lanternGroup(list) {
+    const count = Math.max(1, list.length);
     const bracket = new THREE.BoxGeometry(0.07, 0.07, 0.62);
     bracket.translate(0, 0.32, -0.28);
     const lamp = new THREE.CylinderGeometry(0.2, 0.13, 0.42, 6);
