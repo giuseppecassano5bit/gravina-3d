@@ -1,8 +1,8 @@
-Stato all'8 novembre 2026: **blocco 4.11 (verifiche e chiusura) sul branch `fase-4-11-verifiche`, in attesa del committente**
-(pull request aperta, non unita). Il diorama **non è completo** e il **tetto dei triangoli non è rispettato** in tutte le viste:
+Stato all'8 novembre 2026: **blocco 4.12 (le vie della città) sul branch `fase-4-12-vie`, in corso** (PR in bozza verso `main`).
+Il diorama **non è completo** e il **tetto dei triangoli non è rispettato** in tutte le viste:
 su PC la vista «alta» fa 444 600 triangoli (tetto 400 000); sul telefono centro, scacchi, alta e salsa fanno da 271 000 a 276 000
-(tetto 250 000). Draw call nei limiti (al massimo 55 su PC e 36 sul telefono), 60 fps sul Mac M4. Dettagli nella sezione «Blocco 4.11».
-Prove dell'8/11/2026: `simula` verde (problemi `[]`, 0 case e 0 dettagli sulla strada), `interazioni` 87 su 87, `difetti` uguale a `main`.
+(tetto 250 000). Draw call nei limiti (al massimo 55 su PC e 36 sul telefono), 60 fps sul Mac M4. Dettagli nelle sezioni «Blocco 4.11» e «Blocco 4.12».
+Prove di partenza del 4.12 (8/11/2026): `simula` verde (problemi `[]`, 0 case e 0 dettagli sulla strada), `interazioni` 87 su 87, `difetti` uguale a `main`.
 
 **Fase 3.4 (Gravina oltre il centro storico) completata**: piano, dati, budget, rischi e divisione
 del lavoro su due chat in [`PIANO_FASE_3_4.md`](PIANO_FASE_3_4.md).
@@ -660,6 +660,35 @@ libero non segue le vie: è un'eccezione come la mongolfiera.
 `node prestazioni.mjs dopo-4-11` come nella tabella del punto 2. Nelle prove, `common.mjs` ora attiva il tocco anche via CDP: con la
 GPU vera Chromium apriva a volte il «telefono» senza tocco, e il diorama partiva col profilo da PC (la misura del 4/11 era sbagliata
 per questo).
+
+### Blocco 4.12 · Le vie della città (in corso)
+
+Lavoro notturno avviato l'08/11/2026 sul branch `fase-4-12-vie`.
+Obiettivo: verifica e completamento di tutte le 356 vie di Gravina in Puglia (elenco in `riferimenti/strumenti_4_12/vie.csv` e `docs/vie_4_12.csv`), ripristino scuola San Giovanni Bosco, risoluzione voci aperte della sezione 4, rispetto budget e fedeltà senza inventare nulla.
+
+**Prove di partenza (`prima-4-12`)**:
+- `npm run simula`: 0 problemi, 80 monumenti, `casesullastrada = 0`, `dettaglisullastrada: {}`, 22.17 km simulati;
+- `npm run interazioni`: 87/87 controlli verdi, 0 errori console;
+- `node difetti.mjs`: sotto 37 (vie del mezzo) / 20 (deco), galleggia 13 / 1, dischi 0 / 0, spezzate 65 / 20, sovrapposte 0 / 0;
+- `node prestazioni.mjs prima-4-12`:
+  - PC (Mac M4): pronto 2460 ms, completo 3780 ms, memoria JS 303 MB;
+    - alta: 444 597 tri, 55 dc, 60 fps;
+    - scacchi: 384 651 tri, 28 dc, 60 fps;
+    - partenza: 360 463 tri, 31 dc, 60 fps;
+    - mongolfiera: 398 721 tri, 55 dc, 60 fps;
+    - centro: 338 257 tri, 25 dc, 60 fps;
+    - pausa: 372 890 tri, 26 dc, 60 fps;
+    - panoramica: 341 614 tri, 55 dc, 60 fps;
+    - salsa: 286 598 tri, 27 dc, 60 fps;
+  - Telefono (Mac M4): pronto 2423 ms, completo 3694 ms, memoria JS 275 MB;
+    - alta: 271 063 tri, 32 dc, 60 fps;
+    - scacchi: 276 297 tri, 36 dc, 60 fps;
+    - centro: 272 169 tri, 26 dc, 60 fps;
+    - salsa: 272 544 tri, 35 dc, 60 fps;
+    - partenza: 145 802 tri, 34 dc, 60 fps;
+    - mongolfiera: 188 536 tri, 34 dc, 60 fps;
+    - pausa: 237 802 tri, 22 dc, 60 fps;
+    - panoramica: 198 303 tri, 33 dc, 60 fps.
 
 ## 4. Da sistemare o verificare (emerso finora)
 
