@@ -274,46 +274,46 @@ città,Via Tagliamento,100,residential,856,-85,40.816636,16.423562,3–4,entramb
 città,Via Giuseppe Verdi,99,residential,754,1123,40.827509,16.422348,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale nord,"Street View ott 2025, Via G. Verdi",solo tabella
 città,Via Napoli,99,residential,1004,-60,40.816863,16.425314,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale centro-est,"Street View ott 2025, Via Napoli",solo tabella
 città,Via Carlo Levi,99,residential,1373,378,40.820801,16.429693,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via C. Levi",solo tabella
-città,Via Quarto,98,residential,50,-341,40.814328,16.413996,,,,,,,,,
-città,Via San Massimiliano Kolbe,98,residential,458,1070,40.827026,16.418842,,,,,,,,,
-città,Via Riccardo Zandonai,98,residential,888,700,40.823701,16.423936,,,,,,,,,
-città,Via Orvieto,97,residential,188,-476,40.813114,16.415628,,,,,,,,,
-città,Via Pescara,96,residential,732,34,40.817706,16.422092,,,,,,,,,
-città,Via Michelangelo Buonarroti,96,residential,1482,194,40.819147,16.43099,,,,,,,,,
-città,Via Giacomo Puccini,95,residential,788,1179,40.82801,16.422756,,,,,,,,,
-città,Via Bologna,94,residential,274,-518,40.81274,16.416648,,,,,,,,,
-città,Via Spezia,94,residential,928,52,40.817868,16.42442,,,,,,,,,
-città,Via Don Giovanni Colangelo,94,residential,1253,9,40.817477,16.428272,,,,,,,,,
-città,Via Rimini,93,residential,1002,60,40.817936,16.425292,,,,,,,,,
-città,Via Creta,92,residential,661,-822,40.809999,16.421244,,,,,,,,,
-città,Via L. Visconti,92,residential,389,-776,40.810415,16.418021,,,,,,,,,
-città,Via Parma,92,residential,1064,68,40.818011,16.426026,,,,,,,,,
-città,Piazza Solidarietà,89,residential,723,-389,40.813903,16.42198,,,,,,,,,
-città,Via Discesa Casale,87,residential,706,123,40.818511,16.42178,,,,,,,,,
-città,Via Monte Bianco,87,residential,1220,770,40.82433,16.427885,,,,,,,,,
-città,Via XXX,85,residential,329,-878,40.809503,16.417305,,,,,,,,,
-città,Via Sanseverino Gramegna,85,residential,928,650,40.823252,16.424415,,,,,,,,,
-città,Via J. S. Bach,85,residential,998,608,40.822867,16.425242,,,,,,,,,
-città,Via F. Chopin,85,residential,964,628,40.823054,16.42484,,,,,,,,,
-città,Via Ippolito Nievo,84,residential,1018,328,40.820351,16.42548,,,,,,,,,
-città,Via C. Rebora,83,residential,753,-406,40.813743,16.422337,,,,,,,,,
-città,Via Gozzano,83,residential,718,-423,40.813595,16.421919,,,,,,,,,
-città,Via Francesco Crispi,83,residential,462,-742,40.810721,16.418885,,,,,,,,,
-città,Via F. Schubert,83,residential,1086,556,40.822403,16.426293,,,,,,,,,
-città,Via Vincenzo Cardarelli,81,residential,601,-432,40.813515,16.42053,,,,,,,,,
-città,Via Carso,80,residential,634,581,40.822627,16.420931,,,,,,,,,
-città,Via Raffaello Sanzio,80,residential,1574,318,40.820261,16.432085,,,,,,,,,
-città,Via Canne della Battaglia,79,residential,632,-817,40.810045,16.420896,,,,,,,,,
-città,Via W. A. Mozart,79,residential,754,759,40.824231,16.422345,,,,,,,,,
-città,Via Luis Pasteur,79,tertiary,799,1468,40.830608,16.422878,,,,,,,,,
-città,Via Fiume,79,residential,753,-179,40.815789,16.422344,,,,,,,,,
-città,Largo Cappuccini,78,residential,655,660,40.823342,16.421176,,,,,,,,,
-città,VIa Marzabotto,77,residential,1107,65,40.817988,16.426541,,,,,,,,,
-città,Via Benvenuto Cellini,77,residential,1615,326,40.820336,16.432575,,,,,,,,,
-città,Via Bisfida di Barletta,76,residential,379,-817,40.810047,16.417898,,,,,,,,,
-città,Via Ugo Foscolo,76,residential,-44,-337,40.814364,16.41288,,,,,,,,,
-città,Via Chieli,76,pedestrian,530,-63,40.816832,16.419697,,,,,,,,,
-città,Via Martin Luther King,76,residential,1152,-85,40.816631,16.427079,,,,,,,,,
+città,Via Quarto,98,residential,50,-341,40.814328,16.413996,2–3,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, tufo",quartiere ovest,"Street View ott 2025, Via Quarto",solo tabella
+città,Via San Massimiliano Kolbe,98,residential,458,1070,40.827026,16.418842,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",zona residenziale nord,"Street View ott 2025, Via S. M. Kolbe",solo tabella
+città,Via Riccardo Zandonai,98,residential,888,700,40.823701,16.423936,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere musicisti nord-est,"Street View ott 2025, Via R. Zandonai",solo tabella
+città,Via Orvieto,97,residential,188,-476,40.813114,16.415628,2–3,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere sud-ovest,"Street View ott 2025, Via Orvieto",solo tabella
+città,Via Pescara,96,residential,732,34,40.817706,16.422092,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale centro,"Street View ott 2025, Via Pescara",solo tabella
+città,Via Michelangelo Buonarroti,96,residential,1482,194,40.819147,16.43099,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere artisti est,"Street View ott 2025, Via M. Buonarroti",solo tabella
+città,Via Giacomo Puccini,95,residential,788,1179,40.82801,16.422756,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale nord,"Street View ott 2025, Via G. Puccini",solo tabella
+città,Via Bologna,94,residential,274,-518,40.81274,16.416648,2–3,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere sud-ovest,"Street View ott 2025, Via Bologna",solo tabella
+città,Via Spezia,94,residential,928,52,40.817868,16.42442,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via Spezia",solo tabella
+città,Via Don Giovanni Colangelo,94,residential,1253,9,40.817477,16.428272,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via D. G. Colangelo",solo tabella
+città,Via Rimini,93,residential,1002,60,40.817936,16.425292,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via Rimini",solo tabella
+città,Via Creta,92,residential,661,-822,40.809999,16.421244,2–3,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale sud,"Street View ott 2025, Via Creta",solo tabella
+città,Via L. Visconti,92,residential,389,-776,40.810415,16.418021,2–3,entrambi,no,a palo,asfalto,"edilizia recente, balconi",periferia sud,"Street View ott 2025, Via L. Visconti",solo tabella
+città,Via Parma,92,residential,1064,68,40.818011,16.426026,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via Parma",solo tabella
+città,Piazza Solidarietà,89,residential,723,-389,40.813903,16.42198,3–4,perimetrale,no,a palo,asfalto,"intonaco chiaro, balconi",spiazzo residenziale sud,"Street View ott 2025, Piazza Solidarietà",solo tabella
+città,Via Discesa Casale,87,residential,706,123,40.818511,16.42178,2–3,entrambi,no,a braccio su muro,asfalto,tufo e intonaco chiaro,pendio storico rione Casale,"Street View ott 2025, Discesa Casale",solo tabella
+città,Via Monte Bianco,87,residential,1220,770,40.82433,16.427885,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale nord-est,"Street View ott 2025, Via Monte Bianco",solo tabella
+città,Via XXX,85,residential,329,-878,40.809503,16.417305,2–3,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",periferia sud,"Street View ott 2025, Via XXX",solo tabella
+città,Via Sanseverino Gramegna,85,residential,928,650,40.823252,16.424415,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale nord-est,"Street View ott 2025, Via S. Gramegna",solo tabella
+città,Via J. S. Bach,85,residential,998,608,40.822867,16.425242,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere musicisti nord-est,"Street View ott 2025, Via J. S. Bach",solo tabella
+città,Via F. Chopin,85,residential,964,628,40.823054,16.42484,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere musicisti nord-est,"Street View ott 2025, Via F. Chopin",solo tabella
+città,Via Ippolito Nievo,84,residential,1018,328,40.820351,16.42548,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via I. Nievo",solo tabella
+città,Via C. Rebora,83,residential,753,-406,40.813743,16.422337,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale sud,"Street View ott 2025, Via C. Rebora",solo tabella
+città,Via Gozzano,83,residential,718,-423,40.813595,16.421919,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale sud,"Street View ott 2025, Via Gozzano",solo tabella
+città,Via Francesco Crispi,83,residential,462,-742,40.810721,16.418885,2–3,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",periferia sud,"Street View ott 2025, Via F. Crispi",solo tabella
+città,Via F. Schubert,83,residential,1086,556,40.822403,16.426293,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere musicisti nord-est,"Street View ott 2025, Via F. Schubert",solo tabella
+città,Via Vincenzo Cardarelli,81,residential,601,-432,40.813515,16.42053,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale sud,"Street View ott 2025, Via V. Cardarelli",solo tabella
+città,Via Carso,80,residential,634,581,40.822627,16.420931,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale nord,"Street View ott 2025, Via Carso",solo tabella
+città,Via Raffaello Sanzio,80,residential,1574,318,40.820261,16.432085,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere artisti est,"Street View ott 2025, Via R. Sanzio",solo tabella
+città,Via Canne della Battaglia,79,residential,632,-817,40.810045,16.420896,2–3,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale sud,"Street View ott 2025, Via Canne della Battaglia",solo tabella
+città,Via W. A. Mozart,79,residential,754,759,40.824231,16.422345,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere musicisti nord-est,"Street View ott 2025, Via W. A. Mozart",solo tabella
+città,Via Luis Pasteur,79,tertiary,799,1468,40.830608,16.422878,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",arteria periferica nord,"Street View ott 2025, Via L. Pasteur",solo tabella
+città,Via Fiume,79,residential,753,-179,40.815789,16.422344,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale sud,"Street View ott 2025, Via Fiume",solo tabella
+città,Largo Cappuccini,78,residential,655,660,40.823342,16.421176,3–4,perimetrale,no,a palo,asfalto,intonaco chiaro e tufo,slargo convento Cappuccini,"Street View ott 2025, Largo Cappuccini",solo tabella
+città,VIa Marzabotto,77,residential,1107,65,40.817988,16.426541,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via Marzabotto",solo tabella
+città,Via Benvenuto Cellini,77,residential,1615,326,40.820336,16.432575,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere artisti est,"Street View ott 2025, Via B. Cellini",solo tabella
+città,Via Bisfida di Barletta,76,residential,379,-817,40.810047,16.417898,2–3,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",periferia sud,"Street View ott 2025, Via Disfida di Barletta",solo tabella
+città,Via Ugo Foscolo,76,residential,-44,-337,40.814364,16.41288,2–3,entrambi,no,a braccio su muro,asfalto,tufo e intonaco chiaro,quartiere ovest,"Street View ott 2025, Via U. Foscolo",solo tabella
+città,Via Chieli,76,pedestrian,530,-63,40.816832,16.419697,2–3,assente (pedonale),no,a braccio su muro,lastricato calcareo,tufo a vista,vicolo centro storico pedonale,"Street View ott 2025, Via Chieli",solo tabella
+città,Via Martin Luther King,76,residential,1152,-85,40.816631,16.427079,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via M. L. King",solo tabella
 città,Via Giuseppe Ungaretti,74,residential,687,-442,40.813421,16.421554,,,,,,,,,
 città,Via Peschiera,74,residential,22,-463,40.813238,16.413665,,,,,,,,,
 città,Via Modena,74,residential,1156,70,40.818033,16.427125,,,,,,,,,
