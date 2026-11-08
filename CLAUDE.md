@@ -166,13 +166,16 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
   (contorni indicativi dal satellite, tranne l'uliveto OSM w1152762647); il prato tra Via Madonna della Stella e la gravina è senza
   alberi (`PRATO_STELLA`).
 - **Villette del Liceo Tarantino (blocco N4b, piano approvato dal committente il 14/10/2026)**: tutto il triangolo Via Montale – Via
-  Quasimodo – Via Bertocchi (in OSM «Bertocchi» è un refuso di Betocchi: nel diorama resta il nome OSM, segnalato nel README) è di tipo
+  Quasimodo – Via Betocchi (in OSM «Bertocchi» è un refuso: corretto nel blocco 4.12, `NOMI_CORREZIONI` in `genera_dati.py`) è di tipo
   «villetta» (`CITY_KIND` 13, oggetto `Villette` in sezione 6d); i livelli stanno nelle righe della città di `LIVELLI` (3 m per piano
   più il parapetto, contati sul lato alto, niente «almeno»), unità e tetti (coppi, pannelli, attico) nella tabella `VILLETTE`.
 - **Facciate di chiese e scuole (blocco N3)**: tabelle `FACCIATE` e `SCUOLE` (sezione 6d), un solo costruttore
   (`Details.facciata`); solo gli elementi visti in una foto (fonti nel README), nessuna scritta coi nomi, campanili solo dove
   si vedono. In pipeline: la navata di San Nicola è l'area OSM del luogo di culto (`CHIESE_AREE`), l'Addolorata è una chiesa
   (`CHIESE_OSM`), i nomi di Madonna delle Grazie, Santi Pietro e Paolo e Spirito Santo stanno sulle chiese vere (`CHURCHES`).
+- **Rilievo delle vie (blocco 4.12)**: `docs/vie_4_12.csv` vale come fonte solo nelle righe con un panorama citato; le altre sono
+  `non verificato` (la notte dell'08/11/2026 Street View era nero nel browser di Antigravity). Street View si guarda nel Chrome vero:
+  se non si vede, si scrive «non verificato» e non si modella.
 - Le vie cieche reali della città (`GEO.deco`) si disegnano ma **non si percorrono**. La
   sterrata reale del Castello Svevo è percorribile: con la strada di servizio e la vicinale
   chiude un anello (flag 8, `CASTLE_BOX` in `genera_dati.py`).
