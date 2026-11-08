@@ -3478,6 +3478,13 @@ LIVELLI = [
         (None, 265.0, -7.0, 3),           # Via Matteotti 14–16: palazzina residenziale a 3 livelli
         (None, 414.2, 327.0, 3),          # Corso Aldo Moro 1–3 / Piazza Scacchi est: palazzina a 3 livelli
     ]),
+    ('Street View, Viale Orsini 91, Via Guglielmo Marconi 20, Corso Aldo Moro 38 (ott 2025); Via San Matteo 29 (lug 2022) (blocco 4.13; visti davvero: vengono dopo le righe in serie del 4.8 e le correggono)', [
+        (None, 337.4, -51.4, -3),          # 91 Viale Orsini, lato nord: garage e balconi, la cima esce dall'inquadratura
+        (None, 110.0, -68.0, -3),          # 20 Via G. Marconi, verso nord-est
+        (None, 104.0, -78.0, -3),          # 20 Via G. Marconi, verso sud
+        (None, 365.0, 441.0, -5),          # 38 Corso Aldo Moro, lato est: negozi e quattro file di balconi
+        (None, 296.0, 230.3, -4),          # 29 Via S. Matteo verso nord
+    ]),
 ]
 
 
