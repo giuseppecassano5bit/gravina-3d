@@ -124,9 +124,10 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
   1. *Cinema Teatro Mastrogiacomo* (Piazza Arcangelo Scacchi 23, blocco 4.10, `Details.mastrogiacomo`): la facciata razionalista della ricostruzione del 1939–1941, dalla foto del committente e da Street View, larga circa 11 m sul tratto nord del lato dell'isolato verso la piazza: lesena chiara scanalata, due tondi con le barre, cornice rialzata con le feritoie quadrate a «L», finestra a nastro con oblò e losanghe, pensilina coi fari, piano terra con porte a sopraluce, specchiature murate e portale di pietra grigia;
   2. *Cinema Teatro Centrone* (Via Alcide De Gasperi 14, **lato ovest**, tra Via XX Settembre e la via a sud; blocco 4.10, `Details.centrone`): torri poligonali agli angoli, loggia con la balaustra su due colonne doriche, portone ad arco, grande apertura vetrata nella cornice di pietra, sala col tetto a capanna color ruggine e fianchi a finestre centinate (Street View da tutti i lati);
   3. *Teatro Vida* (Via Giardini 57, lato est; blocco 4.10, `Details.teatroVida`): ingresso vetrato, insegna nera col segno verde (senza scritte), tenda bianca, aiuola con la palma, bacheca degli spettacoli; davanti niente giardinetti generati (`Details.senzaGiardini`);
-  4. *Fondazione Museo Pomarici Santomasi* (Via Museo 20): portale ad arco a tutto sesto in bugnato con stemma nobiliare in chiave di volta e balconata con ringhiera in ferro;
-  5. *Gravina Sotterranea* (Rione Piaggio / Via Meucci): portale d'accesso all'ipogeo ad arco con cancello in ferro e lanterna antica a braccio;
-  6. *Biblioteca Capitolare Finia* (Piazza Notar Domenico / Piazza Benedetto XIII): prospetto tardo-barocco con fastigio mistilineo a volute, campanile a vela centrale sommitale con campana in bronzo, grande orologio circolare con lancette, 3 finestre centinate con conchiglie barocche scolpite sotto i davanzali, portale con stemma prelatizio in rilievo e gradinata in pietra calcarea.
+  4. *Fondazione Museo Pomarici Santomasi* (Via Museo 20; blocco 4.11, Street View ottobre 2025): portale ad arco liscio con le lesene e la chiave, portone chiodato e balcone con la ringhiera, all'estremità ovest del fronte (niente bugnato né stemma);
+  5. *Gravina Sotterranea* (Via Meucci 10): solo la scheda; il portale con cancello e lanterna è stato tolto nel blocco 4.11 (nessuna foto lo mostra);
+  6. *Biblioteca Finia* (Piazza Benedetto XIII, scritta «BIBLIOTECA FINIA» sotto l'orologio, Street View ottobre 2025; fondata nel 1686): fastigio mistilineo a volute, vela con la campana, orologio, 3 finestre centinate con le conchiglie sotto i davanzali, stemma di pietra sopra il portale, gradini.
+  Il *Seminario Vescovile* (blocco 4.3) e le case puntellate di *Via giudice Montea* sono stati tolti nel blocco 4.11: nessuna fonte né foto li conferma.
   Schede curate in `LANDMARKS` con fonti storiche e gruppo dedicato `Cinema, teatri e cultura` in `POI_GROUPS` nella pausa.
 - **Correzioni dei luoghi e percorsi pedonali (blocco 4.7)**:
   - *Scuole dell'I.C. Santomasi-Scacchi* (blocco 4.10, correzione del committente del 18/10/2026): la *Scuola media Santomasi* è in Corso Aldo Moro 51; la *Scuola primaria e dell'infanzia A. Scacchi* è in Corso Aldo Moro 6, edificio OSM w411139563, col cortile verso il Corso, il cancello con l'insegna, il muretto con la ringhiera azzurra e il padiglione col murale (`Details.scuolaScacchi`; la scuola non si divide in «unità» coi coppi);
@@ -199,6 +200,8 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
   250 000 sul telefono, 90 e 70 draw call. Si misura con `node prestazioni.mjs`. I riquadri hanno
   due livelli di dettaglio nella stessa mesh (sezione 6e, `Tiles.updateLod`): quello che si
   aggiunge ai riquadri va anche nella versione lontana, semplificato, o solo in quella piena.
+  Dal blocco 4.11 il tetto è ancora superato in alcune viste (numeri in `docs/DA_FARE.md`, blocco 4.11): balconi e vasi si
+  disegnano solo nelle celle dentro l'inquadratura (`Balconi.update`); il resto aspetta una decisione del committente.
 - 60 fps su PC; comandi da tastiera e touch su telefono (verticale e orizzontale).
 
 ## Comandi
