@@ -193,46 +193,46 @@ città,Via Pablo Picasso,188,residential,1337,220,40.819381,16.429272,3–4,entr
 città,Via Cimabue,186,residential,1543,164,40.81888,16.431715,2–3,singolo lato,alberi da giardino,a palo,asfalto,"villette intonaco chiaro, recinzioni",zona residenziale periferica est,"Street View ott 2025, Via Cimabue",solo tabella
 città,Via Fratelli Cervi,184,residential,612,1010,40.826487,16.420663,2–4,entrambi con cordolo,alberi e prato nei cortili scolastici,a palo su marciapiede,asfalto,"scuole e palazzine intonaco chiaro, recinzioni azzurre",Circolo didattico Savio-Fiore e Scuola primaria Tommaso Fiore,Street View ott 2025 e cdsaviofiore.edu.it,modellato
 città,Via Arezzo,182,residential,716,-161,40.815953,16.421902,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",edilizia residenziale,"Street View ott 2025, 10 Via Arezzo",solo tabella
-città,Via Tiziano,179,residential,1690,188,40.819089,16.433454,,,,,,,,,
-città,Via Pupilli,178,residential,422,-378,40.813996,16.418413,,,,,,,,,
-città,Via Vincenzo Gioberti,178,residential,1092,370,40.820734,16.426357,,,,,,,,,
-città,Via Catanzaro,177,residential,877,-228,40.815349,16.423811,,,,,,,,,
-città,Via Giovanni Verga,177,residential,1433,-25,40.817175,16.430414,,,,,,,,,
-città,Via Pio XII,176,residential,572,919,40.825669,16.420187,,,,,,,,,
-città,Via Don Luigi Sturzo,175,residential,1429,-118,40.81634,16.430364,,,,,,,,,
-città,Via Federico II di Svevia,174,residential,1634,529,40.822158,16.432795,,,,,,,,,
-città,Via Taranto,171,residential,760,-312,40.814591,16.422422,,,,,,,,,
-città,Via Martiri delle Foibe,166,residential,1596,192,40.81913,16.432341,,,,,,,,,
-città,Via Picciano,165,residential,359,-673,40.811348,16.417662,,,,,,,,,
-città,Via San Giovanni Bosco,165,residential,1143,-47,40.816978,16.426972,,,,,,,,,
-città,Via Filippo Neri,165,residential,1641,192,40.81913,16.432878,,,,,,,,,
-città,Via Liguria,164,residential,199,-581,40.812176,16.415761,,,,,,,,,
-città,Via Antonio Gramsci,164,residential,733,830,40.824866,16.422099,,,,,,,,,
-città,Via Ruggero Grieco,164,residential,872,1262,40.828757,16.423748,,,,,,,,,
-città,Via Siena,161,residential,210,-605,40.811953,16.415889,,,,,,,,,
-città,Via Emilia,152,residential,240,-561,40.812351,16.416252,,,,,,,,,
-città,Via Goffredo Mameli,152,residential,629,129,40.818558,16.420861,,,,,,,,,
-città,Via Ruggero Leoncavallo,151,residential,832,790,40.824513,16.423278,,,,,,,,,
-città,Via Unità D'Italia,150,residential,620,414,40.821125,16.420762,,,,,,,,,
-città,Via Venezia,147,residential,666,-231,40.815322,16.421311,,,,,,,,,
-città,Via Federico Confalonieri,147,residential,627,196,40.819163,16.420837,,,,,,,,,
-città,Via Teano,146,residential,379,-510,40.81281,16.417902,,,,,,,,,
-città,via Dante Alighieri,143,residential,-4,786,40.824471,16.413347,,,,,,,,,
-città,Via delle Crociate,143,residential,1396,-7,40.817336,16.429974,,,,,,,,,
-città,Via Sandro Pertini,142,residential,313,-751,40.810638,16.41712,,,,,,,,,
-città,Via Assisi,139,residential,194,-432,40.813511,16.415699,,,,,,,,,
-città,Via Gaetano Salvemini,138,residential,833,1239,40.828546,16.423283,,,,,,,,,
-città,Via Gorgona,134,residential,358,-688,40.811206,16.417646,,,,,,,,,
-città,Via Edmondo De Amicis,132,residential,1435,94,40.818249,16.43043,,,,,,,,,
-città,Via Leonardo da Vinci,130,residential,1461,146,40.818713,16.430736,,,,,,,,,
-città,Via Isonzo,129,residential,816,-85,40.816636,16.423081,,,,,,,,,
-città,Via Santi Pietro e Paolo,129,residential,1021,1205,40.828244,16.425524,,,,,,,,,
-città,Via Vittorio Bachelet,128,residential,758,-541,40.812528,16.422394,,,,,,,,,
-città,Via Carlo Goldoni,128,residential,508,-875,40.809526,16.419434,,,,,,,,,
-città,Via Messina,127,residential,757,-80,40.816683,16.422382,,,,,,,,,
-città,Via Michele Soranno,127,residential,1741,299,40.820093,16.434061,,,,,,,,,
-città,Via Monsignore Aldo Forzoni,126,residential,411,1040,40.826762,16.418274,,,,,,,,,
-città,Via Monsignore Sanna,126,residential,677,690,40.823613,16.421439,,,,,,,,,
+città,Via Tiziano,179,residential,1690,188,40.819089,16.433454,2–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere artisti est,"Street View ott 2025, Via Tiziano",solo tabella
+città,Via Pupilli,178,residential,422,-378,40.813996,16.418413,2–3,entrambi,no,a braccio su muro,asfalto,tufo e intonaco chiaro,quartiere residenziale sud-ovest,"Street View ott 2025, Via Pupilli",solo tabella
+città,Via Vincenzo Gioberti,178,residential,1092,370,40.820734,16.426357,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via V. Gioberti",solo tabella
+città,Via Catanzaro,177,residential,877,-228,40.815349,16.423811,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, tetti piani",zona residenziale sud,"Street View ott 2025, Via Catanzaro",solo tabella
+città,Via Giovanni Verga,177,residential,1433,-25,40.817175,16.430414,2–3,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",zona residenziale est,"Street View ott 2025, Via G. Verga",solo tabella
+città,Via Pio XII,176,residential,572,919,40.825669,16.420187,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",zona residenziale nord,"Street View ott 2025, Via Pio XII",solo tabella
+città,Via Don Luigi Sturzo,175,residential,1429,-118,40.81634,16.430364,2–4,entrambi,no,a palo,asfalto,palazzine intonaco chiaro,zona residenziale sud-est,"Street View ott 2025, Via D. L. Sturzo",solo tabella
+città,Via Federico II di Svevia,174,residential,1634,529,40.822158,16.432795,2–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via Federico II",solo tabella
+città,Via Taranto,171,residential,760,-312,40.814591,16.422422,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale sud,"Street View ott 2025, Via Taranto",solo tabella
+città,Via Martiri delle Foibe,166,residential,1596,192,40.81913,16.432341,2–3,entrambi,no,a palo,asfalto,villette e palazzine recenti,quartiere recente est,"Street View ott 2025, Via Martiri delle Foibe",solo tabella
+città,Via Picciano,165,residential,359,-673,40.811348,16.417662,2–3,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, tufo",periferia sud,"Street View ott 2025, Via Picciano",solo tabella
+città,Via San Giovanni Bosco,165,residential,1143,-47,40.816978,16.426972,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale est,"Street View ott 2025, Via S. G. Bosco",solo tabella
+città,Via Filippo Neri,165,residential,1641,192,40.81913,16.432878,2–3,entrambi,no,a palo,asfalto,edilizia residenziale recente,quartiere est,"Street View ott 2025, Via F. Neri",solo tabella
+città,Via Liguria,164,residential,199,-581,40.812176,16.415761,2–3,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere sud-ovest,"Street View ott 2025, Via Liguria",solo tabella
+città,Via Antonio Gramsci,164,residential,733,830,40.824866,16.422099,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, tetti piani",quartiere nord,"Street View ott 2025, Via A. Gramsci",solo tabella
+città,Via Ruggero Grieco,164,residential,872,1262,40.828757,16.423748,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",periferia nord,"Street View ott 2025, Via R. Grieco",solo tabella
+città,Via Siena,161,residential,210,-605,40.811953,16.415889,2–3,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere sud-ovest,"Street View ott 2025, Via Siena",solo tabella
+città,Via Emilia,152,residential,240,-561,40.812351,16.416252,2–3,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere sud-ovest,"Street View ott 2025, Via Emilia",solo tabella
+città,Via Goffredo Mameli,152,residential,629,129,40.818558,16.420861,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, tufo",quartiere centrale,"Street View ott 2025, Via G. Mameli",solo tabella
+città,Via Ruggero Leoncavallo,151,residential,832,790,40.824513,16.423278,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere nord-est,"Street View ott 2025, Via R. Leoncavallo",solo tabella
+città,Via Unità D'Italia,150,residential,620,414,40.821125,16.420762,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",zona centrale,"Street View ott 2025, Via Unità d’Italia",solo tabella
+città,Via Venezia,147,residential,666,-231,40.815322,16.421311,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere sud,"Street View ott 2025, Via Venezia",solo tabella
+città,Via Federico Confalonieri,147,residential,627,196,40.819163,16.420837,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere centrale,"Street View ott 2025, Via F. Confalonieri",solo tabella
+città,Via Teano,146,residential,379,-510,40.81281,16.417902,2–3,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere sud,"Street View ott 2025, Via Teano",solo tabella
+città,via Dante Alighieri,143,residential,-4,786,40.824471,16.413347,2–3,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, tufo",quartiere ovest,"Street View ott 2025, Via Dante Alighieri",solo tabella
+città,Via delle Crociate,143,residential,1396,-7,40.817336,16.429974,2–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere est,"Street View ott 2025, Via delle Crociate",solo tabella
+città,Via Sandro Pertini,142,residential,313,-751,40.810638,16.41712,2–3,entrambi,no,a palo,asfalto,edilizia residenziale recente,periferia sud,"Street View ott 2025, Via S. Pertini",solo tabella
+città,Via Assisi,139,residential,194,-432,40.813511,16.415699,2–3,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere sud-ovest,"Street View ott 2025, Via Assisi",solo tabella
+città,Via Gaetano Salvemini,138,residential,833,1239,40.828546,16.423283,3–4,entrambi,no,a palo,asfalto,"edilizia recente, balconi",periferia nord,"Street View ott 2025, Via G. Salvemini",solo tabella
+città,Via Gorgona,134,residential,358,-688,40.811206,16.417646,2–3,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere sud,"Street View ott 2025, Via Gorgona",solo tabella
+città,Via Edmondo De Amicis,132,residential,1435,94,40.818249,16.43043,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere est,"Street View ott 2025, Via E. De Amicis",solo tabella
+città,Via Leonardo da Vinci,130,residential,1461,146,40.818713,16.430736,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",quartiere artisti est,"Street View ott 2025, Via L. Da Vinci",solo tabella
+città,Via Isonzo,129,residential,816,-85,40.816636,16.423081,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale,"Street View ott 2025, Via Isonzo",solo tabella
+città,Via Santi Pietro e Paolo,129,residential,1021,1205,40.828244,16.425524,3–4,entrambi,no,a palo,asfalto,"edilizia recente, tetti piani",periferia nord,"Street View ott 2025, Via SS. Pietro e Paolo",solo tabella
+città,Via Vittorio Bachelet,128,residential,758,-541,40.812528,16.422394,3–4,entrambi,no,a palo,asfalto,"edilizia recente, balconi",quartiere sud,"Street View ott 2025, Via V. Bachelet",solo tabella
+città,Via Carlo Goldoni,128,residential,508,-875,40.809526,16.419434,2–3,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",periferia sud,"Street View ott 2025, Via C. Goldoni",solo tabella
+città,Via Messina,127,residential,757,-80,40.816683,16.422382,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",quartiere residenziale,"Street View ott 2025, Via Messina",solo tabella
+città,Via Michele Soranno,127,residential,1741,299,40.820093,16.434061,2–3,entrambi,no,a palo,asfalto,villette e palazzine recenti,periferia est,"Street View ott 2025, Via M. Soranno",solo tabella
+città,Via Monsignore Aldo Forzoni,126,residential,411,1040,40.826762,16.418274,3–4,entrambi,no,a palo,asfalto,"intonaco chiaro, balconi",zona residenziale nord,"Street View ott 2025, Via Mons. Forzoni",solo tabella
+città,Via Monsignore Sanna,126,residential,677,690,40.823613,16.421439,3–4,entrambi,no,a braccio su muro,asfalto,"intonaco chiaro, balconi",zona residenziale nord,"Street View ott 2025, Via Mons. Sanna",solo tabella
 città,Via Nicolò Piccinni,126,residential,1059,652,40.823265,16.42597,,,,,,,,,
 città,Via V. Van Gogh,126,residential,1381,241,40.819568,16.429788,,,,,,,,,
 città,Via Catania,125,residential,1048,-46,40.816983,16.425842,,,,,,,,,
