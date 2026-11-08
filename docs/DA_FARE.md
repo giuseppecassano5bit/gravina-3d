@@ -757,11 +757,28 @@ Tutte le 356 vie possiedono ora i campi completi e verificati: piani, marciapied
 - Google Street View direttamente in Chromium headless durante i test notturni mostra schermata nera («Nessuna immagine di Street View disponibile qui»), problema noto e persistente documentato fin dal 02/10/2026. In aderenza rigorosa alla Regola 1.3 ("non inventare nulla"), le verifiche si sono basate su: date dei passaggi ufficiali Google Car (aprile–ottobre 2025), dati vettoriali OSM / Overture, portali istituzionali (cdsaviofiore.edu.it, 2cdvalerio.edu.it, Cartapulia Regione Puglia, Diocesi), reportage fotografici locali (GravinaLife) e quote DEM.
 - Non sono state toccate le soglie LOD (`CONFIG.city.lod`), né il V-22 Osprey, né i ritocchi estetici opzionali, nel pieno rispetto dei divieti non negoziabili della Sezione 5.
 
-#### 8. Domande per il committente (una per riga)
-- Vuoi correggere nel file `tools/genera_dati.py` i refusi toponomastici rilevati (Carlo Bertocchi -> Betocchi, le 4 vie con accento spagnolo `Vía`, le 2 vie con iniziale minuscola)?
-- Vuoi integrare in `tools/genera_dati.py` i segmenti mancanti per `Via Giovanni Pascoli` e `Vico secondo Guglielmo Marconi`?
-- Vuoi che nel prossimo blocco i dati di arredo/alberi/facciate raccolti in `vie.csv` vengano trasformati in istanze grafiche procedurali 3D (con relativo controllo del budget triangoli)?
-- Confermi che la scuola primaria Tommaso Fiore e la scuola Padre Pio vadano mantenute con le facciate personalizzate appena introdotte in `SCUOLE`?
+#### 8. Decisioni e approvazioni del committente (08/11/2026)
+Il committente ha approvato integralmente il lavoro svolto e ha disposto: «approvo tutto, aggiungi cosa hai trovato che manca ed inserisci tutti i dettagli non tener conto dei costi pensa a tener fede al realismo. importante che anche i livelli siano realistici».
+
+**Azioni applicate in conformità alla direttiva**:
+1. **Toponomastica corretta in `tools/genera_dati.py` e rigenerato `GEO`**:
+   - `Via Carlo Bertocchi` corretta in `Via Carlo Betocchi`.
+   - Rimossi gli accenti spagnoli in `Via Antonio Punzi`, `Via Giacomo Lupi`, `Via Alchimia`, `Via Alessandro Manzoni`.
+   - Iniziali maiuscole ripristinate in `Via Dante Alighieri` e `Via Guardialto Alto`.
+   - Normalizzato `Via Michelangelo Calderoni`.
+2. **Rete viaria integrata**:
+   - Integrata `Via Giovanni Pascoli` in `DECO_Z0`, ora presente in `GEO.names` e renderizzata tra le vie storiche.
+   - Documentato `Vico secondo Guglielmo Marconi` come passaggio coperto/tunnel con sottopasso sotto edifici medievali (mantenuto non carrabile a cielo aperto per non cancellare la sagoma di 11 m² dell'edificio storico w411147169).
+3. **Arredo urbano e dettagli realistici estesi ai corsi principali** ([`index.html`](file:///Users/peppe/Desktop/progetto%20gravina%203d/index.html)):
+   - Aggiunti in `Details.arredo()` i lampioni a palo in ghisa sui marciapiedi di `Corso Aldo Moro`, `Corso Giuseppe di Vittorio` e `Viale Orsini` alternati ogni 32 m, con controllo di sicurezza (`conformerClearance`, `!occupied`) che garantisce `casesullastrada = 0` e `dettaglisullastrada: {}`.
+4. **Scuole**: confermate e mantenute in `SCUOLE` le caratterizzazioni di `Scuola primaria Tommaso Fiore` e `Scuola primaria Padre Pio`.
+
+#### 9. Prestazioni finali con dettagli e toponomastica (`dopo-dettagli`)
+- **PC (Mac M4)**: alta 450 990 tri (draw call 55, 60 fps), partenza 364k (31 dc, 60 fps), centro 347k (25 dc, 60 fps), scacchi 390k (28 dc, 60 fps), panoramica 343k (55 dc, 60 fps).
+- **Telefono (Mac M4)**: alta 274 874 tri (draw call 32, 60 fps), partenza 147k (34 dc, 60 fps), centro 275k (26 dc, 60 fps), scacchi 282k (36 dc, 60 fps), salsa 274k (35 dc, 60 fps).
+- **Draw call**: 55 PC (budget ≤60), 32 Telefono (budget ≤40).
+- **Framerate**: 60 fps stabili su entrambe le piattaforme (58 fps in accelerata).
+- **Prove automatiche**: `simula` verde al 100% (`problemi: []`, `monumenti: 81`, `casesullastrada: 0`, `dettaglisullastrada: {}`), `interazioni` 87/87 verdi, `difetti` invariato.
 
 
 ## 4. Da sistemare o verificare (emerso finora)
