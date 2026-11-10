@@ -9226,6 +9226,10 @@ const VIE_ALBERI = [
   { via: 'Corso Giuseppe di Vittorio', lato: 'ovest', tipo: 'grande', nord: [435, 490], passo: 8 }, // 134, verso nord: filare scuro lungo la ringhiera azzurra
   { via: 'Corso Giuseppe di Vittorio', lato: 'ovest', tipo: 'palla', nord: [492, 600], passo: 20 }, // 140 e 135: radi
   { via: 'Corso Giuseppe di Vittorio', lato: 'ovest', tipo: 'palla', nord: [600, 695], passo: 12 }, // 143
+  // blocco 4.14 (secondo lotto)
+  { via: 'Corso Giuseppe di Vittorio', lato: 'ovest', tipo: 'palla', nord: [695, 738], passo: 12 }, // 172 C.so G. di Vittorio: fino al sottopasso
+  { via: 'Corso Giuseppe di Vittorio', lato: 'est', tipo: 'palla', nord: [640, 738], passo: 12, colore: 'rosso' }, // 172: verdi e rossi scuri
+  { via: 'Piazza Giuseppe Pellicciari', linea: [[119, -127.5], [165, -138]], tipo: 'cubo', passo: 6.5 }, // 6 Via S. Vito Vecchio, 33 e 21 P.za Pellicciari: l'isola in mezzo
 ];
 const VIE_ARREDO = [
   { via: 'Corso Aldo Moro', lati: ['est', 'ovest'], tipo: 'lampione2', passo: 45 },                 // 8, 38, 75: due bracci, sui due lati quasi di fronte
@@ -9235,6 +9239,15 @@ const VIE_ARREDO = [
   { via: 'Corso Giuseppe di Vittorio', lati: ['est'], tipo: 'palo', nord: [420, 700], passo: 45 },  // 134 e 143: palo alto e sottile
   { via: 'Via Matteotti', lati: ['nord'], tipo: 'panchina', est: [205, 232], passo: 9 },            // 17 Via Matteotti
   { via: 'Via Matteotti', lati: ['nord'], tipo: 'fioriera', est: [209, 236], passo: 9 },
+  // blocco 4.14 (secondo lotto). «sospesa»: lampada appesa a un cavo teso tra le case, in mezzo alla via, sopra l'altezza dei mezzi
+  { via: 'Corso Giuseppe di Vittorio', lati: ['est'], tipo: 'palo', nord: [880, 1230], passo: 45 }, // 227, 255, 259, 236, 261 C.so G. di Vittorio
+  { via: 'Via Giuseppe Garibaldi', tipo: 'sospesa', nord: [88, 295], passo: 48 },                   // 20 P.za Scacchi, 16, 43, 53, 77 Via G. Garibaldi
+  { via: 'Via San Vito Vecchio', tipo: 'sospesa', nord: [-440, -170], passo: 55 },                  // 5, 25, 70, 87 Via S. Vito Vecchio
+  { via: 'Via Ventiquattro Maggio', tipo: 'sospesa', nord: [-262, -160], passo: 40 },               // 15 e 34 Via XXIV Maggio
+  { via: 'Via Federico Meninni', tipo: 'sospesa', est: [1262, 1335], passo: 40 },                   // 294 e 304 Via F. Meninni
+  { via: 'Via Firenze', tipo: 'sospesa', est: [338, 417], passo: 40 },                              // 47 Via A. De Gasperi
+  { via: 'Via Firenze', lati: ['sud'], tipo: 'palo', est: [417, 545], passo: 45 },                  // 11 Via Firenze, 94 Via Trieste
+  { via: 'Piazza Giuseppe Pellicciari', lati: ['nord', 'sud'], tipo: 'pastorale', passo: 30 },      // 6 Via S. Vito Vecchio, 21 e 33 P.za Pellicciari
 ];
 const VIE_FACCIATE = [
   [94, -62, '#e8c9bc'], [110, -68, '#e8c9bc'], [110, -78, '#e4bdae'], [104, -78, '#e4bdae'], [89, -102, '#efebe2'],  // 20 Via G. Marconi: rosa, salmone e bianco
@@ -12641,7 +12654,7 @@ const Details = {
     const C = (h) => new THREE.Color(h), BUSSOLA = { nord: [0, 1], sud: [0, -1], est: [1, 0], ovest: [-1, 0] };
     const verdi = [C('#6f9a4a'), C('#7aa551'), C('#648e44')], rossi = [C('#74403e'), C('#7c4641'), C('#5f8440')], scuri = [C('#2f4a2c'), C('#37532f')];
     const corteccia = C('#4a3b2d'), ferro = C('#2c3a30'), testa = C('#8c8f8c'), legno = C('#7a5a3a'), vaso = C('#2d2c2b'), pianta = C('#4f6f35');
-    this.vieCount = { cubo: 0, palla: 0, grande: 0, lampione2: 0, braccio: 0, palo: 0, panchina: 0, fioriera: 0 };
+    this.vieCount = { cubo: 0, palla: 0, grande: 0, lampione2: 0, braccio: 0, palo: 0, panchina: 0, fioriera: 0, sospesa: 0, pastorale: 0 };
 
     /** I punti di una riga: su una linea, o lungo i tratti della via con quel nome, sul lato chiesto, ogni `passo` metri. */
     const punti = (riga, lato, scosta, gap = 0.8) => {
@@ -12698,6 +12711,26 @@ const Details = {
     }
 
     for (const riga of VIE_ARREDO) {
+      if (riga.tipo === 'sospesa') {
+        // blocco 4.14: cavo teso da una casa all'altra e lampada in mezzo, a 6,3 m (il trattore è alto 3,45 m)
+        const fatti = [];
+        for (const edge of this.net.edges.filter((x) => x.name === riga.via)) {
+          const S = edge.samples;
+          for (let s = riga.passo / 2; s < edge.length; s += riga.passo) {
+            const i = Math.min(edge.count - 1, Math.round(s / edge.step)), k = i * 3, k2 = (i + 1) * 3, e = S[k], n = -S[k + 2];
+            if ((riga.est && (e < riga.est[0] || e > riga.est[1])) || (riga.nord && (n < riga.nord[0] || n > riga.nord[1]))) continue;
+            if (fatti.some((q) => Math.hypot(q[0] - e, q[1] - n) < riga.passo * 0.6)) continue;
+            fatti.push([e, n]);
+            const rot = Math.atan2(-(S[k2 + 2] - S[k + 2]), S[k2] - S[k]), y = S[k + 1] + 6.3, tb = this.near([e, n]), L = edge.width + 2.4;
+            tb.addGeometry(new THREE.BoxGeometry(0.04, 0.04, L).rotateY(rot).translate(e, y + 0.5, -n), ferro);
+            tb.addGeometry(new THREE.CylinderGeometry(0.02, 0.02, 0.34, 4).translate(e, y + 0.33, -n), ferro);
+            tb.addGeometry(new THREE.CylinderGeometry(0.12, 0.34, 0.2, 6).translate(e, y + 0.1, -n), testa);
+            tb.addGeometry(new THREE.CylinderGeometry(0.2, 0.14, 0.1, 6).translate(e, y - 0.04, -n), C('#f4e3b0'));
+            this.vieCount.sospesa++;
+          }
+        }
+        continue;
+      }
       for (const lato of riga.lati) {
         for (const q of punti(riga, lato, 0.6, 0.4)) {
           const y = Terrain.heightAt(q.e, q.n), tb = this.near([q.e, q.n]), verso = [-q.se, -q.sn];                 // verso la via
@@ -12705,6 +12738,8 @@ const Details = {
             const n0 = this.lanterns.length;
             this.lampPost([q.e, q.n], 2, verso, 5.6);
             for (let j = n0; j < this.lanterns.length; j++) this.lanterns[j].corso = true;
+          } else if (riga.tipo === 'pastorale') {
+            this.lampPost([q.e, q.n], 1, verso, 5);                                 // blocco 4.14: un braccio curvo con la campana
           } else if (riga.tipo === 'braccio' || riga.tipo === 'palo') {
             // palo alto e sottile, verde scuro, con la testa piatta: col braccio curvo sulla via o quasi senza braccio
             const f = wallFrame(tb, [q.e, q.n], verso), H = riga.tipo === 'braccio' ? 8 : 8.6, b = riga.tipo === 'braccio' ? 1.5 : 0.5;
