@@ -1,7 +1,6 @@
-Stato all'8 novembre 2026: **blocco 4.12 (le vie della città) completato sul branch `fase-4-12-vie`**, in attesa del committente e di Claude (PR #40 lasciata in bozza).
-Il diorama ha completato il rilievo di tutte le 356 vie di Gravina in Puglia e il ripristino della scuola San Giovanni Bosco.
-Il **tetto dei triangoli**: su PC la vista «alta» fa 452 156 triangoli; sul telefono centro, scacchi, alta e salsa fanno da 274 000 a 280 000. Draw call massime 57 su PC e 38 sul telefono (limiti del blocco: 60 e 40), 60 fps su Mac M4 (58 in accelerata). Dettagli nelle sezioni «Blocco 4.11» e «Blocco 4.12». **Il rilievo delle vie del 4.12 è da rifare**: vedi la correzione in quella sezione.
-Prove finali del 4.12 (08/11/2026): `simula` verde (problemi `[]`, 81 monumenti, 0 case e 0 dettagli sulla strada), `interazioni` 87 su 87 passate, `difetti` identico a `main`.
+Stato all'8 novembre 2026: **blocco 4.13 (rilievo delle vie, primo lotto) sul branch `fase-4-13-vie`**, pull request in attesa del committente. Il resto del rilievo 4.12 è ancora `non verificato`: vedi la sezione «Blocco 4.13».
+Il **tetto dei triangoli**: su PC la vista «alta» fa 455 432 triangoli; sul telefono centro, scacchi, alta e salsa fanno da 274 000 a 282 000. Draw call massime 57 su PC e 37 sul telefono (limiti del blocco: 60 e 40), 60 fps su Mac M4 (58 in accelerata). Dettagli nelle sezioni «Blocco 4.11» e «Blocco 4.12». **Il rilievo delle vie del 4.12 è da rifare**: vedi la correzione in quella sezione.
+Prove finali del 4.13 (08/11/2026): `simula` verde (problemi `[]`, 81 monumenti, 0 case e 0 dettagli sulla strada), `interazioni` 87 su 87 passate, `difetti` come `main` salvo una scarpata in più.
 
 **Fase 3.4 (Gravina oltre il centro storico) completata**: piano, dati, budget, rischi e divisione
 del lavoro su due chat in [`PIANO_FASE_3_4.md`](PIANO_FASE_3_4.md).
@@ -659,6 +658,29 @@ libero non segue le vie: è un'eccezione come la mongolfiera.
 `node prestazioni.mjs dopo-4-11` come nella tabella del punto 2. Nelle prove, `common.mjs` ora attiva il tocco anche via CDP: con la
 GPU vera Chromium apriva a volte il «telefono» senza tocco, e il diorama partiva col profilo da PC (la misura del 4/11 era sbagliata
 per questo).
+
+### Blocco 4.13 · Il rilievo delle vie, primo lotto (08/11/2026, PR da approvare)
+
+Guardate in Chrome, in panorami di Street View ogni 60–90 m circa (non a tutti gli incroci; i punti intermedi di Corso Aldo Moro, Via Giardini e Corso Di Vittorio solo verso nord): Corso Vittorio Emanuele, Corso Aldo Moro, Viale Orsini, Piazza Benedetto XIII, Via G. Marconi, Via San Matteo, Via Giardini, Via Matteotti, Via Libertà e la **metà sud** di Corso G. di Vittorio. Punti e date nella colonna `fonte_street_view` di `docs/vie_4_12.csv`.
+
+**Modellato** (tabelle `VIE_ALBERI`, `VIE_ARREDO`, `VIE_FACCIATE` e `Details.vieDalVero`, tutto nello strato `dettagli`, nessuna draw call in più):
+- **Filari a parallelepipedo** attorno alla Villa Comunale (lato nord del Corso, lato sud di Viale Orsini) e sul lato sud di Piazza Benedetto XIII, metà est, al posto dei 5 alberelli nell'aiuola.
+- **Alberelli tondi**: Corso Aldo Moro sui due lati, Corso V. Emanuele lato sud (anche il filare della scuola San Giovanni Bosco, rifatto), Via Libertà, tratti di Via Giardini e di Corso Di Vittorio.
+- **Lampioni**: due bracci solo su Corso Aldo Moro, ora a coppie (passo circa 45 m, indicativo); **su Viale Orsini il 4.12 era sbagliato**: palo alto a un braccio, solo sul lato nord. Pali alti e sottili su Via Giardini e Corso Di Vittorio (passo non misurato).
+- **Altro**: panchine e vasi in Via Matteotti; rosa e bianco in Via Marconi; bianco in Via San Matteo; 5 righe nuove in `LIVELLI`.
+
+**Cosa ho trovato**:
+- **Le righe in serie del 4.8 in `LIVELLI`** non sono state controllate una per una. Almeno due (w385225771 e w385225805, 2 piani) dicevano meno di quanto si vede (almeno 3) e coprivano le mie righe, perché vince l'ultima: le righe nuove stanno in fondo. Vanno riguardate man mano che si passa dalle vie.
+- **Le fioriere grigie del blocco N1 in Via Libertà** e la siepe scura sul lato ovest non si vedono nei panorami (mag 2025): lasciate, da chiarire col committente.
+
+**Non fatto o non visto**:
+- metà nord di Corso Di Vittorio (a nord del civico 143), lampade sospese a cavo (non in questo lotto), finestre di San Giovanni Bosco;
+- il palazzo rosso di Corso Aldo Moro 38 e il blocco sud di Via San Matteo sono **isolati unici** nei dati: colorarli o alzarli sbaglierebbe tutto l'isolato, quindi niente. Serve dividerli;
+- su Corso Aldo Moro circa metà dei punti non ha l'albero perché nel diorama il marciapiede è più stretto del vero o la sagoma arriva al bordo; la larghezza delle vie non è stata toccata.
+
+**Prove** (versione finale): `simula` 0 problemi, 0 case e 0 dettagli sulla carreggiata; `interazioni` 87/87; `difetti` uguale a `main` tranne scarpate 16 275 contro 16 274 (causa non accertata). In `GEO` cambiano solo le 5 altezze.
+
+**Prestazioni** (`prima-4-13` → `dopo-4-13`, GPU vera): nessuna vista oltre il +3%. La più cresciuta è centro su PC (+1,0%); «alta» 455 432 su PC (+0,7%) e 278 982 sul telefono (+0,9%), sempre sopra i tetti di 400 000 e 250 000. Draw call massime 57 su PC e 37 sul telefono; 60 fps (58 in accelerata). Telefono «villette» −7,6% (172 197 → 159 032): nessuna modifica in quella zona, causa non accertata.
 
 ### Blocco 4.12 · Le vie della città (rilievo da rifare · PR #40 ripulita)
 
