@@ -1,4 +1,4 @@
-Stato all'8 novembre 2026: **blocco 4.13 (rilievo delle vie, primo lotto) sul branch `fase-4-13-vie`**, pull request in attesa del committente. Il resto del rilievo 4.12 è ancora `non verificato`: vedi la sezione «Blocco 4.13».
+Stato al 10 novembre 2026: blocco 4.13 unito su `main` (PR #41, 10/11/2026); **blocco 4.14 (rilievo delle vie, secondo lotto) sul branch `fase-4-14-vie`**, pull request in attesa del committente. Viste finora 20 vie; il resto del rilievo 4.12 è ancora `non verificato`: vedi le sezioni «Blocco 4.14» e «Blocco 4.13».
 Il **tetto dei triangoli**: su PC la vista «alta» fa 455 432 triangoli; sul telefono centro, scacchi, alta e salsa fanno da 274 000 a 282 000. Draw call massime 57 su PC e 37 sul telefono (limiti del blocco: 60 e 40), 60 fps su Mac M4 (58 in accelerata). Dettagli nelle sezioni «Blocco 4.11» e «Blocco 4.12». **Il rilievo delle vie del 4.12 è da rifare**: vedi la correzione in quella sezione.
 Prove finali del 4.13 (08/11/2026): `simula` verde (problemi `[]`, 81 monumenti, 0 case e 0 dettagli sulla strada), `interazioni` 87 su 87 passate, `difetti` come `main` salvo una scarpata in più.
 
@@ -659,7 +659,32 @@ libero non segue le vie: è un'eccezione come la mongolfiera.
 GPU vera Chromium apriva a volte il «telefono» senza tocco, e il diorama partiva col profilo da PC (la misura del 4/11 era sbagliata
 per questo).
 
-### Blocco 4.13 · Il rilievo delle vie, primo lotto (08/11/2026, PR da approvare)
+### Blocco 4.14 · Il rilievo delle vie, secondo lotto (10/11/2026, PR da approvare)
+
+Guardate in Chrome, un panorama ogni 60–80 m e agli incroci, **in tutte e due le direzioni in ogni punto**: la metà nord di Corso G. di Vittorio, Via G. Garibaldi, Via Vittorio Veneto, Via Museo, Piazza G. Pellicciari, Via F. Meninni, Via San Vito Vecchio, Via Firenze, Via Ventiquattro Maggio, Via XX Settembre. Punti e date in `docs/vie_4_12.csv`.
+
+**Modellato** (righe nuove in `VIE_ALBERI` e `VIE_ARREDO`, tutto nello strato `dettagli`):
+- **Lampade sospese a un cavo** (tipo nuovo `sospesa`: cavo da una casa all'altra e lampada in mezzo alla via a 6,3 m, sopra i mezzi): Via Garibaldi (tratto stretto), Via San Vito Vecchio, Via XXIV Maggio (tratto centrale), capo est di Via Meninni, tratto ovest di Via Firenze. Passo indicativo.
+- **Piazza Pellicciari**: filare a parallelepipedo sull'isola centrale e lampioni a pastorale attorno (tipo nuovo `pastorale`, un braccio con la campana).
+- **Corso Di Vittorio, metà nord**: alberelli tondi verdi e rossi scuri al civico 172 fino al sottopasso (ne entrano pochi: marciapiede stretto, come su Corso Aldo Moro); pali alti sul lato est dal 227 in su.
+- **Via Firenze**: pali alti sul lato sud del tratto est.
+
+**Visto, niente da cambiare**: Via Museo, Via XX Settembre, Via Vittorio Veneto. Nessuna riga nuova in `LIVELLI` e nessun colore in `VIE_FACCIATE`: dove i piani differiscono si tratta di isolati unici o di case che nei dati mancano. `GEO` non è cambiata.
+
+**Cosa ho trovato** (da decidere col committente):
+- **Corso Di Vittorio a nord del sottopasso**: nel diorama i due lati sono quasi vuoti (prato e pini). Dal vero sul lato ovest ci sono palazzine di 3–5 livelli fino al civico 259 circa e sul lato est muri di cinta con alberi grandi dietro e un cancello tra pilastri di pietra. Le palazzine mancano nei dati (Overture): non si inventano; servirebbe rigenerare i dati o disegnarle da OSM.
+- **Via Vittorio Veneto**: nel tratto stretto dal vero ho visto solo lanterne a muro; nel diorama ci sono i lampioni a palo alternati del blocco N1. Non toccati. Al civico 86 un ponteggio copre la via: capo sud non visto.
+- **Via Museo**: il tratto nord che in `GEO` porta questo nome per Google è Via Santa Maria la Nova e poi Via Paranza Vigilanza. Da controllare su OSM.
+- **Sottopasso** del Corso: passerella pedonale rialzata con ringhiera gialla sul lato ovest; non modellata (tocca `Sottopassi`).
+- **Villa di Via Firenze** (lato sud, civico 11): muretto, pilastri, cancellata e pino; non modellata.
+
+**Non visto**: punto est di Piazza Pellicciari (solo una foto sferica del 2018), tratto sud di Via XXIV Maggio (panorama del 2017 e uno sfocato), capo sud di Via Vittorio Veneto (ponteggio). Le finestre di San Giovanni Bosco restano da fare.
+
+**Prove**: `simula` 0 problemi, 0 case e 0 dettagli sulla carreggiata; `interazioni` 87/87; `difetti` identico a `main` (scarpate 16 275).
+
+**Prestazioni** (`prima-4-14` → `dopo-4-14`, GPU vera, 60 fps, 58 in accelerata): tutte le viste entro il +0,8% tranne **«meninni» su PC, +7,6%** (141 712 → 152 512, draw call 40 → 41); sul telefono la stessa vista è identica (75 049) e lì attorno non ho modificato nulla. Lo stesso salto a 152 000 c'era già nel 4.12: causa non accertata (forse un riquadro in più caricato). «Alta» 457 636 su PC (+0,5%) e 280 882 sul telefono (+0,7%), sempre sopra i tetti. Draw call massime 57 su PC e 37 sul telefono.
+
+### Blocco 4.13 · Il rilievo delle vie, primo lotto (08/11/2026, unito su `main` il 10/11/2026 con la PR #41)
 
 Guardate in Chrome, in panorami di Street View ogni 60–90 m circa (non a tutti gli incroci; i punti intermedi di Corso Aldo Moro, Via Giardini e Corso Di Vittorio solo verso nord): Corso Vittorio Emanuele, Corso Aldo Moro, Viale Orsini, Piazza Benedetto XIII, Via G. Marconi, Via San Matteo, Via Giardini, Via Matteotti, Via Libertà e la **metà sud** di Corso G. di Vittorio. Punti e date nella colonna `fonte_street_view` di `docs/vie_4_12.csv`.
 

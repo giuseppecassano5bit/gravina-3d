@@ -179,6 +179,7 @@ I prompt delle chat e le foto di riferimento stanno in `riferimenti/`, nella car
 - **Vie viste dal vero (blocco 4.13)**: tabelle `VIE_ALBERI`, `VIE_ARREDO` e `VIE_FACCIATE` (sezione 6d) e `Details.vieDalVero`, tutto nello strato `dettagli`, solo per ciò
   che si è visto, con i panorami in `docs/vie_4_12.csv`. In `LIVELLI` **vince l'ultima riga** dello stesso edificio: le righe del 4.13 stanno in fondo, dopo le righe in serie del
   4.8 (mai controllate una per una), non prima di `@@LIVELLI-FINE@@`. Non si colora né si alza un isolato intero per una sola facciata: se la sagoma è un isolato unico, si scrive e si lascia stare.
+  Dal blocco 4.14 in `VIE_ARREDO` ci sono anche `sospesa` (lampada appesa a un cavo in mezzo alla via, a 6,3 m: sempre sopra i 3,2 m controllati da `simula`) e `pastorale`; ogni punto si guarda nelle due direzioni.
 - Le vie cieche reali della città (`GEO.deco`) si disegnano ma **non si percorrono**. La
   sterrata reale del Castello Svevo è percorribile: con la strada di servizio e la vicinale
   chiude un anello (flag 8, `CASTLE_BOX` in `genera_dati.py`).
